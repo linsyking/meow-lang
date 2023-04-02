@@ -17,13 +17,6 @@ dr(x,y,z) {
     z
 }
 
-rep_test() {
-    "dd" = "d";
-    var x = {"dddd"};
-    var y = "dddd";
-    "x=" + x + ",y=" + y
-}
-
 encode(s) {
     var rep = {
         "\" = "\\";
@@ -44,13 +37,6 @@ decode(s) {
     "\^" = "^";
     "\\" = "\";
     rep
-}
-
-test_code() {
-    var s = "\ab\^^^cd\$$$^$^$^";
-    var enc = encode(s);
-    var dec = decode(enc);
-    dec
 }
 
 eq(x,y) {
