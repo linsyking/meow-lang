@@ -14,7 +14,7 @@ pub struct Stmt {
 #[derive(Debug, Clone)]
 pub enum Expr {
     Literal(String),
-    Cat(Vec<Box<Expr>>),
+    Cat(Box<Expr>, Box<Expr>),
     MacAp(MacAp),
     Var(String),
     Block(Box<Block>),
@@ -27,8 +27,9 @@ pub struct MacAp {
 }
 
 #[derive(Debug, Clone)]
-pub enum Block {
-    BStmt(Vec<Box<BStmt>>, Box<Expr>),
+pub struct Block {
+    pub bstmts: Vec<Box<BStmt>>,
+    pub expr: Box<Expr>,
 }
 
 #[derive(Debug, Clone)]

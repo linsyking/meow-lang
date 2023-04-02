@@ -1,6 +1,7 @@
 use std::env::args;
 
-pub mod ast;
+mod ast;
+mod prog;
 
 #[macro_use]
 extern crate lalrpop_util;
@@ -15,5 +16,18 @@ fn main() {
     let res = parse::ProgramParser::new()
         .parse(fc.as_str())
         .expect("unexpected token!");
-    println!("{:?}", res);
+    let context = &mut Box::new(prog::Context::new());
+    prog::eval_prog(res, context);
+    loop {
+        let mut line = String::new();
+        eprint!("> ");
+        std::io::stdin().read_line(&mut line).unwrap();
+        line = line.trim().to_string();
+        let expr = parse::ExpressionParser::new()
+            .parse(line.as_str())
+            .expect("invalid expression!");
+        // Eval!
+        let res = prog::eval(&expr, context);
+        println!("{}", res);
+    }
 }

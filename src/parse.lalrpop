@@ -1,6 +1,5 @@
 use std::str::FromStr;
-use crate::ast::{Prog, Stmt, Expr, MacAp, Block, BStmt}; // (0)
-// use lalrpop_util::ParseError;
+use crate::ast::{Prog, Stmt, Expr, MacAp, Block, BStmt};
 
 grammar;
 
@@ -14,15 +13,6 @@ Comma<T>: Vec<T> = {
     }
 };
 
-AddListE = Add<Expression>;
-
-Add<T>: Vec<T> = {
-    <mut v:(<T> "+")*> <e:T> => {
-        v.push(e);
-        v
-    }
-};
-
 pub Program: Box<Prog> = {
     <s:Statement> <p:Program> => Box::new(Prog::Stmts(s, p)) ,
     () => Box::new(Prog::Epsilon)
@@ -32,17 +22,21 @@ Statement: Stmt = {
     <n:VarName> <a:ArgsVar> "{" <b:BlockE> "}" => Stmt{name: n, args: a, block: b}
 }
 
-Expression: Box<Expr> = {
+pub Expression: Box<Expr> = {
+    <e:Expression> "+" <t:Term> => Box::new(Expr::Cat(e, t)),
+    Term
+}
+
+Term: Box<Expr> = {
     Literal => Box::new(Expr::Literal(<>)),
-    "(" <AddListE> ")" => Box::new(Expr::Cat(<>)),
-    // "(" <e:Expression> ")" => e,
     MacroAp => Box::new(Expr::MacAp(<>)),
     VarName => Box::new(Expr::Var(<>)),
-    "{" <b:BlockE> "}" => Box::new(Expr::Block(b))
+    "{" <b:BlockE> "}" => Box::new(Expr::Block(b)),
+    "(" <e:Expression> ")" => e
 }
 
 BlockE: Box<Block> = {
-    <bs:(<BlockStmt> ";")*> <e:Expression> => Box::new(Block::BStmt(bs, e))
+    <bs:(<BlockStmt> ";")*> <e:Expression> => Box::new(Block{bstmts: bs, expr: e})
 }
 
 BlockStmt: Box<BStmt> = {
