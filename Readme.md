@@ -1,8 +1,8 @@
 # Meow lang
 
-Meow lang is a programming language that is designed to **not** be easy to learn and use.
+Meow lang is a programming language that is designed **not** to be easy to learn and use.
 
-Its mean design purpose is to do experiments with "string replacement".
+Its main design purpose is to do experiments with "string replacement".
 
 ## How to run
 
