@@ -58,3 +58,13 @@ eq(x,y) {
     encode(y) = "T";
     encode(x)
 }
+
+if(c,x,y) {
+    var cc = c + "$";
+    var enc = {
+        "T$" = encode(x);
+        "F$" = encode(y);
+        cc
+    };
+    decode(enc)        
+}
