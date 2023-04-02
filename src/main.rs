@@ -18,11 +18,14 @@ fn main() {
         .expect("unexpected token!");
     let context = &mut Box::new(prog::Context::new());
     prog::eval_prog(res, context);
+    let mut rl = rustyline::DefaultEditor::new().unwrap();
     loop {
         let mut line = String::new();
-        eprint!("> ");
-        std::io::stdin().read_line(&mut line).unwrap();
-        line = line.trim().to_string();
+        let readline = rl.readline("> ");
+        match readline {
+            Ok(l) => line = l.trim().to_string(),
+            Err(_) => println!("invalid input"),
+        }
         let expr = parse::ExpressionParser::new()
             .parse(line.as_str())
             .expect("invalid expression!");

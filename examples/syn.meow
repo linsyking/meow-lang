@@ -46,9 +46,15 @@ decode(s) {
     rep
 }
 
-m(){
-    var s = "abcd";
+test_code() {
+    var s = "\ab\^^^cd\$$$^$^$^";
     var enc = encode(s);
     var dec = decode(enc);
     dec
+}
+
+eq(x,y) {
+    encode(x) = "F";
+    encode(y) = "T";
+    encode(x)
 }

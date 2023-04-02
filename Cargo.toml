@@ -9,6 +9,7 @@ build = "build.rs"
 [dependencies]
 lalrpop-util = {version = "0.19.9", features = ["lexer"]}
 regex = "1.7.3"
+rustyline = "11.0.0"
 
 # Add a build-time dependency on the lalrpop library:
 [build-dependencies]
