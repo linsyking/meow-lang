@@ -4,15 +4,27 @@ Meow lang is a programming language that is designed **not** to be easy to learn
 
 Its main design purpose is to do experiments with "string replacement".
 
-## How to run
+## Formal Definition
+
+Currently the definition of replacement of strings are defined by the built-in `replace` function of `String`.
+
+## Concepts
+
+There are **no** functions in Meow. Instead, we have *macros*. A macro is a piece of code that can be evaluated to a string.
+
+The only available data type is **String**. (However, you can encode other data types inside String)
+
+## Simple Start
 
 ```bash
-cargo run <your meow file path>
+# First clone this repo and open it
+
+cargo run ./examples/syn.meow
 
 # Now you can use the REPL to evaluate expressions
 ```
 
-Run the example code:
+Examples:
 
 ```
 no error found.
@@ -24,65 +36,18 @@ F
 S0
 > dr("a","aba","aba")
 aba
-> m()
-abcd
+> if("T","xsa","ddd")
+xsa
+> eq("as","asas")
+F
 ```
+
+## Tutorials
+
+- [Syntax](./docs/Syntax.md)
+- [Encoding](./docs/Encoding.md)
+- [Double Replacement Lemma](./docs/DRL.md)
 
 ## Examples
 
-```meow
-true() {"T"}
-
-false() {"F"}
-
-zero() {"0"}
-
-succ(x) {"S"+x}
-
-pred(x) {
-    "S0" = "0";
-    x
-}
-
-dr(x,y,z) {
-    y = x;
-    x = y;
-    z
-}
-
-rep_test() {
-    "dd" = "d";
-    var x = {"dddd"};
-    var y = "dddd";
-    "x=" + x + ",y=" + y
-}
-
-encode(s) {
-    var rep = {
-        "\" = "\\";
-        "$" = "\$";
-        "^" = "\^";
-        s
-    };
-    "_^"+ rep +"_$"
-}
-
-decode(s) {
-    var rep = {
-        "_^" = "";
-        "_$" = "";
-        s
-    };
-    "\$" = "$";
-    "\^" = "^";
-    "\\" = "\";
-    rep
-}
-
-m(){
-    var s = "abcd";
-    var enc = encode(s);
-    var dec = decode(enc);
-    dec
-}
-```
+See [syn.meow](./examples/syn.meow).

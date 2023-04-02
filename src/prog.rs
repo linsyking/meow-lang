@@ -80,7 +80,7 @@ pub fn eval_raw(expr: &Box<Expr>, context: &Box<Context>) -> String {
             let args = macap
                 .args
                 .iter()
-                .map(|x| eval(x, context))
+                .map(|x| eval_raw(x, context))
                 .collect::<Vec<String>>();
             // add vars to the context
             for (result, name) in args.iter().zip(mac.args.iter()) {
