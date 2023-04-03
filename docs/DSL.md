@@ -1,4 +1,4 @@
-# Double Replacement Lemma
+# Double Substitution Lemma
 
 $[x/y]([y/x]y)=\begin{cases}
     y, x\subset y\\

@@ -2,11 +2,11 @@
 
 Meow lang is a programming language that is designed **not** to be easy to learn and use.
 
-Its main design purpose is to do experiments with "string replacement".
+Its main design purpose is to do experiments with "string substitution".
 
 ## Formal Definition
 
-Currently the definition of replacement of strings are defined by the built-in `replace` function of `String`.
+Currently the definition of substitution of strings are defined by the built-in `replace` function of `String`.
 
 ## Concepts
 
@@ -46,7 +46,7 @@ F
 
 - [Syntax](./docs/Syntax.md)
 - [Encoding](./docs/Encoding.md)
-- [Double Replacement Lemma](./docs/DRL.md)
+- [Double Substitution Lemma](./docs/DSL.md)
 
 ## Examples
 

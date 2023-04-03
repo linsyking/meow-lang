@@ -4,19 +4,6 @@ The layout of the whole program is not stable, but the core expression syntax is
 
 ## Expression
 
-```
-Expression ::=
-            | Expression "+" Term
-            | Term
-
-Term ::=
-      | Literal
-      | MacroApplication
-      | VarName
-      | "{" BlockExpression "}"
-      | "(" Expression ")"
-```
-
 **All expressions can be evaluated to a string literal.**
 
 `literal` is simply a string literal, like `"abc"`, `"lol"`.
@@ -37,13 +24,16 @@ meow2() {
 `meow1` takes no argument, and it simply returns a string literal `"ab"`.
 
 In `meow2`, we see that we have multiple "commands" in the curly bracket.
+
 The syntax is like Rust, the last expression (which has no ";" at the end) in the block is the return value of the block.
 
 `X;Y` means `let X in Y`, so `X;Y;Z` means `let X in (let Y in Z)`.
 
-Different to many languages, `X=Y` requires that both `X` and `Y` are **expressions** (which is basically strings).
+Different to many languages, `X=Y` requires that both `X` and `Y` are **expressions** (which is string).
 
-`X=Y;Z` means that `let X=Y in Z`, which is $[Y/X]Z$ (string replacement).
+`X=Y;Z` means that `let X=Y in Z`, which is $[Y/X]Z$ (string substitution).
+
+`meow2` will return `"bbbbb"`.
 
 The replacement **only** takes place in the `in xxx`. Hence, in `let X in (let Y in Z)`, the replacement of `X` only takes place in `Z` rather than `Y` (but there is a way to let it happen in `Y`, see later explanation).
 
