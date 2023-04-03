@@ -1,3 +1,4 @@
+use rustyline::error::ReadlineError;
 use std::env::args;
 
 mod ast;
@@ -18,13 +19,26 @@ fn main() {
         .expect("unexpected token!");
     let context = &mut Box::new(prog::Context::new());
     prog::eval_prog(res, context);
+
+    // Rustyline
     let mut rl = rustyline::DefaultEditor::new().unwrap();
     loop {
-        let mut line = String::new();
+        let line: String;
         let readline = rl.readline("> ");
         match readline {
             Ok(l) => line = l.trim().to_string(),
-            Err(_) => println!("invalid input"),
+            Err(ReadlineError::Interrupted) => {
+                println!("Interrupted");
+                break;
+            }
+            Err(ReadlineError::Eof) => {
+                println!("EOF");
+                break;
+            }
+            Err(_) => {
+                println!("invalid input");
+                break;
+            }
         }
         let expr = parse::ExpressionParser::new()
             .parse(line.as_str())

@@ -12,17 +12,21 @@ struct Rule {
 }
 
 #[derive(Debug, Clone)]
+pub enum Symbol {
+    Variable(String),
+    Macro(Stmt),
+}
+
+#[derive(Debug, Clone)]
 pub struct Context {
-    variables: HashMap<String, String>,
-    macros: HashMap<String, Stmt>,
+    symbols: HashMap<String, Symbol>,
     rules: Vec<Rule>,
 }
 
 impl Context {
     pub fn new() -> Self {
         Context {
-            variables: HashMap::new(),
-            macros: HashMap::new(),
+            symbols: HashMap::new(),
             rules: vec![],
         }
     }
@@ -45,13 +49,19 @@ pub fn eval_prog(prog: Box<Prog>, context: &mut Box<Context>) {
 pub fn eval_stmt(stmt: Stmt, context: &mut Box<Context>) {
     // Add a macro to the context
     // Context will be modified
-    context.as_mut().macros.insert(stmt.name.clone(), stmt);
+    context
+        .as_mut()
+        .symbols
+        .insert(stmt.name.clone(), Symbol::Macro(stmt));
 }
 
 fn apply_rule(x: &String, rules: &Vec<Rule>) -> String {
     // apply rules to a string
     let mut result = x.clone();
     for rule in rules.iter().rev() {
+        if rule.y.is_empty() {
+            panic!("empty rule detected");
+        }
         result = result.replace(rule.y.as_str(), rule.x.as_str());
     }
     result
@@ -66,16 +76,23 @@ pub fn eval_raw(expr: &Box<Expr>, context: &Box<Context>) -> String {
         Expr::Var(x) =>
         // use variables
         {
-            context
-                .variables
-                .get(x)
-                .expect("variable not in scope")
-                .clone()
+            let sym = context.symbols.get(x).expect("variable not in scope");
+            match sym {
+                Symbol::Variable(x) => x.clone(),
+                Symbol::Macro(_) => panic!("macro used as variable"),
+            }
         }
         Expr::MacAp(macap) => {
             let mut newcontext: Context = *context.clone();
             // macro application
-            let mac = context.macros.get(&macap.name).expect("macro not in scope");
+            let mac = context
+                .symbols
+                .get(&macap.name)
+                .expect("macro not in scope");
+            let mac = match mac {
+                Symbol::Variable(_) => panic!("variable used as macro"),
+                Symbol::Macro(x) => x,
+            };
             // First evaluate arguments (by value)
             let args = macap
                 .args
@@ -84,7 +101,9 @@ pub fn eval_raw(expr: &Box<Expr>, context: &Box<Context>) -> String {
                 .collect::<Vec<String>>();
             // add vars to the context
             for (result, name) in args.iter().zip(mac.args.iter()) {
-                newcontext.variables.insert(name.clone(), result.clone());
+                newcontext
+                    .symbols
+                    .insert(name.clone(), Symbol::Variable(result.clone()));
             }
             eval_block(&mac.block, &Box::new(newcontext))
         }
@@ -117,8 +136,8 @@ pub fn eval_block(block: &Box<Block>, context: &Box<Context>) -> String {
         match &**bs {
             BStmt::VarDefine(name, expr) => {
                 lcontext
-                    .variables
-                    .insert(name.clone(), eval_raw(expr, lcontext));
+                    .symbols
+                    .insert(name.clone(), Symbol::Variable(eval_raw(expr, lcontext)));
             }
             BStmt::MEq(lv, rv) => {
                 lcontext.rules.push(Rule {
@@ -141,8 +160,7 @@ mod tests {
 
     fn eval_test(expr: &Expr) -> String {
         let context = Box::new(super::Context {
-            variables: HashMap::new(),
-            macros: HashMap::new(),
+            symbols: HashMap::new(),
             rules: vec![],
         });
         let newexpr = Box::new(expr.clone());

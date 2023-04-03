@@ -52,9 +52,23 @@ if(c,x,y) {
         "F$" = encode(y);
         cc
     };
-    decode(enc)        
+    decode(enc)
 }
 
 in(x,y) {
     eq(y,{x=""; y})
+}
+
+encode_add(s,x) {
+    x = "\" + x;
+    s
+}
+
+decode_add(s,x) {
+    "\" + x = x;
+    s
+}
+
+ife(x) {
+    eq(x,"")
 }
