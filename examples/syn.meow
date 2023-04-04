@@ -72,10 +72,3 @@ decode_add(s,x) {
 ife(x) {
     eq(x,"")
 }
-
-test2() {
-    "bb" = "g";
-    var x = "bc";
-    var y = { x };
-    y+x
-}

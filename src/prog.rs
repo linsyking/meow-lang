@@ -7,7 +7,7 @@ lalrpop_mod!(pub expr); // synthesized by LALRPOP
 
 #[derive(Debug, Clone)]
 struct Rule {
-    // [x/y]z
+    // [y/x]z
     x: String,
     y: String,
 }
@@ -16,6 +16,7 @@ struct Rule {
 pub enum Symbol {
     Variable(String),
     Macro(Stmt),
+    VarTok(Vec<Tok>),
 }
 
 #[derive(Debug, Clone)]
@@ -60,10 +61,10 @@ fn apply_rule(x: &String, rules: &Vec<Rule>) -> String {
     // apply rules to a string
     let mut result = x.clone();
     for rule in rules.iter().rev() {
-        if rule.y.is_empty() {
+        if rule.x.is_empty() {
             panic!("empty rule detected");
         }
-        result = result.replace(rule.y.as_str(), rule.x.as_str());
+        result = result.replace(rule.x.as_str(), rule.y.as_str());
     }
     result
 }
@@ -79,6 +80,7 @@ pub fn eval_macap(macap: &MacAp, context: &Box<Context>) -> String {
     let mac = match mac {
         Symbol::Variable(_) => panic!("variable used as macro"),
         Symbol::Macro(x) => x,
+        Symbol::VarTok(_) => panic!("variable token used as macro"),
     };
     // First evaluate arguments (by value)
     let args = macap
@@ -104,6 +106,7 @@ fn clear_context(context: &Context) -> Context {
         .filter(|(_, v)| match v {
             Symbol::Variable(_) => false,
             Symbol::Macro(_) => true,
+            Symbol::VarTok(_) => false,
         })
         .map(|(k, v)| (k.clone(), v.clone()))
         .collect();
@@ -130,6 +133,7 @@ pub fn eval_raw(expr: &Box<Expr>, context: &Box<Context>) -> String {
             match sym {
                 Symbol::Variable(x) => x.clone(),
                 Symbol::Macro(_) => panic!("macro used as variable"),
+                Symbol::VarTok(_) => panic!("variable token used as variable"),
             }
         }
         Expr::MacAp(macap) => eval_macap(macap, context),
@@ -137,7 +141,7 @@ pub fn eval_raw(expr: &Box<Expr>, context: &Box<Context>) -> String {
         Expr::IExpr(x) => {
             let res = eval_raw(x, context);
             let pres = &mut expr::ExpressionParser::new().parse(&res).unwrap();
-            take_one_para(pres, context)
+            take_one_para(pres, &Box::new(clear_rules(context)))
         }
     }
 }
@@ -161,8 +165,8 @@ pub fn eval_block(block: &Box<Block>, context: &Box<Context>) -> String {
             }
             BStmt::MEq(lv, rv) => {
                 lcontext.rules.push(Rule {
-                    x: eval_raw(rv, lcontext),
-                    y: eval_raw(lv, lcontext),
+                    x: eval_raw(lv, lcontext),
+                    y: eval_raw(rv, lcontext),
                 });
             }
         }
@@ -170,24 +174,53 @@ pub fn eval_block(block: &Box<Block>, context: &Box<Context>) -> String {
     eval(&block.expr, lcontext)
 }
 
-fn take_one_para(expr: &mut Vec<Box<Tok>>, context: &Box<Context>) -> String {
+pub fn take_one_para(expr: &mut Vec<Box<Tok>>, context: &Box<Context>) -> String {
     // Take one argument from the expression
     let first = eat_one_para(expr);
     match &*first {
-        Tok::Literal(x) => x.clone(),
-        Tok::Var(x) => {
-            let sym = context.symbols.get(x).expect("symbol not in scope");
-            match sym {
-                Symbol::Variable(y) => y.clone(),
-                Symbol::Macro(y) => {
-                    // Apply macro here
-                    let argnum = y.args.len();
-                    let narg = take_paras(argnum, expr, context);
-                    let macap = MacAp {
-                        name: x.clone(),
-                        args: narg,
-                    };
-                    eval_macap(&macap, context)
+        Tok::Literal(lit) => lit.clone(),
+        Tok::Var(var) => {
+            match var.as_str() {
+                "let" => {
+                    // Let expression
+                    // let x y z = [y/x]z
+                    let x = take_one_para(expr, context);
+                    let y = take_one_para(expr, context);
+                    let mut rules: Vec<Rule> = (*context.rules.clone()).to_vec();
+                    rules.push(Rule { x, y });
+                    let z = take_one_para(expr, context);
+                    // Only here apply rule!
+                    apply_rule(&z, &rules)
+                }
+                "cat" => {
+                    // Concatenate expression
+                    let cleancontext = &Box::new(clear_rules(context));
+                    let x = take_one_para(expr, cleancontext);
+                    let y = take_one_para(expr, cleancontext);
+                    x + y.as_str()
+                }
+                "!" => {
+                    // Eval expression
+                    let exp = take_one_para(expr, context);
+                    let pres = &mut expr::ExpressionParser::new().parse(&exp).unwrap();
+                    take_one_para(pres, &Box::new(clear_rules(context)))
+                }
+                _ => {
+                    let sym = context.symbols.get(var).expect("symbol not in scope");
+                    match sym {
+                        Symbol::Variable(y) => y.clone(),
+                        Symbol::Macro(y) => {
+                            // Apply macro here
+                            let argnum = y.args.len();
+                            let narg = take_paras(argnum, expr, &Box::new(clear_rules(context)));
+                            let macap = MacAp {
+                                name: var.clone(),
+                                args: narg,
+                            };
+                            eval_macap(&macap, context)
+                        }
+                        Symbol::VarTok(_) => panic!("variable token used as variable"),
+                    }
                 }
             }
         }
@@ -206,4 +239,94 @@ fn eat_one_para(expr: &mut Vec<Box<Tok>>) -> Box<Tok> {
     let sd = expr.first().expect("missing argument").clone();
     expr.remove(0);
     sd
+}
+
+pub fn translate(stmt: Stmt, context: &Box<Context>) -> String {
+    // Add para to context var
+    let newcontext = &mut Box::new(*context.clone());
+    for arg in &stmt.args {
+        newcontext
+            .symbols
+            .insert(arg.clone(), Symbol::VarTok(vec![Tok::Var(arg.clone())]));
+    }
+    let toks = trans_block(&stmt.block, newcontext);
+    toks.iter()
+        .map(|x| match x {
+            Tok::Literal(y) => {
+                if y.contains("\"") {
+                    format!("`{}`", y)
+                } else {
+                    format!("\"{}\"", y)
+                }
+            }
+            Tok::Var(y) => y.clone(),
+        })
+        .collect::<Vec<String>>()
+        .join(" ")
+}
+
+fn trans_expr(expr: &Box<Expr>, context: &Box<Context>) -> Vec<Tok> {
+    let tok: &mut Vec<Tok> = &mut Vec::new();
+    match &**expr {
+        Expr::Literal(x) => tok.push(Tok::Literal(x.clone())),
+        Expr::Cat(x, y) => {
+            tok.push(Tok::Var("cat".to_string()));
+            tok.append(&mut trans_expr(x, context));
+            tok.append(&mut trans_expr(y, context));
+        }
+        Expr::Var(x) => {
+            let sym = context.symbols.get(x).expect("symbol not in scope");
+            match sym {
+                Symbol::VarTok(y) => tok.append(&mut y.clone()),
+                _ => panic!("symbol not found"),
+            }
+        }
+        Expr::MacAp(x) => {
+            tok.push(Tok::Var(x.name.clone()));
+            for a in &x.args {
+                tok.append(&mut trans_expr(a, context));
+            }
+        }
+        Expr::Block(x) => tok.append(&mut trans_block(x, &mut context.clone())),
+        Expr::IExpr(x) => {
+            tok.push(Tok::Var("!".to_string()));
+            tok.append(&mut trans_expr(x, context));
+        }
+    }
+    tok.to_vec()
+}
+
+fn trans_block(block: &Box<Block>, context: &mut Box<Context>) -> Vec<Tok> {
+    // Translate one block to a list of tokens
+    // let newcontext = &mut Box::new(*context.clone());
+    let tok: &mut Vec<Tok> = &mut Vec::new();
+    for bs in &block.bstmts {
+        match &**bs {
+            BStmt::VarDefine(name, expr) => {
+                context
+                    .symbols
+                    .insert(name.clone(), Symbol::VarTok(trans_expr(expr, context)));
+            }
+            BStmt::MEq(lv, rv) => {
+                tok.push(Tok::Var("let".to_string()));
+                tok.append(&mut trans_expr(lv, context));
+                tok.append(&mut trans_expr(rv, context));
+            }
+        }
+    }
+    tok.append(&mut trans_expr(&block.expr, context));
+    tok.clone()
+}
+
+pub fn trans_layout(context: &Box<Context>) {
+    for (k, v) in &context.symbols {
+        match v {
+            Symbol::Macro(x) => {
+                let args = x.args.join(",");
+                let res = translate(x.clone(), context);
+                println!("{}({}){{\n{}\n}}", k, args, res);
+            }
+            _ => {}
+        }
+    }
 }

@@ -23,7 +23,7 @@ eq(x,y) {
 }
 
 if(c,x,y) {
-    decode let "T$" encode x let "F$" encode y cat x "$"
+    decode let "T$" encode x let "F$" encode y cat c "$"
 }
 
 in(x,y) {

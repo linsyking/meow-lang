@@ -8,6 +8,7 @@ mod prog;
 extern crate lalrpop_util;
 
 lalrpop_mod!(pub parse); // synthesized by LALRPOP
+lalrpop_mod!(pub expr);
 
 fn main() {
     let mut argv = args();
@@ -19,6 +20,9 @@ fn main() {
         .expect("unexpected token!");
     let context = &mut Box::new(prog::Context::new());
     prog::eval_prog(res, context);
+
+    // Print the translated program
+    prog::trans_layout(context);
 
     // Rustyline
     let mut rl = rustyline::DefaultEditor::new().unwrap();
@@ -40,11 +44,11 @@ fn main() {
                 break;
             }
         }
-        let expr = parse::ExpressionParser::new()
+        let expr = &mut expr::ExpressionParser::new()
             .parse(line.as_str())
             .expect("invalid expression!");
         // Eval!
-        let res = prog::eval(&expr, context);
+        let res = prog::take_one_para(expr, context);
         println!("{}", res);
     }
 }

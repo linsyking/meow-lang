@@ -12,9 +12,11 @@ Tokz: Box<Tok> = {
 }
 
 VarName: String = {
-    r"[a-z]?[a-z0-9_]*" => String::from_str(<>).unwrap()
+    r"[a-z]?[a-z0-9_]*" => String::from_str(<>).unwrap(),
+    "!" => String::from_str("!").unwrap()
 }
 
 Literal: String = {
     r#""[^"]*""# => String::from_str(&<>[1..<>.len() - 1]).unwrap(),
+    r#"`[^`]*`"# => String::from_str(&<>[1..<>.len() - 1]).unwrap()
 }
