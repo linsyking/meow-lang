@@ -1,6 +1,8 @@
 # Meow lang
 
-Meow lang is a programming language that compiles to *cat*, another language that is hard to read but easy to execute. Meow's syntax is easier to read than cat, but meow and cat are equivalent.
+Meow lang is a programming language that compiles to *catlet*, another language that is hard to read but easy to execute. Meow's syntax is easier to read than catlet, but meow and catlet are equivalent.
+
+(It's called *catlet* because the only available two keywords are `cat` and `let`)
 
 Its main design purpose is to do experiments with "string substitution".
 
@@ -21,7 +23,7 @@ The only available data type is **String**. (However, you can encode other data 
 
 cargo run repl
 
-# Now you can use the REPL to evaluate (cat) expressions
+# Now you can use the REPL to evaluate (catlet) expressions
 ```
 
 Example:
@@ -40,7 +42,8 @@ hello world
 - [Syntax](./docs/Syntax.md)
 - [Encoding](./docs/Encoding.md)
 - [Double Substitution Lemma](./docs/DSL.md)
+- [i Expressions](./docs/i-expr.md)
 
 ## Examples
 
-See [syn.meow](./examples/syn.meow), which has compiling result [syn.cat](./examples/syn.cat).
+See [syn.meow](./examples/syn.meow), which has compiled result [syn.cat](./examples/syn.cat).
