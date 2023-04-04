@@ -69,8 +69,9 @@ fn apply_rule(x: &String, rules: &Vec<Rule>) -> String {
 }
 
 pub fn eval_macap(macap: &MacAp, context: &Box<Context>) -> String {
-    let mut newcontext: Context = *context.clone();
+    let mut newcontext = *context.clone();
     // macro application
+    newcontext = clear_context(&newcontext);
     let mac = context
         .symbols
         .get(&macap.name)
@@ -94,6 +95,28 @@ pub fn eval_macap(macap: &MacAp, context: &Box<Context>) -> String {
     eval_block(&mac.block, &Box::new(newcontext))
 }
 
+fn clear_context(context: &Context) -> Context {
+    // clear the context
+    let mut newcontext = Context::new();
+    newcontext.symbols = context
+        .symbols
+        .iter()
+        .filter(|(_, v)| match v {
+            Symbol::Variable(_) => false,
+            Symbol::Macro(_) => true,
+        })
+        .map(|(k, v)| (k.clone(), v.clone()))
+        .collect();
+    newcontext
+}
+
+fn clear_rules(context: &Context) -> Context {
+    // clear the context
+    let mut newcontext = Context::new();
+    newcontext.symbols = context.symbols.clone();
+    newcontext
+}
+
 pub fn eval_raw(expr: &Box<Expr>, context: &Box<Context>) -> String {
     // Evaluate an expression in a given context.
     // Will not apply rules
@@ -110,7 +133,7 @@ pub fn eval_raw(expr: &Box<Expr>, context: &Box<Context>) -> String {
             }
         }
         Expr::MacAp(macap) => eval_macap(macap, context),
-        Expr::Block(x) => eval_block(x, context),
+        Expr::Block(x) => eval_block(x, &Box::new(clear_rules(context))),
         Expr::IExpr(x) => {
             let res = eval_raw(x, context);
             let pres = &mut expr::ExpressionParser::new().parse(&res).unwrap();
@@ -122,19 +145,8 @@ pub fn eval_raw(expr: &Box<Expr>, context: &Box<Context>) -> String {
 pub fn eval(expr: &Box<Expr>, context: &Box<Context>) -> String {
     // Evaluate an expression in a given context.
     // Not allow to change context
-    match &**expr {
-        Expr::Literal(x) => apply_rule(x, &context.rules),
-        Expr::Cat(x, y) => {
-            let cat = eval_raw(x, context) + eval_raw(y, context).as_str();
-            apply_rule(&cat, &context.rules)
-        }
-        _ =>
-        // other cases
-        {
-            let res = eval_raw(expr, context);
-            apply_rule(&res, &context.rules)
-        }
-    }
+    let res = eval_raw(expr, context);
+    apply_rule(&res, &context.rules)
 }
 
 pub fn eval_block(block: &Box<Block>, context: &Box<Context>) -> String {
