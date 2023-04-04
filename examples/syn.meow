@@ -193,3 +193,15 @@ show(x) {
     };
     !(if(leq(len(x), digit("9")), spack(revdigit(x)) , `cat show "` + rem + `" revdigit "` + la + `"`))
 }
+
+fib(x) {
+    if(
+        eq(x, zero()),
+        zero(),
+        !(if(
+            leq(x, num("2")),
+            spack(num("1")),
+            `add fib pred x fib pred pred x`
+        ))
+    )
+}

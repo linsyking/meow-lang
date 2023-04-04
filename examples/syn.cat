@@ -25,3 +25,4 @@ num x = ! if eq len x "S0" spack digit x cat cat cat cat cat cat cat `add mul "`
 spack x = cat cat `"` x `"`
 leq x y = in x y
 show x = ! if leq len x digit "9" spack revdigit x cat cat cat cat `cat show "` let "SSSSSSSSSS" "S" sub x let "SSSSSSSSSS" "" x `" revdigit "` let "SSSSSSSSSS" "" x `"`
+fib x = if eq x zero zero ! if leq x num "2" spack num "1" "add fib pred x fib pred pred x"
