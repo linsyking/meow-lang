@@ -1,0 +1,36 @@
+true() {"T"}
+
+false() {"F"}
+
+zero() {"0"}
+
+succ(x) {cat "S" x}
+
+pred(x) {
+    let "S0" "0" x
+}
+
+dr(x,y,z) {
+    let y x let x y z
+}
+
+encode(s) {
+    cat cat "_^" let "$" "\$" let "^" "\^" let "\" "\\" s "_$"
+}
+
+eq(x,y) {
+    let encode x "F" encode y "T" encode "x"
+}
+
+if(c,x,y) {
+    decode let "T$" encode x let "F$" encode y cat x "$"
+}
+
+in(x,y) {
+    eq y let x "" y
+}
+
+test2() {
+    let "bb" "g" cat "bc" "bc"
+}
+
