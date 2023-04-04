@@ -1,36 +1,27 @@
-true() {"T"}
-
-false() {"F"}
-
-zero() {"0"}
-
-succ(x) {cat "S" x}
-
-pred(x) {
-    let "S0" "0" x
-}
-
-dr(x,y,z) {
-    let y x let x y z
-}
-
-encode(s) {
-    cat cat "_^" let "$" "\$" let "^" "\^" let "\" "\\" s "_$"
-}
-
-eq(x,y) {
-    let encode x "F" encode y "T" encode "x"
-}
-
-if(c,x,y) {
-    decode let "T$" encode x let "F$" encode y cat c "$"
-}
-
-in(x,y) {
-    eq y let x "" y
-}
-
-test2() {
-    let "bb" "g" cat "bc" "bc"
-}
-
+true  = "T"
+false  = "F"
+zero  = "0"
+succ x = cat "S" x
+pred x = let "S0" "0" x
+add x y = let "0" y x
+sub x y = let y "0" x
+mul x y = let "S" let "0" "" y x
+dr x y z = let y x let x y z
+encode s = cat cat "_^" let "$" "\$" let "^" "\^" let "\" "\\" s "_$"
+decode s = let "\\" "\" let "\$" "$" let "\^" "^" let "_^" "" let "_$" "" s
+eq x y = let encode x "F" let encode y "T" encode x
+if c x y = decode let "T$" encode x let "F$" encode y cat c "$"
+in x y = not eq y let x "" y
+not x = if x false true
+ife x = eq x ""
+digit x = let "1" "S0" let "2" "SS0" let "3" "SSS0" let "4" "SSSS0" let "5" "SSSSS0" let "6" "SSSSSS0" let "7" "SSSSSSS0" let "8" "SSSSSSSS0" let "9" "SSSSSSSSS0" x
+exp x y = ! cat let "S" "mul " let "S0" "" y let " 0" "" let "S" cat cat `"` x `" ` y
+nrep x p = let "0" p let "1" p let "2" p let "3" p let "4" p let "5" p let "6" p let "7" p let "8" p let "9" p x
+len x = cat nrep x "S" "0"
+ten  = succ digit "9"
+revdigit x = let "S0" "1" let "SS0" "2" let "SSS0" "3" let "SSSS0" "4" let "SSSSS0" "5" let "SSSSSS0" "6" let "SSSSSSS0" "7" let "SSSSSSSS0" "8" let "SSSSSSSSS0" "9" x
+head x = pred cat nrep let "$0" "S" let "$1" "SS" let "$2" "SSS" let "$3" "SSSS" let "$4" "SSSSS" let "$5" "SSSSSS" let "$6" "SSSSSSS" let "$7" "SSSSSSSS" let "$8" "SSSSSSSSS" let "$9" "SSSSSSSSSS" cat "$" x "" "0"
+num x = ! if eq len x "S0" spack digit x cat cat cat cat cat cat cat `add mul "` head x `" exp ten "` pred len x `" ` `num "` let cat "$" revdigit head x "" cat "$" x `"`
+spack x = cat cat `"` x `"`
+leq x y = in x y
+show x = ! if leq len x digit "9" spack revdigit x cat cat cat cat `cat show "` let "SSSSSSSSSS" "S" sub x let "SSSSSSSSSS" "" x `" revdigit "` let "SSSSSSSSSS" "" x `"`

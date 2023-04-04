@@ -2,13 +2,13 @@ use std::str::FromStr;
 use crate::ast::{Tok};
 grammar;
 
-pub Expression: Vec<Box<Tok>> = {
+pub Expression: Vec<Tok> = {
     Tokz*,
 }
 
-Tokz: Box<Tok> = {
-    Literal => Box::new(Tok::Literal(<>)),
-    VarName => Box::new(Tok::Var(<>)),
+Tokz: Tok = {
+    Literal => Tok::Literal(<>),
+    VarName => Tok::Var(<>),
 }
 
 VarName: String = {

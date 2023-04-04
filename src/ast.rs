@@ -44,10 +44,3 @@ pub enum Tok {
     Var(String),
     Literal(String),
 }
-
-#[test]
-fn tt() {
-    // let dd = Stmt{name: "ss", args: [], }
-    let mut xx = vec![String::from("sdsds")];
-    xx.push(String::from("sdsd"));
-}

@@ -27,7 +27,6 @@ cargo run ./examples/syn.meow
 Examples:
 
 ```
-no error found.
 > true()
 T
 > false()
