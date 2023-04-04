@@ -1,0 +1,20 @@
+use std::str::FromStr;
+use crate::ast::{Tok};
+grammar;
+
+pub Expression: Vec<Box<Tok>> = {
+    Tokz*,
+}
+
+Tokz: Box<Tok> = {
+    Literal => Box::new(Tok::Literal(<>)),
+    VarName => Box::new(Tok::Var(<>)),
+}
+
+VarName: String = {
+    r"[a-z]?[a-z0-9_]*" => String::from_str(<>).unwrap()
+}
+
+Literal: String = {
+    r#""[^"]*""# => String::from_str(&<>[1..<>.len() - 1]).unwrap(),
+}

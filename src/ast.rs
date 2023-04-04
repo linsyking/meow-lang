@@ -18,6 +18,7 @@ pub enum Expr {
     MacAp(MacAp),
     Var(String),
     Block(Box<Block>),
+    IExpr(Box<Expr>),
 }
 
 #[derive(Debug, Clone)]
@@ -36,6 +37,12 @@ pub struct Block {
 pub enum BStmt {
     MEq(Box<Expr>, Box<Expr>),
     VarDefine(String, Box<Expr>),
+}
+
+#[derive(Debug, Clone)]
+pub enum Tok {
+    Var(String),
+    Literal(String),
 }
 
 #[test]

@@ -32,7 +32,8 @@ Term: Box<Expr> = {
     MacroAp => Box::new(Expr::MacAp(<>)),
     VarName => Box::new(Expr::Var(<>)),
     "{" <b:BlockE> "}" => Box::new(Expr::Block(b)),
-    "(" <e:Expression> ")" => e
+    "(" <e:Expression> ")" => e,
+    "!(" <e:Expression> ")" => Box::new(Expr::IExpr(e)),
 }
 
 BlockE: Box<Block> = {
@@ -65,5 +66,6 @@ VarName: String = {
 }
 
 Literal: String = {
-    r#""[^"]*""# => String::from_str(&<>[1..<>.len() - 1]).unwrap()
+    r#""[^"]*""# => String::from_str(&<>[1..<>.len() - 1]).unwrap(),
+    r#"`[^`]*`"# => String::from_str(&<>[1..<>.len() - 1]).unwrap()
 }

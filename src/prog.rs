@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use crate::ast::*;
 
+lalrpop_mod!(pub expr); // synthesized by LALRPOP
 /// Evaluate Program
 
 #[derive(Debug, Clone)]
@@ -67,6 +68,32 @@ fn apply_rule(x: &String, rules: &Vec<Rule>) -> String {
     result
 }
 
+pub fn eval_macap(macap: &MacAp, context: &Box<Context>) -> String {
+    let mut newcontext: Context = *context.clone();
+    // macro application
+    let mac = context
+        .symbols
+        .get(&macap.name)
+        .expect("macro not in scope");
+    let mac = match mac {
+        Symbol::Variable(_) => panic!("variable used as macro"),
+        Symbol::Macro(x) => x,
+    };
+    // First evaluate arguments (by value)
+    let args = macap
+        .args
+        .iter()
+        .map(|x| eval_raw(x, context))
+        .collect::<Vec<String>>();
+    // add vars to the context
+    for (result, name) in args.iter().zip(mac.args.iter()) {
+        newcontext
+            .symbols
+            .insert(name.clone(), Symbol::Variable(result.clone()));
+    }
+    eval_block(&mac.block, &Box::new(newcontext))
+}
+
 pub fn eval_raw(expr: &Box<Expr>, context: &Box<Context>) -> String {
     // Evaluate an expression in a given context.
     // Will not apply rules
@@ -82,32 +109,13 @@ pub fn eval_raw(expr: &Box<Expr>, context: &Box<Context>) -> String {
                 Symbol::Macro(_) => panic!("macro used as variable"),
             }
         }
-        Expr::MacAp(macap) => {
-            let mut newcontext: Context = *context.clone();
-            // macro application
-            let mac = context
-                .symbols
-                .get(&macap.name)
-                .expect("macro not in scope");
-            let mac = match mac {
-                Symbol::Variable(_) => panic!("variable used as macro"),
-                Symbol::Macro(x) => x,
-            };
-            // First evaluate arguments (by value)
-            let args = macap
-                .args
-                .iter()
-                .map(|x| eval_raw(x, context))
-                .collect::<Vec<String>>();
-            // add vars to the context
-            for (result, name) in args.iter().zip(mac.args.iter()) {
-                newcontext
-                    .symbols
-                    .insert(name.clone(), Symbol::Variable(result.clone()));
-            }
-            eval_block(&mac.block, &Box::new(newcontext))
-        }
+        Expr::MacAp(macap) => eval_macap(macap, context),
         Expr::Block(x) => eval_block(x, context),
+        Expr::IExpr(x) => {
+            let res = eval_raw(x, context);
+            let pres = &mut expr::ExpressionParser::new().parse(&res).unwrap();
+            take_one_para(pres, context)
+        }
     }
 }
 
@@ -150,26 +158,40 @@ pub fn eval_block(block: &Box<Block>, context: &Box<Context>) -> String {
     eval(&block.expr, lcontext)
 }
 
-#[cfg(test)]
-mod tests {
-    use std::collections::HashMap;
-
-    use crate::ast::Expr;
-
-    use super::eval;
-
-    fn eval_test(expr: &Expr) -> String {
-        let context = Box::new(super::Context {
-            symbols: HashMap::new(),
-            rules: vec![],
-        });
-        let newexpr = Box::new(expr.clone());
-        eval(&newexpr, &context)
+fn take_one_para(expr: &mut Vec<Box<Tok>>, context: &Box<Context>) -> String {
+    // Take one argument from the expression
+    let first = eat_one_para(expr);
+    match &*first {
+        Tok::Literal(x) => x.clone(),
+        Tok::Var(x) => {
+            let sym = context.symbols.get(x).expect("symbol not in scope");
+            match sym {
+                Symbol::Variable(y) => y.clone(),
+                Symbol::Macro(y) => {
+                    // Apply macro here
+                    let argnum = y.args.len();
+                    let narg = take_paras(argnum, expr, context);
+                    let macap = MacAp {
+                        name: x.clone(),
+                        args: narg,
+                    };
+                    eval_macap(&macap, context)
+                }
+            }
+        }
     }
+}
 
-    #[test]
-    fn expr_eval() {
-        let expr1 = Expr::Literal(String::from("abc"));
-        assert_eq!(eval_test(&expr1), "abc".to_string());
-    }
+fn take_paras(n: usize, expr: &mut Vec<Box<Tok>>, context: &Box<Context>) -> Vec<Box<Expr>> {
+    // Take n arguments from the expression
+    (0..n)
+        .map(|_| Box::new(Expr::Literal(take_one_para(expr, context))))
+        .collect::<Vec<Box<Expr>>>()
+}
+
+fn eat_one_para(expr: &mut Vec<Box<Tok>>) -> Box<Tok> {
+    // Take one argument from the expression
+    let sd = expr.first().expect("missing argument").clone();
+    expr.remove(0);
+    sd
 }

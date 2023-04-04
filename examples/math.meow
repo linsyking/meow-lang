@@ -1,0 +1,50 @@
+zero() {"0"}
+
+succ(x) {"S"+x}
+
+pred(x) {
+    "S0" = "0";
+    x
+}
+
+add(x,y) {
+    "0" = y;
+    x
+}
+
+mul(x,y) {
+    "S" = {"0"=""; y};
+    x
+}
+
+digit(x) {
+    "1" = "S0";
+    "2" = "SS0";
+    "3" = "SSS0";
+    "4" = "SSSS0";
+    "5" = "SSSSS0";
+    "6" = "SSSSSS0";
+    "7" = "SSSSSSS0";
+    "8" = "SSSSSSSS0";
+    "9" = "SSSSSSSSS0";
+    x
+}
+
+exp(x,y) {
+    var sm = {
+        " 0" = "";
+        "S" = `"`+x+`" `;
+        y
+    };
+    var pre = {
+        "S" = "mul ";
+        "S0" = "";
+        y
+    };
+    !(pre + sm)
+}
+
+iexpr() {
+    var q = !(`mul digit "9" digit "3"`);
+    q
+}
