@@ -1,12 +1,19 @@
 # Syntax
 
-The layout of the whole program is not stable, but the core expression syntax is (relatively more) stable.
+The layout of the whole language is not yet stable, but the core expression syntax is (relatively more) stable.
 
 ## Expression
 
 **All expressions can be evaluated to a string literal.**
 
-`literal` is simply a string literal, like `"abc"`, `"lol"`.
+`Literal` is simply a string literal, like `"abc"`, `"lol"`.
+
+There are two ways to define a string literal.
+
+- "abc"
+- \`abc\`
+
+It's not allowed to use " inside a "-string and \` inside a \`-string.
 
 Examples.
 
@@ -45,6 +52,8 @@ Evaluation has two modes. The **raw** mode and the **eval** mode.
 
 In raw mode, a string literal will be simply be what it is. In eval mode, a string literal will be changed according to current rules in the context.
 
+The **eval** mode is only used in the last expression in a block.
+
 For example, consider the following macro:
 
 ```meow
@@ -52,23 +61,40 @@ meow() {
     "dd" = "d";
     var x = {"dddd"};
     var y = "dddd";
-    "x=" + x + ",y=" + y
+    "x=" + x + ", y=" + y
 }
 ```
 
-Here `y` is raw mode evaluation while `x` is an eval mode evaluation. The thumb rule is that **only the last expression** in the block ({}) will be evaluated in eval mode.
+The rules will only apply to current context, it will not go into any deeper `{}` block.
 
-Therefore, `x` is actually evaluated twice while `y` is evaluated only once.
-
-The output of the code above:
+The result of `meow()` is:
 
 ```
-x=d,y=dd
+x=dd, y=dd
 ```
 
 ## Variable
 
-You can use `var` to declare a variable. The syntax is like `var x = "abc";`. The variable is only visible in the block where it is declared. The right hand side can be any expressions. Note that the right hand side is evaluated in **raw** mode (unless you use `var x = {"abc"}`).
+You can use `var` to declare a variable. The syntax is like `var x = "abc";`. The variable is only visible in the block where it is declared. The right hand side can be any expressions. Note that the right hand side is evaluated in **raw** mode.
+
+When compiling to cat, the compiler will **remove all `var` declarations**. So `var` is simply a **syntax sugar**.
+
+For example,
+
+```
+meow() {
+    "dd" = "d";
+    var x = {"dddd"};
+    var y = "dddd";
+    x + y
+}
+```
+
+will be compiled to:
+
+```
+meow  = let "dd" "d" cat "dddd" "dddd"
+```
 
 ---
 

@@ -1,6 +1,6 @@
 # Meow lang
 
-Meow lang is a programming language that is designed **not** to be easy to learn and use.
+Meow lang is a programming language that compiles to *cat*, another language that is hard to read but easy to execute. Meow's syntax is easier to read than cat, but meow and cat are equivalent.
 
 Its main design purpose is to do experiments with "string substitution".
 
@@ -19,26 +19,20 @@ The only available data type is **String**. (However, you can encode other data 
 ```bash
 # First clone this repo and open it
 
-cargo run ./examples/syn.meow
+cargo run repl
 
-# Now you can use the REPL to evaluate expressions
+# Now you can use the REPL to evaluate (cat) expressions
 ```
 
-Examples:
+Example:
 
 ```
-> true()
-T
-> false()
-F
-> {var x = zero();succ(x)}
-S0
-> dr("a","aba","aba")
-aba
-> if("T","xsa","ddd")
-xsa
-> eq("as","asas")
-F
+> "abc"
+abc
+> cat "hello " "world"
+hello world
+> let "apple" "world" "hello apple"
+hello world
 ```
 
 ## Tutorials
@@ -49,4 +43,4 @@ F
 
 ## Examples
 
-See [syn.meow](./examples/syn.meow).
+See [syn.meow](./examples/syn.meow), which has compiling result [syn.cat](./examples/syn.cat).
