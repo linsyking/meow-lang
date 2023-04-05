@@ -18,7 +18,6 @@ pub enum Expr {
     MacAp(MacAp),
     Var(String),
     Block(Box<Block>),
-    IExpr(Box<Expr>),
 }
 
 #[derive(Debug, Clone)]

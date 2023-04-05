@@ -94,10 +94,6 @@ fn trans_expr(expr: &Box<Expr>, context: &Box<Context>) -> Vec<Tok> {
             }
         }
         Expr::Block(x) => tok.append(&mut trans_block(x, &mut context.clone())),
-        Expr::IExpr(x) => {
-            tok.push(Tok::Var("!".to_string()));
-            tok.append(&mut trans_expr(x, context));
-        }
     }
     tok.to_vec()
 }

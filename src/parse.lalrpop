@@ -33,7 +33,6 @@ Term: Box<Expr> = {
     VarName => Box::new(Expr::Var(<>)),
     "{" <b:BlockE> "}" => Box::new(Expr::Block(b)),
     "(" <e:Expression> ")" => e,
-    "!(" <e:Expression> ")" => Box::new(Expr::IExpr(e)),
 }
 
 BlockE: Box<Block> = {

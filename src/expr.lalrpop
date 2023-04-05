@@ -13,7 +13,6 @@ Tokz: Tok = {
 
 VarName: String = {
     r"[a-z]?[a-z0-9_]*" => String::from_str(<>).unwrap(),
-    "!" => String::from_str("!").unwrap()
 }
 
 Literal: String = {

@@ -42,7 +42,6 @@ hello world
 - [Syntax](./docs/Syntax.md)
 - [Encoding](./docs/Encoding.md)
 - [Double Substitution Lemma](./docs/DSL.md)
-- [i Expressions](./docs/i-expr.md)
 
 ## Examples
 
