@@ -84,7 +84,10 @@ fn trans_expr(expr: &Box<Expr>, context: &Box<Context>) -> Vec<Tok> {
             tok.append(&mut trans_expr(y, context));
         }
         Expr::Var(x) => {
-            let vartok = context.variables.get(x).expect("variable not in scope");
+            let vartok = context
+                .variables
+                .get(x)
+                .expect(format!("variable {} not in scope", x).as_str());
             tok.append(&mut vartok.clone())
         }
         Expr::MacAp(x) => {
@@ -126,7 +129,12 @@ pub fn translate(prog: &Box<Prog>, context: &Box<Context>) -> String {
         Prog::Stmts(x, y) => {
             let v = context.macros.get(x.name.as_str()).unwrap();
             let res = compose_tok(&v.body);
-            let output = format!("{} {} = {}\n", x.name, x.args.join(" "), res);
+            let output;
+            if x.args.is_empty() {
+                output = format!("{} = {}\n", x.name, res);
+            } else {
+                output = format!("{} {} = {}\n", x.name, x.args.join(" "), res);
+            }
             output + &translate(y, context)
         }
     }

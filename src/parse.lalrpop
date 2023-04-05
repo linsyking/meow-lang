@@ -61,7 +61,7 @@ VarDef: (String, String) = {
 }
 
 VarName: String = {
-    r"[a-z]?[a-z0-9_]*" => String::from_str(<>).unwrap()
+    r"[a-z0-9_]*" => String::from_str(<>).unwrap()
 }
 
 Literal: String = {
