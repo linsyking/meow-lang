@@ -10,7 +10,7 @@ Its main design purpose is to do experiments with "string substitution".
 
 Currently the definition of substitution of strings are defined by the built-in `replace` function of `String`.
 
-It's not allowed to do $[X/""]Y$ (replace empty string with some string).
+It's not allowed to do $[X/\epsilon]Y$ (replace empty string with some string).
 
 ## Concepts
 
