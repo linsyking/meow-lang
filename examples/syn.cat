@@ -19,7 +19,6 @@ mul x y = let "S" let 0 "" y x
 dr x y z = let y x let x y z
 encode s = cat cat "#$" let "$" "\$" let "#" "\#" let "\" "\\" s "$#"
 decode s = let "\\" "\" let "\#" "#" let "\$" "$" let "$#" "" let "#$" "" s
-encat x y = cat let "#$" "" x let "$#" "" y
 enraw s = let "#$" "" let "$#" "" encode s
 enrep s x y = let enraw x y s
 rep2 s x xr y yr = decode let "x#" enraw xr let "y#" enraw yr enrep enrep encode s x "x#" y "y#"

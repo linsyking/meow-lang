@@ -23,38 +23,28 @@ We have to first implement the `encode` and `decode` macro to help us.
 
 Encoding means to encode a string into another string that has some special properties that we can use.
 
-We define it by this:
-
-$$
-\mathtt{encode}(s) = \mathtt{"\_\^{\,}"} + (\mathtt{["\backslash \backslash"/"\backslash"]["\backslash \$"/"\$"]["\backslash \^{\,}"/"\^{\,}"]}s) + \mathtt{"\_\$"}
-$$
-
-We can prove the following results:
-
-1. $|x|=1 \land x \neq \mathtt{"\backslash"} \Rightarrow $ $x\mathtt{"\^{\,}"} \not\subset \mathtt{["\backslash \backslash"/"\backslash"]["\backslash \$"/"\$"]["\backslash \^{\,}"/"\^{\,}"]}s$, $x\mathtt{"\$"} \not\subset \mathtt{["\backslash \backslash"/"\backslash"]["\backslash \$"/"\$"]["\backslash \^{\,}"/"\^{\,}"]}s$
-
 ## Code
 
 ```meow
 encode(s) {
     var rep = {
-        "\" = "\\";
         "$" = "\$";
-        "^" = "\^";
+        "#" = "\#";
+        "\" = "\\";
         s
     };
-    "_^"+ rep +"_$"
+    "#$"+ rep +"$#"
 }
 
 decode(s) {
     var rep = {
-        "_^" = "";
-        "_$" = "";
+        "$#" = "";
+        "#$" = "";
         s
     };
-    "\$" = "$";
-    "\^" = "^";
     "\\" = "\";
+    "\#" = "#";
+    "\$" = "$";
     rep
 }
 ```

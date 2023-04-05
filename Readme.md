@@ -2,13 +2,15 @@
 
 Meow lang is a programming language that compiles to *catlet*, another language that is hard to read but easy to execute. Meow's syntax is easier to read than catlet, but meow and catlet are equivalent.
 
-(It's called *catlet* because the only available two keywords are `cat` and `let`)
+(It's called *catlet* because the only available two keywords are `cat` and `let`, *currently*)
 
 Its main design purpose is to do experiments with "string substitution".
 
 ## Formal Definition
 
 Currently the definition of substitution of strings are defined by the built-in `replace` function of `String`.
+
+It's not allowed to do $[X/""]Y$ (replace empty string with some string).
 
 ## Concepts
 
@@ -42,6 +44,7 @@ hello world
 - [Syntax](./docs/Syntax.md)
 - [Encoding](./docs/Encoding.md)
 - [Double Substitution Lemma](./docs/DSL.md)
+- [Multiple Replacement](./docs/MR.md)
 
 ## Examples
 

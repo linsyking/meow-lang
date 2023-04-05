@@ -20,9 +20,13 @@ First, we have to make sure that the multiple strings are all **independent**. O
 Implementation code for 2 strings:
 
 ```meow
+encat(x,y) {
+    {"#$"=""; x} + {"$#"=""; y}
+}
+
 enraw(s) {
-    "_^" = "";
-    "_$" = "";
+    "#$" = "";
+    "$#" = "";
     encode(s)
 }
 
@@ -32,11 +36,11 @@ enrep(s,x,y) {
 }
 
 rep2(s,x,xr,y,yr) {
-    var repx = enrep(encode(s),x,"x$");
-    var repy = enrep(repx,y,"y$");
+    var repx = enrep(encode(s),x,"x#");
+    var repy = enrep(repx,y,"y#");
     decode({
-        "x$" = enraw(xr);
-        "y$" = enraw(yr);
+        "x#" = enraw(xr);
+        "y#" = enraw(yr);
         repy
     })
 }
