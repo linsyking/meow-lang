@@ -77,7 +77,7 @@ x=dd, y=dd
 
 You can use `var` to declare a variable. The syntax is like `var x = "abc";`. The variable is only visible in the block where it is declared. The right hand side can be any expressions. Note that the right hand side is evaluated in **raw** mode.
 
-When compiling to cat, the compiler will **remove all `var` declarations**. So `var` is simply a **syntax sugar**.
+When compiling to catlet, the compiler will **remove all `var` declarations**. So `var` is simply a **syntax sugar**.
 
 For example,
 

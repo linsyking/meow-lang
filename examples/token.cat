@@ -1,0 +1,2 @@
+eat x w = x
+head x = ! cat cat `eat "` let " " `" eat "` x `" ""`

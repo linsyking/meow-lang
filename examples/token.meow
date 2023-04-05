@@ -1,0 +1,9 @@
+eat(x,w) {
+  x
+}
+
+head(x) {
+  var xx = {" " = `" eat "`; x};
+  !(`eat "` + xx + `" ""`)
+}
+

@@ -19,10 +19,7 @@ fn main() {
     if fp == "repl" {
         repl(&mut Box::new(prog::Context::new()));
     } else {
-        let fc = std::fs::read_to_string(fp).expect("failed to open the file");
-        let res = parse::ProgramParser::new()
-            .parse(fc.as_str())
-            .expect("unexpected token!");
+        let res = read_file(&fp);
         let context = &mut Box::new(prog::Context::new());
         prog::eval_prog(&res, context);
         let trans = prog::translate(&res, context);
@@ -34,7 +31,19 @@ fn main() {
     }
 }
 
+fn read_file(path: &str) -> Box<ast::Prog> {
+    let fc = std::fs::read_to_string(path).expect("failed to open the file");
+    let res = parse::ProgramParser::new()
+        .parse(fc.as_str())
+        .expect("unexpected token!");
+    res
+}
+
 fn repl(context: &mut Box<prog::Context>) {
+    // Load default module
+    prog::eval_prog(&read_file("./examples/syn.meow"), context);
+    println!("default script loaded");
+
     let mut rl = rustyline::DefaultEditor::new().unwrap();
     loop {
         let line: String;
@@ -65,10 +74,7 @@ fn repl(context: &mut Box<prog::Context>) {
                 context.clean();
             } else if cmd == &"load" {
                 let path = cmds.get(1).unwrap();
-                let fc = std::fs::read_to_string(path).expect("failed to open the file");
-                let res = parse::ProgramParser::new()
-                    .parse(fc.as_str())
-                    .expect("unexpected token!");
+                let res = read_file(path);
                 prog::eval_prog(&res, context);
                 println!("loaded {}", path);
             } else {

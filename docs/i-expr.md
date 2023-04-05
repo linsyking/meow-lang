@@ -1,6 +1,6 @@
 # i Expressions
 
-i expressions allow you to evaluate cat expression inside cat expression. This gives us the power to do recursion.
+i expressions allow you to evaluate catlet expressions inside catlet expressions. This gives us the power to do recursion.
 
 The fibonacci function can be defined as:
 
