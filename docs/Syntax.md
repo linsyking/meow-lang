@@ -44,7 +44,7 @@ Different to many languages, `X=Y` requires that both `X` and `Y` are **expressi
 
 The replacement **only** takes place in the `in xxx`. Hence, in `let X in (let Y in Z)`, the replacement of `X` only takes place in `Z` rather than `Y` (but there is a way to let it happen in `Y`, see later explanation).
 
-`MacroApplication` is a macro name followed by a list of arguments, like `succ(a,b,c)`. The language is *by value*, so the arguments are evaluated before the macro is applied.
+`MacroApplication` is a macro name followed by a list of arguments, like `succ(a,b,c)`. The language is *by name*, so the arguments will be evaluated after the macro is applied.
 
 ## Evaluation Mode
 

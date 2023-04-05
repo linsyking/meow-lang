@@ -18,6 +18,44 @@ There are **no** functions in Meow. Instead, we have *macros*. A macro is a piec
 
 The only available data type is **String**. (However, you can encode other data types inside String)
 
+## Code Style
+
+Meow:
+
+```meow
+encode(s) {
+    var rep = {
+        "$" = "\$";
+        "#" = "\#";
+        "\" = "\\";
+        s
+    };
+    "#$"+ rep +"$#"
+}
+
+fib(x) {
+    if(
+        eq0(x),
+        0(),
+        if(
+            leq(x, 2()),
+            1(),
+            add(
+                fib(pred(x)),
+                fib(pred(pred(x)))
+            )
+        )
+    )
+}
+```
+
+Catlet (Compiled result):
+
+```catlet
+encode s = cat cat "#$" let "$" "\$" let "#" "\#" let "\" "\\" s "$#"
+fib x = if eq0 x 0 if leq x 2 1 add fib pred x fib pred pred x
+```
+
 ## Simple Start
 
 ```bash
