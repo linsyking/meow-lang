@@ -1,6 +1,6 @@
-true() {"T"}
+T() {"T"}
 
-false() {"F"}
+F() {"F"}
 
 0() {"0"}
 
@@ -116,7 +116,15 @@ in(x,y) {
 }
 
 not(x) {
-    if(x, false(), true())
+    if(x, F(), T())
+}
+
+or(x,y) {
+    if(x,T(), y)
+}
+
+and(x,y) {
+    if(x,y,F())
 }
 
 eq0(x) {
@@ -259,5 +267,21 @@ fib(x) {
                 fib(pred(pred(x)))
             )
         )
+    )
+}
+
+tl(x) {
+    var en = {
+        "#$" + enraw(hd(x)) = "#$";
+        encode(x)
+    };
+    decode(en)
+}
+
+wd(x) {
+    if(
+        or(eq(x, ""), eq(hd(x)," ")),
+        "",
+        hd(x) + wd(tl(x))
     )
 }

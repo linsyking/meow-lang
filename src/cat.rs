@@ -42,6 +42,27 @@ impl Context {
                         body: Vec::new(),
                     }),
                 ),
+                (
+                    "hd".to_string(),
+                    Symbol::Macro(Macro {
+                        args: vec!["x".to_string()],
+                        body: Vec::new(),
+                    }),
+                ),
+                (
+                    "tl".to_string(),
+                    Symbol::Macro(Macro {
+                        args: vec!["x".to_string()],
+                        body: Vec::new(),
+                    }),
+                ),
+                (
+                    "if".to_string(),
+                    Symbol::Macro(Macro {
+                        args: vec!["x".to_string(), "x".to_string(), "x".to_string()],
+                        body: Vec::new(),
+                    }),
+                ),
             ]),
             rules: Vec::new(),
         }
@@ -61,8 +82,8 @@ fn eval_macap(mac: &Macro, args: &Vec<Vec<Tok>>, context: &Box<Context>) -> Stri
 
 fn clear_context(context: &Context) -> Context {
     // clear the context
-    let mut newcontext = Context::new();
-    newcontext.symbols = context
+    let mut newcontext = context.clone();
+    newcontext.symbols = newcontext
         .symbols
         .iter()
         .filter(|(_, v)| match v {
@@ -71,13 +92,14 @@ fn clear_context(context: &Context) -> Context {
         })
         .map(|(k, v)| (k.clone(), v.clone()))
         .collect();
+    newcontext.rules.clear();
     newcontext
 }
 
 fn clear_rules(context: &Context) -> Context {
     // clear the context
-    let mut newcontext = Context::new();
-    newcontext.symbols = context.symbols.clone();
+    let mut newcontext = context.clone();
+    newcontext.rules.clear();
     newcontext
 }
 
@@ -98,7 +120,7 @@ fn apply_rule(x: &String, rules: &Vec<Rule>, context: &mut Box<Context>) -> Stri
 
 fn eval_strict(expr: &mut Vec<Tok>, context: &mut Box<Context>) -> String {
     // Take one argument from the expression
-    // println!("eval strict: {:?}", expr);
+    // println!("[strict] {:?}", expr);
     let first = eat_one_para(expr);
     match &first {
         Tok::Literal(lit) => lit.clone(),
@@ -123,6 +145,37 @@ fn eval_strict(expr: &mut Vec<Tok>, context: &mut Box<Context>) -> String {
                     let x = eval_strict(expr, cleancontext);
                     let y = eval_strict(expr, cleancontext);
                     x + y.as_str()
+                }
+                "hd" => {
+                    // Head of a string
+                    let cleancontext = &mut Box::new(clear_rules(context));
+                    let x = eval_strict(expr, cleancontext);
+                    if x.is_empty() {
+                        String::new()
+                    } else {
+                        x.chars().next().unwrap().to_string()
+                    }
+                }
+                "tl" => {
+                    // Tail of a string
+                    let cleancontext = &mut Box::new(clear_rules(context));
+                    let x = eval_strict(expr, cleancontext);
+                    if x.is_empty() {
+                        String::new()
+                    } else {
+                        x.chars().skip(1).collect()
+                    }
+                }
+                "if" => {
+                    let cleancontext = &mut Box::new(clear_rules(context));
+                    let x = eval_strict(expr, cleancontext);
+                    let y = &mut eval_lazy(expr, cleancontext);
+                    let z = &mut eval_lazy(expr, cleancontext);
+                    if &x == "T" {
+                        eval_strict(y, cleancontext)
+                    } else {
+                        eval_strict(z, cleancontext)
+                    }
                 }
                 _ => {
                     let sym = context
