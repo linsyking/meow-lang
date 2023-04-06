@@ -22,49 +22,28 @@ pub enum Symbol {
 pub struct Context {
     symbols: HashMap<String, Symbol>,
     rules: Vec<Rule>,
+    libsyms: HashMap<String, usize>,
 }
 
 impl Context {
     pub fn new() -> Self {
         Context {
-            symbols: HashMap::from([
-                (
-                    "cat".to_string(),
-                    Symbol::Macro(Macro {
-                        args: vec!["x".to_string(), "y".to_string()],
-                        body: Vec::new(),
-                    }),
-                ),
-                (
-                    "let".to_string(),
-                    Symbol::Macro(Macro {
-                        args: vec!["x".to_string(), "y".to_string(), "z".to_string()],
-                        body: Vec::new(),
-                    }),
-                ),
-                (
-                    "hd".to_string(),
-                    Symbol::Macro(Macro {
-                        args: vec!["x".to_string()],
-                        body: Vec::new(),
-                    }),
-                ),
-                (
-                    "tl".to_string(),
-                    Symbol::Macro(Macro {
-                        args: vec!["x".to_string()],
-                        body: Vec::new(),
-                    }),
-                ),
-                (
-                    "if".to_string(),
-                    Symbol::Macro(Macro {
-                        args: vec!["x".to_string(), "x".to_string(), "x".to_string()],
-                        body: Vec::new(),
-                    }),
-                ),
-            ]),
+            symbols: HashMap::new(),
             rules: Vec::new(),
+            libsyms: HashMap::from(
+                [
+                    ("cat", 2),
+                    ("let", 3),
+                    ("hd", 1),
+                    ("tl", 1),
+                    ("if", 3),
+                    ("eq", 2),
+                    ("len", 1),
+                    ("num", 1),
+                    ("show", 1),
+                ]
+                .map(|(k, v)| (k.to_string(), v)),
+            ),
         }
     }
 }
@@ -116,6 +95,19 @@ fn apply_rule(x: &String, rules: &Vec<Rule>, context: &mut Box<Context>) -> Stri
         }
     }
     result
+}
+
+fn num_to_s(num: usize) -> String {
+    let mut result = String::new();
+    for _ in 0..num {
+        result.push('S');
+    }
+    result.push('0');
+    result
+}
+
+fn s_to_num(s: &String) -> usize {
+    s.chars().filter(|c| *c == 'S').count()
 }
 
 fn eval_strict(expr: &mut Vec<Tok>, context: &mut Box<Context>) -> String {
@@ -177,6 +169,33 @@ fn eval_strict(expr: &mut Vec<Tok>, context: &mut Box<Context>) -> String {
                         eval_strict(z, cleancontext)
                     }
                 }
+                "eq" => {
+                    let cleancontext = &mut Box::new(clear_rules(context));
+                    let x = eval_strict(expr, cleancontext);
+                    let y = eval_strict(expr, cleancontext);
+                    if x == y {
+                        "T".to_string()
+                    } else {
+                        "F".to_string()
+                    }
+                }
+                "len" => {
+                    // Length of a string
+                    let cleancontext = &mut Box::new(clear_rules(context));
+                    let x = eval_strict(expr, cleancontext);
+                    num_to_s(x.len())
+                }
+                "num" => {
+                    let cleancontext = &mut Box::new(clear_rules(context));
+                    let x = eval_strict(expr, cleancontext);
+                    let rn: usize = x.parse().unwrap();
+                    num_to_s(rn)
+                }
+                "show" => {
+                    let cleancontext = &mut Box::new(clear_rules(context));
+                    let x = eval_strict(expr, cleancontext);
+                    s_to_num(&x).to_string()
+                }
                 _ => {
                     let sym = context
                         .symbols
@@ -207,17 +226,24 @@ fn eval_lazy(expr: &mut Vec<Tok>, context: &Box<Context>) -> Vec<Tok> {
     match &first {
         Tok::Literal(lit) => vec![Tok::Literal(lit.clone())],
         Tok::Var(var) => {
-            let sym = context
-                .symbols
-                .get(var)
-                .expect(format!("symbol {} not in scope", var).as_str());
-            match &sym {
-                Symbol::Variable(y) => y.clone(),
-                Symbol::Macro(y) => {
-                    // Apply macro here
-                    let argnum = y.args.len();
-                    let narg = take_paras_lazy(argnum, expr, context);
-                    [vec![first], narg.concat()].concat()
+            if context.libsyms.contains_key(var.as_str()) {
+                // Library symbols
+                let narg =
+                    take_paras_lazy(*context.libsyms.get(var.as_str()).unwrap(), expr, context);
+                [vec![first], narg.concat()].concat()
+            } else {
+                let sym = context
+                    .symbols
+                    .get(var)
+                    .expect(format!("symbol {} not in scope", var).as_str());
+                match &sym {
+                    Symbol::Variable(y) => y.clone(),
+                    Symbol::Macro(y) => {
+                        // Apply macro here
+                        let argnum = y.args.len();
+                        let narg = take_paras_lazy(argnum, expr, context);
+                        [vec![first], narg.concat()].concat()
+                    }
                 }
             }
         }

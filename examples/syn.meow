@@ -46,12 +46,6 @@ mul(x,y) {
     x
 }
 
-dr(x,y,z) {
-    y = x;
-    x = y;
-    z
-}
-
 encode(s) {
     var rep = {
         "$" = "\$";
@@ -74,43 +68,6 @@ decode(s) {
     rep
 }
 
-enraw(s) {
-    "#$" = "";
-    "$#" = "";
-    encode(s)
-}
-
-enrep(s,x,y) {
-    enraw(x) = y;
-    s
-}
-
-rep2(s,x,xr,y,yr) {
-    var repx = enrep(encode(s),x,"x#");
-    var repy = enrep(repx,y,"y#");
-    decode({
-        "x#" = enraw(xr);
-        "y#" = enraw(yr);
-        repy
-    })
-}
-
-eq(x,y) {
-    encode(x) = "F";
-    encode(y) = "T";
-    encode(x)
-}
-
-if(c,x,y) {
-    var cc = c + "#";
-    var enc = {
-        "T#" = encode(x);
-        "F#" = encode(y);
-        cc
-    };
-    decode(enc)
-}
-
 in(x,y) {
     not(eq(y,{x=""; y}))
 }
@@ -131,30 +88,6 @@ eq0(x) {
     eq(x, 0())
 }
 
-factorial(x) {
-    if(
-        eq(x, 1()),
-        1(),
-        mul(
-            x,
-            factorial(pred(x))
-        )
-    )
-}
-
-digit(x) {
-    "1" = 1();
-    "2" = 2();
-    "3" = 3();
-    "4" = 4();
-    "5" = 5();
-    "6" = 6();
-    "7" = 7();
-    "8" = 8();
-    "9" = 9();
-    x
-}
-
 exp(x,y) {
     if(
         eq0(y),
@@ -166,116 +99,8 @@ exp(x,y) {
     )
 }
 
-nrep(x,p) {
-    "0" = p;
-    "1" = p;
-    "2" = p;
-    "3" = p;
-    "4" = p;
-    "5" = p;
-    "6" = p;
-    "7" = p;
-    "8" = p;
-    "9" = p;
-    x
-}
-
-len(x) {
-    var s = nrep(x, "S");
-    s + 0()
-}
-
-revdigit(x) {
-    1() = "1";
-    2() = "2";
-    3() = "3";
-    4() = "4";
-    5() = "5";
-    6() = "6";
-    7() = "7";
-    8() = "8";
-    9() = "9";
-    x
-}
-
-head(x) {
-    var s = {
-        "$0" = {"0"=""; "S" + 0()};
-        "$1" = {"0"=""; "S" + 1()};
-        "$2" = {"0"=""; "S" + 2()};
-        "$3" = {"0"=""; "S" + 3()};
-        "$4" = {"0"=""; "S" + 4()};
-        "$5" = {"0"=""; "S" + 5()};
-        "$6" = {"0"=""; "S" + 6()};
-        "$7" = {"0"=""; "S" + 7()};
-        "$8" = {"0"=""; "S" + 8()};
-        "$9" = {"0"=""; "S" + 9()};
-        "$" + x
-    };
-    var rep = nrep(s, "");
-    pred(rep + 0())
-}
-
-num(x) {
-    var ten = succ(9());
-    var nl = pred(len(x));
-    var hd = head(x);
-    var hdnum = revdigit(hd);
-    var remain = {
-        "$" + hdnum = "";
-        "$" + x
-    };
-    if(
-        eq(len(x), 1()),
-        digit(x),
-        add(
-            mul(hd, exp(ten, nl)),
-            num(remain)
-        )
-    )
-}
-
 leq(x,y) {
     in(x,y)
-}
-
-show(x) {
-    var la = {
-        "SSSSSSSSSS" = "";
-        x
-    };
-    var rem = {
-        "SSSSSSSSSS" = "S";
-        sub(x,la)
-    };
-    if(
-        leq(len(x), 10()),
-        revdigit(x),
-        show(rem) + revdigit(la)
-    )
-}
-
-fib(x) {
-    if(
-        eq0(x),
-        0(),
-        if(
-            leq(x, 2()),
-            1(),
-            add(
-                fib(pred(x)),
-                fib(pred(pred(x)))
-            )
-        )
-    )
-}
-
-tl(x) {
-    var en = {
-        "#$" + enraw(hd(x)) = "#$";
-        encode(x)
-    };
-    decode(en)
 }
 
 wd(x) {
