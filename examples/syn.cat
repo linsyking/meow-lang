@@ -36,5 +36,5 @@ revdigit x = let 1 "1" let 2 "2" let 3 "3" let 4 "4" let 5 "5" let 6 "6" let 7 "
 head x = pred cat nrep let "$0" let "0" "" cat "S" 0 let "$1" let "0" "" cat "S" 1 let "$2" let "0" "" cat "S" 2 let "$3" let "0" "" cat "S" 3 let "$4" let "0" "" cat "S" 4 let "$5" let "0" "" cat "S" 5 let "$6" let "0" "" cat "S" 6 let "$7" let "0" "" cat "S" 7 let "$8" let "0" "" cat "S" 8 let "$9" let "0" "" cat "S" 9 cat "$" x "" 0
 num x = if eq len x 1 digit x add mul head x exp succ 9 pred len x num let cat "$" revdigit head x "" cat "$" x
 leq x y = in x y
-show x = if leq len x 9 revdigit x cat show let "SSSSSSSSSS" "S" sub x let "SSSSSSSSSS" "" x revdigit let "SSSSSSSSSS" "" x
+show x = if leq len x 10 revdigit x cat show let "SSSSSSSSSS" "S" sub x let "SSSSSSSSSS" "" x revdigit let "SSSSSSSSSS" "" x
 fib x = if eq0 x 0 if leq x 2 1 add fib pred x fib pred pred x

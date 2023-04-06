@@ -27,7 +27,22 @@ pub struct Context {
 impl Context {
     pub fn new() -> Self {
         Context {
-            symbols: HashMap::new(),
+            symbols: HashMap::from([
+                (
+                    "cat".to_string(),
+                    Symbol::Macro(Macro {
+                        args: vec!["x".to_string(), "y".to_string()],
+                        body: Vec::new(),
+                    }),
+                ),
+                (
+                    "let".to_string(),
+                    Symbol::Macro(Macro {
+                        args: vec!["x".to_string(), "y".to_string(), "z".to_string()],
+                        body: Vec::new(),
+                    }),
+                ),
+            ]),
             rules: Vec::new(),
         }
     }
@@ -41,7 +56,7 @@ fn eval_macap(mac: &Macro, args: &Vec<Vec<Tok>>, context: &Box<Context>) -> Stri
             .insert(name.clone(), Symbol::Variable(result.clone()));
     }
     let block = &mut mac.body.clone();
-    eval_strict(block, &Box::new(newcontext))
+    eval_strict(block, &mut Box::new(newcontext))
 }
 
 fn clear_context(context: &Context) -> Context {
@@ -66,7 +81,7 @@ fn clear_rules(context: &Context) -> Context {
     newcontext
 }
 
-fn apply_rule(x: &String, rules: &Vec<Rule>, context: &Box<Context>) -> String {
+fn apply_rule(x: &String, rules: &Vec<Rule>, context: &mut Box<Context>) -> String {
     // apply rules to a string
     let mut result = x.clone();
     for rule in rules.iter().rev() {
@@ -74,14 +89,16 @@ fn apply_rule(x: &String, rules: &Vec<Rule>, context: &Box<Context>) -> String {
             panic!("empty rule detected");
         }
         if result.contains(rule.x.as_str()) {
-            result = result.replace(rule.x.as_str(), &eval_strict(&mut rule.y.clone(), context));
+            let varres = eval_strict(&mut rule.y.clone(), context);
+            result = result.replace(rule.x.as_str(), &varres);
         }
     }
     result
 }
 
-fn eval_strict(expr: &mut Vec<Tok>, context: &Box<Context>) -> String {
+fn eval_strict(expr: &mut Vec<Tok>, context: &mut Box<Context>) -> String {
     // Take one argument from the expression
+    // println!("eval strict: {:?}", expr);
     let first = eat_one_para(expr);
     match &first {
         Tok::Literal(lit) => lit.clone(),
@@ -90,17 +107,19 @@ fn eval_strict(expr: &mut Vec<Tok>, context: &Box<Context>) -> String {
                 "let" => {
                     // Let expression
                     // let x y z = [y/x]z
-                    let x = eval_strict(expr, context);
-                    let y = eval_lazy(expr, context);
+                    let cleancontext = &mut Box::new(clear_rules(context));
+                    let x = eval_strict(expr, cleancontext);
+                    let y = eval_lazy(expr, cleancontext);
+                    // println!("let lazy: {:?}", y);
                     let mut rules: Vec<Rule> = (*context.rules.clone()).to_vec();
                     rules.push(Rule { x, y });
-                    let z = eval_strict(expr, context);
+                    let z = eval_strict(expr, cleancontext);
                     // Only here apply rule!
                     apply_rule(&z, &rules, context)
                 }
                 "cat" => {
                     // Concatenate expression
-                    let cleancontext = &Box::new(clear_rules(context));
+                    let cleancontext = &mut Box::new(clear_rules(context));
                     let x = eval_strict(expr, cleancontext);
                     let y = eval_strict(expr, cleancontext);
                     x + y.as_str()
@@ -112,13 +131,14 @@ fn eval_strict(expr: &mut Vec<Tok>, context: &Box<Context>) -> String {
                         .expect(format!("symbol {} not in scope", var).as_str());
                     match &sym {
                         Symbol::Variable(y) => {
-                            eval_strict(&mut y.clone(), &Box::new(clear_rules(context)))
+                            eval_strict(&mut y.clone(), &mut Box::new(clear_rules(context)))
                         }
                         Symbol::Macro(y) => {
                             // Apply macro here
                             let argnum = y.args.len();
                             let narg =
                                 take_paras_lazy(argnum, expr, &Box::new(clear_rules(context)));
+                            // println!("macro args: {:?}", narg);
                             eval_macap(y, &narg, &Box::new(clear_context(context)))
                         }
                     }
@@ -134,36 +154,17 @@ fn eval_lazy(expr: &mut Vec<Tok>, context: &Box<Context>) -> Vec<Tok> {
     match &first {
         Tok::Literal(lit) => vec![Tok::Literal(lit.clone())],
         Tok::Var(var) => {
-            match var.as_str() {
-                "let" => {
-                    // Let expression
-                    // let x y z = [y/x]z
-                    let x = eval_lazy(expr, context);
-                    let y = eval_lazy(expr, context);
-                    let z = eval_lazy(expr, context);
-                    [vec![first], x, y, z].concat()
-                }
-                "cat" => {
-                    // Concatenate expression
-                    // let cleancontext = &Box::new(clear_rules(context));
-                    let x = eval_lazy(expr, context);
-                    let y = eval_lazy(expr, context);
-                    [vec![first], x, y].concat()
-                }
-                _ => {
-                    let sym = context
-                        .symbols
-                        .get(var)
-                        .expect(format!("symbol {} not in scope", var).as_str());
-                    match &sym {
-                        Symbol::Variable(y) => y.clone(),
-                        Symbol::Macro(y) => {
-                            // Apply macro here
-                            let argnum = y.args.len();
-                            let narg = take_paras_lazy(argnum, expr, context);
-                            [vec![first], narg.concat()].concat()
-                        }
-                    }
+            let sym = context
+                .symbols
+                .get(var)
+                .expect(format!("symbol {} not in scope", var).as_str());
+            match &sym {
+                Symbol::Variable(y) => y.clone(),
+                Symbol::Macro(y) => {
+                    // Apply macro here
+                    let argnum = y.args.len();
+                    let narg = take_paras_lazy(argnum, expr, context);
+                    [vec![first], narg.concat()].concat()
                 }
             }
         }
@@ -191,5 +192,5 @@ pub fn eval(macros: &HashMap<String, Macro>, expr: &Vec<Tok>) -> String {
         context.symbols.insert(k.clone(), Symbol::Macro(v.clone()));
     }
     let exp = &mut expr.clone();
-    eval_strict(exp, &Box::new(context))
+    eval_strict(exp, &mut Box::new(context))
 }

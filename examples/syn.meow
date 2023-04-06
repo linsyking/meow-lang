@@ -241,7 +241,7 @@ show(x) {
         sub(x,la)
     };
     if(
-        leq(len(x), 9()),
+        leq(len(x), 10()),
         revdigit(x),
         show(rem) + revdigit(la)
     )
