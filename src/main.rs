@@ -74,7 +74,7 @@ fn repl(context: &mut Box<prog::Context>) {
                 context.clean();
             } else if cmd == &"load" {
                 let path = cmds.get(1).unwrap();
-                let res = read_file(path);
+                let res = read_file(format!("examples/{}.meow", path).as_str());
                 prog::eval_prog(&res, context);
                 println!("loaded {}", path);
             } else {

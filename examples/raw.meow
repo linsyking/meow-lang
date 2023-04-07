@@ -1,0 +1,38 @@
+enraw(s) {
+    "1" = "01";
+    "0" = "00";
+    s
+}
+
+encode(s) {
+    var rep = enraw(s);
+    "11"+ rep +"11"
+}
+
+decode(s) {
+    var rep = {
+        "11" = "";
+        s
+    };
+    "00" = "0";
+    "01" = "1";
+    rep
+}
+
+tail(x) {
+    var pre = {
+        "1101" = "";
+        "1100" = "";
+        "1111" = "11";
+        encode(x)
+    };
+    decode("11" + pre)
+}
+
+head(x) {
+    var r = {
+        enraw(tail(x))+"11" = "11";
+        encode(x)
+    };
+    decode(r)
+}
