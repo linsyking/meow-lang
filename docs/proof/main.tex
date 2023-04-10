@@ -1,0 +1,295 @@
+\documentclass{article}
+%include polycode.fmt
+\usepackage[a4paper,left=2.5cm,right=2.5cm,top=\dimexpr15mm+1.5\baselineskip,bottom=2cm]{geometry}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{setspace}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{enumerate}
+\usepackage{titlesec}
+\usepackage{hyperref}
+\usepackage{exscale}
+\usepackage{pdfpages}
+\usepackage{mathpartir}
+\usepackage{relsize}
+\usepackage{cases}
+\usepackage{mathrsfs}
+\usepackage{dutchcal}
+\usepackage{float}
+\usepackage{tcolorbox}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{stmaryrd}
+\usepackage{calrsfs}
+\usepackage{mdframed}
+\usepackage{minted}
+
+\theoremstyle{definition}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}{Lemma}[section]
+\newtheorem{definition}{Definition}[section]
+\newtheorem*{remark}{Remark}
+\newtheorem{corollary}{Corollary}[section]
+\definecolor{bg}{rgb}{0.95,0.95,0.95}
+\newcommand{\ip}[1]{\langle #1 \rangle}
+\newcommand{\lp}{\cdot \mathtt{l}}
+\newcommand{\rp}{\cdot \mathtt{r}}
+\newcommand{\li}{\mathtt{l}\cdot}
+\newcommand{\ri}{\mathtt{r}\cdot}
+
+\allowdisplaybreaks
+\graphicspath{ {./figures/} }
+
+\hypersetup{
+    colorlinks, linkcolor=black, urlcolor=cyan
+}
+\title{\vspace{-3em}String Substitution Theory for Finite Charset\footnote{This note is licensed under a \href{https://creativecommons.org/licenses/by-nc-sa/2.0/}{CC BY-NC-SA 2.0} license.}\quad}
+\author{Y. Xiang\vspace{1em}}
+\date{\today\vspace{-1em}}
+\begin{document}
+\maketitle
+
+\section{Introduction}
+
+String substituion is widely used in computer programming. Many daily tasks need to be done by string substitution.
+
+As an example, consider the ``backslash-escaping string'' problem.
+When we want to define a string that including special characters in a programming language, we usually use backslash to escape the special characters. For example, in Python, we can define a string that contains a backslash by ``$\backslash \backslash$'', and a string that contains a single quote by ``$\backslash \texttt{"}$''. And it seems that we can always transform a backslash-escaped string back to the original string. But how to prove its correctness? Is it possible that some string cannot be transformed back to the original string?
+
+In this note, we will investigate the theory behind string substituion.
+
+\section{Theorems}
+
+When we are talking about characters, we are talking about an element in a charset $\Sigma$. String, then, is a sequence of characters.
+
+We will not talk about the case when $\Sigma$ is infinite. Its behavior is different from the finite case.
+
+For simplicity, we will use the following notation:
+
+\begin{itemize}
+    \item $\Sigma$ denotes a finite charset that has at least two elements.
+    \item Single capital letter denotes a string (possibly empty).
+    \item Single lower case letter denotes one \textbf{nonempty} (empty unless mentioned) character.
+    \item $\epsilon$ denotes the empty string. $\epsilon A=A\epsilon=A$ for any string $A$.
+    \item When $B\neq \epsilon$, $[A/B]: \text{String} \rightarrow \text{String}, [A/B]C=C.\mathtt{replace}(B, A)$. ($[A/\epsilon]C$ is \textbf{undefined behavior})
+    \item $A\sqsubset B\Leftrightarrow \exists C, B = AC$.
+    \item $A\sqsupset B\Leftrightarrow \exists C, B = CA$.
+\end{itemize}
+
+\begin{theorem}
+    (\emph{Identity Substitution})
+    If $A\neq \epsilon$,
+    \begin{align}
+        [A/A]S = S
+    \end{align}
+\end{theorem}
+
+\begin{theorem}
+    (\emph{Direct Substitution})
+    If $B\neq \epsilon$,
+    \begin{align}
+        [A/B]B = A
+    \end{align}
+\end{theorem}
+
+\begin{theorem}
+    (\emph{Substitution Elimitation})
+    If $B\not\subset S$,
+    \begin{align}
+        [A/B]S = S
+    \end{align}
+\end{theorem}
+
+\begin{lemma}
+    If $A \cap B = \varnothing, A \cap C = \varnothing, C \neq \epsilon$, then
+    \begin{align}
+        A\subset [B/C]S \Leftrightarrow A \subset S
+    \end{align}
+    \label{thm:independent substituion}
+\end{lemma}
+
+\begin{proof}
+    First we prove $\Leftarrow$.
+    If $A \subset S$, let $S = XAY$. Since $A \cap C = \varnothing$, we have $[B/C](XAY) = ([B/C]X)A([B/C]Y)$. Thus $A \subset [B/C]S$.
+
+    Now we prove $\Rightarrow$.
+    If $A \subset [B/C]S$, we do induction on $|S|$.
+
+    If $|S| = 0$, then $A = \epsilon$, we are done. Suppose the statement is true for $|S|\leq n$. Noe consider the case when $|S| = n+1$.
+
+    Consider whether $C \subset S$. If $C \not\subset S$, then $[B/C]S = S$, we are done. If $C \subset S$, let $S = XCY$ where $C\not\subset X$.
+
+    Then we have $[B/C](XCY) = XB([B/C]Y)$. Since $A \cap B = \varnothing$, we have $A \subset X \lor A \subset [B/C]Y$. By IH on $Y$, we have $A \subset X \lor A \subset Y$. In either case $A\subset XCY$ Thus $A \subset S$.
+\end{proof}
+
+\begin{lemma}
+    (\emph{Tail Elimitation})
+    $B\cap A=\varnothing$, then
+    \begin{align}
+        CB\subset AB \Rightarrow C \sqsupset A
+    \end{align}
+\end{lemma}
+
+\begin{lemma}
+    (\emph{Head Elimitation})
+    $B\cap A=\varnothing$, then
+    \begin{align}
+        BC\subset BA \Rightarrow C \sqsubset A
+    \end{align}
+\end{lemma}
+
+\begin{lemma}
+    (\emph{Stepping-into})
+    $A\neq \epsilon$, then
+    \begin{align}
+        [C/A] (AB) = C([C/A]B)
+    \end{align}
+\end{lemma}
+
+\begin{lemma}
+    (\emph{Double Substitution Lemma})
+    $X,Y$ are nonempty, $X\subset Y$, then
+    \begin{align}
+        [X/Y][Y/X]Z=Z
+    \end{align}
+    \label{lem:double substitution}
+\end{lemma}
+
+The following theorem introduces the concept of escaping.
+
+\begin{theorem}
+    Let $b\neq x$, we define the following operations on strings:
+    \begin{align}
+        \mathtt{enc}_{b,x}(S) & \triangleq [xb/b][xx/x]S \\
+        \mathtt{dec}_{b,x}(S) & \triangleq [x/xx][b/xb]S
+    \end{align}
+
+    $b$ is called the \textbf{escaped character}, and $x$ is called the \textbf{backslash character} of $\Sigma$. Usually one charset has one fixed backslash character and many escaped characters. In this case, $b$ and $x$ are fixed-points of the escaping function.
+
+    Then we have:
+    \begin{enumerate}[(i)]
+        \item For any string $S$, we have:
+              \begin{align}
+                  \mathtt{dec}(\mathtt{enc}(S)) & =S
+              \end{align}
+        \item For any $b'\neq b, b'\neq x$ (if exists), we have:
+              \begin{align}
+                  b'b \not\subset \mathtt{enc}(S)
+              \end{align}
+    \end{enumerate}
+\end{theorem}
+
+\begin{proof}
+    First, we prove that $yb \subset [xb/b][xx/x]S \Rightarrow y=x$.
+
+    Suppose $y\neq x$. Let $S' = [xx/x]S$. If $b\notin S'$, then $[xb/b]S'=S'$. $yb \not\subset S'$, contradiction. If $b\in S'$, let $S'=AbB$ where $b\notin A$.
+
+    We do induction on the length of $S'$ to prove that $ye \not\subset [xb/b]S'$. When $|S'|=0$, we are done. Suppose the statement is true for $|S'|\leq n$. Now consider the case when $|S'|=n+1$.
+
+    $[xb/b]S' = Axb([xb/b]B)$. Since $yb \not\subset Axb$, and by IH we know that $yb \not\subset [xb/b]B$. Hence, $yb \not\subset [xb/b]S'$.
+
+    Since $b'e\not\subset bb$, this has proved (ii). (i) is simply by lemma \ref{lem:double substitution}.
+\end{proof}
+
+\begin{remark}
+    This theorem requires that $|\Sigma|\geq 2$. It is impossible to escape any character if the charset has only one element.
+\end{remark}
+
+Later we will define the escaping function.
+
+\begin{lemma}
+    $A\subset B\Leftrightarrow \mathtt{enc}(A)\subset \mathtt{enc}(B)$.
+\end{lemma}
+
+It is possible to extract the first character of one string.
+
+\begin{lemma}
+    (\emph{Single Character Substitution})
+
+    Suppose $\Omega  = \{\omega_1,\cdots,\omega_M\}\subset \Sigma,\sigma \in \Sigma$, then for any string $S$,
+    \begin{align}
+        [\sigma/\Omega]S \triangleq [\sigma/\omega_1][\sigma/\omega_2]\cdots[\sigma/\omega_M]S
+    \end{align}
+    is well-defined, i.e. the order of substituion does not matter. And when $\Omega=\Sigma$,
+    \begin{align}
+        [\sigma/\Sigma]S = \underbrace{\sigma\cdots\sigma}_{|S|}
+    \end{align}
+    \label{lem:single character substitution}
+\end{lemma}
+
+\begin{theorem}
+    Assume that $\Sigma = \{\sigma_1,\cdots,\sigma_N\}$.
+    We define the following functions (let $\mathtt{enc}=\mathtt{enc}_{\sigma_1,\sigma_2},\mathtt{dec}=\mathtt{dec}_{\sigma_1,\sigma_2}$):
+    \begin{align}
+        \mathtt{tail}(X) & \triangleq \mathtt{dec}\left([\epsilon/\sigma_1\sigma_1][\epsilon/\sigma_1\sigma_1\sigma_2\sigma_2][\epsilon/\sigma_1\sigma_1\sigma_2\sigma_1](\prod_{i=3}^N[\epsilon/\sigma_1\sigma_1\sigma_i]) (\sigma_1\sigma_1\mathtt{enc}(X))\right) \\
+        \mathtt{head}(X) & \triangleq \mathtt{dec}([\epsilon/\mathtt{enc}(\mathtt{tail}(X))\sigma_1\sigma_1](\mathtt{enc}(X)\sigma_1\sigma_1))
+    \end{align}
+    Then we have:
+    \begin{align}
+        \mathtt{tail}(aS) & = \begin{cases}
+                                  \epsilon, & aS=\epsilon     \\
+                                  S,        & aS\neq \epsilon
+                              \end{cases} \\
+        \mathtt{head}(aS) & = \begin{cases}
+                                  \epsilon, & aS=\epsilon     \\
+                                  a,        & aS\neq \epsilon
+                              \end{cases}
+    \end{align}
+\end{theorem}
+
+We can also define the equality.
+
+\begin{theorem}
+    We define the equality by:
+    \begin{align}
+        \mathtt{eq}(X,Y) \triangleq [\bot/\mathtt{enc}(X)][\top/\mathtt{enc}(Y)](\mathtt{enc}(X))
+    \end{align}
+    Then we claim that for any $X,Y$,
+    \begin{align}
+        \mathtt{eq}(X,Y) = \begin{cases}
+                               \top,\quad X=Y \\
+                               \bot,\quad X\neq Y
+                           \end{cases}
+    \end{align}
+\end{theorem}
+
+Next, we can do the multiple substitution.
+
+\begin{theorem}
+    (\emph{Multiple Substitution})
+
+    Let $n\in \mathbb{N}^*$, and for every $i\neq j, X_i \not\subset X_j$. We define the following functions:
+    \begin{align}
+        \mathtt{rep}_n(S, X_1, Y_1, \cdots, X_n, Y_n) & \triangleq \mathtt{dec}\left((\prod_{i=1}^n[\mathtt{enc}(Y_i)/x\underbrace{b\cdots b}_{i+1}x])(\prod_{i=1}^n[x\underbrace{b\cdots b}_{i+1}x/\mathtt{enc}(X_i)])\mathtt{enc}(S)\right)
+    \end{align}
+    \label{lem:multiple substitution}
+\end{theorem}
+
+Now to formally define the escaping function, we need to introduce the concept of \textbf{escaping charset} and \textbf{escaped charset}.
+
+\begin{definition}
+    $f$ is an escaping function of $\Sigma$ if there exists two nonempty subsets $U,V\subset \Sigma$ and $f$ is a bijection from $U$ to $V$ such that there exists at least one fixed point $x_0$, $f(x_0)=x_0$. Then $U$ is called the \textbf{escaped charset} of $f$, and $V$ is called the \textbf{escaping charset} of $f$.
+\end{definition}
+
+\begin{theorem}
+    (\emph{Character Escaping})
+
+    Suppose $f: U\rightarrow V, U=\{u_1,\cdots,u_n\}, f(u_i) = v_i (1\leq i\leq n), f(u_k)=u_k$.
+    We define:
+    \begin{align}
+        % \mathtt{escape}_f(S)   & \triangleq (\prod_{i=1}^{k-1}[u_ku_i/u_i])(\prod_{i=k+1}^{n}[u_ku_i/u_i])[u_ku_k/u_k]S                      \\
+        % \mathtt{unescape}_f(S) & \triangleq [u_k/u_ku_k] (\prod_{i=1}^{n-k}[u_ku_{n-i+1}/u_{n-i+1}])(\prod_{i=1}^{k-1}[u_ku_{k-i}/u_{k-i}])S
+        \mathtt{escape}_f(S)   & \triangleq (\prod_{i=1}^{n}[u_kf(u_i)/u_i])S             \\
+        \mathtt{unescape}_f(S) & \triangleq (\prod_{i=1}^{n}[u_kf(u_{n-i+1})/u_{n-i+1}])S
+    \end{align}
+    Then, for any string $S$,
+    \begin{align}
+        \mathtt{unescape}_f(\mathtt{escape}_f(S)) = S
+    \end{align}
+\end{theorem}
+
+\begin{proof}
+    By \ref{lem:double substitution}.
+\end{proof}
+\end{document}
