@@ -1,0 +1,4 @@
+enc x = let "$" "\$" let "\" "\\" x
+dec x = let "\\" "\" let "\$" "$" x
+catc x y = rep2 "\$" "\" x "$" y
+rep2 s x1 y1 x2 y2 = dec let "\$$" enc y1 let "\$$$" enc y2 let "\$$$$" cat enc x2 "$" let enc x2 "\$$$" let enc x1 "\$$" enc s

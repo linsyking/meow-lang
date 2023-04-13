@@ -52,12 +52,12 @@
 
 \section{Introduction}
 
-String substituion is widely used in computer programming. Many daily tasks need to be done by string substitution.
+String substitution is widely used in computer programming. Many daily tasks need to be done by string substitution.
 
 As an example, consider the ``backslash-escaping string'' problem.
 When we want to define a string that including special characters in a programming language, we usually use backslash to escape the special characters. For example, in Python, we can define a string that contains a backslash by ``$\backslash \backslash$'', and a string that contains a single quote by ``$\backslash \texttt{"}$''. And it seems that we can always transform a backslash-escaped string back to the original string. But how to prove its correctness? Is it possible that some string cannot be transformed back to the original string?
 
-In this note, we will investigate the theory behind string substituion.
+In this note, we will investigate the theory behind string substitution.
 
 \section{Theorems}
 
@@ -75,6 +75,8 @@ For simplicity, we will use the following notation:
     \item When $B\neq \epsilon$, $[A/B]: \text{String} \rightarrow \text{String}, [A/B]C=C.\mathtt{replace}(B, A)$. ($[A/\epsilon]C$ is \textbf{undefined behavior})
     \item $A\sqsubset B\Leftrightarrow \exists C, B = AC$.
     \item $A\sqsupset B\Leftrightarrow \exists C, B = CA$.
+    \item $\prod_i^{m\rightarrow n} X(i) \triangleq X(m)X(m+1)\cdots X(n)$.
+    \item $\prod_i^{m\leftarrow n} X(i) \triangleq X(n)X(n-1)\cdots X(m)$.
 \end{itemize}
 
 \begin{theorem}
@@ -106,7 +108,7 @@ For simplicity, we will use the following notation:
     \begin{align}
         A\subset [B/C]S \Leftrightarrow A \subset S
     \end{align}
-    \label{thm:independent substituion}
+    \label{thm:independent substitution}
 \end{lemma}
 
 \begin{proof}
@@ -211,7 +213,7 @@ It is possible to extract the first character of one string.
     \begin{align}
         [\sigma/\Omega]S \triangleq [\sigma/\omega_1][\sigma/\omega_2]\cdots[\sigma/\omega_M]S
     \end{align}
-    is well-defined, i.e. the order of substituion does not matter. And when $\Omega=\Sigma$,
+    is well-defined, i.e. the order of substitution does not matter. And when $\Omega=\Sigma$,
     \begin{align}
         [\sigma/\Sigma]S = \underbrace{\sigma\cdots\sigma}_{|S|}
     \end{align}
@@ -220,9 +222,10 @@ It is possible to extract the first character of one string.
 
 \begin{theorem}
     Assume that $\Sigma = \{\sigma_1,\cdots,\sigma_N\}$.
+
     We define the following functions (let $\mathtt{enc}=\mathtt{enc}_{\sigma_1,\sigma_2},\mathtt{dec}=\mathtt{dec}_{\sigma_1,\sigma_2}$):
     \begin{align}
-        \mathtt{tail}(X) & \triangleq \mathtt{dec}\left([\epsilon/\sigma_1\sigma_1][\epsilon/\sigma_1\sigma_1\sigma_2\sigma_2][\epsilon/\sigma_1\sigma_1\sigma_2\sigma_1](\prod_{i=3}^N[\epsilon/\sigma_1\sigma_1\sigma_i]) (\sigma_1\sigma_1\mathtt{enc}(X))\right) \\
+        \mathtt{tail}(X) & \triangleq \mathtt{dec}\left([\epsilon/\sigma_1\sigma_1][\epsilon/\sigma_1\sigma_1\sigma_2\sigma_2][\epsilon/\sigma_1\sigma_1\sigma_2\sigma_1](\prod_i^{3\rightarrow N}[\epsilon/\sigma_1\sigma_1\sigma_i]) (\sigma_1\sigma_1\mathtt{enc}(X))\right) \\
         \mathtt{head}(X) & \triangleq \mathtt{dec}([\epsilon/\mathtt{enc}(\mathtt{tail}(X))\sigma_1\sigma_1](\mathtt{enc}(X)\sigma_1\sigma_1))
     \end{align}
     Then we have:
@@ -260,10 +263,25 @@ Next, we can do the multiple substitution.
     (\emph{Multiple Substitution})
 
     Let $n\in \mathbb{N}^*$, and for every $i\neq j, X_i \not\subset X_j$. We define the following functions:
-    \begin{align}
-        \mathtt{rep}_n(S, X_1, Y_1, \cdots, X_n, Y_n) & \triangleq \mathtt{dec}\left((\prod_{i=1}^n[\mathtt{enc}(Y_i)/x\underbrace{b\cdots b}_{i+1}x])(\prod_{i=1}^n[x\underbrace{b\cdots b}_{i+1}x/\mathtt{enc}(X_i)])\mathtt{enc}(S)\right)
-    \end{align}
+    \begin{multline}
+        \mathtt{rep}_n(S, X_1, Y_1, \cdots, X_n, Y_n) \triangleq \\
+        \mathtt{dec}_{b,x}\left((\prod_i^{1\rightarrow n} [\mathtt{enc}_{b,x}(Y_i)/x\underbrace{b\cdots b}_{i+1}])(\prod_i^{1\leftarrow n} ([\mathtt{enc}_{b,x}(X_i)b/x\underbrace{b\cdots b}_{i+2}][x\underbrace{b\cdots b}_{i+1}/\mathtt{enc}_{b,x}(X_i)]))\mathtt{enc}_{b,x}(S)\right)
+    \end{multline}
     \label{lem:multiple substitution}
+\end{theorem}
+
+It turns out that we can build \texttt{cat} function by using multiple substitution.
+
+\begin{theorem}
+    Let $X,Y$ be two strings, choose any $a\neq b$ in $\Sigma$, define
+    \begin{align}
+        \mathtt{cat}(X,Y) \triangleq \mathtt{rep}_{2}(ab, a, X, b, Y)
+    \end{align}
+    which is what we known as the ``string concatenation'' function.
+    For any string $X,Y$, we have
+    \begin{align}
+        \mathtt{cat}(X,Y) = XY
+    \end{align}
 \end{theorem}
 
 Now to formally define the escaping function, we need to introduce the concept of \textbf{escaping charset} and \textbf{escaped charset}.
@@ -275,13 +293,11 @@ Now to formally define the escaping function, we need to introduce the concept o
 \begin{theorem}
     (\emph{Character Escaping})
 
-    Suppose $f: U\rightarrow V, U=\{u_1,\cdots,u_n\}, f(u_i) = v_i (1\leq i\leq n), f(u_k)=u_k$.
+    Suppose $f: U\rightarrow V, U=\{u_1,\cdots,u_n\}, f(u_k)=u_k$.
     We define:
     \begin{align}
-        % \mathtt{escape}_f(S)   & \triangleq (\prod_{i=1}^{k-1}[u_ku_i/u_i])(\prod_{i=k+1}^{n}[u_ku_i/u_i])[u_ku_k/u_k]S                      \\
-        % \mathtt{unescape}_f(S) & \triangleq [u_k/u_ku_k] (\prod_{i=1}^{n-k}[u_ku_{n-i+1}/u_{n-i+1}])(\prod_{i=1}^{k-1}[u_ku_{k-i}/u_{k-i}])S
-        \mathtt{escape}_f(S)   & \triangleq (\prod_{i=1}^{n}[u_kf(u_i)/u_i])S             \\
-        \mathtt{unescape}_f(S) & \triangleq (\prod_{i=1}^{n}[u_kf(u_{n-i+1})/u_{n-i+1}])S
+        \mathtt{escape}_f(S)   & \triangleq \mathtt{rep}_n(S,u_1,u_kf(u_1),\cdots, u_n,u_kf(u_n))  \\
+        \mathtt{unescape}_f(S) & \triangleq \mathtt{rep}_n(S,u_kf(u_1),u_1,\cdots, u_kf(u_n), u_n)
     \end{align}
     Then, for any string $S$,
     \begin{align}
@@ -289,7 +305,7 @@ Now to formally define the escaping function, we need to introduce the concept o
     \end{align}
 \end{theorem}
 
-\begin{proof}
-    By \ref{lem:double substitution}.
-\end{proof}
+% \begin{proof}
+%     By \ref{lem:double substitution}.
+% \end{proof}
 \end{document}

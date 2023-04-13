@@ -2,7 +2,7 @@
 
 Meow lang is a programming language that compiles to *catlet*, another language that is hard to read but easy to execute. Meow's syntax is easier to read than catlet, but meow and catlet are equivalent.
 
-(It's called *catlet* because the only available two keywords are `cat` and `let`, *currently*)
+The **only** operation is doing "let" (cat can be implemented by let).
 
 Its main design purpose is to do experiments with "string substitution".
 

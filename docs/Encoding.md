@@ -23,28 +23,41 @@ We have to first implement the `encode` and `decode` macro to help us.
 
 Encoding means to encode a string into another string that has some special properties that we can use.
 
+## Cat
+
+We want `cat` to concatenate two strings. It is possible by using `rep2`.
+
+```meow
+cat(x,y) {
+    rep2("\$","\",x,"$",y)
+}
+
+rep2(s,x1,y1,x2,y2) {
+    var s1 = {
+        "\$$" = enc(y1);
+        "\$$$" = enc(y2);
+        "\$$$$" = enc(x2) + "$";
+        enc(x2) = "\$$$";
+        enc(x1) = "\$$";
+        enc(s)
+    };
+    dec(s1)
+}
+
+```
+
 ## Code
 
 ```meow
-encode(s) {
-    var rep = {
-        "$" = "\$";
-        "#" = "\#";
-        "\" = "\\";
-        s
-    };
-    "#$"+ rep +"$#"
+enc(x) {
+    "$" = "\$";
+    "\" = "\\";
+    x
 }
 
-decode(s) {
-    var rep = {
-        "$#" = "";
-        "#$" = "";
-        s
-    };
+dec(x) {
     "\\" = "\";
-    "\#" = "#";
     "\$" = "$";
-    rep
+    x
 }
 ```
