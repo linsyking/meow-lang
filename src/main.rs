@@ -19,7 +19,7 @@ fn main() {
     if fp == "repl" {
         repl(&mut Box::new(prog::Context::new()));
     } else {
-        let res = read_file(&fp);
+        let res = read_file(fp);
         let context = &mut Box::new(prog::Context::new());
         prog::eval_prog(&res, context);
         let trans = prog::translate(&res, context);
@@ -46,10 +46,9 @@ fn repl(context: &mut Box<prog::Context>) {
 
     let mut rl = rustyline::DefaultEditor::new().unwrap();
     loop {
-        let line: String;
         let readline = rl.readline("> ");
-        match readline {
-            Ok(l) => line = l.trim().to_string(),
+        let line = match readline {
+            Ok(l) => l.trim().to_string(),
             Err(ReadlineError::Interrupted) => {
                 println!("Interrupted");
                 break;
@@ -62,11 +61,11 @@ fn repl(context: &mut Box<prog::Context>) {
                 println!("invalid input");
                 break;
             }
-        }
+        };
         if &line.as_str()[0..1] == ":" {
             // command
-            let cmds: Vec<&str> = line.as_str()[1..].split(" ").collect();
-            let cmd = cmds.get(0).unwrap();
+            let cmds: Vec<&str> = line.as_str()[1..].split(' ').collect();
+            let cmd = cmds.first().unwrap();
             // let remain = cmds.get(1..).unwrap().join(" ");
             if cmd == &"quit" {
                 break;
