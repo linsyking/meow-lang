@@ -63,7 +63,7 @@ In this note, we will investigate the theory behind string substitution.
 
 When we are talking about characters, we are talking about an element in a charset $\Sigma$. String, then, is a sequence of characters.
 
-We will not talk about the case when $\Sigma$ is infinite. Its behavior is different from the finite case.
+We will not talk about the case when $\Sigma$ is infinite. Its behavior is different from the finite case. Moreover we assume $|\Sigma| > 1$.
 
 For simplicity, we will use the following notation:
 
@@ -78,6 +78,19 @@ For simplicity, we will use the following notation:
     \item $\prod_i^{m\rightarrow n} X(i) \triangleq X(m)X(m+1)\cdots X(n)$.
     \item $\prod_i^{m\leftarrow n} X(i) \triangleq X(n)X(n-1)\cdots X(m)$.
 \end{itemize}
+
+There are several possible implementation of $\mathtt{replace}(B, A)$. We now assume the following recursive \textit{left-to-right} implementation:
+
+\begin{definition}
+    (\emph{(Left-to-Right) String Substitution})
+    Given two strings $A, B$, for any string $C$,
+    \begin{align}
+        [A/B]C = \begin{cases}
+            C,\quad B \not\subset C\\
+            XA[A/B]Y,\quad (X, Y) = \arg\min_{(X', Y')} \{ |X'| | C = X'BY' \}
+        \end{cases}
+    \end{align}
+\end{definition}
 
 \begin{theorem}
     (\emph{Identity Substitution})
@@ -118,7 +131,7 @@ For simplicity, we will use the following notation:
     Now we prove $\Rightarrow$.
     If $A \subset [B/C]S$, we do induction on $|S|$.
 
-    If $|S| = 0$, then $A = \epsilon$, we are done. Suppose the statement is true for $|S|\leq n$. Noe consider the case when $|S| = n+1$.
+    If $|S| = 0$, then $A = \epsilon$, we are done. Suppose the statement is true for $|S|\leq n$. Now consider the case when $|S| = n+1$.
 
     Consider whether $C \subset S$. If $C \not\subset S$, then $[B/C]S = S$, we are done. If $C \subset S$, let $S = XCY$ where $C\not\subset X$.
 
@@ -160,14 +173,53 @@ For simplicity, we will use the following notation:
 
 The following theorem introduces the concept of escaping.
 
-\begin{theorem}
-    Let $b\neq x$, we define the following operations on strings:
-    \begin{align}
-        \mathtt{enc}_{b,x}(S) & \triangleq [xb/b][xx/x]S \\
-        \mathtt{dec}_{b,x}(S) & \triangleq [x/xx][b/xb]S
-    \end{align}
+% \begin{theorem}
+%     Let $b\neq x$, we define the following operations on strings:
+%     \begin{align}
+%         \mathtt{enc}_{b,x}(S) & \triangleq [xb/b][xx/x]S \\
+%         \mathtt{dec}_{b,x}(S) & \triangleq [x/xx][b/xb]S
+%     \end{align}
 
-    $b$ is called the \textbf{escaped character}, and $x$ is called the \textbf{backslash character} of $\Sigma$. Usually one charset has one fixed backslash character and many escaped characters. In this case, $b$ and $x$ are fixed-points of the escaping function.
+%     % $b$ is called the \textbf{escaped character}, and $x$ is called the \textbf{backslash character} of $\Sigma$. Usually one charset has one fixed backslash character and many escaped characters. In this case, $b$ and $x$ are fixed-points of the escaping function.
+
+%     Then we have:
+%     \begin{enumerate}[(i)]
+%         \item For any string $S$, we have:
+%               \begin{align}
+%                   \mathtt{dec}(\mathtt{enc}(S)) & =S
+%               \end{align}
+%         \item For any $b'\neq x$, we have:
+%               \begin{align}
+%                   b'b \not\subset \mathtt{enc}(S)
+%               \end{align}
+%               Specifically,
+%               \begin{align}
+%                   bb \not\subset \mathtt{enc}(S)
+%               \end{align}
+%     \end{enumerate}
+% \end{theorem}
+
+% \begin{proof}
+%     We prove that $yb \subset [xb/b][xx/x]S \Rightarrow y=x$.
+
+%     Suppose $y\neq x$. Let $S' = [xx/x]S$. If $b\notin S'$, then $[xb/b]S'=S'$. $yb \not\subset S'$, contradiction. If $b\in S'$, let $S'=AbB$ where $b\notin A$.
+
+%     We do induction on the length of $S'$ to prove that $ye \not\subset [xb/b]S'$. When $|S'|=0$, we are done. Suppose the statement is true for $|S'|\leq n$. Now consider the case when $|S'|=n+1$.
+
+%     $[xb/b]S' = Axb([xb/b]B)$. Since $yb \not\subset Axb$, and by IH we know that $yb \not\subset [xb/b]B$. Hence, $yb \not\subset [xb/b]S'$, contradiction.
+
+%     This has proved (ii). (i) is simply by lemma \ref{lem:double substitution}.
+% \end{proof}
+
+
+% For simplicity, we can define a single-step encoder and decoder:
+
+\begin{theorem}
+    Let $b \neq x \subset \Sigma$, we define the following operations on strings:
+    \begin{align}
+        \mathtt{enc}_{b,x}(S) & \triangleq [xb/b]S \\
+        \mathtt{dec}_{b,x}(S) & \triangleq [b/xb]S
+    \end{align}
 
     Then we have:
     \begin{enumerate}[(i)]
@@ -175,34 +227,35 @@ The following theorem introduces the concept of escaping.
               \begin{align}
                   \mathtt{dec}(\mathtt{enc}(S)) & =S
               \end{align}
-        \item For any $b'\neq b, b'\neq x$ (if exists), we have:
-              \begin{align}
-                  b'b \not\subset \mathtt{enc}(S)
+        \item \begin{align}
+                  bb \not\subset \mathtt{enc}(S)
+              \end{align}
+        \item \begin{align}
+                  \mathtt{enc}(X)\mathtt{enc}(Y) = \mathtt{enc}(XY)
               \end{align}
     \end{enumerate}
 \end{theorem}
-
-\begin{proof}
-    First, we prove that $yb \subset [xb/b][xx/x]S \Rightarrow y=x$.
-
-    Suppose $y\neq x$. Let $S' = [xx/x]S$. If $b\notin S'$, then $[xb/b]S'=S'$. $yb \not\subset S'$, contradiction. If $b\in S'$, let $S'=AbB$ where $b\notin A$.
-
-    We do induction on the length of $S'$ to prove that $ye \not\subset [xb/b]S'$. When $|S'|=0$, we are done. Suppose the statement is true for $|S'|\leq n$. Now consider the case when $|S'|=n+1$.
-
-    $[xb/b]S' = Axb([xb/b]B)$. Since $yb \not\subset Axb$, and by IH we know that $yb \not\subset [xb/b]B$. Hence, $yb \not\subset [xb/b]S'$.
-
-    Since $b'e\not\subset bb$, this has proved (ii). (i) is simply by lemma \ref{lem:double substitution}.
-\end{proof}
-
-\begin{remark}
-    This theorem requires that $|\Sigma|\geq 2$. It is impossible to escape any character if the charset has only one element.
-\end{remark}
 
 Later we will define the escaping function.
 
 \begin{lemma}
     $A\subset B\Leftrightarrow \mathtt{enc}(A)\subset \mathtt{enc}(B)$.
 \end{lemma}
+
+We will need the \texttt{cat} macro extensively:
+
+\begin{theorem}
+    (\emph{String Concatenation})
+    \begin{align}
+        \mathtt{cat}(X,Y) \triangleq \mathtt{dec}_{b,x}([\mathtt{enc}_{b,x}(Y)/bb][\mathtt{enc}_{b,x}(X)/xx](xxbb))
+    \end{align}
+    Then we claim that for any $X,Y$,
+    \begin{align}
+        \mathtt{cat}(X,Y) = XY
+    \end{align}
+\end{theorem}
+
+We can now directly write $XY$ in the expression (automatically convert to the above macro).
 
 It is possible to extract the first character of one string.
 
@@ -243,16 +296,40 @@ It is possible to extract the first character of one string.
 
 We can also define the equality.
 
-\begin{theorem}
-    We define the equality by:
+\begin{definition}
+    (\emph{Border Encoding Decoding})
     \begin{align}
-        \mathtt{eq}(X,Y) \triangleq [\bot/\mathtt{enc}(X)][\top/\mathtt{enc}(Y)](\mathtt{enc}(X))
+        \mathtt{benc}_{b, x}(X) \triangleq bb\mathtt{enc}_{b, x}(X)bb \\
+        \mathtt{bdec}_{b, x}(X) \triangleq [\epsilon/bb]X
+    \end{align}
+\end{definition}
+
+\begin{theorem}
+    Choose any two characters $\top \neq \bot \subset \Sigma$,
+    we can define the equality by:
+    \begin{align}
+        \mathtt{eq}(X,Y) \triangleq [\bot/\mathtt{benc}_{b, x}(X)][\top/\mathtt{benc}_{b, x}(Y)](\mathtt{benc}_{b, x}(X))
     \end{align}
     Then we claim that for any $X,Y$,
     \begin{align}
         \mathtt{eq}(X,Y) = \begin{cases}
                                \top,\quad X=Y \\
                                \bot,\quad X\neq Y
+                           \end{cases}
+    \end{align}
+\end{theorem}
+
+We can define a \texttt{if} selector:
+
+\begin{theorem}
+    \begin{align}
+        \mathtt{if}(C,X,Y) \triangleq \mathtt{dec}_{b,x}\big([\mathtt{enc}_{b, x}(Y)/bb]\left([\mathtt{enc}_{b, x}(X)/\top][bb/\bot]C\right)\big)
+    \end{align}
+    Then we claim that for any $C,X,Y$,
+    \begin{align}
+        \mathtt{if}(C,X,Y) = \begin{cases}
+                               X,\quad C=\top \\
+                               Y,\quad C=\bot
                            \end{cases}
     \end{align}
 \end{theorem}
