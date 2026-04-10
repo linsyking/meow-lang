@@ -278,7 +278,7 @@ It is possible to extract the first character of one string.
 
     We define the following functions (let $\mathtt{enc}=\mathtt{enc}_{\sigma_1,\sigma_2},\mathtt{dec}=\mathtt{dec}_{\sigma_1,\sigma_2}$):
     \begin{align}
-        \mathtt{tail}(X) & \triangleq \mathtt{dec}\left([\epsilon/\sigma_1\sigma_1][\epsilon/\sigma_1\sigma_1\sigma_2\sigma_2][\epsilon/\sigma_1\sigma_1\sigma_2\sigma_1](\prod_i^{3\rightarrow N}[\epsilon/\sigma_1\sigma_1\sigma_i]) (\sigma_1\sigma_1\mathtt{enc}(X))\right) \\
+        \mathtt{tail}(X) & \triangleq \mathtt{dec}\left([\epsilon/\sigma_1\sigma_1][\epsilon/\sigma_1\sigma_1\sigma_2][\epsilon/\sigma_1\sigma_1\sigma_2\sigma_1](\prod_i^{3\rightarrow N}[\epsilon/\sigma_1\sigma_1\sigma_i]) (\sigma_1\sigma_1\mathtt{enc}(X))\right) \\
         \mathtt{head}(X) & \triangleq \mathtt{dec}([\epsilon/\mathtt{enc}(\mathtt{tail}(X))\sigma_1\sigma_1](\mathtt{enc}(X)\sigma_1\sigma_1))
     \end{align}
     Then we have:
