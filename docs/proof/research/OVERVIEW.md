@@ -325,3 +325,53 @@ Template, rigor audit and front-matter rewrite of `main.tex`:
   (ab→baa and aa→ab both fit after renaming); §5.6 items 5–6 → the
   decidable-class cluster + Kurth's census tradition + Kobayashi et al.
   derivational complexity.
+
+## 10. Recursion stage launched (2026-09-19, night)
+
+Research program: recursive definitions over raw L (named first-order defs, call
+nodes, macro-style as in meow), under eager vs lazy runtime semantics. Four
+agents spawned (scratch: research/scratch/rec/{eager,lazy_args,lazy_pass,streams}):
+
+- **eager** — conjecture: VACUITY. All L constructors are strict in all
+  sub-expressions, so every call node in a body is evaluated on every
+  invocation; the call tree is syntax-determined, any call-graph cycle makes it
+  infinite (König), strictness propagates undefinedness to the root ⇒ every
+  recursive definition diverges on every input ⇒ eager recursive L denotes
+  exactly L's partial functions (plus ⊥). Nothing gained.
+- **lazy_args** — conjecture: also inert, differently. Call-by-need arguments,
+  strict constructors: a thunk is forced iff the parameter is live in the
+  callee, and liveness is syntactic (transitive through call chains) ⇒
+  termination is input-independent (all inputs or none), well-founded
+  unfoldings prune+β back to plain L expressions ⇒ same class. Operational
+  eager/lazy separation exists (dead-argument programs) but no denotational gain.
+- **lazy_pass** — the payoff direction. Make the one operator-level
+  non-strictness official: [R/P]E forces R only if P occurs in ⟦E⟧ (matches
+  [A/B]S = S when B ⊄ S regardless of A). The replacement slot is the ONLY
+  place a recursive call can be guarded (L's if splices both branches into a
+  strict scrutinee, so it cannot guard). Conjectures: pattern-gated guarded
+  recursion; universality (exactly the partial computable functions over Σ*,
+  |Σ|≥2, self-recursion sufficing); consequences: rev computable (kills hinge
+  2), X↦X^{2^{|X|}} computable (kills the §4 unreachable function), towers of
+  growth for total defs, totality undecidable. Interpreter verification required.
+- **streams** — coinductive lazy direction: infinite strings, passes as causal
+  streaming processes (thm:subsequential's machine), productivity instead of
+  termination, guardedness conditions, variable patterns on streams,
+  conservativity over lazy_pass on finite strings.
+
+Agents instructed: one problem per round, bounded turns (<128K output tokens,
+<30 min thinking per turn), own scratch dirs, no edits to main.tex/Subst.lean.
+Plan: collect reports, verify, then write the paper section (and only then
+consider Lean formalization of the chosen semantics).
+
+## 11. Lean: repC2_correct complete (2026-09-19, night)
+
+The long-running Lean agent finished: `repC2_correct` (the paper's Multiple
+Substitution theorem, unrestricted patterns) is fully proven in
+lean/Subst.lean — 0 errors, 0 sorries, 0 warnings, all 36 #eval outputs
+match. Independently re-verified by the coordinator (fresh
+`lake env lean Subst.lean`: exit 0; grep: 0 `sorry`, 0 `axiom`/`native_decide`;
+theorem statement byte-identical to git HEAD, only `:= sorry` → `:= by`).
+Proof architecture: phase-locking via renLoop/insLoop over marked rounds
+(markRounds/assemble), enc2/dec2 code layer, dec2Pass_enc2 finish; S = []
+split. Header status comment updated (was stale: claimed the theorem unproven).
+Section 2 of the paper is now fully machine-checked.

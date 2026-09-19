@@ -10,13 +10,14 @@
   * Composition is right-to-left, as in the paper:
     `subst A B (subst C D E)` is `[A/B][C/D]E`.
 
-  Status: every theorem of Section 2 is proven except `repC2_correct` (the
-  paper's Theorem (Multiple Substitution): the unrestricted comma-code
+  Status: every theorem of Section 2 is proven, including `repC2_correct`
+  (the paper's Theorem (Multiple Substitution): the unrestricted comma-code
   construction, no hypothesis on the patterns beyond `X_i ≠ ε` and
-  everything over `σ`; roadmap in its docstring).  For the comma code the
-  *code layer* is proven: `enc2Pass_eq` (the pass composition computes the
-  block map) and `dec2Pass_enc2` (the decode round trip); the
-  phase-locking staging argument is the remaining work.  `repC` is an
+  everything over `σ`).  For the comma code the *code layer* is proven:
+  `enc2Pass_eq` (the pass composition computes the block map) and
+  `dec2Pass_enc2` (the decode round trip); the phase-locking staging
+  argument is the content of `repC2_correct`'s proof (via `renLoop`/
+  `insLoop`/`markRounds`/`assemble`).  `repC` is an
   enc-based variant of the construction, which computes `repRef` only under
   the condition that every `X_i` is a single character or does not end in
   `x` (a statement not proven here); it is kept as a demo of the shadowing
@@ -2349,16 +2350,38 @@ def Canon : List (NFItem α) → Prop
   | NFItem.frag W :: [] => W ≠ []
 
 omit [DecidableEq α] in
-/-- The shape of a rename round's output: fragments are nonempty and
-never adjacent, markers have index `≥ 1` and `≤ i`, and damaged markers
-belong to round `i` with at least one leftover `b`. -/
-def Rounded (i : Nat) : List (NFItem α) → Prop
+/-- The canonical state between rounds, with the additional bound that
+every marker's round is at most `m` (before round `i = m + 1` runs). -/
+def CanonB (m : Nat) : List (NFItem α) → Prop
   | [] => True
-  | NFItem.mark j :: ns => 1 ≤ j ∧ j ≤ i ∧ Rounded i ns
-  | NFItem.dmg _ i' j :: ns => i' = i ∧ 1 ≤ j ∧ Rounded i ns
+  | NFItem.mark j :: ns => 1 ≤ j ∧ j ≤ m ∧ CanonB m ns
+  | NFItem.dmg _ _ _ :: _ => False
   | NFItem.frag _ :: NFItem.frag _ :: _ => False
   | NFItem.frag _ :: NFItem.dmg _ _ _ :: _ => False
-  | NFItem.frag W :: NFItem.mark j :: ns => W ≠ [] ∧ 1 ≤ j ∧ Rounded i ns
+  | NFItem.frag W :: NFItem.mark j :: ns => W ≠ [] ∧ 1 ≤ j ∧ j ≤ m ∧ CanonB m ns
+  | NFItem.frag W :: [] => W ≠ []
+
+omit [DecidableEq α] in
+/-- Every fragment in the list is nonempty. -/
+def fragsNE : List (NFItem α) → Prop
+  | [] => True
+  | NFItem.frag W :: ns => W ≠ [] ∧ fragsNE ns
+  | _ :: ns => fragsNE ns
+
+/-- The shape of a rename round's output: fragments are nonempty and
+never adjacent, markers have index `≥ 1` and `≤ i`, and damaged markers
+belong to round `i` with at least one leftover `b`; a damaged marker
+remembers the fragment `A` eaten in front of the pattern's final `b`,
+so `X = A ++ [b]`. -/
+def Rounded (b : α) (i : Nat) (X : List α) : List (NFItem α) → Prop
+  | [] => True
+  | NFItem.mark j :: ns => 1 ≤ j ∧ j ≤ i ∧ Rounded b i X ns
+  | NFItem.dmg A i' j :: ns =>
+      i' = i ∧ 1 ≤ j ∧ j ≤ i ∧ X = A ++ [b] ∧ Rounded b i X ns
+  | NFItem.frag _ :: NFItem.frag _ :: _ => False
+  | NFItem.frag W :: NFItem.dmg A i' j :: ns =>
+      W ≠ [] ∧ i' = i ∧ 1 ≤ j ∧ j ≤ i ∧ X = A ++ [b] ∧ Rounded b i X ns
+  | NFItem.frag W :: NFItem.mark j :: ns => W ≠ [] ∧ 1 ≤ j ∧ j ≤ i ∧ Rounded b i X ns
   | NFItem.frag W :: [] => W ≠ []
 
 /-- The rename scan through the fragment `W`, which is followed by the
@@ -2526,6 +2549,2682 @@ theorem itext_push (b x : α) (A : List α) (ns : List (NFItem α)) :
           · subst hA; simp [pushFrag, itext, enc2_nil]
           · simp [pushFrag, itext, hA]
 
+/-! ### Scan lemmas for the round passes
+
+  The rename pass replaces `enc2 x X` by the round-`i` marker, the
+  repair pass replaces the round-`i+1` marker by `enc2 x X ++ [b]`, and
+  the instantiation pass replaces the round-`k` marker by `enc2 x Y`.
+  Each pass scans left to right, so each of the three proofs below
+  peels the text one character at a time; these lemmas dispose of the
+  stretches where no match can start. -/
+
+/-- A nonempty run of `a`'s cannot match a text that is empty or
+headed by a different character. -/
+theorem mh_rep_none (a c : α) (hac : a ≠ c) : ∀ (k : Nat), 1 ≤ k → ∀ (T : List α),
+    (T = [] ∨ ∃ T', T = c :: T') → matchHere (List.replicate k a) T = none := by
+  intro k hk T hT
+  rcases hT with h | ⟨T', h⟩
+  · subst h
+    cases k with
+    | zero => exact absurd hk (by omega)
+    | succ k' => rfl
+  · subst h
+    cases k with
+    | zero => exact absurd hk (by omega)
+    | succ k' =>
+        show matchHere (a :: List.replicate k' a) (c :: T') = none
+        exact matchHere_ne a _ c T' hac
+
+/-- If the pattern `B` never matches a text starting with `b`, a run of
+`b`'s passes through the scan untouched. -/
+theorem bpass (b : α) (A B : List α) (hB : ∀ C, matchHere B (b :: C) = none) :
+    ∀ (m : Nat) (T : List α), subst A B (List.replicate m b ++ T)
+      = List.replicate m b ++ subst A B T := by
+  intro m
+  induction m with
+  | zero => intro T; rfl
+  | succ m ih =>
+      intro T
+      show subst A B (b :: (List.replicate m b ++ T))
+          = b :: (List.replicate m b ++ subst A B T)
+      rw [subst_cons_none A B b (List.replicate m b ++ T) (hB _), ih T]
+
+/-- The pattern `enc2 x X` never matches a text starting with `b`. -/
+theorem enc2_b_none (x b : α) (hxb : x ≠ b) (X : List α) (hX : X ≠ []) (C : List α) :
+    matchHere (enc2 x X) (b :: C) = none := by
+  obtain ⟨c, X', hXc⟩ : ∃ c X', X = c :: X' := by
+    cases X with
+    | nil => exact absurd rfl hX
+    | cons c X' => exact ⟨c, X', rfl⟩
+  rw [hXc, enc2_head]
+  exact matchHere_ne x _ b C hxb
+
+omit [DecidableEq α] in
+/-- The code of a nonempty pattern is nonempty. -/
+theorem enc2_ne_nil (x : α) (X : List α) (hX : X ≠ []) : enc2 x X ≠ [] := by
+  cases X with
+  | nil => exact absurd rfl hX
+  | cons c X' => simp [enc2_head]
+
+/-- A marker passes through the rename scan untouched when the pattern
+is neither `[]` nor the single character `b`. -/
+theorem markpass (x b : α) (hxb : x ≠ b) (A : List α) (X : List α) (hX : X ≠ [])
+    (hXb : X ≠ [b]) (j : Nat) (hj : 1 ≤ j) (T : List α) :
+    subst A (enc2 x X) (marker x b (j + 1) ++ T)
+      = marker x b (j + 1) ++ subst A (enc2 x X) T := by
+  have hB := enc2_b_none x b hxb X hX
+  cases j with
+  | zero => exact absurd hj (by omega)
+  | succ j' =>
+      have hE : marker x b (j' + 1 + 1) ++ T = x :: (List.replicate (j' + 1 + 1) b ++ T) := rfl
+      have hM : matchHere (enc2 x X) (x :: (List.replicate (j' + 1 + 1) b ++ T)) = none :=
+        mark_none x b hxb X (List.replicate j' b ++ T) hX hXb
+      rw [hE, subst_cons_none A (enc2 x X) x _ hM, bpass b A (enc2 x X) hB]
+      rfl
+
+/-! ### The rename scan through one fragment -/
+
+omit [DecidableEq α] in
+theorem take_drop_id : ∀ (k : Nat) (l : List α), l.take k ++ l.drop k = l := by
+  intro k
+  induction k with
+  | zero => intro l; rfl
+  | succ k ih =>
+      intro l
+      cases l with
+      | nil => rfl
+      | cons a l' =>
+          show (a :: l'.take k) ++ l'.drop k = a :: l'
+          rw [List.cons_append, ih l']
+
+/-- Unfolding `fragGo` at a nonempty fragment. -/
+theorem fragGo_cons (b x : α) (i : Nat) (c : α) (X' : List α) (w : α) (W' : List α) (j : Nat) :
+    fragGo b x i (c :: X') (w :: W') j =
+      if (w :: W').take (c :: X').length = c :: X' then
+        NFItem.mark i :: fragGo b x i (c :: X') ((w :: W').drop (c :: X').length) j
+      else if (c :: X') = (w :: W') ++ [b] then [NFItem.dmg (w :: W') i j]
+      else shiftItem w (fragGo b x i (c :: X') W' j) := by
+  simp only [fragGo]
+
+/-- Unfolding `fragGo` at an exhausted fragment. -/
+theorem fragGo_end (b x : α) (i : Nat) (c : α) (X' : List α) (j : Nat) :
+    fragGo b x i (c :: X') [] j =
+      if (c :: X') = [b] then [NFItem.dmg [] i j] else [NFItem.mark j] := by
+  simp only [fragGo]
+
+/-- The alpha-branch of `fragGo`: the pattern is a prefix of the
+remaining fragment, so the round-`i` marker is emitted and the scan
+continues inside the fragment. -/
+theorem fragGo_alpha (b x : α) (i : Nat) (c : α) (X' : List α) (w : α) (W' : List α) (j : Nat)
+    (hα : (w :: W').take (c :: X').length = c :: X') :
+    fragGo b x i (c :: X') (w :: W') j
+      = NFItem.mark i :: fragGo b x i (c :: X') ((w :: W').drop (c :: X').length) j := by
+  rw [fragGo_cons]
+  split
+  · rfl
+  · next h => exact absurd hα h
+
+/-- The gamma-branch of `fragGo`: the pattern is the remaining fragment
+plus one `b`, so the match eats into the following marker and leaves a
+damaged marker. -/
+theorem fragGo_gamma (b x : α) (i : Nat) (c : α) (X' : List α) (w : α) (W' : List α) (j : Nat)
+    (hα : ¬((w :: W').take (c :: X').length = c :: X'))
+    (hγ : (c :: X') = (w :: W') ++ [b]) :
+    fragGo b x i (c :: X') (w :: W') j = [NFItem.dmg (w :: W') i j] := by
+  rw [fragGo_cons]
+  split
+  · next h => exact absurd h hα
+  · rfl
+
+/-- The skip-branch of `fragGo`: no match at the fragment head, so the
+first block is kept and the scan moves on. -/
+theorem fragGo_skip (b x : α) (i : Nat) (c : α) (X' : List α) (w : α) (W' : List α) (j : Nat)
+    (hα : ¬((w :: W').take (c :: X').length = c :: X'))
+    (hγ : ¬((c :: X') = (w :: W') ++ [b])) :
+    fragGo b x i (c :: X') (w :: W') j = shiftItem w (fragGo b x i (c :: X') W' j) := by
+  rw [fragGo_cons]
+  split
+  · next h => exact absurd h hα
+  · rfl
+
+omit [DecidableEq α] in
+/-- The text of a nonempty fragment followed by a tail, as a cons of its
+first block. -/
+theorem frag_cons_text (x : α) (w : α) (W' T : List α) :
+    enc2 x (w :: W') ++ T = x :: (w :: (enc2 x W' ++ T)) := by
+  simp [enc2_head]
+
+omit [DecidableEq α] in
+/-- If the first `k` characters of `l` are `P`, then `l` splits at `k`
+into `P` and the rest. -/
+theorem take_eq_split : ∀ (k : Nat) (l P : List α), l.take k = P → l = P ++ l.drop k := by
+  intro k l P h
+  have htd := take_drop_id k l
+  rw [h] at htd
+  exact htd.symm
+
+/-- The rename scan at an exhausted fragment: the next item is the
+marker `mark j`, so the scan either fires into the marker's head (the
+pattern is exactly `[b]`) or passes the whole marker through. -/
+theorem fragGo_end_scan (x b : α) (hxb : x ≠ b) (i : Nat) (X : List α) (hX : X ≠ [])
+    (j : Nat) (hj : 1 ≤ j) (ns : List (NFItem α))
+    (hNS : subst (marker x b (i + 1)) (enc2 x X) (itext b x ns)
+      = itext b x (renameNF b x i X ns)) :
+    subst (marker x b (i + 1)) (enc2 x X) (marker x b (j + 1) ++ itext b x ns)
+      = itext b x (fragGo b x i X [] j ++ renameNF b x i X ns) := by
+  cases X with
+  | nil => exact absurd rfl hX
+  | cons c X' =>
+    by_cases hXb : (c :: X') = [b]
+    · rw [hXb] at hNS ⊢
+      have hcon : marker x b (j + 1) ++ itext b x ns
+          = x :: (List.replicate (j + 1) b ++ itext b x ns) := rfl
+      have hB : ∀ C, matchHere (enc2 x [b]) (b :: C) = none :=
+        enc2_b_none x b hxb [b] (by simp)
+      rw [hcon, subst_cons_match (marker x b (i + 1)) (enc2 x [b]) (by simp [enc2]) x
+          (List.replicate (j + 1) b ++ itext b x ns) (List.replicate j b ++ itext b x ns)
+          (mark_fire x b j (itext b x ns)),
+        bpass b (marker x b (i + 1)) (enc2 x [b]) hB j (itext b x ns), hNS,
+        show fragGo b x i [b] [] j = [NFItem.dmg [] i j] from by
+          rw [fragGo_end]; simp]
+      show marker x b (i + 1) ++ (List.replicate j b ++ itext b x (renameNF b x i [b] ns))
+          = (marker x b (i + 1) ++ List.replicate j b) ++ itext b x (renameNF b x i [b] ns)
+      exact (List.append_assoc _ _ _).symm
+    · rw [markpass x b hxb (marker x b (i + 1)) (c :: X') hX hXb j hj (itext b x ns), hNS,
+        show fragGo b x i (c :: X') [] j = [NFItem.mark j] from by
+          rw [fragGo_end]; simp [hXb]]
+      rfl
+
+/-- The rename scan through the fragment `W` followed by the marker
+`mark j` (round `j ≥ 1`): the round-`i` substitution over the fragment
+text plus the marker produces exactly `fragGo`'s output followed by the
+scan of whatever follows the marker.  Proven by strong induction on the
+fragment: an alpha-match restarts after the match inside the fragment,
+a gamma-match eats into the marker and stops, and otherwise the scan
+moves one block on. -/
+theorem fragGo_scan (x b : α) (hxb : x ≠ b) (i : Nat) (X : List α) (hX : X ≠ []) :
+    ∀ (n : Nat) (W : List α), W.length ≤ n → ∀ (j : Nat) (ns : List (NFItem α)), 1 ≤ j →
+    subst (marker x b (i + 1)) (enc2 x X) (itext b x ns)
+      = itext b x (renameNF b x i X ns) →
+    subst (marker x b (i + 1)) (enc2 x X) (enc2 x W ++ (marker x b (j + 1) ++ itext b x ns))
+      = itext b x (fragGo b x i X W j ++ renameNF b x i X ns) := by
+  intro n
+  induction n with
+  | zero =>
+      intro W hW j ns hj hNS
+      cases W with
+      | nil =>
+          show subst (marker x b (i + 1)) (enc2 x X) (marker x b (j + 1) ++ itext b x ns)
+              = itext b x (fragGo b x i X [] j ++ renameNF b x i X ns)
+          exact fragGo_end_scan x b hxb i X hX j hj ns hNS
+      | cons w W' =>
+          have h1 : 1 ≤ (w :: W').length := by simp
+          omega
+  | succ n ih =>
+      intro W hW j ns hj hNS
+      cases j with
+      | zero => exact absurd hj (by omega)
+      | succ j' =>
+      cases X with
+      | nil => exact absurd rfl hX
+      | cons c X' =>
+      cases W with
+      | nil =>
+          show subst (marker x b (i + 1)) (enc2 x (c :: X'))
+              (marker x b (j' + 1 + 1) ++ itext b x ns)
+              = itext b x (fragGo b x i (c :: X') [] (j' + 1)
+                  ++ renameNF b x i (c :: X') ns)
+          exact fragGo_end_scan x b hxb i (c :: X') hX (j' + 1) (by omega) ns hNS
+      | cons w W' =>
+          have hcon : enc2 x (w :: W') ++ (marker x b (j' + 1 + 1) ++ itext b x ns)
+              = x :: (w :: (enc2 x W' ++ (marker x b (j' + 1 + 1) ++ itext b x ns))) :=
+            frag_cons_text x w W' _
+          by_cases hα : (w :: W').take (c :: X').length = c :: X'
+          · have hsplit : w :: W' = (c :: X') ++ (w :: W').drop (c :: X').length :=
+              take_eq_split _ _ _ hα
+            have hM : matchHere (enc2 x (c :: X'))
+                (enc2 x ((c :: X') ++ (w :: W').drop (c :: X').length)
+                  ++ (marker x b (j' + 1 + 1) ++ itext b x ns))
+                = some (enc2 x ((w :: W').drop (c :: X').length)
+                  ++ (marker x b (j' + 1 + 1) ++ itext b x ns)) :=
+              aligned_fire x (c :: X') ((w :: W').drop (c :: X').length)
+                (marker x b (j' + 1 + 1) ++ itext b x ns)
+            rw [← hsplit] at hM
+            have hlen₂ : ((w :: W').drop (c :: X').length).length ≤ n := by
+              have h1 : ((w :: W').drop (c :: X').length).length
+                  = (w :: W').length - (c :: X').length := List.length_drop
+              have h2 : 1 ≤ (c :: X').length := by simp
+              omega
+            rw [hcon, subst_cons_match (marker x b (i + 1)) (enc2 x (c :: X'))
+                (enc2_ne_nil x (c :: X') hX) x
+                (w :: (enc2 x W' ++ (marker x b (j' + 1 + 1) ++ itext b x ns)))
+                (enc2 x ((w :: W').drop (c :: X').length)
+                  ++ (marker x b (j' + 1 + 1) ++ itext b x ns)) hM,
+              ih ((w :: W').drop (c :: X').length) hlen₂ (j' + 1) ns (by omega) hNS,
+              fragGo_alpha b x i c X' w W' (j' + 1) hα]
+            rfl
+          · by_cases hγ : (c :: X') = (w :: W') ++ [b]
+            · have hM : matchHere (enc2 x (c :: X'))
+                  (enc2 x (w :: W') ++ (marker x b (j' + 1 + 1) ++ itext b x ns))
+                  = some (b :: (List.replicate j' b ++ itext b x ns)) := by
+                rw [hγ]
+                exact gamma_fire x b (w :: W') (List.replicate j' b ++ itext b x ns)
+              have hB := enc2_b_none x b hxb (c :: X') hX
+              rw [hcon, subst_cons_match (marker x b (i + 1)) (enc2 x (c :: X'))
+                  (enc2_ne_nil x (c :: X') hX) x
+                  (w :: (enc2 x W' ++ (marker x b (j' + 1 + 1) ++ itext b x ns)))
+                  (b :: (List.replicate j' b ++ itext b x ns)) hM,
+                subst_cons_none (marker x b (i + 1)) (enc2 x (c :: X')) b
+                  (List.replicate j' b ++ itext b x ns) (hB _),
+                bpass b (marker x b (i + 1)) (enc2 x (c :: X')) hB j' (itext b x ns), hNS,
+                fragGo_gamma b x i c X' w W' (j' + 1) hα hγ]
+              show marker x b (i + 1) ++ (List.replicate (j' + 1) b
+                  ++ itext b x (renameNF b x i (c :: X') ns))
+                  = (marker x b (i + 1) ++ List.replicate (j' + 1) b)
+                    ++ itext b x (renameNF b x i (c :: X') ns)
+              exact (List.append_assoc _ _ _).symm
+            · have hT : marker x b (j' + 1 + 1) ++ itext b x ns
+                  = x :: b :: b :: (List.replicate j' b ++ itext b x ns) := rfl
+              have hT2 : marker x b (j' + 1 + 1) ++ itext b x ns
+                  = x :: b :: (List.replicate (j' + 1) b ++ itext b x ns) := rfl
+              have hA : matchHere (enc2 x (c :: X'))
+                  (enc2 x (w :: W') ++ (marker x b (j' + 1 + 1) ++ itext b x ns)) = none := by
+                cases hM : matchHere (enc2 x (c :: X'))
+                    (enc2 x (w :: W') ++ (marker x b (j' + 1 + 1) ++ itext b x ns)) with
+                | none => rfl
+                | some D =>
+                    rcases aligned_class x b hxb (w :: W') (c :: X')
+                      (marker x b (j' + 1 + 1) ++ itext b x ns) D
+                      (Or.inr ⟨List.replicate j' b ++ itext b x ns, hT⟩) hM with
+                    ⟨W₂, hsplit, _⟩ | ⟨T₃, _, hXeq, _⟩
+                    · exact absurd (by rw [hsplit]; exact take_append_self (c :: X') W₂) hα
+                    · exact absurd hXeq hγ
+              have hβ := beta_skip x b hxb (c :: X') w W'
+                (marker x b (j' + 1 + 1) ++ itext b x ns) (Or.inr ⟨_, hT2⟩) hA
+              have hlen₁ : W'.length ≤ n := by
+                have h1 : (w :: W').length = W'.length + 1 := by simp
+                omega
+              rw [hcon,
+                subst_cons_none (marker x b (i + 1)) (enc2 x (c :: X')) x
+                  (w :: (enc2 x W' ++ (marker x b (j' + 1 + 1) ++ itext b x ns))) hA,
+                subst_cons_none (marker x b (i + 1)) (enc2 x (c :: X')) w
+                  (enc2 x W' ++ (marker x b (j' + 1 + 1) ++ itext b x ns)) hβ,
+                ih W' hlen₁ (j' + 1) ns (by omega) hNS,
+                fragGo_skip b x i c X' w W' (j' + 1) hα hγ]
+              simp only [itext_append, itext_shift, List.cons_append]
+
+/-- Unfolding `fragEnd` at a nonempty fragment: the alpha-branch. -/
+theorem fragEnd_alpha (b x : α) (i : Nat) (c : α) (X' : List α) (w : α) (W' : List α)
+    (hα : (w :: W').take (c :: X').length = c :: X') :
+    fragEnd b x i (c :: X') (w :: W')
+      = NFItem.mark i :: fragEnd b x i (c :: X') ((w :: W').drop (c :: X').length) := by
+  simp only [fragEnd]
+  split
+  · rfl
+  · next h => exact absurd hα h
+
+/-- Unfolding `fragEnd` at a nonempty fragment: the skip-branch. -/
+theorem fragEnd_skip (b x : α) (i : Nat) (c : α) (X' : List α) (w : α) (W' : List α)
+    (hα : ¬((w :: W').take (c :: X').length = c :: X')) :
+    fragEnd b x i (c :: X') (w :: W') = shiftItem w (fragEnd b x i (c :: X') W') := by
+  simp only [fragEnd]
+  split
+  · next h => exact absurd h hα
+  · rfl
+
+/-- The rename scan through the final fragment (followed by nothing):
+the round-`i` substitution over the fragment text is exactly
+`fragEnd`'s output.  Strong induction on the fragment: there is no
+gamma-fire here because nothing follows the fragment. -/
+theorem fragEnd_scan (x b : α) (hxb : x ≠ b) (i : Nat) (X : List α) (hX : X ≠ []) :
+    ∀ (n : Nat) (W : List α), W.length ≤ n →
+    subst (marker x b (i + 1)) (enc2 x X) (enc2 x W) = itext b x (fragEnd b x i X W) := by
+  cases X with
+  | nil => exact absurd rfl hX
+  | cons c X' =>
+  intro n
+  induction n with
+  | zero =>
+      intro W hW
+      cases W with
+      | nil =>
+          have hfe : fragEnd b x i (c :: X') [] = [] := by simp only [fragEnd]
+          rw [hfe]
+          show subst (marker x b (i + 1)) (enc2 x (c :: X')) [] = itext b x []
+          rw [subst_nil]
+          rfl
+      | cons w W' =>
+          have h1 : 1 ≤ (w :: W').length := by simp
+          omega
+  | succ n ih =>
+      intro W hW
+      cases W with
+      | nil =>
+          have hfe : fragEnd b x i (c :: X') [] = [] := by simp only [fragEnd]
+          rw [hfe]
+          show subst (marker x b (i + 1)) (enc2 x (c :: X')) [] = itext b x []
+          rw [subst_nil]
+          rfl
+      | cons w W' =>
+          have hcon : enc2 x (w :: W') = x :: (w :: enc2 x W') := enc2_head x w W'
+          by_cases hα : (w :: W').take (c :: X').length = c :: X'
+          · have hsplit : w :: W' = (c :: X') ++ (w :: W').drop (c :: X').length :=
+              take_eq_split _ _ _ hα
+            have hM : matchHere (enc2 x (c :: X')) (enc2 x (w :: W'))
+                = some (enc2 x ((w :: W').drop (c :: X').length)) := by
+              have h0 := aligned_fire x (c :: X') ((w :: W').drop (c :: X').length) []
+              rw [← hsplit] at h0
+              simp only [List.append_nil] at h0
+              exact h0
+            have hlen₂ : ((w :: W').drop (c :: X').length).length ≤ n := by
+              have h1 : ((w :: W').drop (c :: X').length).length
+                  = (w :: W').length - (c :: X').length := List.length_drop
+              have h2 : 1 ≤ (c :: X').length := by simp
+              omega
+            rw [hcon, subst_cons_match (marker x b (i + 1)) (enc2 x (c :: X'))
+                (enc2_ne_nil x (c :: X') hX) x (w :: enc2 x W')
+                (enc2 x ((w :: W').drop (c :: X').length)) hM,
+              ih ((w :: W').drop (c :: X').length) hlen₂,
+              fragEnd_alpha b x i c X' w W' hα]
+            rfl
+          · have hA : matchHere (enc2 x (c :: X')) (enc2 x (w :: W')) = none := by
+              cases hM : matchHere (enc2 x (c :: X')) (enc2 x (w :: W')) with
+              | none => rfl
+              | some D =>
+                  have hM2 : matchHere (enc2 x (c :: X')) (enc2 x (w :: W') ++ [])
+                      = some D := by rw [List.append_nil]; exact hM
+                  rcases aligned_class x b hxb (w :: W') (c :: X') [] D (Or.inl rfl) hM2 with
+                  ⟨W₂, hsplit, _⟩ | ⟨T₃, hTeq, hXeq, _⟩
+                  · exact absurd (by rw [hsplit]; exact take_append_self (c :: X') W₂) hα
+                  · exact nomatch hTeq
+            have hA2 : matchHere (enc2 x (c :: X')) (enc2 x (w :: W') ++ []) = none := by
+              rw [List.append_nil]; exact hA
+            have hβ0 := beta_skip x b hxb (c :: X') w W' [] (Or.inl rfl) hA2
+            have hβ : matchHere (enc2 x (c :: X')) (w :: enc2 x W') = none := by
+              rw [← List.append_nil (enc2 x W')]; exact hβ0
+            have hlen₁ : W'.length ≤ n := by
+              have h1 : (w :: W').length = W'.length + 1 := by simp
+              omega
+            rw [hcon,
+              subst_cons_none (marker x b (i + 1)) (enc2 x (c :: X')) x (w :: enc2 x W') hA,
+              subst_cons_none (marker x b (i + 1)) (enc2 x (c :: X')) w (enc2 x W') hβ,
+              ih W' hlen₁,
+              fragEnd_skip b x i c X' w W' hα]
+            simp only [itext_shift]
+
+/-- Unfolding `renameNF` at a marker. -/
+theorem renameNF_mark (b x : α) (i : Nat) (X : List α) (j : Nat) (ns : List (NFItem α)) :
+    renameNF b x i X (NFItem.mark j :: ns)
+      = if X = [b] then NFItem.dmg [] i j :: renameNF b x i X ns
+        else NFItem.mark j :: renameNF b x i X ns := by
+  simp only [renameNF]
+
+/-- Unfolding `renameNF` at a fragment followed by a marker. -/
+theorem renameNF_frag_mark (b x : α) (i : Nat) (X : List α) (W : List α) (j : Nat)
+    (ns : List (NFItem α)) :
+    renameNF b x i X (NFItem.frag W :: NFItem.mark j :: ns)
+      = fragGo b x i X W j ++ renameNF b x i X ns := by
+  simp only [renameNF]
+
+/-- Unfolding `renameNF` at a final fragment. -/
+theorem renameNF_frag_nil (b x : α) (i : Nat) (X : List α) (W : List α) :
+    renameNF b x i X (NFItem.frag W :: []) = fragEnd b x i X W := by
+  simp only [renameNF, List.append_nil]
+
+/-- The rename pass of round `i` over a canonical item list: the
+substitution over the flat text is exactly `renameNF`'s output.  The
+list is processed item by item; each fragment scan is `fragGo_scan` or
+`fragEnd_scan`, and each marker either passes through or -- when the
+pattern is exactly `[b]` -- fires into the marker's head. -/
+theorem renameNF_scan (x b : α) (hxb : x ≠ b) (i : Nat) (X : List α) (hX : X ≠ []) :
+    ∀ (n : Nat) (ns : List (NFItem α)), ns.length ≤ n → CanonB (i - 1) ns →
+    subst (marker x b (i + 1)) (enc2 x X) (itext b x ns)
+      = itext b x (renameNF b x i X ns) := by
+  cases X with
+  | nil => exact absurd rfl hX
+  | cons c X' =>
+  intro n
+  induction n with
+  | zero =>
+      intro ns hns hC
+      cases ns with
+      | nil =>
+          show subst (marker x b (i + 1)) (enc2 x (c :: X')) [] = []
+          rw [subst_nil]
+      | cons m ns' =>
+          have h1 : 1 ≤ (m :: ns').length := by simp
+          omega
+  | succ n ih =>
+      intro ns hns hC
+      cases ns with
+      | nil =>
+          show subst (marker x b (i + 1)) (enc2 x (c :: X')) [] = []
+          rw [subst_nil]
+      | cons m ns' =>
+      cases m with
+      | mark j =>
+          obtain ⟨hj, _, hC'⟩ := hC
+          have hns' : ns'.length ≤ n := by
+            have h1 : (NFItem.mark j :: ns').length = ns'.length + 1 := by simp
+            omega
+          have hit : itext b x (NFItem.mark j :: ns')
+              = marker x b (j + 1) ++ itext b x ns' := rfl
+          by_cases hXb : (c :: X') = [b]
+          · have hR := fragGo_end_scan x b hxb i (c :: X') hX j hj ns' (ih ns' hns' hC')
+            rw [fragGo_end, ite_eq_left hXb] at hR
+            rw [renameNF_mark, ite_eq_left hXb, hit]
+            exact hR
+          · rw [renameNF_mark, ite_eq_right hXb, hit,
+              markpass x b hxb (marker x b (i + 1)) (c :: X') hX hXb j hj (itext b x ns'),
+              ih ns' hns' hC']
+            rfl
+      | frag W =>
+          cases ns' with
+          | nil =>
+              have hit : itext b x (NFItem.frag W :: []) = enc2 x W := by simp [itext]
+              rw [renameNF_frag_nil, hit]
+              exact fragEnd_scan x b hxb i (c :: X') hX W.length W (Nat.le_refl _)
+          | cons m2 ns'' =>
+              cases m2 with
+              | frag W2 => exact hC.elim
+              | dmg A i2 j2 => exact hC.elim
+              | mark j =>
+                  obtain ⟨hW, hj, _, hC''⟩ := hC
+                  have hns'' : ns''.length ≤ n := by
+                    have h1 : (NFItem.frag W :: NFItem.mark j :: ns'').length
+                        = ns''.length + 2 := by simp
+                    omega
+                  have hit : itext b x (NFItem.frag W :: NFItem.mark j :: ns'')
+                      = enc2 x W ++ (marker x b (j + 1) ++ itext b x ns'') := rfl
+                  rw [renameNF_frag_mark, hit]
+                  exact fragGo_scan x b hxb i (c :: X') hX W.length W (Nat.le_refl _) j ns'' hj
+                    (ih ns'' hns'' hC'')
+      | dmg A i2 j2 => exact hC.elim
+
+omit [DecidableEq α] in
+/-- `shiftItem` never returns an empty list. -/
+theorem shiftItem_ne (w : α) : ∀ L : List (NFItem α), shiftItem w L ≠ [] := by
+  intro L
+  cases L with
+  | nil => simp [shiftItem]
+  | cons n L' =>
+      cases n with
+      | frag W => simp [shiftItem]
+      | mark i => simp [shiftItem]
+      | dmg W i j => simp [shiftItem]
+
+omit [DecidableEq α] in
+/-- `shiftItem` commutes with appending a tail, on nonempty lists. -/
+theorem shiftItem_append (w : α) : ∀ (L M : List (NFItem α)), L ≠ [] →
+    shiftItem w L ++ M = shiftItem w (L ++ M) := by
+  intro L
+  cases L with
+  | nil => intro M h; exact absurd rfl h
+  | cons n L' =>
+      cases n with
+      | frag W => intro M _; rfl
+      | mark i => intro M _; rfl
+      | dmg W i j => intro M _; rfl
+
+/-- `fragGo` never returns an empty list (for nonempty patterns). -/
+theorem fragGo_ne (b x : α) (i : Nat) (X : List α) (hX : X ≠ []) :
+    ∀ (n : Nat) (W : List α), W.length ≤ n → ∀ j : Nat, fragGo b x i X W j ≠ [] := by
+  cases X with
+  | nil => exact absurd rfl hX
+  | cons c X' =>
+  intro n
+  induction n with
+  | zero =>
+      intro W hW j
+      cases W with
+      | nil =>
+          intro h
+          rw [fragGo_end] at h
+          split at h
+          · exact nomatch h
+          · exact nomatch h
+      | cons w W' =>
+          have h1 : 1 ≤ (w :: W').length := by simp
+          omega
+  | succ n ih =>
+      intro W hW j
+      cases W with
+      | nil =>
+          intro h
+          rw [fragGo_end] at h
+          split at h
+          · exact nomatch h
+          · exact nomatch h
+      | cons w W' =>
+          by_cases hα : (w :: W').take (c :: X').length = c :: X'
+          · intro h
+            rw [fragGo_alpha b x i c X' w W' j hα] at h
+            exact nomatch h
+          · by_cases hγ : (c :: X') = (w :: W') ++ [b]
+            · intro h
+              rw [fragGo_gamma b x i c X' w W' j hα hγ] at h
+              exact nomatch h
+            · intro h
+              rw [fragGo_skip b x i c X' w W' j hα hγ] at h
+              exact shiftItem_ne w _ h
+
+omit [DecidableEq α] in
+/-- Shifting a block onto a rounded list keeps it rounded. -/
+theorem rounded_shift (b : α) (i : Nat) (X : List α) (w : α) : ∀ ns : List (NFItem α),
+    Rounded b i X ns → Rounded b i X (shiftItem w ns) := by
+  intro ns hC
+  cases ns with
+  | nil => exact (by simp : ([w] : List α) ≠ [])
+  | cons n ns' =>
+      cases n with
+      | frag W =>
+          cases ns' with
+          | nil => exact (by simp : (w :: W : List α) ≠ [])
+          | cons m ns'' =>
+              cases m with
+              | frag W2 => exact hC.elim
+              | mark j => exact ⟨by simp, hC.2.1, hC.2.2.1, hC.2.2.2⟩
+              | dmg A i2 j2 =>
+                  exact ⟨by simp, hC.2.1, hC.2.2.1, hC.2.2.2.1, hC.2.2.2.2.1,
+                    hC.2.2.2.2.2⟩
+      | mark j => exact ⟨by simp, hC.1, hC.2.1, hC.2.2⟩
+      | dmg A i2 j2 =>
+          exact ⟨by simp, hC.1, hC.2.1, hC.2.2.1, hC.2.2.2.1, hC.2.2.2.2⟩
+
+/-- The rename scan through a fragment keeps the list rounded, whatever
+rounded material follows; the scan always ends in the trailing marker
+or a damaged marker. -/
+theorem fragGo_rounded (b x : α) (i : Nat) (X : List α) (hX : X ≠ []) :
+    1 ≤ i → ∀ (n : Nat) (W : List α), W.length ≤ n → ∀ (j : Nat), 1 ≤ j → j ≤ i →
+    ∀ M : List (NFItem α), Rounded b i X M →
+    Rounded b i X (fragGo b x i X W j ++ M) := by
+  cases X with
+  | nil => exact absurd rfl hX
+  | cons c X' =>
+  intro hi n
+  induction n with
+  | zero =>
+      intro W hW j hj hjm M hM
+      cases W with
+      | nil =>
+          rw [fragGo_end]
+          split
+          · next h => exact ⟨rfl, hj, hjm, h, hM⟩
+          · exact ⟨hj, hjm, hM⟩
+      | cons w W' =>
+          have h1 : 1 ≤ (w :: W').length := by simp
+          omega
+  | succ n ih =>
+      intro W hW j hj hjm M hM
+      cases W with
+      | nil =>
+          rw [fragGo_end]
+          split
+          · next h => exact ⟨rfl, hj, hjm, h, hM⟩
+          · exact ⟨hj, hjm, hM⟩
+      | cons w W' =>
+          by_cases hα : (w :: W').take (c :: X').length = c :: X'
+          · rw [fragGo_alpha b x i c X' w W' j hα, List.cons_append]
+            exact ⟨hi, Nat.le_refl i,
+              ih ((w :: W').drop (c :: X').length) (by
+                    have h1 : ((w :: W').drop (c :: X').length).length
+                        = (w :: W').length - (c :: X').length := List.length_drop
+                    have h2 : 1 ≤ (c :: X').length := by simp
+                    omega) j hj hjm M hM⟩
+          · by_cases hγ : (c :: X') = (w :: W') ++ [b]
+            · rw [fragGo_gamma b x i c X' w W' j hα hγ, List.cons_append]
+              exact ⟨rfl, hj, hjm, hγ, hM⟩
+            · rw [fragGo_skip b x i c X' w W' j hα hγ,
+                shiftItem_append w _ _ (fragGo_ne b x i (c :: X') hX W'.length W'
+                  (by
+                    have h1 : (w :: W').length = W'.length + 1 := by simp
+                    omega) j)]
+              exact rounded_shift b i (c :: X') w _ (ih W' (by
+                have h1 : (w :: W').length = W'.length + 1 := by simp
+                omega) j hj hjm M hM)
+
+/-- The rename scan through a final fragment keeps the list rounded. -/
+theorem fragEnd_rounded (b x : α) (i : Nat) (X : List α) (hX : X ≠ []) :
+    1 ≤ i → ∀ (n : Nat) (W : List α), W.length ≤ n →
+    Rounded b i X (fragEnd b x i X W) := by
+  cases X with
+  | nil => exact absurd rfl hX
+  | cons c X' =>
+  intro hi n
+  induction n with
+  | zero =>
+      intro W hW
+      cases W with
+      | nil =>
+          have hfe : fragEnd b x i (c :: X') [] = [] := by simp only [fragEnd]
+          rw [hfe]
+          exact (by trivial : Rounded b i (c :: X') [])
+      | cons w W' =>
+          have h1 : 1 ≤ (w :: W').length := by simp
+          omega
+  | succ n ih =>
+      intro W hW
+      cases W with
+      | nil =>
+          have hfe : fragEnd b x i (c :: X') [] = [] := by simp only [fragEnd]
+          rw [hfe]
+          exact (by trivial : Rounded b i (c :: X') [])
+      | cons w W' =>
+          by_cases hα : (w :: W').take (c :: X').length = c :: X'
+          · rw [fragEnd_alpha b x i c X' w W' hα]
+            exact ⟨hi, Nat.le_refl i,
+              ih ((w :: W').drop (c :: X').length) (by
+                have h1 : ((w :: W').drop (c :: X').length).length
+                    = (w :: W').length - (c :: X').length := List.length_drop
+                have h2 : 1 ≤ (c :: X').length := by simp
+                omega)⟩
+          · rw [fragEnd_skip b x i c X' w W' hα]
+            exact rounded_shift b i (c :: X') w _ (ih W' (by
+              have h1 : (w :: W').length = W'.length + 1 := by simp
+              omega))
+
+/-- The rename pass of round `i` turns a canonical list (markers at
+most `i - 1`) into a rounded one (markers at most `i`, damaged markers
+of round `i`). -/
+theorem renameNF_rounded (b x : α) (i : Nat) (X : List α) (hX : X ≠ []) :
+    1 ≤ i → ∀ (n : Nat) (ns : List (NFItem α)), ns.length ≤ n → CanonB (i - 1) ns →
+    Rounded b i X (renameNF b x i X ns) := by
+  intro hi n
+  induction n with
+  | zero =>
+      intro ns hns hC
+      cases ns with
+      | nil => exact (by trivial : Rounded b i X [])
+      | cons m ns' =>
+          have h1 : 1 ≤ (m :: ns').length := by simp
+          omega
+  | succ n ih =>
+      intro ns hns hC
+      cases ns with
+      | nil => exact (by trivial : Rounded b i X [])
+      | cons m ns' =>
+      cases m with
+      | mark j =>
+          obtain ⟨hj, hjm, hC'⟩ := hC
+          have hji : j ≤ i := by omega
+          have hns' : ns'.length ≤ n := by
+            have h1 : (NFItem.mark j :: ns').length = ns'.length + 1 := by simp
+            omega
+          rw [renameNF_mark]
+          split
+          · next h => exact ⟨rfl, hj, hji, h, ih ns' hns' hC'⟩
+          · exact ⟨hj, hji, ih ns' hns' hC'⟩
+      | frag W =>
+          cases ns' with
+          | nil =>
+              rw [renameNF_frag_nil]
+              exact fragEnd_rounded b x i X hX hi W.length W (Nat.le_refl _)
+          | cons m2 ns'' =>
+              cases m2 with
+              | frag W2 => exact hC.elim
+              | dmg A i2 j2 => exact hC.elim
+              | mark j =>
+                  obtain ⟨hW, hj, hjm, hC''⟩ := hC
+                  have hji : j ≤ i := by omega
+                  have hns'' : ns''.length ≤ n := by
+                    have h1 : (NFItem.frag W :: NFItem.mark j :: ns'').length
+                        = ns''.length + 2 := by simp
+                    omega
+                  rw [renameNF_frag_mark]
+                  exact fragGo_rounded b x i X hX hi W.length W (Nat.le_refl _) j hj hji
+                    (renameNF b x i X ns'') (ih ns'' hns'' hC'')
+      | dmg A i2 j2 => exact hC.elim
+
+/-- A shorter run of `a`'s cannot match a longer run followed by an
+empty or differently-headed text. -/
+theorem mh_brun (a c : α) (hac : a ≠ c) : ∀ (K M : Nat), M < K → ∀ (T : List α),
+    (T = [] ∨ ∃ T', T = c :: T') →
+    matchHere (List.replicate K a) (List.replicate M a ++ T) = none := by
+  intro K
+  induction K with
+  | zero => intro M hM T hT; omega
+  | succ K ih =>
+      intro M hM T hT
+      match M, hM with
+      | 0, _ =>
+          have h1 : 1 ≤ K + 1 := by omega
+          exact mh_rep_none a c hac (K + 1) h1 T hT
+      | M + 1, _ =>
+          have hstep : matchHere (List.replicate (K + 1) a) (List.replicate (M + 1) a ++ T)
+              = matchHere (List.replicate K a) (List.replicate M a ++ T) := by
+            show matchHere (a :: List.replicate K a) (a :: (List.replicate M a ++ T))
+                = matchHere (List.replicate K a) (List.replicate M a ++ T)
+            rw [matchHere_cons_self]
+          rw [hstep]
+          exact ih M (by omega) T hT
+
+/-- A run of `a`'s matches a longer run, leaving the difference. -/
+theorem mh_run_fire (a : α) : ∀ (K N : Nat), K ≤ N → ∀ (T : List α),
+    matchHere (List.replicate K a) (List.replicate N a ++ T)
+      = some (List.replicate (N - K) a ++ T) := by
+  intro K
+  induction K with
+  | zero => intro N _ T; rfl
+  | succ K ih =>
+      intro N hN T
+      cases N with
+      | zero => omega
+      | succ N =>
+          have hstep : matchHere (List.replicate (K + 1) a) (List.replicate (N + 1) a ++ T)
+              = matchHere (List.replicate K a) (List.replicate N a ++ T) := by
+            show matchHere (a :: List.replicate K a) (a :: (List.replicate N a ++ T))
+                = matchHere (List.replicate K a) (List.replicate N a ++ T)
+            rw [matchHere_cons_self]
+          rw [hstep, ih N (by omega) T]
+          have hsub : N + 1 - (K + 1) = N - K := by omega
+          rw [hsub]
+
+omit [DecidableEq α] in
+/-- If a tail is empty or `x`-headed, so is an `enc2`-image followed by
+it. -/
+theorem enc2_T_cond (x : α) : ∀ (W' T : List α), (T = [] ∨ ∃ T', T = x :: T') →
+    (enc2 x W' ++ T = [] ∨ ∃ R, enc2 x W' ++ T = x :: R) := by
+  intro W' T hT
+  cases W' with
+  | nil => exact hT
+  | cons w W'' =>
+      refine Or.inr ⟨w :: (enc2 x W'' ++ T), ?_⟩
+      show (x :: w :: enc2 x W'') ++ T = _
+      rfl
+
+omit [DecidableEq α] in
+/-- A rounded list headed by a fragment keeps a rounded tail and a
+nonempty fragment. -/
+theorem rounded_frag_tail {b : α} {i : Nat} {X W : List α} {ns : List (NFItem α)}
+    (hC : Rounded b i X (NFItem.frag W :: ns)) : W ≠ [] ∧ Rounded b i X ns := by
+  cases ns with
+  | nil => exact ⟨hC, trivial⟩
+  | cons m ns' =>
+      cases m with
+      | frag W2 => exact hC.elim
+      | mark j => exact ⟨hC.1, hC.2.1, hC.2.2.1, hC.2.2.2⟩
+      | dmg A i2 j2 =>
+          exact ⟨hC.1, hC.2.1, hC.2.2.1, hC.2.2.2.1, hC.2.2.2.2.1, hC.2.2.2.2.2⟩
+
+omit [DecidableEq α] in
+/-- Every fragment of a rounded list is nonempty. -/
+theorem rounded_fragsNE (b : α) (i : Nat) (X : List α) : ∀ ns : List (NFItem α),
+    Rounded b i X ns → fragsNE ns := by
+  intro ns
+  induction ns with
+  | nil => intro _; exact trivial
+  | cons m ns' ih =>
+      intro hC
+      cases m with
+      | frag W =>
+          obtain ⟨hW, hC'⟩ := rounded_frag_tail hC
+          exact ⟨hW, ih hC'⟩
+      | mark j => exact ih hC.2.2
+      | dmg A i2 j2 => exact ih hC.2.2.2.2
+
+omit [DecidableEq α] in
+/-- The flat text of a list with nonempty fragments is empty or
+`x`-headed. -/
+theorem itext_head (b x : α) : ∀ ns : List (NFItem α), fragsNE ns →
+    itext b x ns = [] ∨ ∃ T, itext b x ns = x :: T := by
+  intro ns
+  induction ns with
+  | nil => intro _; exact Or.inl rfl
+  | cons m ns' ih =>
+      intro hF
+      cases m with
+      | frag W =>
+          obtain ⟨hW, hF'⟩ := hF
+          cases W with
+          | nil => exact absurd rfl hW
+          | cons w W'' =>
+              refine Or.inr ⟨w :: (enc2 x W'' ++ itext b x ns'), ?_⟩
+              show (x :: w :: enc2 x W'') ++ itext b x ns' = _
+              rfl
+      | mark j => exact Or.inr ⟨_, rfl⟩
+      | dmg A i2 j2 => exact Or.inr ⟨_, rfl⟩
+
+/-- A marker `mark j` with `j ≤ i` passes through the repair scan
+(pattern `x b^{i+2}`) untouched. -/
+theorem markpass2 (x b : α) (hxb : x ≠ b) (A : List α) (K M : Nat)
+    (hKM : M < K) (T : List α) (hT : T = [] ∨ ∃ T', T = x :: T') :
+    subst A (marker x b K) (marker x b M ++ T)
+      = marker x b M ++ subst A (marker x b K) T := by
+  have hB : ∀ C, matchHere (marker x b K) (b :: C) = none := by
+    intro C
+    show matchHere (x :: List.replicate K b) (b :: C) = none
+    exact matchHere_ne x _ b C hxb
+  have hM1 : matchHere (marker x b K) (x :: (List.replicate M b ++ T)) = none := by
+    show matchHere (x :: List.replicate K b) (x :: (List.replicate M b ++ T)) = none
+    rw [matchHere_cons_self]
+    exact mh_brun b x (Ne.symm hxb) K M hKM T hT
+  show subst A (marker x b K) (x :: (List.replicate M b ++ T))
+      = (x :: List.replicate M b) ++ subst A (marker x b K) T
+  rw [subst_cons_none A (marker x b K) x _ hM1, bpass b A (marker x b K) hB]
+  rfl
+
+/-- A fragment passes through the repair and instantiation scans
+(pattern `x b^K` with `K ≥ 2`) untouched: no `b`-run inside an `enc2`
+image or before an `x`-headed tail is long enough. -/
+theorem fragpass2 (x b : α) (hxb : x ≠ b) (A : List α) (K : Nat) (hK : 2 ≤ K) :
+    ∀ (W T : List α), (T = [] ∨ ∃ T', T = x :: T') →
+    subst A (marker x b K) (enc2 x W ++ T) = enc2 x W ++ subst A (marker x b K) T := by
+  obtain ⟨K', rfl⟩ : ∃ K', K = K' + 1 + 1 := ⟨K - 2, by omega⟩
+  intro W
+  induction W with
+  | nil => intro T hT; rfl
+  | cons w W' ih =>
+      intro T hT
+      have hcond := enc2_T_cond x W' T hT
+      have hA1 : matchHere (marker x b (K' + 1 + 1)) (x :: (w :: (enc2 x W' ++ T))) = none := by
+        show matchHere (x :: List.replicate (K' + 1 + 1) b) (x :: (w :: (enc2 x W' ++ T))) = none
+        rw [matchHere_cons_self]
+        by_cases hwb : b = w
+        · subst hwb
+          show matchHere (b :: List.replicate (K' + 1) b) (b :: (enc2 x W' ++ T)) = none
+          rw [matchHere_cons_self]
+          exact mh_rep_none b x (Ne.symm hxb) (K' + 1) (by omega) (enc2 x W' ++ T) hcond
+        · exact matchHere_ne b _ w _ hwb
+      have hA2 : matchHere (marker x b (K' + 1 + 1)) (w :: (enc2 x W' ++ T)) = none := by
+        by_cases hwx : x = w
+        · subst hwx
+          show matchHere (x :: List.replicate (K' + 1 + 1) b) (x :: (enc2 x W' ++ T)) = none
+          rw [matchHere_cons_self]
+          exact mh_rep_none b x (Ne.symm hxb) (K' + 1 + 1) (by omega) (enc2 x W' ++ T) hcond
+        · show matchHere (x :: List.replicate (K' + 1 + 1) b) (w :: (enc2 x W' ++ T)) = none
+          exact matchHere_ne x _ w _ hwx
+      show subst A (marker x b (K' + 1 + 1)) (x :: (w :: (enc2 x W' ++ T)))
+          = (x :: w :: enc2 x W') ++ subst A (marker x b (K' + 1 + 1)) T
+      rw [subst_cons_none A (marker x b (K' + 1 + 1)) x _ hA1,
+        subst_cons_none A (marker x b (K' + 1 + 1)) w _ hA2, ih T hT]
+      rfl
+
+omit [DecidableEq α] in
+/-- Unfolding `repairNF` on a marker head. -/
+theorem repairNF_mark (b x : α) (i : Nat) (X : List α) (j : Nat) (ns : List (NFItem α)) :
+    repairNF b x i X (NFItem.mark j :: ns) = NFItem.mark j :: repairNF b x i X ns := by
+  simp only [repairNF]
+
+omit [DecidableEq α] in
+/-- Unfolding `repairNF` on a damaged-marker head. -/
+theorem repairNF_dmg (b x : α) (i : Nat) (X A : List α) (i2 j : Nat) (ns : List (NFItem α)) :
+    repairNF b x i X (NFItem.dmg A i2 j :: ns)
+      = pushFrag A (NFItem.mark j :: repairNF b x i X ns) := by
+  simp only [repairNF]
+
+omit [DecidableEq α] in
+/-- Unfolding `repairNF` on a fragment before a damaged marker. -/
+theorem repairNF_frag_dmg (b x : α) (i : Nat) (X W A : List α) (i2 j : Nat)
+    (ns : List (NFItem α)) :
+    repairNF b x i X (NFItem.frag W :: NFItem.dmg A i2 j :: ns)
+      = NFItem.frag (W ++ A) :: NFItem.mark j :: repairNF b x i X ns := by
+  simp only [repairNF]
+
+omit [DecidableEq α] in
+/-- Unfolding `repairNF` on a fragment before a marker. -/
+theorem repairNF_frag_mark (b x : α) (i : Nat) (X W : List α) (j : Nat) (ns : List (NFItem α)) :
+    repairNF b x i X (NFItem.frag W :: NFItem.mark j :: ns)
+      = NFItem.frag W :: NFItem.mark j :: repairNF b x i X ns := by
+  simp only [repairNF]
+
+omit [DecidableEq α] in
+/-- Unfolding `repairNF` on a final fragment. -/
+theorem repairNF_frag_nil (b x : α) (i : Nat) (X W : List α) :
+    repairNF b x i X (NFItem.frag W :: []) = NFItem.frag W :: [] := by
+  simp only [repairNF]
+
+omit [DecidableEq α] in
+/-- The restoration algebra of the repair pass: the fired damaged
+marker `x b^{i+1} b^j` is restored to `enc2 x A` followed by the marker
+`x b^{j+1}`. -/
+theorem repair_algebra (x b : α) (A : List α) (j : Nat) (Y : List α) :
+    (enc2 x (A ++ [b]) ++ [b]) ++ (List.replicate j b ++ Y)
+      = enc2 x A ++ (marker x b (j + 2) ++ Y) := by
+  simp [enc2, marker, List.replicate_succ]
+
+/-- The repair scan at a damaged marker: the pattern `x b^{i+2}` fires
+exactly at the damaged marker's head, restoring the fragment `A` and
+the marker. -/
+theorem dmg_pass (x b : α) (hxb : x ≠ b) (i : Nat) (X A : List α) (j : Nat) (T : List α)
+    (hX : X = A ++ [b]) (hj : 1 ≤ j) :
+    subst (enc2 x X ++ [b]) (marker x b (i + 2))
+        ((marker x b (i + 1) ++ List.replicate j b) ++ T)
+      = enc2 x A ++ (marker x b (j + 1)
+          ++ subst (enc2 x X ++ [b]) (marker x b (i + 2)) T) := by
+  have hB : marker x b (i + 2) ≠ [] := by simp [marker]
+  have hsplit : List.replicate (i + 1) b ++ List.replicate j b
+      = List.replicate (i + 1 + j) b := replicate_append b (i + 1) j
+  have hfire : matchHere (marker x b (i + 2))
+      ((marker x b (i + 1) ++ List.replicate j b) ++ T)
+      = some (List.replicate (j - 1) b ++ T) := by
+    show matchHere (x :: List.replicate (i + 2) b)
+        (x :: ((List.replicate (i + 1) b ++ List.replicate j b) ++ T)) = _
+    rw [matchHere_cons_self, hsplit, mh_run_fire b (i + 2) (i + 1 + j) (by omega) T]
+    have hsub : i + 1 + j - (i + 2) = j - 1 := by omega
+    rw [hsub]
+  have hcon : (marker x b (i + 1) ++ List.replicate j b) ++ T
+      = x :: ((List.replicate (i + 1) b ++ List.replicate j b) ++ T) := rfl
+  have hBb : ∀ C, matchHere (marker x b (i + 2)) (b :: C) = none := by
+    intro C
+    show matchHere (x :: List.replicate (i + 2) b) (b :: C) = none
+    exact matchHere_ne x _ b C hxb
+  rw [hcon, subst_cons_match (enc2 x X ++ [b]) (marker x b (i + 2)) hB x
+    ((List.replicate (i + 1) b ++ List.replicate j b) ++ T)
+    (List.replicate (j - 1) b ++ T) hfire,
+    bpass b (enc2 x X ++ [b]) (marker x b (i + 2)) hBb (j - 1) T]
+  cases j with
+  | zero => omega
+  | succ j' =>
+      have hjm : j' + 1 - 1 = j' := by omega
+      rw [hjm, hX]
+      exact repair_algebra x b A j' _
+
+/-- The repair pass `i` on the item layer: over the flat text of a
+rounded list, the repair scan replaces exactly the damaged markers. -/
+theorem repairNF_scan (x b : α) (hxb : x ≠ b) (i : Nat) (X : List α) :
+    ∀ (n : Nat) (ns : List (NFItem α)), ns.length ≤ n → Rounded b i X ns →
+    subst (enc2 x X ++ [b]) (marker x b (i + 2)) (itext b x ns)
+      = itext b x (repairNF b x i X ns) := by
+  intro n
+  induction n with
+  | zero =>
+      intro ns hns hC
+      cases ns with
+      | nil =>
+          show subst (enc2 x X ++ [b]) (marker x b (i + 2)) [] = []
+          rw [subst_nil]
+      | cons m ns' =>
+          have h1 : 1 ≤ (m :: ns').length := by simp
+          omega
+  | succ n ih =>
+      intro ns hns hC
+      cases ns with
+      | nil =>
+          show subst (enc2 x X ++ [b]) (marker x b (i + 2)) [] = []
+          rw [subst_nil]
+      | cons m ns' =>
+      cases m with
+      | mark j =>
+          obtain ⟨hj, hji, hC'⟩ := hC
+          have hns' : ns'.length ≤ n := by
+            have h1 : (NFItem.mark j :: ns').length = ns'.length + 1 := by simp
+            omega
+          have hit : itext b x (NFItem.mark j :: ns')
+              = marker x b (j + 1) ++ itext b x ns' := rfl
+          rw [hit, repairNF_mark,
+            markpass2 x b hxb (enc2 x X ++ [b]) (i + 2) (j + 1) (by omega) (itext b x ns')
+              (itext_head b x ns' (rounded_fragsNE b i X ns' hC')),
+            ih ns' hns' hC']
+          rfl
+      | dmg A i2 j2 =>
+          obtain ⟨hi2, hj2, _, hXeq, hC'⟩ := hC
+          have hns' : ns'.length ≤ n := by
+            have h1 : (NFItem.dmg A i2 j2 :: ns').length = ns'.length + 1 := by simp
+            omega
+          have hit : itext b x (NFItem.dmg A i2 j2 :: ns')
+              = (marker x b (i2 + 1) ++ List.replicate j2 b) ++ itext b x ns' := rfl
+          rw [hit, hi2, dmg_pass x b hxb i X A j2 (itext b x ns') hXeq hj2,
+            ih ns' hns' hC', repairNF_dmg, itext_push]
+          rfl
+      | frag W =>
+          cases ns' with
+          | nil =>
+              have hit : itext b x (NFItem.frag W :: []) = enc2 x W ++ [] := rfl
+              rw [hit, repairNF_frag_nil,
+                fragpass2 x b hxb (enc2 x X ++ [b]) (i + 2) (by omega) W [] (Or.inl rfl),
+                subst_nil, hit]
+          | cons m2 ns'' =>
+              cases m2 with
+              | frag W2 => exact hC.elim
+              | dmg A i2 j2 =>
+                  obtain ⟨hW, hi2, hj2, _, hXeq, hC''⟩ := hC
+                  have hns'' : ns''.length ≤ n := by
+                    have h1 : (NFItem.frag W :: NFItem.dmg A i2 j2 :: ns'').length
+                        = ns''.length + 2 := by simp
+                    omega
+                  have hit : itext b x (NFItem.frag W :: NFItem.dmg A i2 j2 :: ns'')
+                      = enc2 x W ++ ((marker x b (i2 + 1) ++ List.replicate j2 b)
+                          ++ itext b x ns'') := rfl
+                  rw [hit, hi2, repairNF_frag_dmg,
+                    fragpass2 x b hxb (enc2 x X ++ [b]) (i + 2) (by omega) W
+                      ((marker x b (i + 1) ++ List.replicate j2 b) ++ itext b x ns'')
+                      (Or.inr ⟨_, rfl⟩),
+                    dmg_pass x b hxb i X A j2 (itext b x ns'') hXeq hj2,
+                    ih ns'' hns'' hC'']
+                  have hR : itext b x (NFItem.frag (W ++ A) :: NFItem.mark j2
+                      :: repairNF b x i X ns'')
+                      = enc2 x (W ++ A) ++ (marker x b (j2 + 1)
+                          ++ itext b x (repairNF b x i X ns'')) := rfl
+                  rw [hR, enc2_append]
+                  simp only [List.append_assoc]
+              | mark j =>
+                  obtain ⟨hW, hj, hji, hC''⟩ := hC
+                  have hns'' : ns''.length ≤ n := by
+                    have h1 : (NFItem.frag W :: NFItem.mark j :: ns'').length
+                        = ns''.length + 2 := by simp
+                    omega
+                  have hit : itext b x (NFItem.frag W :: NFItem.mark j :: ns'')
+                      = enc2 x W ++ (marker x b (j + 1) ++ itext b x ns'') := rfl
+                  rw [hit, repairNF_frag_mark,
+                    fragpass2 x b hxb (enc2 x X ++ [b]) (i + 2) (by omega) W
+                      (marker x b (j + 1) ++ itext b x ns'') (Or.inr ⟨_, rfl⟩),
+                    markpass2 x b hxb (enc2 x X ++ [b]) (i + 2) (j + 1) (by omega)
+                      (itext b x ns'') (itext_head b x ns'' (rounded_fragsNE b i X ns'' hC'')),
+                    ih ns'' hns'' hC'']
+                  rfl
+
+omit [DecidableEq α] in
+/-- The repair pass of round `i` turns a rounded list back into a
+canonical one with markers at most `i`. -/
+theorem repairNF_canon (b x : α) (i : Nat) (X : List α) :
+    ∀ (n : Nat) (ns : List (NFItem α)), ns.length ≤ n → Rounded b i X ns →
+    CanonB i (repairNF b x i X ns) := by
+  intro n
+  induction n with
+  | zero =>
+      intro ns hns hC
+      cases ns with
+      | nil => exact (by trivial : CanonB i (repairNF b x i X []))
+      | cons m ns' =>
+          have h1 : 1 ≤ (m :: ns').length := by simp
+          omega
+  | succ n ih =>
+      intro ns hns hC
+      cases ns with
+      | nil => exact (by trivial : CanonB i (repairNF b x i X []))
+      | cons m ns' =>
+      cases m with
+      | mark j =>
+          obtain ⟨hj, hji, hC'⟩ := hC
+          have hns' : ns'.length ≤ n := by
+            have h1 : (NFItem.mark j :: ns').length = ns'.length + 1 := by simp
+            omega
+          rw [repairNF_mark]
+          exact ⟨hj, hji, ih ns' hns' hC'⟩
+      | dmg A i2 j2 =>
+          obtain ⟨hi2, hj2, hjm, hXeq, hC'⟩ := hC
+          have hns' : ns'.length ≤ n := by
+            have h1 : (NFItem.dmg A i2 j2 :: ns').length = ns'.length + 1 := by simp
+            omega
+          rw [repairNF_dmg]
+          have hp : pushFrag A (NFItem.mark j2 :: repairNF b x i X ns')
+              = if A = [] then NFItem.mark j2 :: repairNF b x i X ns'
+                else NFItem.frag A :: NFItem.mark j2 :: repairNF b x i X ns' := by
+            simp only [pushFrag]
+          rw [hp]
+          by_cases hA : A = []
+          · rw [ite_eq_left hA]
+            exact ⟨hj2, hjm, ih ns' hns' hC'⟩
+          · rw [ite_eq_right hA]
+            exact ⟨hA, hj2, hjm, ih ns' hns' hC'⟩
+      | frag W =>
+          cases ns' with
+          | nil =>
+              rw [repairNF_frag_nil]
+              exact hC
+          | cons m2 ns'' =>
+              cases m2 with
+              | frag W2 => exact hC.elim
+              | dmg A i2 j2 =>
+                  obtain ⟨hW, hi2, hj2, hjm, hXeq, hC''⟩ := hC
+                  have hns'' : ns''.length ≤ n := by
+                    have h1 : (NFItem.frag W :: NFItem.dmg A i2 j2 :: ns'').length
+                        = ns''.length + 2 := by simp
+                    omega
+                  rw [repairNF_frag_dmg]
+                  exact ⟨by simp [hW], hj2, hjm, ih ns'' hns'' hC''⟩
+              | mark j =>
+                  obtain ⟨hW, hj, hji, hC''⟩ := hC
+                  have hns'' : ns''.length ≤ n := by
+                    have h1 : (NFItem.frag W :: NFItem.mark j :: ns'').length
+                        = ns''.length + 2 := by simp
+                    omega
+                  rw [repairNF_frag_mark]
+                  exact ⟨hW, hj, hji, ih ns'' hns'' hC''⟩
+
+
+/-- The shape needed by the instantiation passes: fragments nonempty,
+markers indexed `1..k`, no damaged markers; adjacent fragments are
+allowed (a fired marker merges its neighbours). -/
+def InstOK (k : Nat) : List (NFItem α) → Prop
+  | [] => True
+  | NFItem.mark j :: ns => 1 ≤ j ∧ j ≤ k ∧ InstOK k ns
+  | NFItem.dmg _ _ _ :: _ => False
+  | NFItem.frag W :: ns => W ≠ [] ∧ InstOK k ns
+
+omit [DecidableEq α] in
+/-- A canonical list is instantiable. -/
+theorem canonB_instOK (m : Nat) : ∀ ns : List (NFItem α), CanonB m ns → InstOK m ns := by
+  intro ns
+  induction ns with
+  | nil => intro _; exact trivial
+  | cons n ns' ih =>
+      intro hC
+      cases n with
+      | frag W =>
+          cases ns' with
+          | nil => exact ⟨hC, trivial⟩
+          | cons n2 ns'' =>
+              cases n2 with
+              | frag W2 => exact hC.elim
+              | mark j => exact ⟨hC.1, ih ⟨hC.2.1, hC.2.2.1, hC.2.2.2⟩⟩
+              | dmg A i2 j2 => exact hC.elim
+      | mark j => exact ⟨hC.1, hC.2.1, ih hC.2.2⟩
+      | dmg A i2 j2 => exact hC.elim
+
+omit [DecidableEq α] in
+/-- An instantiable list has nonempty fragments. -/
+theorem instOK_fragsNE (k : Nat) : ∀ ns : List (NFItem α), InstOK k ns → fragsNE ns := by
+  intro ns
+  induction ns with
+  | nil => intro _; exact trivial
+  | cons n ns' ih =>
+      intro hC
+      cases n with
+      | frag W => exact ⟨hC.1, ih hC.2⟩
+      | mark j => exact ih hC.2.2
+      | dmg A i2 j2 => exact hC.elim
+
+omit [DecidableEq α] in
+/-- Pushing a fragment onto an instantiable list keeps it so. -/
+theorem pushFrag_instOK (Y : List α) (k : Nat) : ∀ ns : List (NFItem α),
+    InstOK k ns → InstOK k (pushFrag Y ns) := by
+  intro ns
+  cases ns with
+  | nil =>
+      intro _
+      simp only [pushFrag]
+      split
+      · exact trivial
+      · exact ⟨by assumption, trivial⟩
+  | cons n ns' =>
+      intro hC
+      cases n with
+      | frag W => exact ⟨by simp [hC.1], hC.2⟩
+      | mark j =>
+          simp only [pushFrag]
+          split
+          · exact hC
+          · exact ⟨by assumption, hC.1, hC.2.1, hC.2.2⟩
+      | dmg A i2 j2 => exact hC.elim
+
+omit [DecidableEq α] in
+/-- Unfolding `instNF` on a fired marker. -/
+theorem instNF_mark_fire (b x : α) (k : Nat) (Y : List α) (ns : List (NFItem α)) :
+    instNF b x k Y (NFItem.mark k :: ns) = pushFrag Y (instNF b x k Y ns) := by
+  simp [instNF]
+
+omit [DecidableEq α] in
+/-- Unfolding `instNF` on a passed marker. -/
+theorem instNF_mark_pass (b x : α) (k : Nat) (Y : List α) (j : Nat) (ns : List (NFItem α))
+    (hjk : ¬ j = k) :
+    instNF b x k Y (NFItem.mark j :: ns) = NFItem.mark j :: instNF b x k Y ns := by
+  simp [instNF, hjk]
+
+omit [DecidableEq α] in
+/-- Unfolding `instNF` on a fragment head. -/
+theorem instNF_frag_cons (b x : α) (k : Nat) (Y W : List α) (ns : List (NFItem α)) :
+    instNF b x k Y (NFItem.frag W :: ns) = NFItem.frag W :: instNF b x k Y ns := rfl
+
+/-- The instantiation pass `k` on the item layer: over the flat text,
+the scan replaces exactly the markers of round `k` by the code of `Y`. -/
+theorem instNF_scan (x b : α) (hxb : x ≠ b) (k : Nat) (hk : 1 ≤ k) (Y : List α) :
+    ∀ (n : Nat) (ns : List (NFItem α)), ns.length ≤ n → InstOK k ns →
+    subst (enc2 x Y) (marker x b (k + 1)) (itext b x ns)
+      = itext b x (instNF b x k Y ns) := by
+  intro n
+  induction n with
+  | zero =>
+      intro ns hns hC
+      cases ns with
+      | nil =>
+          show subst (enc2 x Y) (marker x b (k + 1)) [] = []
+          rw [subst_nil]
+      | cons m ns' =>
+          have h1 : 1 ≤ (m :: ns').length := by simp
+          omega
+  | succ n ih =>
+      intro ns hns hC
+      cases ns with
+      | nil =>
+          show subst (enc2 x Y) (marker x b (k + 1)) [] = []
+          rw [subst_nil]
+      | cons m ns' =>
+      cases m with
+      | mark j =>
+          obtain ⟨hj, hjk, hC'⟩ := hC
+          have hns' : ns'.length ≤ n := by
+            have h1 : (NFItem.mark j :: ns').length = ns'.length + 1 := by simp
+            omega
+          have hit : itext b x (NFItem.mark j :: ns')
+              = marker x b (j + 1) ++ itext b x ns' := rfl
+          rw [hit]
+          by_cases hjk' : j = k
+          · rw [hjk']
+            have hcon : marker x b (k + 1) ++ itext b x ns'
+                = x :: (List.replicate (k + 1) b ++ itext b x ns') := rfl
+            have hfire : matchHere (marker x b (k + 1))
+                (x :: (List.replicate (k + 1) b ++ itext b x ns'))
+                = some (itext b x ns') :=
+              matchHere_prefix (marker x b (k + 1)) (itext b x ns')
+            have hB : marker x b (k + 1) ≠ [] := by simp [marker]
+            rw [hcon, subst_cons_match (enc2 x Y) (marker x b (k + 1)) hB x
+              (List.replicate (k + 1) b ++ itext b x ns') (itext b x ns') hfire,
+              ih ns' hns' hC', instNF_mark_fire, itext_push]
+          · have hT := itext_head b x ns' (instOK_fragsNE k ns' hC')
+            rw [markpass2 x b hxb (enc2 x Y) (k + 1) (j + 1) (by omega)
+              (itext b x ns') hT, ih ns' hns' hC', instNF_mark_pass b x k Y j ns' hjk']
+            rfl
+      | frag W =>
+          obtain ⟨hW, hC'⟩ := hC
+          have hns' : ns'.length ≤ n := by
+            have h1 : (NFItem.frag W :: ns').length = ns'.length + 1 := by simp
+            omega
+          have hit : itext b x (NFItem.frag W :: ns') = enc2 x W ++ itext b x ns' := rfl
+          have hT := itext_head b x ns' (instOK_fragsNE k ns' hC')
+          rw [hit, instNF_frag_cons,
+            fragpass2 x b hxb (enc2 x Y) (k + 1) (by omega) W (itext b x ns') hT,
+            ih ns' hns' hC']
+          rfl
+      | dmg A i2 j2 => exact hC.elim
+
+omit [DecidableEq α] in
+/-- The instantiation pass `k` leaves an instantiable list for the
+earlier rounds. -/
+theorem instNF_canon (b x : α) (k : Nat) (Y : List α) :
+    ∀ (n : Nat) (ns : List (NFItem α)), ns.length ≤ n → InstOK k ns →
+    InstOK (k - 1) (instNF b x k Y ns) := by
+  intro n
+  induction n with
+  | zero =>
+      intro ns hns hC
+      cases ns with
+      | nil => exact trivial
+      | cons m ns' =>
+          have h1 : 1 ≤ (m :: ns').length := by simp
+          omega
+  | succ n ih =>
+      intro ns hns hC
+      cases ns with
+      | nil => exact trivial
+      | cons m ns' =>
+      cases m with
+      | mark j =>
+          obtain ⟨hj, hjk, hC'⟩ := hC
+          have hns' : ns'.length ≤ n := by
+            have h1 : (NFItem.mark j :: ns').length = ns'.length + 1 := by simp
+            omega
+          by_cases hjk' : j = k
+          · rw [hjk', instNF_mark_fire]
+            exact pushFrag_instOK Y (k - 1) (instNF b x k Y ns') (ih ns' hns' hC')
+          · rw [instNF_mark_pass b x k Y j ns' hjk']
+            exact ⟨hj, by omega, ih ns' hns' hC'⟩
+      | frag W =>
+          have hns' : ns'.length ≤ n := by
+            have h1 : (NFItem.frag W :: ns').length = ns'.length + 1 := by simp
+            omega
+          rw [instNF_frag_cons]
+          exact ⟨hC.1, ih ns' hns' hC.2⟩
+      | dmg A i2 j2 => exact hC.elim
+
+/-- The length of the pattern of round `j`. -/
+def xlen (pairs : List (List α × List α)) (j : Nat) : Nat :=
+  (pairs.getD (j - 1) ([], [])).1.length
+
+/-- Drop the first `k` entries of an annotated list. -/
+def dropN : Nat → List (α × Option Nat) → List (α × Option Nat)
+  | 0, T => T
+  | _ + 1, [] => []
+  | k + 1, _ :: T' => dropN k T'
+
+omit [DecidableEq α] in
+/-- Dropping the length of a prefix. -/
+theorem dropN_length (U : List (α × Option Nat)) :
+    ∀ (k : Nat) (T : List (α × Option Nat)), T.length = k → dropN k (T ++ U) = U := by
+  intro k T
+  induction T generalizing k with
+  | nil => intro h; cases k with
+    | zero => rfl
+    | succ k' => simp at h
+  | cons t T' ih =>
+      intro h
+      cases k with
+      | zero => simp at h
+      | succ k' =>
+          rw [List.length_cons] at h
+          show dropN k' (T' ++ U) = U
+          exact ih k' (by omega)
+
+omit [DecidableEq α] in
+/-- Dropping past the end of a list gives `[]`. -/
+theorem dropN_all (T : List (α × Option Nat)) (k : Nat) (hk : T.length ≤ k) :
+    dropN k T = [] := by
+  induction T generalizing k with
+  | nil => cases k with
+    | zero => rfl
+    | succ k' => rfl
+  | cons t T' ih =>
+      cases k with
+      | zero => simp at hk
+      | succ k' =>
+          rw [List.length_cons] at hk
+          show dropN k' T' = []
+          exact ih k' (by omega)
+
+omit [DecidableEq α] in
+/-- Dropping entries never lengthens the list. -/
+theorem dropN_length_le (k : Nat) : ∀ T : List (α × Option Nat),
+    (dropN k T).length ≤ T.length := by
+  induction k with
+  | zero => intro T; exact Nat.le_refl _
+  | succ k' ih =>
+      intro T
+      cases T with
+      | nil => exact Nat.le_refl 0
+      | cons t T' =>
+          show (dropN k' T').length ≤ (t :: T').length
+          rw [List.length_cons]
+          have h := ih T'
+          omega
+
+/-- The item-level reading of an annotated list: an unfrozen entry
+extends the current fragment, and each `|X_j|`-sized chunk of round-`j`
+entries becomes one marker. -/
+def pieces (pairs : List (List α × List α)) : List (α × Option Nat) → List (NFItem α)
+  | [] => []
+  | (t, none) :: T' => pushFrag [t] (pieces pairs T')
+  | (t, some j) :: T' =>
+      NFItem.mark j :: pieces pairs (dropN (xlen pairs j - 1) T')
+termination_by T => T.length
+decreasing_by
+  · simp only [List.length_cons]; omega
+  · have h := dropN_length_le (xlen pairs j - 1) T'
+    simp only [List.length_cons] at h ⊢
+    omega
+
+omit [DecidableEq α] in
+/-- Unfolding `pieces` on an unfrozen entry. -/
+theorem pieces_none (pairs : List (List α × List α)) (t : α) (T : List (α × Option Nat)) :
+    pieces pairs ((t, none) :: T) = pushFrag [t] (pieces pairs T) := by
+  simp only [pieces]
+
+omit [DecidableEq α] in
+/-- Unfolding `pieces` on a frozen entry. -/
+theorem pieces_some (pairs : List (List α × List α)) (t : α) (j : Nat)
+    (T : List (α × Option Nat)) :
+    pieces pairs ((t, some j) :: T)
+      = NFItem.mark j :: pieces pairs (dropN (xlen pairs j - 1) T) := by
+  simp only [pieces]
+
+omit [DecidableEq α] in
+/-- Pushing a single character is shifting it. -/
+theorem pushFrag_single (w : α) : ∀ ns : List (NFItem α),
+    pushFrag [w] ns = shiftItem w ns := by
+  intro ns
+  cases ns with
+  | nil => rfl
+  | cons n ns' =>
+      cases n with
+      | frag W => rfl
+      | mark j => rfl
+      | dmg A i2 j2 => rfl
+
+omit [DecidableEq α] in
+/-- Pushing an empty fragment is the identity. -/
+theorem pushFrag_nil : ∀ ns : List (NFItem α), pushFrag [] ns = ns := by
+  intro ns
+  cases ns with
+  | nil => rfl
+  | cons n ns' =>
+      cases n with
+      | frag W => show NFItem.frag ([] ++ W) :: ns' = NFItem.frag W :: ns'; rfl
+      | mark j => rfl
+      | dmg A i2 j2 => rfl
+
+omit [DecidableEq α] in
+/-- Unfolding `repairNF` on a fragment before a fragment. -/
+theorem repairNF_frag_frag (b x : α) (i : Nat) (X W W2 : List α) (ns : List (NFItem α)) :
+    repairNF b x i X (NFItem.frag W :: NFItem.frag W2 :: ns)
+      = NFItem.frag W :: repairNF b x i X (NFItem.frag W2 :: ns) := by
+  simp only [repairNF]
+
+omit [DecidableEq α] in
+/-- The repair pass commutes with shifting a character onto the list. -/
+theorem repairNF_shift (b x : α) (i : Nat) (X : List α) (w : α) :
+    ∀ ns : List (NFItem α),
+    repairNF b x i X (shiftItem w ns) = shiftItem w (repairNF b x i X ns) := by
+  intro ns
+  cases ns with
+  | nil =>
+      show repairNF b x i X (NFItem.frag [w] :: [])
+        = shiftItem w (repairNF b x i X [])
+      rw [repairNF_frag_nil]
+      rfl
+  | cons n ns' =>
+      cases n with
+      | mark j =>
+          show repairNF b x i X (NFItem.frag [w] :: NFItem.mark j :: ns')
+            = shiftItem w (repairNF b x i X (NFItem.mark j :: ns'))
+          rw [repairNF_frag_mark, repairNF_mark]
+          rfl
+      | frag W =>
+          cases ns' with
+          | nil =>
+              show repairNF b x i X (NFItem.frag (w :: W) :: [])
+                = shiftItem w (repairNF b x i X (NFItem.frag W :: []))
+              rw [repairNF_frag_nil, repairNF_frag_nil]
+              rfl
+          | cons n2 ns'' =>
+              cases n2 with
+              | frag W2 =>
+                  show repairNF b x i X (NFItem.frag (w :: W) :: NFItem.frag W2 :: ns'')
+                    = shiftItem w (repairNF b x i X (NFItem.frag W :: NFItem.frag W2 :: ns''))
+                  rw [repairNF_frag_frag, repairNF_frag_frag]
+                  rfl
+              | dmg A i2 j2 =>
+                  show repairNF b x i X (NFItem.frag (w :: W) :: NFItem.dmg A i2 j2 :: ns'')
+                    = shiftItem w (repairNF b x i X (NFItem.frag W :: NFItem.dmg A i2 j2 :: ns''))
+                  rw [repairNF_frag_dmg, repairNF_frag_dmg]
+                  show NFItem.frag ((w :: W) ++ A) :: NFItem.mark j2 :: repairNF b x i X ns''
+                    = NFItem.frag (w :: (W ++ A)) :: NFItem.mark j2 :: repairNF b x i X ns''
+                  rw [List.cons_append]
+              | mark j =>
+                  show repairNF b x i X (NFItem.frag (w :: W) :: NFItem.mark j :: ns'')
+                    = shiftItem w (repairNF b x i X (NFItem.frag W :: NFItem.mark j :: ns''))
+                  rw [repairNF_frag_mark, repairNF_frag_mark]
+                  rfl
+      | dmg A i2 j2 =>
+          cases A with
+          | nil =>
+              show repairNF b x i X (NFItem.frag [w] :: NFItem.dmg [] i2 j2 :: ns')
+                = shiftItem w (repairNF b x i X (NFItem.dmg [] i2 j2 :: ns'))
+              rw [repairNF_frag_dmg, repairNF_dmg, pushFrag_nil]
+              show NFItem.frag ([w] ++ []) :: NFItem.mark j2 :: repairNF b x i X ns'
+                = shiftItem w (NFItem.mark j2 :: repairNF b x i X ns')
+              rw [List.append_nil]
+              rfl
+          | cons a A' =>
+              show repairNF b x i X (NFItem.frag [w] :: NFItem.dmg (a :: A') i2 j2 :: ns')
+                = shiftItem w (repairNF b x i X (NFItem.dmg (a :: A') i2 j2 :: ns'))
+              rw [repairNF_frag_dmg, repairNF_dmg]
+              show NFItem.frag ([w] ++ (a :: A')) :: NFItem.mark j2 :: repairNF b x i X ns'
+                = shiftItem w (pushFrag (a :: A') (NFItem.mark j2 :: repairNF b x i X ns'))
+              have h3 : pushFrag (a :: A') (NFItem.mark j2 :: repairNF b x i X ns')
+                  = NFItem.frag (a :: A') :: NFItem.mark j2 :: repairNF b x i X ns' := by
+                simp [pushFrag]
+              rw [h3]
+              show NFItem.frag ([w] ++ (a :: A')) :: NFItem.mark j2 :: repairNF b x i X ns'
+                = NFItem.frag (w :: (a :: A')) :: NFItem.mark j2 :: repairNF b x i X ns'
+              simp only [List.cons_append, List.nil_append]
+
+/-! ### The bridge to the annotated semantics
+
+  The item-level rounds correspond to the freezing passes over the
+  annotated representation: an unfrozen entry extends a fragment, and a
+  `|X_j|`-sized chunk of round-`j` entries is one marker.  The invariant
+  `Chunked` records that frozen runs are aligned to their chunk size.
+-/
+
+/-- One full round at the item level: the rename pass followed by the
+repair pass. -/
+def roundNF (b x : α) (i : Nat) (X : List α) (ns : List (NFItem α)) : List (NFItem α) :=
+  repairNF b x i X (renameNF b x i X ns)
+
+/-- A fragment written as unfrozen entries. -/
+def runE (W : List α) : List (α × Option Nat) := W.map (fun w => (w, none))
+
+omit [DecidableEq α] in
+/-- The characters of the maximal unfrozen prefix. -/
+def runOf : List (α × Option Nat) → List α
+  | (t, none) :: T' => t :: runOf T'
+  | _ => []
+
+omit [DecidableEq α] in
+/-- The annotated list after the maximal unfrozen prefix. -/
+def afterRun : List (α × Option Nat) → List (α × Option Nat)
+  | (_, none) :: T' => afterRun T'
+  | T => T
+
+omit [DecidableEq α] in
+/-- Unfolding `runOf` and `afterRun` on an unfrozen entry. -/
+theorem runOf_afterRun_none (t : α) (T : List (α × Option Nat)) :
+    runOf ((t, none) :: T) = t :: runOf T ∧ afterRun ((t, none) :: T) = afterRun T :=
+  ⟨rfl, rfl⟩
+
+omit [DecidableEq α] in
+/-- An annotated list is its unfrozen run followed by its frozen tail. -/
+theorem run_decomp : ∀ T : List (α × Option Nat),
+    T = runE (runOf T) ++ afterRun T := by
+  intro T
+  induction T with
+  | nil => rfl
+  | cons t T' ih =>
+      obtain ⟨c, o⟩ := t
+      cases o with
+      | none => show (c, none) :: T' = (c, none) :: (runE (runOf T') ++ afterRun T'); rw [← ih]
+      | some j => rfl
+
+omit [DecidableEq α] in
+/-- The tail after the unfrozen run is empty or frozen-headed. -/
+theorem afterRun_cases : ∀ T : List (α × Option Nat),
+    afterRun T = [] ∨ ∃ (c : α) (j : Nat) (T' : List (α × Option Nat)),
+      afterRun T = (c, some j) :: T' := by
+  intro T
+  cases T with
+  | nil => exact Or.inl rfl
+  | cons t T' =>
+      obtain ⟨c, o⟩ := t
+      cases o with
+      | none =>
+          rcases afterRun_cases T' with h | ⟨c2, j, T''⟩
+          · exact Or.inl (by
+              show afterRun ((c, none) :: T') = []
+              rw [show afterRun ((c, none) :: T') = afterRun T' from rfl]
+              exact h)
+          · exact Or.inr ⟨c2, j, T''⟩
+      | some j => exact Or.inr ⟨c, j, T', rfl⟩
+
+/-- A round leaves a leading marker unchanged. -/
+theorem roundNF_mark (b x : α) (i : Nat) (X : List α) (j : Nat) (ns : List (NFItem α)) :
+    roundNF b x i X (NFItem.mark j :: ns) = NFItem.mark j :: roundNF b x i X ns := by
+  show repairNF b x i X (renameNF b x i X (NFItem.mark j :: ns))
+    = NFItem.mark j :: repairNF b x i X (renameNF b x i X ns)
+  rw [renameNF_mark]
+  split
+  · show repairNF b x i X (NFItem.dmg [] i j :: renameNF b x i X ns) = _
+    rw [repairNF_dmg, pushFrag_nil]
+  · rw [repairNF_mark]
+
+omit [DecidableEq α] in
+/-- Pushing a one-character fragment onto a pushed fragment. -/
+theorem pushFrag_cons (v : α) : ∀ (V : List α) (ns : List (NFItem α)),
+    pushFrag [v] (pushFrag V ns) = pushFrag (v :: V) ns := by
+  intro V ns
+  cases ns with
+  | nil => cases V with
+    | nil => rfl
+    | cons v' V' => rfl
+  | cons n ns' =>
+      cases n with
+      | frag W => cases V with
+        | nil => show NFItem.frag ([v] ++ W) :: ns' = NFItem.frag (v :: W) :: ns'; rfl
+        | cons v' V' => show NFItem.frag ([v] ++ (v' :: V' ++ W)) :: ns' = NFItem.frag (v :: v' :: V' ++ W) :: ns'; simp
+      | mark j => cases V with
+        | nil => rfl
+        | cons v' V' => rfl
+      | dmg A i2 j2 => cases V with
+        | nil => rfl
+        | cons v' V' => rfl
+
+omit [DecidableEq α] in
+/-- `pieces` over a run of unfrozen entries. -/
+theorem pieces_run (pairs : List (List α × List α)) : ∀ (V : List α) (T : List (α × Option Nat)),
+    pieces pairs (runE V ++ T) = pushFrag V (pieces pairs T) := by
+  intro V
+  induction V with
+  | nil => intro T; show pieces pairs T = pushFrag [] (pieces pairs T); rw [pushFrag_nil]
+  | cons v V' ih =>
+      intro T
+      show pieces pairs ((v, none) :: (runE V' ++ T))
+        = pushFrag (v :: V') (pieces pairs T)
+      rw [pieces_none, ih T]
+      exact pushFrag_cons v V' (pieces pairs T)
+
+omit [DecidableEq α] in
+/-- Taking at least the whole list takes the whole list. -/
+theorem take_of_le : ∀ (L : List α) (n : Nat), L.length ≤ n → L.take n = L := by
+  intro L
+  induction L with
+  | nil => intro n _; cases n with
+    | zero => rfl
+    | succ n' => rfl
+  | cons a L' ih =>
+      intro n h
+      cases n with
+      | zero => simp at h
+      | succ n' =>
+          show a :: L'.take n' = a :: L'
+          exact congrArg (a :: ·) (ih n' (by simp at h; omega))
+
+omit [DecidableEq α] in
+/-- Taking one more character. -/
+theorem take_succ_cons (a : α) (l : List α) (n : Nat) :
+    (a :: l).take (n + 1) = a :: l.take n := rfl
+
+omit [DecidableEq α] in
+/-- An annotated list whose head is frozen. -/
+def FrozenHead : List (α × Option Nat) → Prop
+  | (_, some _) :: _ => True
+  | _ => False
+
+omit [DecidableEq α] in
+/-- An annotated list of only frozen entries. -/
+def AllFrozen : List (α × Option Nat) → Prop
+  | [] => True
+  | (_, some _) :: T' => AllFrozen T'
+  | (_, none) :: _ => False
+
+omit [DecidableEq α] in
+/-- The first `k` entries are frozen. -/
+def frozenPrefix : Nat → List (α × Option Nat) → Prop
+  | 0, _ => True
+  | _ + 1, [] => False
+  | k + 1, (_, some _) :: T' => frozenPrefix k T'
+  | _ + 1, (_, none) :: _ => False
+
+/-- The frozen runs are aligned: at a round-`j` frozen entry, the rest of
+the current `|X_j|`-sized chunk is frozen too. -/
+def Chunked (pairs : List (List α × List α)) : List (α × Option Nat) → Prop
+  | [] => True
+  | (_t, none) :: T' => Chunked pairs T'
+  | (_t, some j) :: T' =>
+      frozenPrefix (xlen pairs j - 1) T' ∧ Chunked pairs (dropN (xlen pairs j - 1) T')
+termination_by T => T.length
+decreasing_by
+  · simp only [List.length_cons]; omega
+  · have h := dropN_length_le (xlen pairs j - 1) T'
+    simp only [List.length_cons] at h ⊢
+    omega
+
+/-- Unfolding `dropU?` at an unfrozen entry. -/
+theorem dropU?_cons_none (c : α) (X' : List α) (d : α) (T' : List (α × Option Nat)) :
+    dropU? (c :: X') ((d, none) :: T') = if c = d then dropU? X' T' else none := rfl
+
+/-- Unfolding `dropU?` at a frozen entry. -/
+theorem dropU?_cons_some (c : α) (X' : List α) (d : α) (j : Nat)
+    (T' : List (α × Option Nat)) :
+    dropU? (c :: X') ((d, some j) :: T') = none := rfl
+
+/-- Unfolding `freezePass` at an unmatched head. -/
+theorem freezePass_cons_none (X : List α) (hX : X ≠ []) (i : Nat) (t : α × Option Nat)
+    (T' : List (α × Option Nat)) (hd : dropU? X (t :: T') = none) :
+    freezePass X hX i (t :: T') = t :: freezePass X hX i T' := by
+  simp only [freezePass]
+  split
+  · next hU => exact absurd hU (by rw [hd]; simp)
+  · rfl
+
+/-- Unfolding `freezePass` at a matched head. -/
+theorem freezePass_cons_some (X : List α) (hX : X ≠ []) (i : Nat) (t : α × Option Nat)
+    (T' : List (α × Option Nat)) (U : List (α × Option Nat))
+    (hd : dropU? X (t :: T') = some U) :
+    freezePass X hX i (t :: T')
+      = freezeBlock i X.length (t :: T') ++ freezePass X hX i U := by
+  simp only [freezePass]
+  split
+  · next hU =>
+      rw [hd] at hU
+      injection hU with hU'
+      subst hU'
+      rfl
+  · next h => exact absurd hd (by rw [h]; simp)
+
+/-- The freezing pass skips frozen entries unchanged. -/
+theorem freezePass_frozen (X : List α) (hX : X ≠ []) (i : Nat) :
+    ∀ (F T : List (α × Option Nat)), AllFrozen F →
+    freezePass X hX i (F ++ T) = F ++ freezePass X hX i T := by
+  intro F
+  induction F with
+  | nil => intro T _; rfl
+  | cons f F' ih =>
+      intro T hF
+      obtain ⟨c, o⟩ := f
+      cases o with
+      | none => exact absurd hF (by cases hF <;> simp [AllFrozen])
+      | some j =>
+          have hd : dropU? X ((c, some j) :: (F' ++ T)) = none := by
+            cases X with
+            | nil => exact absurd rfl hX
+            | cons c' X' => rfl
+          have hF' : AllFrozen F' := hF
+          show freezePass X hX i ((c, some j) :: (F' ++ T)) = _
+          rw [freezePass_cons_none X hX i (c, some j) (F' ++ T) hd]
+          show (c, some j) :: freezePass X hX i (F' ++ T) = _
+          rw [ih T hF']
+          show (c, some j) :: (F' ++ freezePass X hX i T)
+            = ((c, some j) :: F') ++ freezePass X hX i T
+          rfl
+
+omit [DecidableEq α] in
+/-- A frozen prefix splits off. -/
+theorem frozenPrefix_split : ∀ (k : Nat) (T : List (α × Option Nat)), frozenPrefix k T →
+    ∃ F U : List (α × Option Nat), T = F ++ U ∧ F.length = k ∧ AllFrozen F := by
+  intro k
+  induction k with
+  | zero => intro T _; exact ⟨[], T, rfl, rfl, trivial⟩
+  | succ k' ih =>
+      intro T h
+      cases T with
+      | nil => exact absurd h (by cases h <;> simp [frozenPrefix])
+      | cons t T' =>
+          obtain ⟨c, o⟩ := t
+          cases o with
+          | none => exact absurd h (by cases h <;> simp [frozenPrefix])
+          | some j =>
+              obtain ⟨F, U, h1, h2, h3⟩ := ih T' h
+              exact ⟨(c, some j) :: F, U, by rw [h1]; rfl, by simp [h2], h3⟩
+
+/-- Dropping a frozen prefix commutes with the freezing pass. -/
+theorem freezePass_dropN_frozen (X : List α) (hX : X ≠ []) (i : Nat) (k : Nat)
+    (T : List (α × Option Nat)) (hFP : frozenPrefix k T) :
+    dropN k (freezePass X hX i T) = freezePass X hX i (dropN k T) := by
+  obtain ⟨F, U, h1, h2, h3⟩ := frozenPrefix_split k T hFP
+  rw [h1, freezePass_frozen X hX i F U h3]
+  show dropN k (F ++ freezePass X hX i U) = freezePass X hX i (dropN k (F ++ U))
+  rw [dropN_length (freezePass X hX i U) k F h2, dropN_length U k F h2]
+
+omit [DecidableEq α] in
+/-- A full block freezes exactly `k` entries. -/
+theorem freezeBlock_length (i : Nat) : ∀ (k : Nat) (T : List (α × Option Nat)),
+    k ≤ T.length → (freezeBlock i k T).length = k := by
+  intro k
+  induction k with
+  | zero => intro T _; rfl
+  | succ k' ih =>
+      intro T h
+      cases T with
+      | nil => simp at h
+      | cons t T' =>
+          obtain ⟨d, o⟩ := t
+          show ((d, some i) :: freezeBlock i k' T').length = k' + 1
+          rw [List.length_cons]
+          rw [ih T' (by rw [List.length_cons] at h; omega)]
+
+omit [DecidableEq α] in
+/-- A freshly frozen block reads as one marker. -/
+theorem pieces_freezeBlock (pairs : List (List α × List α)) (i : Nat) (k : Nat)
+    (hxl : xlen pairs i = k) (hk : 1 ≤ k) :
+    ∀ (T T2 : List (α × Option Nat)), k ≤ T.length →
+    pieces pairs (freezeBlock i k T ++ T2) = NFItem.mark i :: pieces pairs T2 := by
+  induction k with
+  | zero => intro T T2 _; exact absurd hk (by omega)
+  | succ k' ih =>
+      intro T T2 h
+      cases T with
+      | nil => simp at h
+      | cons t T' =>
+          obtain ⟨d, o⟩ := t
+          have hlen : k' ≤ T'.length := by rw [List.length_cons] at h; omega
+          have hdrop : xlen pairs i - 1 = k' := by omega
+          show pieces pairs ((d, some i) :: (freezeBlock i k' T' ++ T2)) = _
+          rw [pieces_some, hdrop,
+              dropN_length T2 k' (freezeBlock i k' T') (freezeBlock_length i k' T' hlen)]
+
+omit [DecidableEq α] in
+/-- Unfolding `Chunked` at an unfrozen entry. -/
+theorem Chunked_none (pairs : List (List α × List α)) (t : α)
+    (T : List (α × Option Nat)) :
+    Chunked pairs ((t, none) :: T) = Chunked pairs T := by
+  simp only [Chunked]
+
+omit [DecidableEq α] in
+/-- Unfolding `Chunked` at a frozen entry. -/
+theorem Chunked_some (pairs : List (List α × List α)) (t : α) (j : Nat)
+    (T : List (α × Option Nat)) :
+    Chunked pairs ((t, some j) :: T)
+      = (frozenPrefix (xlen pairs j - 1) T
+          ∧ Chunked pairs (dropN (xlen pairs j - 1) T)) := by
+  simp only [Chunked]
+
+omit [DecidableEq α] in
+/-- `Chunked` only depends on the frozen tail. -/
+theorem Chunked_runE (pairs : List (List α × List α)) :
+    ∀ (V : List α) (T : List (α × Option Nat)),
+    Chunked pairs (runE V ++ T) → Chunked pairs T := by
+  intro V
+  induction V with
+  | nil => intro T h; exact h
+  | cons v V' ih =>
+      intro T h
+      have h' : Chunked pairs ((v, none) :: (runE V' ++ T)) := h
+      rw [Chunked_none] at h'
+      exact ih T h'
+
+/-- A matching unfrozen run is consumed by `dropU?`. -/
+theorem dropU?_runE_take : ∀ (X V : List α) (T2 : List (α × Option Nat)),
+    V.take X.length = X → dropU? X (runE V ++ T2) = some (runE (V.drop X.length) ++ T2) := by
+  intro X
+  induction X with
+  | nil => intro V T2 _; cases V with
+    | nil => rfl
+    | cons v V' => rfl
+  | cons c X' ih =>
+      intro V T2 h
+      cases V with
+      | nil => exact absurd h (by simp)
+      | cons v V' =>
+          have h1 : (v :: V').take (c :: X').length = v :: V'.take X'.length :=
+            take_succ_cons v V' X'.length
+          rw [h1] at h
+          have hV : V'.take X'.length = X' := by injection h
+          have hv : v = c := by injection h
+          show dropU? (c :: X') ((v, none) :: (runE V' ++ T2)) = _
+          rw [dropU?_cons_none, ite_eq_left hv.symm]
+          exact ih V' T2 hV
+
+/-- A pattern longer than the unfrozen run cannot match it. -/
+theorem dropU?_runE_short : ∀ (X V : List α) (T2 : List (α × Option Nat)),
+    V.length < X.length → (T2 = [] ∨ FrozenHead T2) →
+    dropU? X (runE V ++ T2) = none := by
+  intro X
+  induction X with
+  | nil => intro V T2 hlen _; simp only [List.length_nil] at hlen; omega
+  | cons c X' ih =>
+      intro V T2 hlen hT2
+      cases V with
+      | nil =>
+          cases T2 with
+          | nil => rfl
+          | cons t T' =>
+              obtain ⟨d, o⟩ := t
+              cases o with
+              | none =>
+                  rcases hT2 with h | h
+                  · exact absurd h (by simp)
+                  · exact absurd h (by simp [FrozenHead])
+              | some j => rfl
+      | cons v V' =>
+          have hlen' : V'.length < X'.length := by simp at hlen; omega
+          show dropU? (c :: X') ((v, none) :: (runE V' ++ T2)) = none
+          rw [dropU?_cons_none]
+          split
+          · exact ih V' T2 hlen' hT2
+          · rfl
+
+/-- The freezing pass passes a too-short unfrozen run through. -/
+theorem freezePass_short (X : List α) (hX : X ≠ []) (i : Nat) :
+    ∀ (V : List α) (T2 : List (α × Option Nat)), V.length < X.length →
+    (T2 = [] ∨ FrozenHead T2) →
+    freezePass X hX i (runE V ++ T2) = runE V ++ freezePass X hX i T2 := by
+  intro V
+  induction V with
+  | nil => intro T2 _ _; rfl
+  | cons v V' ih =>
+      intro T2 hlen hT2
+      have hlen' : V'.length < X.length := by simp at hlen; omega
+      have hd : dropU? X ((v, none) :: (runE V' ++ T2)) = none :=
+        dropU?_runE_short X (v :: V') T2 hlen hT2
+      show freezePass X hX i ((v, none) :: (runE V' ++ T2)) = _
+      rw [freezePass_cons_none X hX i (v, none) (runE V' ++ T2) hd]
+      show (v, none) :: freezePass X hX i (runE V' ++ T2) = _
+      rw [ih T2 hlen' hT2]
+      rfl
+
+/-- Unfolding `fragEnd` at an exhausted fragment. -/
+theorem fragEnd_nil (b x : α) (i : Nat) (c : α) (X' : List α) :
+    fragEnd b x i (c :: X') [] = [] := by
+  simp only [fragEnd]
+
+/-- The round of a fragment pushed before a marker. -/
+theorem round_descend (b x : α) (i : Nat) (X : List α) (hX : X ≠ []) :
+    ∀ (W : List α) (j : Nat) (ns : List (NFItem α)),
+    roundNF b x i X (pushFrag W (NFItem.mark j :: ns))
+      = repairNF b x i X (fragGo b x i X W j ++ renameNF b x i X ns) := by
+  intro W
+  cases W with
+  | nil =>
+      intro j ns
+      show roundNF b x i X (pushFrag [] (NFItem.mark j :: ns)) = _
+      rw [pushFrag_nil, roundNF_mark]
+      cases X with
+      | nil => exact absurd rfl hX
+      | cons c X' =>
+          rw [fragGo_end]
+          split
+          · show NFItem.mark j :: repairNF b x i (c :: X') (renameNF b x i (c :: X') ns)
+                = repairNF b x i (c :: X') ([NFItem.dmg [] i j] ++ renameNF b x i (c :: X') ns)
+            rw [show [NFItem.dmg [] i j] ++ renameNF b x i (c :: X') ns
+                  = NFItem.dmg [] i j :: renameNF b x i (c :: X') ns from rfl,
+                repairNF_dmg, pushFrag_nil]
+          · show NFItem.mark j :: repairNF b x i (c :: X') (renameNF b x i (c :: X') ns)
+                = repairNF b x i (c :: X') ([NFItem.mark j] ++ renameNF b x i (c :: X') ns)
+            rw [show [NFItem.mark j] ++ renameNF b x i (c :: X') ns
+                  = NFItem.mark j :: renameNF b x i (c :: X') ns from rfl,
+                repairNF_mark]
+  | cons w W' =>
+      intro j ns
+      show repairNF b x i X (renameNF b x i X (NFItem.frag (w :: W') :: NFItem.mark j :: ns)) = _
+      rw [renameNF_frag_mark]
+
+/-- The round of a final fragment. -/
+theorem round_descend_end (b x : α) (i : Nat) (X : List α) (hX : X ≠ []) :
+    ∀ (W : List α),
+    roundNF b x i X (pushFrag W []) = repairNF b x i X (fragEnd b x i X W) := by
+  intro W
+  cases W with
+  | nil =>
+      show roundNF b x i X (pushFrag [] []) = _
+      rw [pushFrag_nil]
+      show repairNF b x i X (renameNF b x i X ([] : List (NFItem α))) = _
+      cases X with
+      | nil => exact absurd rfl hX
+      | cons c X' => rw [fragEnd_nil]; rfl
+  | cons w W' =>
+      show repairNF b x i X (renameNF b x i X (NFItem.frag (w :: W') :: [])) = _
+      rw [renameNF_frag_nil]
+
+omit [DecidableEq α] in
+/-- A nonempty list has positive length. -/
+theorem length_pos_of_ne_nil : ∀ L : List α, L ≠ [] → 1 ≤ L.length := by
+  intro L
+  cases L with
+  | nil => intro h; exact absurd rfl h
+  | cons a L' => intro _; simp
+
+omit [DecidableEq α] in
+/-- Pushing a nonempty fragment onto an empty list. -/
+theorem pushFrag_cons_nil (v : α) (V : List α) :
+    pushFrag (v :: V) [] = NFItem.frag (v :: V) :: [] := rfl
+
+omit [DecidableEq α] in
+/-- Pushing a nonempty fragment onto a marker. -/
+theorem pushFrag_cons_mark (v : α) (V : List α) (j : Nat) (ns : List (NFItem α)) :
+    pushFrag (v :: V) (NFItem.mark j :: ns)
+      = NFItem.frag (v :: V) :: NFItem.mark j :: ns := rfl
+
+omit [DecidableEq α] in
+/-- The length of a run written as entries. -/
+theorem runE_length (V : List α) : (runE V).length = V.length := by
+  simp [runE]
+
+omit [DecidableEq α] in
+/-- `pieces` of the empty annotated list. -/
+theorem pieces_nil (pairs : List (List α × List α)) :
+    pieces pairs ([] : List (α × Option Nat)) = [] := by
+  simp only [pieces]
+
+/-- A frozen head blocks the matcher at any pattern. -/
+theorem dropU?_tail (c : α) (X' : List α) (T2 : List (α × Option Nat))
+    (hT2 : T2 = [] ∨ FrozenHead T2) : dropU? (c :: X') T2 = none := by
+  rcases hT2 with h | h
+  · rw [h]; rfl
+  · cases T2 with
+    | nil => exact absurd h (by simp [FrozenHead])
+    | cons t T'' =>
+        obtain ⟨d, o⟩ := t
+        cases o with
+        | none => exact absurd h (by simp [FrozenHead])
+        | some j => rfl
+
+omit [DecidableEq α] in
+/-- Introducing a run preserves `Chunked`. -/
+theorem Chunked_runE_intro (pairs : List (List α × List α)) :
+    ∀ (V : List α) (T : List (α × Option Nat)),
+    Chunked pairs T → Chunked pairs (runE V ++ T) := by
+  intro V
+  induction V with
+  | nil => intro T h; exact h
+  | cons v V' ih =>
+      intro T h
+      show Chunked pairs ((v, none) :: (runE V' ++ T))
+      rw [Chunked_none]
+      exact ih T h
+
+/-- A failed take means no match in the run. -/
+theorem dropU?_runE_none : ∀ (X V : List α) (T2 : List (α × Option Nat)),
+    (T2 = [] ∨ FrozenHead T2) → ¬(V.take X.length = X) →
+    dropU? X (runE V ++ T2) = none := by
+  intro X
+  induction X with
+  | nil => intro V T2 _ h; exact absurd rfl h
+  | cons c X' ih =>
+      intro V T2 hT2 h
+      cases V with
+      | nil => exact dropU?_tail c X' T2 hT2
+      | cons v V' =>
+          have h1 : (v :: V').take (c :: X').length = v :: V'.take X'.length :=
+            take_succ_cons v V' X'.length
+          show dropU? (c :: X') ((v, none) :: (runE V' ++ T2)) = none
+          rw [dropU?_cons_none]
+          split
+          · next hcv =>
+              refine ih V' T2 hT2 ?_
+              intro hV
+              apply h
+              show (v :: V').take (c :: X').length = c :: X'
+              rw [h1, hV, hcv]
+          · rfl
+
+/-- The pieces of a head match of the freezing pass. -/
+theorem pieces_freeze_match (pairs : List (List α × List α)) (i : Nat) (X : List α)
+    (hX : X ≠ []) (hxl : xlen pairs i = X.length) (t : α × Option Nat)
+    (T' U : List (α × Option Nat)) (hd : dropU? X (t :: T') = some U) :
+    pieces pairs (freezePass X hX i (t :: T'))
+      = NFItem.mark i :: pieces pairs (freezePass X hX i U) := by
+  rw [freezePass_cons_some X hX i t T' U hd]
+  refine pieces_freezeBlock pairs i X.length hxl (length_pos_of_ne_nil X hX) (t :: T')
+    (freezePass X hX i U) ?_
+  have h := dropU?_length X (t :: T') U hd
+  have h2 : (t :: T').length = T'.length + 1 := List.length_cons
+  omega
+
+/-- The pieces of an unmatched unfrozen head. -/
+theorem pieces_freeze_skip (pairs : List (List α × List α)) (X : List α) (hX : X ≠ [])
+    (i : Nat) (c : α) (T' : List (α × Option Nat))
+    (hd : dropU? X ((c, none) :: T') = none) :
+    pieces pairs (freezePass X hX i ((c, none) :: T'))
+      = shiftItem c (pieces pairs (freezePass X hX i T')) := by
+  rw [freezePass_cons_none X hX i (c, none) T' hd, pieces_none, pushFrag_single]
+
+/-- `freezePass` of the empty annotated list. -/
+theorem freezePass_nil (X : List α) (hX : X ≠ []) (i : Nat) :
+    freezePass X hX i ([] : List (α × Option Nat)) = [] := by
+  simp only [freezePass]
+
+omit [DecidableEq α] in
+/-- `Chunked` of the empty annotated list. -/
+theorem Chunked_nil (pairs : List (List α × List α)) :
+    Chunked pairs ([] : List (α × Option Nat)) := by
+  simp only [Chunked]
+
+omit [DecidableEq α] in
+/-- Pushing a nonempty fragment before a marker is shifting its head
+into the pushed fragment. -/
+theorem pushFrag_shiftItem_mark (c : α) (W : List α) (j : Nat) (ns : List (NFItem α)) :
+    pushFrag (c :: W) (NFItem.mark j :: ns)
+      = shiftItem c (pushFrag W (NFItem.mark j :: ns)) := by
+  cases W with
+  | nil => rfl
+  | cons w W' => rfl
+
+/-- The item-level round `i` over the pieces of an annotated list is the
+freezing pass of round `i`, read back as pieces. -/
+theorem round_pieces (x b : α) (pairs : List (List α × List α)) (i : Nat)
+    (X : List α) (hX : X ≠ []) (hxl : xlen pairs i = X.length) :
+    ∀ (n : Nat) (T : List (α × Option Nat)), T.length ≤ n → Chunked pairs T →
+    roundNF b x i X (pieces pairs T) = pieces pairs (freezePass X hX i T) := by
+  intro n
+  induction n with
+  | zero =>
+      intro T hT hC
+      cases T with
+      | nil => rw [pieces_nil, freezePass_nil, pieces_nil]; rfl
+      | cons t T' => rw [List.length_cons] at hT; omega
+  | succ n' ih =>
+      intro T hT hC
+      cases T with
+      | nil => rw [pieces_nil, freezePass_nil, pieces_nil]; rfl
+      | cons t T' =>
+          rw [List.length_cons] at hT
+          obtain ⟨c, o⟩ := t
+          cases o with
+          | some j =>
+              rw [Chunked_some] at hC
+              obtain ⟨hFP, hCD⟩ := hC
+              have hdn : dropU? X ((c, some j) :: T') = none := by
+                cases X with
+                | nil => exact absurd rfl hX
+                | cons c₀ X₀ => rfl
+              rw [pieces_some, roundNF_mark, freezePass_cons_none _ _ _ _ _ hdn,
+                  pieces_some, freezePass_dropN_frozen X hX i (xlen pairs j - 1) T' hFP]
+              have hlen := dropN_length_le (xlen pairs j - 1) T'
+              rw [ih (dropN (xlen pairs j - 1) T') (by omega) hCD]
+          | none =>
+              obtain ⟨W, T2, hdec, hT2⟩ :
+                  ∃ (W : List α) (T2 : List (α × Option Nat)),
+                    T' = runE W ++ T2
+                      ∧ (T2 = []
+                        ∨ ∃ (d : α) (j : Nat) (T'' : List (α × Option Nat)),
+                            T2 = (d, some j) :: T'') :=
+                ⟨runOf T', afterRun T', run_decomp T', afterRun_cases T'⟩
+              rw [hdec] at hT ⊢
+              rw [Chunked_none] at hC
+              rw [hdec] at hC
+              have hC2 : Chunked pairs T2 := Chunked_runE pairs W T2 hC
+              have hL1 : (runE W ++ T2).length = W.length + T2.length := by
+                rw [List.length_append, runE_length]
+              show roundNF b x i X (pieces pairs (runE (c :: W) ++ T2))
+                = pieces pairs (freezePass X hX i ((c, none) :: (runE W ++ T2)))
+              rw [pieces_run]
+              cases X with
+              | nil => exact absurd rfl hX
+              | cons c₀ X₀ =>
+                  have hX1 : 1 ≤ (c₀ :: X₀).length := length_pos_of_ne_nil _ (by simp)
+                  rcases hT2 with hT2nil | ⟨d, j, T'', hT2⟩
+                  · -- the final fragment: `fragEnd`
+                      rw [hT2nil] at hT hL1 ⊢
+                      rw [pieces_nil]
+                      show roundNF b x i (c₀ :: X₀) (pushFrag (c :: W)
+                          ([] : List (NFItem α)))
+                        = pieces pairs (freezePass (c₀ :: X₀) hX i
+                            ((c, none) :: (runE W ++ ([] : List (α × Option Nat)))))
+                      rw [round_descend_end b x i (c₀ :: X₀) hX (c :: W)]
+                      by_cases hα : (c :: W).take (c₀ :: X₀).length = c₀ :: X₀
+                      · -- alpha
+                          have hdU : dropU? (c₀ :: X₀)
+                              ((c, none) :: (runE W ++ ([] : List (α × Option Nat))))
+                              = some (runE ((c :: W).drop (c₀ :: X₀).length)
+                                  ++ ([] : List (α × Option Nat))) :=
+                            dropU?_runE_take (c₀ :: X₀) (c :: W) [] hα
+                          have hRlen : (c₀ :: X₀).length
+                              + ((c :: W).drop (c₀ :: X₀).length).length
+                              = W.length + 1 := by
+                            have h1 := List.take_append_drop (c₀ :: X₀).length (c :: W)
+                            rw [hα] at h1
+                            have h2 := congrArg List.length h1
+                            simp only [List.length_append] at h2
+                            exact h2
+                          rw [fragEnd_alpha b x i c₀ X₀ c W hα, repairNF_mark,
+                              ← round_descend_end b x i (c₀ :: X₀) hX
+                                ((c :: W).drop (c₀ :: X₀).length)]
+                          have halg : pieces pairs
+                              (runE ((c :: W).drop (c₀ :: X₀).length)
+                                ++ ([] : List (α × Option Nat)))
+                              = pushFrag ((c :: W).drop (c₀ :: X₀).length)
+                                  ([] : List (NFItem α)) := by
+                            rw [pieces_run, pieces_nil]
+                          rw [← halg,
+                              pieces_freeze_match pairs i (c₀ :: X₀) hX hxl (c, none)
+                                (runE W ++ ([] : List (α × Option Nat)))
+                                (runE ((c :: W).drop (c₀ :: X₀).length)
+                                  ++ ([] : List (α × Option Nat))) hdU,
+                              ih (runE ((c :: W).drop (c₀ :: X₀).length)
+                                ++ ([] : List (α × Option Nat)))
+                                (by
+                                  simp only [List.length_append, runE_length]
+                                  omega)
+                                (Chunked_runE_intro pairs
+                                  ((c :: W).drop (c₀ :: X₀).length)
+                                  ([] : List (α × Option Nat)) (Chunked_nil pairs))]
+                      · -- skip
+                          have hdn : dropU? (c₀ :: X₀)
+                              ((c, none) :: (runE W ++ ([] : List (α × Option Nat))))
+                              = none :=
+                            dropU?_runE_none (c₀ :: X₀) (c :: W) [] (Or.inl rfl) hα
+                          rw [fragEnd_skip b x i c₀ X₀ c W hα, repairNF_shift,
+                              ← round_descend_end b x i (c₀ :: X₀) hX W]
+                          have halg : pieces pairs
+                              (runE W ++ ([] : List (α × Option Nat)))
+                              = pushFrag W ([] : List (NFItem α)) := by
+                            rw [pieces_run, pieces_nil]
+                          rw [← halg,
+                              pieces_freeze_skip pairs (c₀ :: X₀) hX i c
+                                (runE W ++ ([] : List (α × Option Nat))) hdn,
+                              ih (runE W ++ ([] : List (α × Option Nat))) (by omega)
+                                (Chunked_runE_intro pairs W
+                                  ([] : List (α × Option Nat)) (Chunked_nil pairs))]
+                  · -- a frozen head follows: `fragGo`
+                      have hL3 : T2.length = T''.length + 1 := by rw [hT2]; simp
+                      rw [hT2] at hC2
+                      rw [Chunked_some] at hC2
+                      obtain ⟨hFP, hCD⟩ := hC2
+                      rw [hT2, pieces_some]
+                      rw [round_descend b x i (c₀ :: X₀) hX (c :: W) j
+                        (pieces pairs (dropN (xlen pairs j - 1) T''))]
+                      by_cases hα : (c :: W).take (c₀ :: X₀).length = c₀ :: X₀
+                      · -- alpha
+                          have hdU : dropU? (c₀ :: X₀)
+                              ((c, none) :: (runE W ++ ((d, some j) :: T'')))
+                              = some (runE ((c :: W).drop (c₀ :: X₀).length)
+                                  ++ ((d, some j) :: T'')) :=
+                            dropU?_runE_take (c₀ :: X₀) (c :: W) ((d, some j) :: T'') hα
+                          have hRlen : (c₀ :: X₀).length
+                              + ((c :: W).drop (c₀ :: X₀).length).length
+                              = W.length + 1 := by
+                            have h1 := List.take_append_drop (c₀ :: X₀).length (c :: W)
+                            rw [hα] at h1
+                            have h2 := congrArg List.length h1
+                            simp only [List.length_append] at h2
+                            exact h2
+                          rw [fragGo_alpha b x i c₀ X₀ c W j hα]
+                          show repairNF b x i (c₀ :: X₀)
+                              (NFItem.mark i
+                                :: (fragGo b x i (c₀ :: X₀)
+                                      ((c :: W).drop (c₀ :: X₀).length) j
+                                    ++ renameNF b x i (c₀ :: X₀)
+                                      (pieces pairs (dropN (xlen pairs j - 1) T''))))
+                            = pieces pairs (freezePass (c₀ :: X₀) hX i
+                                ((c, none) :: (runE W ++ ((d, some j) :: T''))))
+                          rw [repairNF_mark,
+                              ← round_descend b x i (c₀ :: X₀) hX
+                                ((c :: W).drop (c₀ :: X₀).length) j
+                                (pieces pairs (dropN (xlen pairs j - 1) T''))]
+                          have halg : pieces pairs
+                              (runE ((c :: W).drop (c₀ :: X₀).length)
+                                ++ ((d, some j) :: T''))
+                              = pushFrag ((c :: W).drop (c₀ :: X₀).length)
+                                  (NFItem.mark j
+                                    :: pieces pairs (dropN (xlen pairs j - 1) T'')) := by
+                            rw [pieces_run, pieces_some]
+                          rw [← halg,
+                              pieces_freeze_match pairs i (c₀ :: X₀) hX hxl (c, none)
+                                (runE W ++ ((d, some j) :: T''))
+                                (runE ((c :: W).drop (c₀ :: X₀).length)
+                                  ++ ((d, some j) :: T'')) hdU,
+                              ih (runE ((c :: W).drop (c₀ :: X₀).length)
+                                ++ ((d, some j) :: T''))
+                                (by
+                                  have hB : (runE ((c :: W).drop (c₀ :: X₀).length)
+                                      ++ ((d, some j) :: T'')).length
+                                      = ((c :: W).drop (c₀ :: X₀).length).length
+                                        + (T''.length + 1) := by
+                                    rw [List.length_append, runE_length,
+                                      show ((d, some j) :: T'').length
+                                        = T''.length + 1 from rfl]
+                                  omega)
+                                (Chunked_runE_intro pairs
+                                  ((c :: W).drop (c₀ :: X₀).length)
+                                  ((d, some j) :: T'')
+                                  (by rw [Chunked_some]; exact ⟨hFP, hCD⟩))]
+                      · -- gamma or skip
+                          by_cases hγ : (c₀ :: X₀) = (c :: W) ++ [b]
+                          · -- gamma
+                              have hdn : dropU? (c₀ :: X₀)
+                                  ((c, none) :: (runE W ++ ((d, some j) :: T'')))
+                                  = none :=
+                                dropU?_runE_none (c₀ :: X₀) (c :: W)
+                                  ((d, some j) :: T'') (Or.inr (by exact True.intro)) hα
+                              have hshort : W.length < (c₀ :: X₀).length := by
+                                rw [hγ, List.length_append, List.length_cons,
+                                  List.length_singleton]
+                                omega
+                              rw [fragGo_gamma b x i c₀ X₀ c W j hα hγ]
+                              show repairNF b x i (c₀ :: X₀)
+                                  (NFItem.dmg (c :: W) i j
+                                    :: renameNF b x i (c₀ :: X₀)
+                                      (pieces pairs (dropN (xlen pairs j - 1) T'')))
+                                = pieces pairs (freezePass (c₀ :: X₀) hX i
+                                    ((c, none) :: (runE W ++ ((d, some j) :: T''))))
+                              rw [repairNF_dmg]
+                              show pushFrag (c :: W) (NFItem.mark j
+                                  :: roundNF b x i (c₀ :: X₀)
+                                    (pieces pairs (dropN (xlen pairs j - 1) T'')))
+                                = pieces pairs (freezePass (c₀ :: X₀) hX i
+                                    ((c, none) :: (runE W ++ ((d, some j) :: T''))))
+                              have hR : pieces pairs
+                                  (freezePass (c₀ :: X₀) hX i
+                                    ((c, none) :: (runE W ++ ((d, some j) :: T''))))
+                                  = shiftItem c (pushFrag W (NFItem.mark j
+                                      :: pieces pairs
+                                        (freezePass (c₀ :: X₀) hX i
+                                          (dropN (xlen pairs j - 1) T'')))) := by
+                                have hd1 : dropU? (c₀ :: X₀)
+                                    ((d, some j) :: T'') = none := rfl
+                                rw [freezePass_cons_none (c₀ :: X₀) hX i (c, none)
+                                    (runE W ++ ((d, some j) :: T'')) hdn,
+                                  freezePass_short (c₀ :: X₀) hX i W
+                                    ((d, some j) :: T'') hshort
+                                    (Or.inr (by exact True.intro)),
+                                  freezePass_cons_none (c₀ :: X₀) hX i (d, some j)
+                                    T'' hd1,
+                                  pieces_none, pushFrag_single, pieces_run, pieces_some,
+                                  freezePass_dropN_frozen (c₀ :: X₀) hX i
+                                    (xlen pairs j - 1) T'' hFP]
+                              have hlen := dropN_length_le (xlen pairs j - 1) T''
+                              rw [ih (dropN (xlen pairs j - 1) T'') (by omega) hCD, hR]
+                              exact pushFrag_shiftItem_mark c W j _
+                          · -- skip
+                              have hdn : dropU? (c₀ :: X₀)
+                                  ((c, none) :: (runE W ++ ((d, some j) :: T'')))
+                                  = none :=
+                                dropU?_runE_none (c₀ :: X₀) (c :: W)
+                                  ((d, some j) :: T'') (Or.inr (by exact True.intro)) hα
+                              rw [fragGo_skip b x i c₀ X₀ c W j hα hγ,
+                                  shiftItem_append c (fragGo b x i (c₀ :: X₀) W j)
+                                    (renameNF b x i (c₀ :: X₀)
+                                      (pieces pairs (dropN (xlen pairs j - 1) T'')))
+                                    (fragGo_ne b x i (c₀ :: X₀) hX W.length W
+                                      (Nat.le_refl _) j),
+                                  repairNF_shift,
+                                  ← round_descend b x i (c₀ :: X₀) hX W j
+                                    (pieces pairs (dropN (xlen pairs j - 1) T''))]
+                              have halg : pieces pairs (runE W ++ T2)
+                                  = pushFrag W (NFItem.mark j
+                                      :: pieces pairs (dropN (xlen pairs j - 1) T'')) := by
+                                rw [pieces_run, hT2, pieces_some]
+                              rw [← halg,
+                                  pieces_freeze_skip pairs (c₀ :: X₀) hX i c
+                                    (runE W ++ ((d, some j) :: T'')) hdn,
+                                  ih (runE W ++ T2) (by omega)
+                                    (Chunked_runE_intro pairs W T2
+                                      (by rw [hT2, Chunked_some]; exact ⟨hFP, hCD⟩)),
+                                  hT2]
+
+/-- A prefix of `k` entries, all frozen with tag exactly `j`. -/
+def purePrefix : Nat → Nat → List (α × Option Nat) → Prop
+  | _, 0, _ => True
+  | _, _ + 1, [] => False
+  | j, k + 1, (_, some j') :: T' => j' = j ∧ purePrefix j k T'
+  | _, _ + 1, (_, none) :: _ => False
+
+/-- The strong chunk invariant: every frozen run is pure (a single
+round's tag) and a concatenation of whole `|X_j|`-chunks. -/
+def PureChunked (pairs : List (List α × List α)) : List (α × Option Nat) → Prop
+  | [] => True
+  | (_t, none) :: T' => PureChunked pairs T'
+  | (_t, some j) :: T' =>
+      purePrefix j (xlen pairs j - 1) T'
+        ∧ PureChunked pairs (dropN (xlen pairs j - 1) T')
+  termination_by T => T.length
+  decreasing_by
+    · simp only [List.length_cons]; omega
+    · have h := dropN_length_le (xlen pairs j - 1) T'
+      simp only [List.length_cons] at h ⊢
+      omega
+
+omit [DecidableEq α] in
+/-- Unfolding `PureChunked` at an unfrozen entry. -/
+theorem PureChunked_none (pairs : List (List α × List α)) (t : α)
+    (T : List (α × Option Nat)) :
+    PureChunked pairs ((t, none) :: T) = PureChunked pairs T := by
+  simp only [PureChunked]
+
+omit [DecidableEq α] in
+/-- Unfolding `PureChunked` at a frozen entry. -/
+theorem PureChunked_some (pairs : List (List α × List α)) (t : α) (j : Nat)
+    (T : List (α × Option Nat)) :
+    PureChunked pairs ((t, some j) :: T)
+      = (purePrefix j (xlen pairs j - 1) T
+          ∧ PureChunked pairs (dropN (xlen pairs j - 1) T)) := by
+  simp only [PureChunked]
+
+omit [DecidableEq α] in
+/-- `PureChunked` of the empty annotated list. -/
+theorem PureChunked_nil (pairs : List (List α × List α)) :
+    PureChunked pairs ([] : List (α × Option Nat)) := by
+  simp only [PureChunked]
+
+omit [DecidableEq α] in
+/-- A pure prefix is frozen. -/
+theorem purePrefix_frozen : ∀ (j k : Nat) (T : List (α × Option Nat)),
+    purePrefix j k T → frozenPrefix k T := by
+  intro j k
+  induction k with
+  | zero => intro T _; exact trivial
+  | succ k' ih =>
+      intro T h
+      cases T with
+      | nil => exact False.elim h
+      | cons t T' =>
+          obtain ⟨c, o⟩ := t
+          cases o with
+          | none => exact False.elim h
+          | some j' =>
+              obtain ⟨_, hrest⟩ := h
+              exact ih T' hrest
+
+omit [DecidableEq α] in
+/-- A pure prefix stays a pure prefix when a tail is appended. -/
+theorem purePrefix_app : ∀ (j k : Nat) (F L : List (α × Option Nat)),
+    purePrefix j k F → purePrefix j k (F ++ L) := by
+  intro j k
+  induction k with
+  | zero => intro F L _; exact trivial
+  | succ k' ih =>
+      intro F L h
+      cases F with
+      | nil => exact False.elim h
+      | cons t F' =>
+          obtain ⟨c, o⟩ := t
+          cases o with
+          | none => exact False.elim h
+          | some j' =>
+              obtain ⟨hj, hrest⟩ := h
+              exact ⟨hj, ih F' L hrest⟩
+
+omit [DecidableEq α] in
+/-- Splitting off a pure prefix. -/
+theorem purePrefix_split : ∀ (j k : Nat) (T : List (α × Option Nat)),
+    purePrefix j k T → ∃ F U, T = F ++ U ∧ F.length = k
+      ∧ purePrefix j k F ∧ AllFrozen F := by
+  intro j k
+  induction k with
+  | zero => intro T _; exact ⟨[], T, rfl, rfl, trivial, trivial⟩
+  | succ k' ih =>
+      intro T h
+      cases T with
+      | nil => exact False.elim h
+      | cons t T' =>
+          obtain ⟨c, o⟩ := t
+          cases o with
+          | none => exact False.elim h
+          | some j' =>
+              obtain ⟨hj, hrest⟩ := h
+              obtain ⟨F, U, hT', hF, hP, hA⟩ := ih T' hrest
+              refine ⟨(c, some j') :: F, U, by rw [hT']; rfl, ?_, ⟨hj, hP⟩, ?_⟩
+              · simp [hF]
+              · exact hA
+
+/-- A freezing pass preserves pure prefixes. -/
+theorem freezePass_purePrefix (X : List α) (hX : X ≠ []) (i j k : Nat) :
+    ∀ T : List (α × Option Nat), purePrefix j k T →
+    purePrefix j k (freezePass X hX i T) := by
+  intro T h
+  obtain ⟨F, U, hT, hF, hP, hA⟩ := purePrefix_split j k T h
+  rw [hT, freezePass_frozen X hX i F U hA]
+  exact purePrefix_app j k F _ hP
+
+/-- Peeling a matched unfrozen block preserves the strong invariant. -/
+theorem PureChunked_dropU (pairs : List (List α × List α)) :
+    ∀ (n : Nat) (X : List α) (L U : List (α × Option Nat)), L.length ≤ n →
+    dropU? X L = some U → PureChunked pairs L → PureChunked pairs U := by
+  intro n
+  induction n with
+  | zero =>
+      intro X L U hL
+      cases L with
+      | nil =>
+          intro hd hC
+          cases X with
+          | nil =>
+              have hd2 : some ([] : List (α × Option Nat)) = some U := hd
+              injection hd2 with hd'
+              subst hd'
+              exact hC
+          | cons c₀ X₀ =>
+              have hd2 : none = some U := hd
+              exact absurd hd2 (by simp)
+      | cons t L' => rw [List.length_cons] at hL; omega
+  | succ n' ih =>
+      intro X L U hL hd hC
+      cases L with
+      | nil =>
+          cases X with
+          | nil =>
+              have hd2 : some ([] : List (α × Option Nat)) = some U := hd
+              injection hd2 with hd'
+              subst hd'
+              exact hC
+          | cons c₀ X₀ =>
+              have hd2 : none = some U := hd
+              exact absurd hd2 (by simp)
+      | cons t L' =>
+          rw [List.length_cons] at hL
+          obtain ⟨c, o⟩ := t
+          cases o with
+          | some j =>
+              cases X with
+              | nil =>
+                  have hd2 : some ((c, some j) :: L') = some U := hd
+                  injection hd2 with hd'
+                  subst hd'
+                  exact hC
+              | cons c₀ X₀ =>
+                  rw [dropU?_cons_some] at hd
+                  exact absurd hd (by simp)
+          | none =>
+              cases X with
+              | nil =>
+                  have hd2 : some ((c, none) :: L') = some U := hd
+                  injection hd2 with hd'
+                  subst hd'
+                  rw [PureChunked_none] at hC
+                  rw [PureChunked_none]
+                  exact hC
+              | cons c₀ X₀ =>
+                  rw [PureChunked_none] at hC
+                  rw [dropU?_cons_none] at hd
+                  by_cases hcc : c₀ = c
+                  · rw [ite_eq_left hcc] at hd
+                    exact ih X₀ L' U (by omega) hd hC
+                  · rw [ite_eq_right hcc] at hd
+                    exact absurd hd (by simp)
+
+omit [DecidableEq α] in
+/-- A `freezeBlock` is a pure prefix of round-`i` entries. -/
+theorem purePrefix_freezeBlock (i : Nat) : ∀ (m : Nat) (T : List (α × Option Nat)),
+    m ≤ T.length → purePrefix i m (freezeBlock i m T) := by
+  intro m
+  induction m with
+  | zero => intro T _; exact trivial
+  | succ m' ih =>
+      intro T h
+      cases T with
+      | nil => simp at h
+      | cons t T' =>
+          have hlen : m' ≤ T'.length := by rw [List.length_cons] at h; omega
+          exact ⟨rfl, ih T' hlen⟩
+
+omit [DecidableEq α] in
+/-- The strong invariant implies the weak one. -/
+theorem PureChunked_imp_Chunked (pairs : List (List α × List α)) :
+    ∀ (n : Nat) (T : List (α × Option Nat)), T.length ≤ n →
+    PureChunked pairs T → Chunked pairs T := by
+  intro n
+  induction n with
+  | zero =>
+      intro T hT
+      cases T with
+      | nil => intro _; exact Chunked_nil pairs
+      | cons t T' => rw [List.length_cons] at hT; omega
+  | succ n' ih =>
+      intro T hT hC
+      cases T with
+      | nil => exact Chunked_nil pairs
+      | cons t T' =>
+          rw [List.length_cons] at hT
+          obtain ⟨c, o⟩ := t
+          cases o with
+          | none =>
+              rw [PureChunked_none] at hC
+              rw [Chunked_none]
+              exact ih T' (by omega) hC
+          | some j =>
+              rw [PureChunked_some] at hC
+              obtain ⟨hPP, hCD⟩ := hC
+              rw [Chunked_some]
+              have hlen := dropN_length_le (xlen pairs j - 1) T'
+              exact ⟨purePrefix_frozen j (xlen pairs j - 1) T' hPP,
+                ih _ (by omega) hCD⟩
+
+omit [DecidableEq α] in
+/-- Introducing a run preserves the strong invariant. -/
+theorem PureChunked_runE_intro (pairs : List (List α × List α)) :
+    ∀ (V : List α) (T : List (α × Option Nat)),
+    PureChunked pairs T → PureChunked pairs (runE V ++ T) := by
+  intro V
+  induction V with
+  | nil => intro T h; exact h
+  | cons v V' ih =>
+      intro T h
+      show PureChunked pairs ((v, none) :: (runE V' ++ T))
+      rw [PureChunked_none]
+      exact ih T h
+
+/-- The freezing pass preserves the strong chunk invariant. -/
+theorem PureChunked_freezePass (pairs : List (List α × List α)) (X : List α)
+    (hX : X ≠ []) (i : Nat) (hxl : xlen pairs i = X.length) :
+    ∀ (n : Nat) (T : List (α × Option Nat)), T.length ≤ n →
+    PureChunked pairs T → PureChunked pairs (freezePass X hX i T) := by
+  intro n
+  induction n with
+  | zero =>
+      intro T hT
+      cases T with
+      | nil => intro _; rw [freezePass_nil]; exact PureChunked_nil pairs
+      | cons t T' => rw [List.length_cons] at hT; omega
+  | succ n' ih =>
+      intro T hT hC
+      cases T with
+      | nil => rw [freezePass_nil]; exact PureChunked_nil pairs
+      | cons t T' =>
+          rw [List.length_cons] at hT
+          obtain ⟨c, o⟩ := t
+          cases o with
+          | some j =>
+              have hdn : dropU? X ((c, some j) :: T') = none := by
+                cases X with
+                | nil => exact absurd rfl hX
+                | cons c₀ X₀ => rfl
+              rw [PureChunked_some] at hC
+              obtain ⟨hPP, hCD⟩ := hC
+              rw [freezePass_cons_none _ _ _ _ _ hdn, PureChunked_some]
+              have hlen := dropN_length_le (xlen pairs j - 1) T'
+              refine ⟨freezePass_purePrefix X hX i j (xlen pairs j - 1) T' hPP, ?_⟩
+              rw [freezePass_dropN_frozen X hX i (xlen pairs j - 1) T'
+                (purePrefix_frozen j (xlen pairs j - 1) T' hPP)]
+              exact ih _ (by omega) hCD
+          | none =>
+              rw [PureChunked_none] at hC
+              cases hd : dropU? X ((c, none) :: T') with
+              | none =>
+                  rw [freezePass_cons_none _ _ _ _ _ hd, PureChunked_none]
+                  exact ih T' (by omega) hC
+              | some U =>
+                  rw [freezePass_cons_some _ _ _ _ _ _ hd]
+                  have hX1 : 1 ≤ X.length := length_pos_of_ne_nil X hX
+                  obtain ⟨m, hm⟩ : ∃ m, X.length = m + 1 :=
+                    Nat.exists_eq_succ_of_ne_zero (by omega)
+                  have him : xlen pairs i - 1 = m := by omega
+                  have hlenU := dropU?_length X ((c, none) :: T') U hd
+                  have hL : ((c, none) :: T').length = T'.length + 1 := rfl
+                  have hlenB : m ≤ T'.length := by omega
+                  rw [hm]
+                  show PureChunked pairs
+                    ((c, some i) :: (freezeBlock i m T' ++ freezePass X hX i U))
+                  rw [PureChunked_some, him]
+                  refine ⟨purePrefix_app i m (freezeBlock i m T')
+                    (freezePass X hX i U) (purePrefix_freezeBlock i m T' hlenB), ?_⟩
+                  rw [dropN_length (freezePass X hX i U) m (freezeBlock i m T')
+                    (freezeBlock_length i m T' hlenB)]
+                  exact ih U (by omega) (PureChunked_dropU pairs
+                    ((c, none) :: T').length X ((c, none) :: T') U (Nat.le_refl _) hd
+                    (by rw [PureChunked_none]; exact hC))
+
+/-- The head of a dropped suffix is in the list. -/
+theorem drop_head_mem : ∀ (L : List β) (k : Nat) (p : β) (ps' : List β),
+    L.drop k = p :: ps' → p ∈ L := by
+  intro L k
+  induction k generalizing L with
+  | zero =>
+      intro p ps' h
+      rw [List.drop_zero] at h
+      subst h
+      exact List.mem_cons_self ..
+  | succ k' ih =>
+      intro p ps' h
+      cases L with
+      | nil => simp at h
+      | cons a L' =>
+          have h2 : L'.drop k' = p :: ps' := h
+          exact List.mem_cons_of_mem a (ih L' p ps' h2)
+
+/-- Dropping one more past a cons-shaped drop. -/
+theorem drop_succ_of_cons : ∀ (L : List β) (k : Nat) (p : β) (ps' : List β),
+    L.drop k = p :: ps' → L.drop (k + 1) = ps' := by
+  intro L k p ps' h
+  have h2 : (L.drop k).drop 1 = L.drop (k + 1) := List.drop_drop
+  rw [h] at h2
+  exact h2.symm
+
+/-- The head of a dropped suffix is the indexed entry. -/
+theorem drop_head_getD : ∀ (L : List β) (k : Nat) (p : β) (ps' : List β) (d : β),
+    L.drop k = p :: ps' → L.getD k d = p := by
+  intro L k
+  induction k generalizing L with
+  | zero =>
+      intro p ps' d h
+      rw [List.drop_zero] at h
+      subst h
+      rfl
+  | succ k' ih =>
+      intro p ps' d h
+      cases L with
+      | nil => simp at h
+      | cons a L' =>
+          have h2 : L'.drop k' = p :: ps' := h
+          exact ih L' p ps' d h2
+
 /-! ### The construction over `enc2` directly
 
   `enc2Pass_eq` and `dec2Pass_enc2` (both proven above) bridge the
@@ -2547,6 +5246,1138 @@ def renameRR (b x : α) : Nat → List (List α × List α) → List α → List
 def instRR (b x : α) : Nat → List (List α × List α) → List α → List α
   | _, [], T => T
   | i, (_, Yi) :: ps, T => instRR b x (i - 1) ps (subst (enc2 x Yi) (marker x b (i + 1)) T)
+
+/-- The rename/repair rounds on the item layer, mirroring `renameRR`
+one round at a time. -/
+def renLoop (b x : α) : Nat → List (List α × List α) → List (NFItem α) → List (NFItem α)
+  | _, [], ns => ns
+  | i, (Xi, _) :: ps, ns =>
+      renLoop b x (i + 1) ps (repairNF b x i Xi (renameNF b x i Xi ns))
+
+/-- Unfolding `renLoop` on a round. -/
+theorem renLoop_cons (b x : α) (i : Nat) (Xi Yi : List α) (ps : List (List α × List α))
+    (ns : List (NFItem α)) :
+    renLoop b x i ((Xi, Yi) :: ps) ns =
+      renLoop b x (i + 1) ps (repairNF b x i Xi (renameNF b x i Xi ns)) := rfl
+
+/-- The item-level rename rounds compute the pieces of the freezing
+rounds over the annotated list. -/
+theorem renLoop_markRounds (b x : α) (pairs : List (List α × List α))
+    (hne : ∀ p ∈ pairs, p.1 ≠ []) :
+    ∀ (ps : List (List α × List α)) (i : Nat), ps = pairs.drop (i - 1) → 1 ≤ i →
+    ∀ (n : Nat) (A : List (α × Option Nat)), A.length ≤ n →
+    PureChunked pairs A →
+    renLoop b x i ps (pieces pairs A) = pieces pairs (markRounds ps i A) := by
+  intro ps
+  induction ps with
+  | nil => intro i _ _ n A _ _; rfl
+  | cons p ps' ih =>
+      intro i hps hi n A hA hC
+      obtain ⟨Xi, Yi⟩ := p
+      have hmem : (Xi, Yi) ∈ pairs :=
+        drop_head_mem pairs (i - 1) (Xi, Yi) ps' hps.symm
+      have hXi : Xi ≠ [] := hne (Xi, Yi) hmem
+      have hxl : xlen pairs i = Xi.length := by
+        simp only [xlen]
+        rw [drop_head_getD pairs (i - 1) (Xi, Yi) ps' ([], []) hps.symm]
+      have hps2 : ps' = pairs.drop i := by
+        have h3 := drop_succ_of_cons pairs (i - 1) (Xi, Yi) ps' hps.symm
+        have h4 : i - 1 + 1 = i := by omega
+        rw [h4] at h3
+        exact h3.symm
+      rw [renLoop_cons]
+      show renLoop b x (i + 1) ps' (roundNF b x i Xi (pieces pairs A))
+        = pieces pairs (markRounds ((Xi, Yi) :: ps') i A)
+      have hMR : markRounds ((Xi, Yi) :: ps') i A
+          = markRounds ps' (i + 1) (freezePass Xi hXi i A) := by
+        simp only [markRounds]
+        rw [dite_eq_right hXi]
+      rw [hMR, round_pieces x b pairs i Xi hXi hxl A.length A (Nat.le_refl _)
+        (PureChunked_imp_Chunked pairs A.length A (Nat.le_refl _) hC),
+        ih (i + 1) hps2 (by omega) (freezePass Xi hXi i A).length
+          (freezePass Xi hXi i A) (Nat.le_refl _)
+          (PureChunked_freezePass pairs Xi hXi i hxl A.length A (Nat.le_refl _) hC)]
+
+/-- Unfolding `renameRR` on a round. -/
+theorem renameRR_cons (b x : α) (i : Nat) (Xi Yi : List α) (ps : List (List α × List α))
+    (T : List α) :
+    renameRR b x i ((Xi, Yi) :: ps) T =
+      renameRR b x (i + 1) ps
+        (subst (enc2 x Xi ++ [b]) (marker x b (i + 2))
+          (subst (marker x b (i + 1)) (enc2 x Xi) T)) := rfl
+
+/-- The item-level rounds compute the `renameRR` text. -/
+theorem renLoop_scan (x b : α) (hxb : x ≠ b) :
+    ∀ (ps : List (List α × List α)), (∀ p ∈ ps, p.1 ≠ []) → ∀ (i : Nat), 1 ≤ i →
+    ∀ (ns : List (NFItem α)), CanonB (i - 1) ns →
+    itext b x (renLoop b x i ps ns) = renameRR b x i ps (itext b x ns) := by
+  intro ps
+  induction ps with
+  | nil => intro _ _ _ _ _; rfl
+  | cons p ps ih =>
+      intro hne i hi ns hC
+      obtain ⟨Xi, Yi⟩ := p
+      have hXi : Xi ≠ [] := hne (Xi, Yi) (by simp)
+      have hR1 := renameNF_scan x b hxb i Xi hXi ns.length ns (Nat.le_refl _) hC
+      have hRd := renameNF_rounded b x i Xi hXi hi ns.length ns (Nat.le_refl _) hC
+      have hR2 := repairNF_scan x b hxb i Xi (renameNF b x i Xi ns).length
+        (renameNF b x i Xi ns) (Nat.le_refl _) hRd
+      rw [← hR1] at hR2
+      rw [renLoop_cons, renameRR_cons, hR2]
+      exact ih (fun p hp => hne p (List.mem_cons.mpr (Or.inr hp))) (i + 1) (by omega)
+        (repairNF b x i Xi (renameNF b x i Xi ns))
+        (repairNF_canon b x i Xi (renameNF b x i Xi ns).length
+          (renameNF b x i Xi ns) (Nat.le_refl _) hRd)
+
+/-- The item-level rounds keep the list canonical, with markers at
+most the last round's index. -/
+theorem renLoop_canon (b x : α) :
+    ∀ (ps : List (List α × List α)), (∀ p ∈ ps, p.1 ≠ []) → ∀ (i : Nat), 1 ≤ i →
+    ∀ (ns : List (NFItem α)), CanonB (i - 1) ns →
+    CanonB (i - 1 + ps.length) (renLoop b x i ps ns) := by
+  intro ps
+  induction ps with
+  | nil => intro _ _ _ ns hC; exact hC
+  | cons p ps ih =>
+      intro hne i hi ns hC
+      obtain ⟨Xi, Yi⟩ := p
+      have hXi : Xi ≠ [] := hne (Xi, Yi) (by simp)
+      have hRd := renameNF_rounded b x i Xi hXi hi ns.length ns (Nat.le_refl _) hC
+      have hRound : CanonB i (repairNF b x i Xi (renameNF b x i Xi ns)) :=
+        repairNF_canon b x i Xi (renameNF b x i Xi ns).length
+          (renameNF b x i Xi ns) (Nat.le_refl _) hRd
+      have hidx : i - 1 + ((Xi, Yi) :: ps).length = (i + 1) - 1 + ps.length := by
+        simp only [List.length_cons]
+        omega
+      rw [renLoop_cons, hidx]
+      exact ih (fun p hp => hne p (List.mem_cons.mpr (Or.inr hp))) (i + 1) (by omega)
+        (repairNF b x i Xi (renameNF b x i Xi ns)) hRound
+
+/-- The instantiation rounds on the item layer, mirroring `instRR`. -/
+def insLoop (b x : α) : Nat → List (List α × List α) → List (NFItem α) → List (NFItem α)
+  | _, [], ns => ns
+  | i, (_, Yi) :: ps, ns => insLoop b x (i - 1) ps (instNF b x i Yi ns)
+
+omit [DecidableEq α] in
+/-- Unfolding `insLoop` on a round. -/
+theorem insLoop_cons (b x : α) (i : Nat) (Xi Yi : List α) (ps : List (List α × List α))
+    (ns : List (NFItem α)) :
+    insLoop b x i ((Xi, Yi) :: ps) ns = insLoop b x (i - 1) ps (instNF b x i Yi ns) := rfl
+
+omit [DecidableEq α] in
+/-- A leading fragment passes through the instantiation rounds. -/
+theorem insLoop_frag (b x : α) :
+    ∀ (ps : List (List α × List α)) (i : Nat) (P : List α) (ns : List (NFItem α)),
+    itext b x (insLoop b x i ps (NFItem.frag P :: ns))
+      = enc2 x P ++ itext b x (insLoop b x i ps ns) := by
+  intro ps
+  induction ps with
+  | nil => intro i P ns; rfl
+  | cons p ps' ih =>
+      intro i P ns
+      obtain ⟨Xi, Yi⟩ := p
+      simp only [insLoop_cons]
+      rw [instNF_frag_cons]
+      exact ih (i - 1) P (instNF b x i Yi ns)
+
+omit [DecidableEq α] in
+/-- A pushed fragment passes through the instantiation rounds. -/
+theorem insLoop_push (b x : α) :
+    ∀ (ps : List (List α × List α)) (i : Nat) (P : List α) (ns : List (NFItem α)),
+    itext b x (insLoop b x i ps (pushFrag P ns))
+      = enc2 x P ++ itext b x (insLoop b x i ps ns) := by
+  intro ps
+  induction ps with
+  | nil =>
+      intro i P ns
+      exact itext_push b x P ns
+  | cons p ps' ih =>
+      intro i P ns
+      obtain ⟨Xi, Yi⟩ := p
+      simp only [insLoop_cons]
+      by_cases hP : P = []
+      · rw [hP, pushFrag_nil, enc2_nil, List.nil_append]
+      · cases ns with
+        | nil =>
+            have hp : pushFrag P ([] : List (NFItem α)) = NFItem.frag P :: [] := by
+              simp only [pushFrag]
+              rw [ite_eq_right hP]
+            rw [hp, instNF_frag_cons, insLoop_frag]
+        | cons n ns' =>
+            cases n with
+            | frag W =>
+                have hp : pushFrag P (NFItem.frag W :: ns')
+                    = NFItem.frag (P ++ W) :: ns' := rfl
+                rw [hp, instNF_frag_cons, instNF_frag_cons, insLoop_frag,
+                  insLoop_frag, enc2_append, List.append_assoc]
+            | mark j =>
+                have hp : pushFrag P (NFItem.mark j :: ns')
+                    = NFItem.frag P :: NFItem.mark j :: ns' := by
+                  simp only [pushFrag]
+                  rw [ite_eq_right hP]
+                rw [hp, instNF_frag_cons, insLoop_frag]
+            | dmg W j k =>
+                have hp : pushFrag P (NFItem.dmg W j k :: ns')
+                    = NFItem.frag P :: NFItem.dmg W j k :: ns' := by
+                  simp only [pushFrag]
+                  rw [ite_eq_right hP]
+                rw [hp, instNF_frag_cons, insLoop_frag]
+
+omit [DecidableEq α] in
+/-- Unfrozen runs pass through `assemble`. -/
+theorem assemble_runE (pairs : List (List α × List α)) :
+    ∀ (V : List α) (T : List (α × Option Nat)),
+    assemble pairs (runE V ++ T) = V ++ assemble pairs T := by
+  intro V
+  induction V with
+  | nil => intro T; rfl
+  | cons v V' ih =>
+      intro T
+      have hr : runE (v :: V') = (v, none) :: runE V' := rfl
+      rw [hr, List.cons_append]
+      simp only [assemble]
+      rw [ih T]
+      rfl
+
+omit [DecidableEq α] in
+/-- Unfolding `insLoop` on a round, projecting the image. -/
+theorem insLoop_cons' (b x : α) (i : Nat) (p : List α × List α) (ps : List (List α × List α))
+    (ns : List (NFItem α)) :
+    insLoop b x i (p :: ps) ns = insLoop b x (i - 1) ps (instNF b x i p.2 ns) := by
+  obtain ⟨Xi, Yi⟩ := p
+  rfl
+
+/-- The head of the reversed prefix is the round's pair. -/
+theorem take_reverse_cons : ∀ (pairs : List (List α × List α)) (i : Nat),
+    i + 1 ≤ pairs.length →
+    (pairs.take (i + 1)).reverse = pairs.getD i ([], []) :: (pairs.take i).reverse := by
+  intro pairs i
+  induction i generalizing pairs with
+  | zero =>
+      intro h
+      cases pairs with
+      | nil => simp only [List.length_nil] at h; omega
+      | cons p ps => rfl
+  | succ i' ih =>
+      intro h
+      cases pairs with
+      | nil => simp only [List.length_nil] at h; omega
+      | cons p ps =>
+          have hps : i' + 1 ≤ ps.length := by
+            simp only [List.length_cons] at h
+            omega
+          have hIH := ih ps hps
+          have ht1 : (p :: ps).take (i' + 1 + 1) = p :: ps.take (i' + 1) := rfl
+          have ht2 : (p :: ps).take (i' + 1) = p :: ps.take i' := rfl
+          have hg : (p :: ps).getD (i' + 1) ([], []) = ps.getD i' ([], []) := rfl
+          rw [ht1, hg, ht2, List.reverse_cons, List.reverse_cons, hIH, List.cons_append]
+
+/-- A marker contributes the image of its round through the rounds. -/
+theorem insLoop_mark (b x : α) (pairs : List (List α × List α)) :
+    ∀ (i : Nat) (ps : List (List α × List α)),
+    ps = (pairs.take i).reverse → 1 ≤ i → i ≤ pairs.length →
+    ∀ (j : Nat) (ns0 : List (NFItem α)), 1 ≤ j → j ≤ i →
+    itext b x (insLoop b x i ps (NFItem.mark j :: ns0))
+      = enc2 x (pairs.getD (j - 1) ([], [])).2 ++ itext b x (insLoop b x i ps ns0) := by
+  intro i
+  induction i with
+  | zero => intro ps hps hi1; omega
+  | succ i' ih =>
+      intro ps hps hi1 hi2 j ns0 hj1 hj2
+      have hHead := take_reverse_cons pairs i' (by omega)
+      by_cases hj : j = i' + 1
+      · subst hj
+        rw [Nat.add_sub_cancel, hps, hHead]
+        simp only [insLoop_cons']
+        rw [instNF_mark_fire, insLoop_push]
+      · have hj' : j ≤ i' := by omega
+        rw [hps, hHead]
+        simp only [insLoop_cons']
+        rw [instNF_mark_pass b x (i' + 1) (pairs.getD i' ([], [])).2 j ns0 hj]
+        exact ih ((pairs.take i').reverse) rfl (by omega) (by omega) j
+          (instNF b x (i' + 1) (pairs.getD i' ([], [])).2 ns0) hj1 hj'
+
+/-- A defaulted entry inside range belongs to the list. -/
+theorem getD_lt_mem {β : Type} : ∀ (L : List β) (k : Nat) (d : β), k < L.length →
+    L.getD k d ∈ L := by
+  intro L k d h
+  have hlen : (L.drop k).length = L.length - k := List.length_drop
+  have hpos : 0 < (L.drop k).length := by omega
+  cases hdrop : L.drop k with
+  | nil =>
+      rw [hdrop] at hpos
+      simp at hpos
+  | cons p ps' =>
+      rw [drop_head_getD L k p ps' d hdrop]
+      exact drop_head_mem L k p ps' hdrop
+
+omit [DecidableEq α] in
+/-- `dropN` is the standard drop. -/
+theorem dropN_eq_drop : ∀ (k : Nat) (T : List (α × Option Nat)),
+    dropN k T = List.drop k T := by
+  intro k
+  induction k with
+  | zero => intro T; rfl
+  | succ k' ih =>
+      intro T
+      cases T with
+      | nil => rfl
+      | cons t T' =>
+          show dropN k' T' = List.drop (k' + 1) (t :: T')
+          rw [ih T']
+          rfl
+
+omit [DecidableEq α] in
+/-- Dropping an additive amount. -/
+theorem dropN_add : ∀ (a b : Nat) (T : List (α × Option Nat)),
+    dropN (a + b) T = dropN b (dropN a T) := by
+  intro a b T
+  rw [dropN_eq_drop, dropN_eq_drop, dropN_eq_drop, List.drop_drop, ← dropN_eq_drop]
+
+omit [DecidableEq α] in
+/-- One more entry of the same round. -/
+theorem runLen_self_cons (j : Nat) : ∀ (c : α) (X : List (α × Option Nat)),
+    runLen j ((c, some j) :: X) = runLen j X + 1 := by
+  intro c X
+  show (if j = j then runLen j X + 1 else 0) = runLen j X + 1
+  split
+  · rfl
+  · rename_i h
+    exact absurd rfl h
+
+omit [DecidableEq α] in
+/-- The run length over a pure prefix. -/
+theorem runLen_app : ∀ (j k : Nat) (T U : List (α × Option Nat)),
+    purePrefix j k T → T.length = k → runLen j (T ++ U) = k + runLen j U := by
+  intro j k
+  induction k with
+  | zero =>
+      intro T U _ hT
+      cases T with
+      | nil => rw [Nat.zero_add]; rfl
+      | cons t T' =>
+          simp only [List.length_cons] at hT
+          omega
+  | succ k' ih =>
+      intro T U h hT
+      cases T with
+      | nil => exact False.elim h
+      | cons t T' =>
+          obtain ⟨c, o⟩ := t
+          cases o with
+          | none => exact False.elim h
+          | some j' =>
+              obtain ⟨hj, hrest⟩ := h
+              have hT' : T'.length = k' := by
+                simp only [List.length_cons] at hT
+                omega
+              rw [hj, List.cons_append, runLen_self_cons j c (T' ++ U),
+                ih T' U hrest hT']
+              omega
+
+omit [DecidableEq α] in
+/-- The head run of a round, from the definition of `assemble`. -/
+theorem assemble_runHead (pairs : List (List α × List α)) (j : Nat) :
+    ∀ W : List (α × Option Nat),
+    assemble pairs W
+      = (List.replicate (runLen j W / xlen pairs j) (pairs.getD (j - 1) ([], [])).2).flatten
+        ++ assemble pairs (dropN (runLen j W) W) := by
+  intro W
+  cases W with
+  | nil =>
+      have hr : runLen j ([] : List (α × Option Nat)) = 0 := rfl
+      have hdn : dropN 0 ([] : List (α × Option Nat)) = [] := rfl
+      rw [hr, Nat.zero_div, List.replicate_zero, hdn]
+      rfl
+  | cons t T' =>
+      obtain ⟨c, o⟩ := t
+      cases o with
+      | none =>
+          have hr : runLen j ((c, none) :: T') = 0 := rfl
+          have hdn : dropN 0 ((c, none) :: T') = (c, none) :: T' := rfl
+          rw [hr, Nat.zero_div, List.replicate_zero, hdn]
+          rfl
+      | some j' =>
+          by_cases hjj : j' = j
+          · subst hjj
+            rw [dropN_eq_drop]
+            simp only [assemble]
+            rfl
+          · have hr : runLen j ((c, some j') :: T') = 0 := by
+              show (if j' = j then runLen j T' + 1 else 0) = 0
+              split
+              · rename_i h
+                exact absurd h hjj
+              · rfl
+            have hdn : dropN 0 ((c, some j') :: T') = (c, some j') :: T' := rfl
+            rw [hr, Nat.zero_div, List.replicate_zero, hdn]
+            rfl
+
+omit [DecidableEq α] in
+/-- Freezing one chunk of a round. -/
+theorem assemble_chunk (pairs : List (List α × List α)) (hne : ∀ p ∈ pairs, p.1 ≠ []) :
+    ∀ (t : α) (j : Nat) (T : List (α × Option Nat)), 1 ≤ j → j ≤ pairs.length →
+    PureChunked pairs ((t, some j) :: T) →
+    assemble pairs ((t, some j) :: T)
+      = (pairs.getD (j - 1) ([], [])).2 ++ assemble pairs (dropN (xlen pairs j - 1) T) := by
+  intro t j T hj1 hj2 hC
+  have hmem : pairs.getD (j - 1) ([], []) ∈ pairs :=
+    getD_lt_mem pairs (j - 1) ([], []) (by omega)
+  have hXne : (pairs.getD (j - 1) ([], [])).1 ≠ [] := hne _ hmem
+  have hxj : 1 ≤ xlen pairs j := by
+    simp only [xlen]
+    cases hE : (pairs.getD (j - 1) ([], [])).1 with
+    | nil => exact absurd hE hXne
+    | cons v V =>
+        simp only [List.length_cons]
+        omega
+  have hxdef : xlen pairs j = (pairs.getD (j - 1) ([], [])).1.length := rfl
+  rw [PureChunked_some] at hC
+  obtain ⟨hPP, hCW⟩ := hC
+  obtain ⟨F, W, hT, hF, hPF, hAF⟩ := purePrefix_split j (xlen pairs j - 1) T hPP
+  have hWdef : dropN (xlen pairs j - 1) T = W := by
+    rw [hT, dropN_length W (xlen pairs j - 1) F hF]
+  have hr : runLen j ((t, some j) :: T) = xlen pairs j + runLen j W := by
+    rw [hT, runLen_self_cons j t (F ++ W), runLen_app j (xlen pairs j - 1) F W hPF hF]
+    omega
+  have hd : List.drop (runLen j ((t, some j) :: T)) ((t, some j) :: T)
+      = dropN (runLen j W) W := by
+    rw [hr, ← dropN_eq_drop]
+    obtain ⟨k, hk⟩ : ∃ k, xlen pairs j + runLen j W = k + 1 :=
+      ⟨xlen pairs j + runLen j W - 1, by omega⟩
+    rw [hk]
+    show dropN k T = dropN (runLen j W) W
+    have hk2 : k = xlen pairs j - 1 + runLen j W := by omega
+    rw [hk2, dropN_add, hWdef]
+  rw [hWdef]
+  simp only [assemble]
+  rw [← hxdef, hd, hr, Nat.add_comm (xlen pairs j) (runLen j W),
+    Nat.add_div_right (runLen j W) (by omega : 0 < xlen pairs j), List.replicate_succ,
+    List.flatten_cons, assemble_runHead pairs j W, List.append_assoc]
+
+/-- All frozen entries are tagged with round indices in range. -/
+def TagsOK : Nat → List (α × Option Nat) → Prop
+  | _, [] => True
+  | n, (_, none) :: T => TagsOK n T
+  | n, (_, some j) :: T => 1 ≤ j ∧ j ≤ n ∧ TagsOK n T
+
+omit [DecidableEq α] in
+/-- Unfolding `TagsOK` on the empty list. -/
+theorem TagsOK_nil (n : Nat) : TagsOK n ([] : List (α × Option Nat)) = True := by
+  simp only [TagsOK]
+
+omit [DecidableEq α] in
+/-- Unfolding `TagsOK` on an unfrozen entry. -/
+theorem TagsOK_none (n : Nat) (c : α) (T : List (α × Option Nat)) :
+    TagsOK n ((c, none) :: T) = TagsOK n T := by
+  simp only [TagsOK]
+
+omit [DecidableEq α] in
+/-- Unfolding `TagsOK` on a frozen entry. -/
+theorem TagsOK_some (n : Nat) (c : α) (j : Nat) (T : List (α × Option Nat)) :
+    TagsOK n ((c, some j) :: T) = (1 ≤ j ∧ j ≤ n ∧ TagsOK n T) := by
+  simp only [TagsOK]
+
+omit [DecidableEq α] in
+/-- Unfrozen lists satisfy any tag bound. -/
+theorem TagsOK_runE : ∀ (n : Nat) (S : List α), TagsOK n (runE S) := by
+  intro n S
+  induction S with
+  | nil => exact trivial
+  | cons c S' ih =>
+      show TagsOK n ((c, none) :: runE S')
+      exact ih
+
+omit [DecidableEq α] in
+/-- Dropping entries preserves tag bounds. -/
+theorem TagsOK_dropN : ∀ (n k : Nat) (T : List (α × Option Nat)),
+    TagsOK n T → TagsOK n (dropN k T) := by
+  intro n k T
+  induction k generalizing T with
+  | zero => intro h; exact h
+  | succ k' ih =>
+      intro h
+      cases T with
+      | nil => exact trivial
+      | cons t T' =>
+          obtain ⟨c, o⟩ := t
+          cases o with
+          | none => rw [TagsOK_none] at h; exact ih T' h
+          | some j =>
+              rw [TagsOK_some] at h
+              obtain ⟨h1, h2, h3⟩ := h
+              exact ih T' h3
+
+omit [DecidableEq α] in
+/-- Tag bounds pass over concatenation. -/
+theorem TagsOK_app : ∀ (n : Nat) (A B : List (α × Option Nat)),
+    TagsOK n A → TagsOK n B → TagsOK n (A ++ B) := by
+  intro n A
+  induction A with
+  | nil => intro B _ hB; exact hB
+  | cons a A' ih =>
+      intro B hA hB
+      obtain ⟨c, o⟩ := a
+      cases o with
+      | none => rw [TagsOK_none] at hA; exact ih B hA hB
+      | some j =>
+          rw [TagsOK_some] at hA
+          obtain ⟨h1, h2, h3⟩ := hA
+          exact ⟨h1, h2, ih B h3 hB⟩
+
+omit [DecidableEq α] in
+/-- A frozen block carries one tag, in range. -/
+theorem TagsOK_freezeBlock : ∀ (i n : Nat), 1 ≤ i → i ≤ n →
+    ∀ (m : Nat) (T : List (α × Option Nat)), TagsOK n (freezeBlock i m T) := by
+  intro i n hi hin m T
+  induction m generalizing T with
+  | zero => exact trivial
+  | succ m' ih =>
+      cases T with
+      | nil => exact trivial
+      | cons t T' =>
+          show 1 ≤ i ∧ i ≤ n ∧ TagsOK n (freezeBlock i m' T')
+          exact ⟨hi, hin, ih T'⟩
+
+/-- Tag bounds survive the unfrozen matcher. -/
+theorem TagsOK_dropU : ∀ (n k : Nat) (X : List α) (L U : List (α × Option Nat)),
+    L.length ≤ k → dropU? X L = some U → TagsOK n L → TagsOK n U := by
+  intro n k
+  induction k with
+  | zero =>
+      intro X L U hL
+      cases L with
+      | nil =>
+          intro hd hC
+          cases X with
+          | nil =>
+              have hd2 : some ([] : List (α × Option Nat)) = some U := hd
+              injection hd2 with hd'
+              subst hd'
+              exact hC
+          | cons c₀ X₀ =>
+              have hd2 : none = some U := hd
+              exact absurd hd2 (by simp)
+      | cons t L' => rw [List.length_cons] at hL; omega
+  | succ k' ih =>
+      intro X L U hL hd hC
+      cases L with
+      | nil =>
+          cases X with
+          | nil =>
+              have hd2 : some ([] : List (α × Option Nat)) = some U := hd
+              injection hd2 with hd'
+              subst hd'
+              exact hC
+          | cons c₀ X₀ =>
+              have hd2 : none = some U := hd
+              exact absurd hd2 (by simp)
+      | cons t L' =>
+          rw [List.length_cons] at hL
+          obtain ⟨c, o⟩ := t
+          cases o with
+          | some j =>
+              cases X with
+              | nil =>
+                  have hd2 : some ((c, some j) :: L') = some U := hd
+                  injection hd2 with hd'
+                  subst hd'
+                  exact hC
+              | cons c₀ X₀ =>
+                  rw [dropU?_cons_some] at hd
+                  exact absurd hd (by simp)
+          | none =>
+              cases X with
+              | nil =>
+                  have hd2 : some ((c, none) :: L') = some U := hd
+                  injection hd2 with hd'
+                  subst hd'
+                  exact hC
+              | cons c₀ X₀ =>
+                  rw [TagsOK_none] at hC
+                  rw [dropU?_cons_none] at hd
+                  by_cases hcc : c₀ = c
+                  · rw [ite_eq_left hcc] at hd
+                    exact ih X₀ L' U (by omega) hd hC
+                  · rw [ite_eq_right hcc] at hd
+                    exact absurd hd (by simp)
+
+/-- The freezing pass keeps tag bounds. -/
+theorem TagsOK_freezePass : ∀ (i n : Nat), 1 ≤ i → i ≤ n → ∀ (X : List α) (hX : X ≠ []),
+    ∀ (m : Nat) (T : List (α × Option Nat)), T.length ≤ m → TagsOK n T →
+    TagsOK n (freezePass X hX i T) := by
+  intro i n hi hin X hX m
+  induction m with
+  | zero =>
+      intro T hT hC
+      cases T with
+      | nil => rw [freezePass_nil]; exact trivial
+      | cons t T' => rw [List.length_cons] at hT; omega
+  | succ m' ih =>
+      intro T hT hC
+      cases T with
+      | nil => rw [freezePass_nil]; exact trivial
+      | cons t T' =>
+          rw [List.length_cons] at hT
+          obtain ⟨c, o⟩ := t
+          cases o with
+          | some j =>
+              have hdn : dropU? X ((c, some j) :: T') = none := by
+                cases X with
+                | nil => exact absurd rfl hX
+                | cons c₀ X₀ => rfl
+              rw [freezePass_cons_none _ _ _ _ _ hdn, TagsOK_some]
+              rw [TagsOK_some] at hC
+              obtain ⟨h1, h2, h3⟩ := hC
+              exact ⟨h1, h2, ih T' (by omega) h3⟩
+          | none =>
+              cases hd : dropU? X ((c, none) :: T') with
+              | none =>
+                  rw [freezePass_cons_none _ _ _ _ _ hd]
+                  exact ih T' (by omega) hC
+              | some U =>
+                  rw [freezePass_cons_some _ _ _ _ _ _ hd]
+                  have hX1 : 1 ≤ X.length := length_pos_of_ne_nil X hX
+                  have hlenU := dropU?_length X ((c, none) :: T') U hd
+                  have hL : ((c, none) :: T').length = T'.length + 1 := rfl
+                  refine TagsOK_app n (freezeBlock i X.length ((c, none) :: T'))
+                    (freezePass X hX i U) ?_ ?_
+                  · exact TagsOK_freezeBlock i n hi hin X.length ((c, none) :: T')
+                  · exact ih U (by omega)
+                      (TagsOK_dropU n ((c, none) :: T').length X
+                        ((c, none) :: T') U (Nat.le_refl _) hd hC)
+
+/-- The freezing rounds keep tag bounds. -/
+theorem markRounds_TagsOK (pairs : List (List α × List α)) (hne : ∀ p ∈ pairs, p.1 ≠ []) :
+    ∀ (ps : List (List α × List α)) (i : Nat), ps = pairs.drop (i - 1) → 1 ≤ i →
+    i + ps.length = pairs.length + 1 →
+    ∀ (T : List (α × Option Nat)), TagsOK pairs.length T →
+    TagsOK pairs.length (markRounds ps i T) := by
+  intro ps
+  induction ps with
+  | nil => intro i hps hi hlen T hC; exact hC
+  | cons p ps' ih =>
+      intro i hps hi hlen T hC
+      obtain ⟨Xi, Yi⟩ := p
+      have hmem : (Xi, Yi) ∈ pairs := drop_head_mem pairs (i - 1) (Xi, Yi) ps' hps.symm
+      have hXi : Xi ≠ [] := hne _ hmem
+      have hps2 : ps' = pairs.drop i := by
+        have h3 := drop_succ_of_cons pairs (i - 1) (Xi, Yi) ps' hps.symm
+        have h4 : i - 1 + 1 = i := by omega
+        rw [h4] at h3
+        exact h3.symm
+      have hMR : markRounds ((Xi, Yi) :: ps') i T
+          = markRounds ps' (i + 1) (freezePass Xi hXi i T) := by
+        simp only [markRounds]
+        split
+        · next h => exact absurd h hXi
+        · rfl
+      simp only [List.length_cons] at hlen
+      rw [hMR]
+      exact ih (i + 1) hps2 (by omega) (by omega) (freezePass Xi hXi i T)
+        (TagsOK_freezePass i pairs.length (by omega) (by omega) Xi hXi
+          T.length T (Nat.le_refl _) hC)
+
+/-- The freezing rounds keep the strong chunk invariant. -/
+theorem markRounds_PureChunked (pairs : List (List α × List α)) (hne : ∀ p ∈ pairs, p.1 ≠ []) :
+    ∀ (ps : List (List α × List α)) (i : Nat), ps = pairs.drop (i - 1) → 1 ≤ i →
+    ∀ (T : List (α × Option Nat)), PureChunked pairs T →
+    PureChunked pairs (markRounds ps i T) := by
+  intro ps
+  induction ps with
+  | nil => intro i hps hi T hC; exact hC
+  | cons p ps' ih =>
+      intro i hps hi T hC
+      obtain ⟨Xi, Yi⟩ := p
+      have hmem : (Xi, Yi) ∈ pairs := drop_head_mem pairs (i - 1) (Xi, Yi) ps' hps.symm
+      have hXi : Xi ≠ [] := hne _ hmem
+      have hxl : xlen pairs i = Xi.length := by
+        simp only [xlen]
+        rw [drop_head_getD pairs (i - 1) (Xi, Yi) ps' ([], []) hps.symm]
+      have hps2 : ps' = pairs.drop i := by
+        have h3 := drop_succ_of_cons pairs (i - 1) (Xi, Yi) ps' hps.symm
+        have h4 : i - 1 + 1 = i := by omega
+        rw [h4] at h3
+        exact h3.symm
+      have hMR : markRounds ((Xi, Yi) :: ps') i T
+          = markRounds ps' (i + 1) (freezePass Xi hXi i T) := by
+        simp only [markRounds]
+        split
+        · next h => exact absurd h hXi
+        · rfl
+      rw [hMR]
+      exact ih (i + 1) hps2 (by omega) (freezePass Xi hXi i T)
+        (PureChunked_freezePass pairs Xi hXi i hxl T.length T (Nat.le_refl _) hC)
+
+omit [DecidableEq α] in
+/-- The instantiation rounds annihilate the empty item list. -/
+theorem insLoop_nil (b x : α) : ∀ (ps : List (List α × List α)) (i : Nat),
+    insLoop b x i ps [] = [] := by
+  intro ps
+  induction ps with
+  | nil => intro i; rfl
+  | cons p ps' ih =>
+      intro i
+      simp only [insLoop_cons']
+      exact ih (i - 1)
+
+/-- The instantiation rounds over frozen pieces compute the frozen text. -/
+theorem insLoop_pieces_assemble (b x : α) (pairs : List (List α × List α))
+    (hne : ∀ p ∈ pairs, p.1 ≠ []) :
+    ∀ (n : Nat) (A : List (α × Option Nat)), A.length ≤ n → PureChunked pairs A →
+    TagsOK pairs.length A →
+    itext b x (insLoop b x pairs.length pairs.reverse (pieces pairs A))
+      = enc2 x (assemble pairs A) := by
+  intro n
+  induction n with
+  | zero =>
+      intro A hA
+      cases A with
+      | nil =>
+          intro _ _
+          rw [pieces_nil, insLoop_nil b x pairs.reverse pairs.length]
+          simp only [assemble]
+          rfl
+      | cons a A' =>
+          rw [List.length_cons] at hA
+          omega
+  | succ n' ih =>
+      intro A hA hPC hTO
+      cases A with
+      | nil =>
+          rw [pieces_nil, insLoop_nil b x pairs.reverse pairs.length]
+          simp only [assemble]
+          rfl
+      | cons a A' =>
+          rw [List.length_cons] at hA
+          obtain ⟨c, o⟩ := a
+          cases o with
+          | none =>
+              rw [PureChunked_none] at hPC
+              have hTO' : TagsOK pairs.length A' := hTO
+              have hps : pairs.reverse = (pairs.take pairs.length).reverse := by
+                rw [List.take_length]
+              rw [pieces_none, insLoop_push b x pairs.reverse pairs.length [c]
+                (pieces pairs A'), ih A' (by omega) hPC hTO']
+              simp only [assemble]
+              rfl
+          | some j =>
+              have hPC0 := hPC
+              rw [PureChunked_some] at hPC
+              obtain ⟨hPP, hCW⟩ := hPC
+              rw [TagsOK_some] at hTO
+              obtain ⟨hj1, hj2, hTO'⟩ := hTO
+              have hTO2 : TagsOK pairs.length (dropN (xlen pairs j - 1) A') :=
+                TagsOK_dropN pairs.length (xlen pairs j - 1) A' hTO'
+              have hlen : (dropN (xlen pairs j - 1) A').length ≤ n' := by
+                rw [dropN_eq_drop]
+                have h1 : (List.drop (xlen pairs j - 1) A').length
+                    = A'.length - (xlen pairs j - 1) := List.length_drop
+                omega
+              have hps : pairs.reverse = (pairs.take pairs.length).reverse := by
+                rw [List.take_length]
+              rw [pieces_some, insLoop_mark b x pairs pairs.length pairs.reverse hps
+                (by omega) (Nat.le_refl _) j
+                (pieces pairs (dropN (xlen pairs j - 1) A')) hj1 hj2,
+                ih (dropN (xlen pairs j - 1) A') hlen hCW hTO2,
+                assemble_chunk pairs hne c j A' hj1 hj2 hPC0, ← enc2_append]
+
+omit [DecidableEq α] in
+/-- A defaulted entry at or beyond the end is the default. -/
+theorem getD_ge : ∀ (L : List β) (k : Nat) (d : β), L.length ≤ k → L.getD k d = d := by
+  intro L k d
+  induction L generalizing k with
+  | nil => intro _; rfl
+  | cons a L' ih =>
+      intro h
+      cases k with
+      | zero => simp only [List.length_cons] at h; omega
+      | succ k' =>
+          show L'.getD k' d = d
+          exact ih k' (by simp only [List.length_cons] at h; omega)
+
+/-- The renaming rounds leave the empty text empty. -/
+theorem renameRR_nil (b x : α) : ∀ (ps : List (List α × List α)) (i : Nat),
+    renameRR b x i ps [] = [] := by
+  intro ps
+  induction ps with
+  | nil => intro i; rfl
+  | cons p ps' ih =>
+      intro i
+      obtain ⟨Xi, Yi⟩ := p
+      show renameRR b x (i + 1) ps'
+        (subst (enc2 x Xi ++ [b]) (marker x b (i + 2))
+          (subst (marker x b (i + 1)) (enc2 x Xi) [])) = []
+      rw [subst_nil, subst_nil, ih (i + 1)]
+
+/-- The instantiation rounds leave the empty text empty. -/
+theorem instRR_nil (b x : α) : ∀ (ps : List (List α × List α)) (i : Nat),
+    instRR b x i ps [] = [] := by
+  intro ps
+  induction ps with
+  | nil => intro i; rfl
+  | cons p ps' ih =>
+      intro i
+      obtain ⟨Xi, Yi⟩ := p
+      show instRR b x (i - 1) ps' (subst (enc2 x Yi) (marker x b (i + 1)) []) = []
+      rw [subst_nil, ih (i - 1)]
+
+/-- The decode passes leave the empty text empty. -/
+theorem dec2Passes_nil (x : α) : ∀ (σ : List α), dec2Passes x σ [] = [] := by
+  intro σ
+  induction σ with
+  | nil => rfl
+  | cons c σ' ih =>
+      show (if c = x then dec2Passes x σ' []
+        else dec2Passes x σ' (subst [c] [x, c] [])) = []
+      rw [subst_nil]
+      split
+      · exact ih
+      · exact ih
+
+/-- `dec2Pass` leaves the empty text empty. -/
+theorem dec2Pass_nil (x : α) (σ : List α) : dec2Pass x σ [] = [] := by
+  show subst [x] [x, x] (dec2Passes x σ []) = []
+  rw [dec2Passes_nil, subst_nil]
+
+/-- The freezing rounds leave the empty text empty. -/
+theorem markRounds_nil : ∀ (ps : List (List α × List α)) (i : Nat),
+    markRounds ps i [] = [] := by
+  intro ps
+  induction ps with
+  | nil => intro i; rfl
+  | cons p ps' ih =>
+      intro i
+      obtain ⟨Xi, Yi⟩ := p
+      show markRounds ps' (i + 1) (if h : Xi = [] then [] else freezePass Xi h i []) = []
+      split
+      · exact ih (i + 1)
+      · rw [freezePass_nil, ih (i + 1)]
+
+omit [DecidableEq α] in
+/-- Dropping entries loses no memberships. -/
+theorem mem_dropN : ∀ (k : Nat) (T : List (α × Option Nat)) (e : α × Option Nat),
+    e ∈ dropN k T → e ∈ T := by
+  intro k
+  induction k with
+  | zero => intro T e h; exact h
+  | succ k' ih =>
+      intro T e h
+      cases T with
+      | nil => exact absurd h (by simp [dropN])
+      | cons t T' => exact List.mem_cons_of_mem _ (ih T' e h)
+
+omit [DecidableEq α] in
+/-- A frozen block has no unfrozen entries. -/
+theorem freezeBlock_notNone : ∀ (i m : Nat) (T : List (α × Option Nat)),
+    ∀ e ∈ freezeBlock i m T, e.2 ≠ none := by
+  intro i m
+  induction m with
+  | zero =>
+      intro T e he
+      rw [show freezeBlock i 0 T = ([] : List (α × Option Nat)) from rfl] at he
+      exact absurd he (by simp)
+  | succ m' ih =>
+      intro T e he
+      cases T with
+      | nil =>
+          rw [show freezeBlock i (m' + 1) ([] : List (α × Option Nat))
+              = ([] : List (α × Option Nat)) from rfl] at he
+          exact absurd he (by simp)
+      | cons t T' =>
+          obtain ⟨d, o⟩ := t
+          cases List.mem_cons.mp he with
+          | inl h =>
+              rw [h]
+              exact Option.some_ne_none i
+          | inr h => exact ih T' e h
+
+/-- The unfrozen matcher keeps memberships. -/
+theorem mem_dropU : ∀ (k : Nat) (X : List α) (L U : List (α × Option Nat)),
+    L.length ≤ k → dropU? X L = some U → ∀ e ∈ U, e ∈ L := by
+  intro k
+  induction k with
+  | zero =>
+      intro X L U hL
+      cases L with
+      | nil =>
+          intro hd e he
+          cases X with
+          | nil =>
+              have hd2 : some ([] : List (α × Option Nat)) = some U := hd
+              injection hd2 with hd'
+              subst hd'
+              exact he
+          | cons c₀ X₀ =>
+              have hd2 : none = some U := hd
+              exact absurd hd2 (by simp)
+      | cons t L' => rw [List.length_cons] at hL; omega
+  | succ k' ih =>
+      intro X L U hL hd e he
+      cases L with
+      | nil =>
+          cases X with
+          | nil =>
+              have hd2 : some ([] : List (α × Option Nat)) = some U := hd
+              injection hd2 with hd'
+              subst hd'
+              exact he
+          | cons c₀ X₀ =>
+              have hd2 : none = some U := hd
+              exact absurd hd2 (by simp)
+      | cons t L' =>
+          rw [List.length_cons] at hL
+          obtain ⟨c, o⟩ := t
+          cases o with
+          | some j =>
+              cases X with
+              | nil =>
+                  have hd2 : some ((c, some j) :: L') = some U := hd
+                  injection hd2 with hd'
+                  subst hd'
+                  exact he
+              | cons c₀ X₀ =>
+                  rw [dropU?_cons_some] at hd
+                  exact absurd hd (by simp)
+          | none =>
+              cases X with
+              | nil =>
+                  have hd2 : some ((c, none) :: L') = some U := hd
+                  injection hd2 with hd'
+                  subst hd'
+                  exact he
+              | cons c₀ X₀ =>
+                  rw [dropU?_cons_none] at hd
+                  by_cases hcc : c₀ = c
+                  · rw [ite_eq_left hcc] at hd
+                    exact List.mem_cons_of_mem _ (ih X₀ L' U (by omega) hd e he)
+                  · rw [ite_eq_right hcc] at hd
+                    exact absurd hd (by simp)
+
+/-- Unfrozen characters are never introduced by a freezing pass. -/
+theorem freezePass_mem (σ : List α) : ∀ (X : List α) (hX : X ≠ []) (i : Nat),
+    ∀ (n : Nat) (T : List (α × Option Nat)), T.length ≤ n →
+    (∀ e ∈ T, e.2 = none → e.1 ∈ σ) →
+    (∀ e ∈ freezePass X hX i T, e.2 = none → e.1 ∈ σ) := by
+  intro X hX i n
+  induction n with
+  | zero =>
+      intro T hT
+      cases T with
+      | nil =>
+          intro _ e he
+          rw [freezePass_nil] at he
+          exact absurd he (by simp)
+      | cons t T' => rw [List.length_cons] at hT; omega
+  | succ n' ih =>
+      intro T hT hcond
+      cases T with
+      | nil =>
+          intro e he
+          rw [freezePass_nil] at he
+          exact absurd he (by simp)
+      | cons t T' =>
+          rw [List.length_cons] at hT
+          obtain ⟨c, o⟩ := t
+          cases o with
+          | some j =>
+              have hdn : dropU? X ((c, some j) :: T') = none := by
+                cases X with
+                | nil => exact absurd rfl hX
+                | cons c₀ X₀ => rfl
+              rw [freezePass_cons_none _ _ _ _ _ hdn]
+              intro e he he2
+              cases List.mem_cons.mp he with
+              | inl h =>
+                  rw [h] at he2
+                  exact absurd he2 (Option.some_ne_none j)
+              | inr h =>
+                  refine ih T' (by omega) ?_ e h he2
+                  intro e2 he2' he22
+                  exact hcond e2 (List.mem_cons_of_mem _ he2') he22
+          | none =>
+              cases hd : dropU? X ((c, none) :: T') with
+              | none =>
+                  rw [freezePass_cons_none _ _ _ _ _ hd]
+                  intro e he he2
+                  cases List.mem_cons.mp he with
+                  | inl h =>
+                      subst h
+                      exact hcond (c, none) List.mem_cons_self rfl
+                  | inr h =>
+                      refine ih T' (by omega) ?_ e h he2
+                      intro e2 he2' he22
+                      exact hcond e2 (List.mem_cons_of_mem _ he2') he22
+              | some U =>
+                  rw [freezePass_cons_some _ _ _ _ _ _ hd]
+                  have hX1 : 1 ≤ X.length := length_pos_of_ne_nil X hX
+                  have hlenU := dropU?_length X ((c, none) :: T') U hd
+                  have hL : ((c, none) :: T').length = T'.length + 1 := rfl
+                  intro e he he2
+                  cases List.mem_append.mp he with
+                  | inl h =>
+                      exact absurd he2 (freezeBlock_notNone i X.length ((c, none) :: T') e h)
+                  | inr h =>
+                      refine ih U (by omega) ?_ e h he2
+                      intro e2 he2' he22
+                      exact hcond e2 (mem_dropU ((c, none) :: T').length X
+                        ((c, none) :: T') U (Nat.le_refl _) hd e2 he2') he22
+
+/-- Unfrozen characters are never introduced by the freezing rounds. -/
+theorem markRounds_mem (σ : List α) : ∀ (ps : List (List α × List α)) (i : Nat)
+    (T : List (α × Option Nat)), (∀ e ∈ T, e.2 = none → e.1 ∈ σ) →
+    (∀ e ∈ markRounds ps i T, e.2 = none → e.1 ∈ σ) := by
+  intro ps
+  induction ps with
+  | nil => intro i T h; exact h
+  | cons p ps' ih =>
+      intro i T h
+      obtain ⟨Xi, Yi⟩ := p
+      by_cases hXi : Xi = []
+      · have hMR : markRounds ((Xi, Yi) :: ps') i T = markRounds ps' (i + 1) T := by
+          simp only [markRounds]
+          split
+          · rfl
+          · next h => exact absurd hXi h
+        rw [hMR]
+        exact ih (i + 1) T h
+      · have hMR : markRounds ((Xi, Yi) :: ps') i T
+            = markRounds ps' (i + 1) (freezePass Xi hXi i T) := by
+          simp only [markRounds]
+          split
+          · next h => exact absurd h hXi
+          · rfl
+        rw [hMR]
+        exact ih (i + 1) (freezePass Xi hXi i T)
+          (freezePass_mem σ Xi hXi i T.length T (Nat.le_refl _) h)
+
+/-- Membership of the assembled text. -/
+theorem assemble_mem (pairs : List (List α × List α)) (σ : List α)
+    (hσ : ∀ (j : Nat) (c : α), c ∈ (pairs.getD (j - 1) ([], [])).2 → c ∈ σ) :
+    ∀ (n : Nat) (A : List (α × Option Nat)), A.length ≤ n →
+    (∀ e ∈ A, e.2 = none → e.1 ∈ σ) →
+    ∀ c ∈ assemble pairs A, c ∈ σ := by
+  intro n
+  induction n with
+  | zero =>
+      intro A hA
+      cases A with
+      | nil =>
+          intro _ c hc
+          exact absurd hc (by simp [assemble])
+      | cons e A' => rw [List.length_cons] at hA; omega
+  | succ n' ih =>
+      intro A hA hcond
+      cases A with
+      | nil =>
+          intro c hc
+          exact absurd hc (by simp [assemble])
+      | cons e A' =>
+          rw [List.length_cons] at hA
+          obtain ⟨c₀, o⟩ := e
+          cases o with
+          | none =>
+              intro c hc
+              have hunf : assemble pairs ((c₀, none) :: A') = c₀ :: assemble pairs A' := by
+                simp only [assemble]
+              rw [hunf] at hc
+              cases List.mem_cons.mp hc with
+              | inl hc' =>
+                  rw [hc']
+                  exact hcond (c₀, none) List.mem_cons_self rfl
+              | inr hc' =>
+                  refine ih A' (by omega) ?_ c hc'
+                  intro e2 he2' he22
+                  exact hcond e2 (List.mem_cons_of_mem _ he2') he22
+          | some j =>
+              intro c hc
+              have hunf := assemble_runHead pairs j ((c₀, some j) :: A')
+              rw [hunf] at hc
+              cases List.mem_append.mp hc with
+              | inl hc' =>
+                  obtain ⟨l, hl, hcl⟩ := List.mem_flatten.mp hc'
+                  obtain ⟨_, hl'⟩ := List.mem_replicate.mp hl
+                  rw [hl'] at hcl
+                  exact hσ j c hcl
+              | inr hc' =>
+                  have hcond2 : ∀ e ∈ dropN (runLen j ((c₀, some j) :: A'))
+                      ((c₀, some j) :: A'), e.2 = none → e.1 ∈ σ := by
+                    intro e he he2
+                    exact hcond e (mem_dropN _ _ _ he) he2
+                  refine ih (dropN (runLen j ((c₀, some j) :: A'))
+                    ((c₀, some j) :: A')) ?_ hcond2 c hc'
+                  rw [runLen_self_cons j c₀ A']
+                  show (dropN (runLen j A') A').length ≤ n'
+                  have h1 := dropN_length_le (runLen j A') A'
+                  omega
+
+omit [DecidableEq α] in
+/-- Frozen pieces are instantiable. -/
+theorem pieces_InstOK (pairs : List (List α × List α)) :
+    ∀ (n : Nat) (A : List (α × Option Nat)), A.length ≤ n → TagsOK pairs.length A →
+    InstOK pairs.length (pieces pairs A) := by
+  intro n
+  induction n with
+  | zero =>
+      intro A hA
+      cases A with
+      | nil =>
+          intro _
+          rw [pieces_nil]
+          exact trivial
+      | cons e A' => rw [List.length_cons] at hA; omega
+  | succ n' ih =>
+      intro A hA hTO
+      cases A with
+      | nil =>
+          rw [pieces_nil]
+          exact trivial
+      | cons e A' =>
+          rw [List.length_cons] at hA
+          obtain ⟨c, o⟩ := e
+          cases o with
+          | none =>
+              rw [TagsOK_none] at hTO
+              rw [pieces_none]
+              exact pushFrag_instOK [c] pairs.length (pieces pairs A')
+                (ih A' (by omega) hTO)
+          | some j =>
+              rw [TagsOK_some] at hTO
+              obtain ⟨hj1, hj2, hTO'⟩ := hTO
+              rw [pieces_some]
+              show 1 ≤ j ∧ j ≤ pairs.length
+                ∧ InstOK pairs.length (pieces pairs (dropN (xlen pairs j - 1) A'))
+              have hfu : (dropN (xlen pairs j - 1) A').length ≤ n' := by
+                have h1 := dropN_length_le (xlen pairs j - 1) A'
+                omega
+              exact ⟨hj1, hj2,
+                ih (dropN (xlen pairs j - 1) A') hfu (TagsOK_dropN pairs.length
+                  (xlen pairs j - 1) A' hTO')⟩
+
+/-- Unfolding `instRR` on a round. -/
+theorem instRR_cons (b x : α) (i : Nat) (Xi Yi : List α) (ps : List (List α × List α))
+    (T : List α) :
+    instRR b x i ((Xi, Yi) :: ps) T
+      = instRR b x (i - 1) ps (subst (enc2 x Yi) (marker x b (i + 1)) T) := rfl
+
+/-- The item-level instantiation rounds compute the `instRR` text. -/
+theorem insLoop_scan (x b : α) (hxb : x ≠ b) :
+    ∀ (ps : List (List α × List α)) (i : Nat), ps.length ≤ i →
+    ∀ (ns : List (NFItem α)), InstOK i ns →
+    itext b x (insLoop b x i ps ns) = instRR b x i ps (itext b x ns) := by
+  intro ps
+  induction ps with
+  | nil => intro _ _ _ _; rfl
+  | cons p ps ih =>
+      intro i hlen ns hC
+      obtain ⟨Xi, Yi⟩ := p
+      have hlen' : ps.length + 1 ≤ i := by
+        have h1 : ((Xi, Yi) :: ps).length = ps.length + 1 := by simp
+        omega
+      have hR := instNF_scan x b hxb i (by omega) Yi ns.length ns (Nat.le_refl _) hC
+      rw [insLoop_cons, instRR_cons, hR]
+      exact ih (i - 1) (by omega) (instNF b x i Yi ns)
+        (instNF_canon b x i Yi ns.length ns (Nat.le_refl _) hC)
 
 theorem renameRepair2_eq (b x : α) (σ : List α) (hnd : σ.Pairwise (· ≠ ·))
     (pairs : List (List α × List α)) (hp : ∀ p ∈ pairs, ∀ c ∈ p.1 ++ p.2, c ∈ σ) :
@@ -2602,6 +6433,18 @@ theorem repC2_eq (b x : α) (σ : List α) (hnd : σ.Pairwise (· ≠ ·))
     instantiate2_eq b x σ hnd pairs hp pairs.reverse pairs.length hall,
     enc2Pass_eq x σ hnd S hS]
 
+omit [DecidableEq α] in
+/-- An unfrozen run is strongly chunked. -/
+theorem PureChunked_runE (pairs : List (List α × List α)) :
+    ∀ (V : List α), PureChunked pairs (runE V) := by
+  intro V
+  induction V with
+  | nil => exact PureChunked_nil pairs
+  | cons v V' ih =>
+      show PureChunked pairs ((v, none) :: runE V')
+      rw [PureChunked_none]
+      exact ih
+
 /-- Theorem (Multiple Substitution): the comma-code construction
 computes the freezing semantics for ARBITRARY nonempty patterns -- no
 restriction on the patterns.  The patterns, replacements, and `S` must be
@@ -2621,7 +6464,72 @@ theorem repC2_correct (b x : α) (hxb : x ≠ b) (σ : List α) (hnd : σ.Pairwi
     (pairs : List (List α × List α)) (hne : ∀ p ∈ pairs, p.1 ≠ [])
     (S : List α) (hS : ∀ c ∈ S, c ∈ σ)
     (hp : ∀ p ∈ pairs, ∀ c ∈ p.1 ++ p.2, c ∈ σ) :
-    repC2 b x σ pairs S = repRef pairs S := sorry
+    repC2 b x σ pairs S = repRef pairs S := by
+  by_cases hSnil : S = []
+  · subst hSnil
+    have hE : enc2 x ([] : List α) = [] := rfl
+    rw [repC2_eq b x σ hnd pairs [] hS hp, hE, renameRR_nil b x pairs 1,
+      instRR_nil b x pairs.reverse pairs.length, dec2Pass_nil x σ]
+    show ([] : List α) = assemble pairs (markRounds pairs 1 ([] : List (α × Option Nat)))
+    rw [markRounds_nil pairs 1]
+    simp only [assemble]
+  · have hps0 : pairs = List.drop (1 - 1) pairs := by
+      show pairs = List.drop 0 pairs
+      rw [List.drop_zero]
+    have hpc : pieces pairs (runE S) = NFItem.frag S :: [] := by
+      cases S with
+      | nil => exact absurd rfl hSnil
+      | cons v S' =>
+          rw [show runE (v :: S') = runE (v :: S') ++ ([] : List (α × Option Nat))
+              from (List.append_nil _).symm, pieces_run, pieces_nil, pushFrag_cons_nil]
+    have hPC : PureChunked pairs (runE S) := PureChunked_runE pairs S
+    have hTO : TagsOK pairs.length (runE S) := TagsOK_runE pairs.length S
+    have hMR1 : renLoop b x 1 pairs (NFItem.frag S :: [])
+        = pieces pairs (markRounds pairs 1 (runE S)) := by
+      rw [← hpc]
+      exact renLoop_markRounds b x pairs hne pairs 1 hps0 (by omega)
+        (runE S).length (runE S) (Nat.le_refl _) hPC
+    have hTOMR : TagsOK pairs.length (markRounds pairs 1 (runE S)) :=
+      markRounds_TagsOK pairs hne pairs 1 hps0 (by omega) (by omega) (runE S) hTO
+    have hPCMR : PureChunked pairs (markRounds pairs 1 (runE S)) :=
+      markRounds_PureChunked pairs hne pairs 1 hps0 (by omega) (runE S) hPC
+    have hIOK : InstOK pairs.length (renLoop b x 1 pairs (NFItem.frag S :: [])) := by
+      rw [hMR1]
+      exact pieces_InstOK pairs (markRounds pairs 1 (runE S)).length
+        (markRounds pairs 1 (runE S)) (Nat.le_refl _) hTOMR
+    have hCanon : CanonB (1 - 1) (NFItem.frag S :: []) := hSnil
+    have hRS := renLoop_scan x b hxb pairs hne 1 (by omega) (NFItem.frag S :: []) hCanon
+    have hite : itext b x (NFItem.frag S :: []) = enc2 x S := by simp [itext]
+    have hR : renameRR b x 1 pairs (enc2 x S)
+        = itext b x (renLoop b x 1 pairs (NFItem.frag S :: [])) := by
+      rw [← hite, ← hRS]
+    have hIS := insLoop_scan x b hxb pairs.reverse pairs.length
+      (by rw [List.length_reverse]; exact Nat.le_refl pairs.length)
+      (renLoop b x 1 pairs (NFItem.frag S :: [])) hIOK
+    have hσ : ∀ (j : Nat) (c : α), c ∈ (pairs.getD (j - 1) ([], [])).2 → c ∈ σ := by
+      intro j c hc
+      by_cases hj : j - 1 < pairs.length
+      · exact hp (pairs.getD (j - 1) ([], []))
+          (getD_lt_mem pairs (j - 1) ([], []) hj) c
+          (List.mem_append_right (pairs.getD (j - 1) ([], [])).1 hc)
+      · rw [getD_ge pairs (j - 1) ([], []) (by omega)] at hc
+        simp at hc
+    have hcond0 : ∀ e ∈ runE S, e.2 = none → e.1 ∈ σ := by
+      intro e he _
+      have he' : e ∈ S.map (fun w => (w, none)) := he
+      obtain ⟨w, hw, heq⟩ := List.mem_map.mp he'
+      have he3 : (w, none) = e := heq
+      rw [← he3]
+      exact hS w hw
+    have hmem : ∀ c ∈ assemble pairs (markRounds pairs 1 (runE S)), c ∈ σ :=
+      assemble_mem pairs σ hσ (markRounds pairs 1 (runE S)).length
+        (markRounds pairs 1 (runE S)) (Nat.le_refl _)
+        (markRounds_mem σ pairs 1 (runE S) hcond0)
+    rw [repC2_eq b x σ hnd pairs S hS hp, hR, ← hIS, hMR1,
+      insLoop_pieces_assemble b x pairs hne (markRounds pairs 1 (runE S)).length
+        (markRounds pairs 1 (runE S)) (Nat.le_refl _) hPCMR hTOMR,
+      dec2Pass_enc2 x σ hnd (assemble pairs (markRounds pairs 1 (runE S))) hmem]
+    rfl
 
 #eval repC2 'a' 'c' ['a', 'b', 'c'] [(['a'], ['b', 'a'])] ['a', 'b', 'a']  -- [b, a, b, b, a]
 #eval repC2 'a' 'c' ['a', 'b', 'c'] [(['a', 'b'], ['c']), (['b', 'a'], ['a', 'a'])] ['a', 'b', 'a']  -- [c, a]
