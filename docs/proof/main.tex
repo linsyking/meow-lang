@@ -7,7 +7,6 @@
 \usepackage{amsthm}
 \usepackage{amssymb}
 \usepackage{enumerate}
-\usepackage{titlesec}
 \usepackage{hyperref}
 \usepackage{exscale}
 \usepackage{pdfpages}
@@ -32,6 +31,7 @@
 \newtheorem*{remark}{Remark}
 \newtheorem{corollary}{Corollary}[section]
 \newtheorem{proposition}{Proposition}[section]
+\newtheorem{conjecture}{Conjecture}[section]
 \definecolor{bg}{rgb}{0.95,0.95,0.95}
 \newcommand{\ip}[1]{\langle #1 \rangle}
 \newcommand{\lp}{\cdot \mathtt{l}}
@@ -871,7 +871,7 @@ How strong is the substitution calculus? This section gives a pipeline normal fo
 
 Definition~\ref{def:subst} made three design choices: the scan proceeds left to right and takes the leftmost match; one pass replaces \emph{all} occurrences; and the scan never re-enters inserted text. Each choice is load-bearing, in a different way. This section varies them one at a time and measures the damage -- to the toolkit of Section~2 and to the class of reachable functions of Section~3.
 
-A \emph{variant calculus} is the grammar of Definition~\ref{def:exp} with the node $[\,R/P\,]\,E$ reinterpreted: sub-expressions still denote by Definition~\ref{def:den}, and the node applies the variant primitive to $\llbracket E \rrbracket(\vec S)$ with pattern $\llbracket P \rrbracket(\vec S)$ and replacement $\llbracket R \rrbracket(\vec S)$, undefinedness propagating as there. $V$-reachability is as in Definition~\ref{def:reachable}; we write $V \sqsubseteq W$ when every $V$-reachable function is $W$-reachable, and $L$ for the calculus of Sections~2--4. Statements below marked \emph{verified} were confirmed by exhaustive enumeration over the finite domains stated where they occur.
+A \emph{variant calculus} is the grammar of Definition~\ref{def:exp} with the node $[\,R/P\,]\,E$ reinterpreted: sub-expressions still denote by Definition~\ref{def:den}, and the node applies the variant primitive to $\llbracket E \rrbracket(\vec S)$ with pattern $\llbracket P \rrbracket(\vec S)$ and replacement $\llbracket R \rrbracket(\vec S)$, undefinedness propagating as there. $V$-reachability is as in Definition~\ref{def:reachable}; we write $V \sqsubseteq W$ when every $V$-reachable function is $W$-reachable, and $L$ for the calculus of Sections~2--4; $\mathrm{rev}(T)$ is the reversal of $T$. Statements below marked \emph{verified} were confirmed by exhaustive enumeration over the finite domains stated where they occur.
 
 \subsection{One Occurrence at a Time}
 
@@ -917,7 +917,7 @@ The point: $XX$ is a marker that is \emph{fresh with respect to $X$ by length} (
 \end{theorem}
 
 \begin{proof}
-    (i) The leftmost $b$ of $ab$ is at position $1$, giving $aY$; the leftmost $a$ of $aY$ is at position $0$ -- always the marker, whatever $Y$ contains -- giving $XY$. No $\mathtt{enc}$ is needed, in contrast to Theorem~\ref{thm:cat}. (ii) By Lemma~\ref{lem:doubled}, the factor with $\sigma = X[0]$ fires at position $0$, deleting the first $2|X|+1$ characters of $XXX$ and leaving $X[1:]$; the factors with $\sigma \neq X[0]$ are inert, and after the firing pass the string is shorter than every remaining pattern. For $X = \epsilon$ the scrutinee is $\epsilon$ and every factor is inert. (iii) Write $X = cR$. The pattern $R\cdot X\cdot d$ occurs in the scrutinee $cR\cdot cR\cdot d$ at position $1$, and deleting it leaves $c$. An occurrence at position $0$ forces, compared character by character, $X = c^k$ with $c = d$; then the pattern is $c^{2k}$ and deleting it from $c^{2k+1}$ still leaves exactly one $c$. The pattern is always nonempty (it ends in $d$), including for $X = \epsilon$, where it is $d$ and the scrutinee is $d$. (iv) If $X = Y$, pattern and scrutinee of $\mathtt{eqind}$ coincide and the whole string is the leftmost occurrence, giving $\bot$. If $X \neq Y$: no match can be whole (it would force $|X| = |Y|$ and $X\cdot YY = Y\cdot YY$), a proper match leaves $U\bot V$ with at least two characters, and when the pattern is longer than the scrutinee the pass is inert, leaving the scrutinee -- also of length at least $2$. So $\mathtt{eqind} \notin \{\epsilon, \bot\}$, and the final pass, on the fixed one-character scrutinee $\bot$, fires exactly when its pattern is $\bot$. (v) The pattern $\top dXdYd$ has exactly the length of the scrutinee, so it can occur only at position $0$, and does so iff $C = \top$; the second pass is inert on the result $X$ by length. (Verified: all inputs of length $\leq 4$ over $|\Sigma| = 2$ and $\leq 3$ over $|\Sigma| = 3$, all choices of the fixed characters.)
+    (i) The leftmost $b$ of $ab$ is at position $1$, giving $aY$; the leftmost $a$ of $aY$ is at position $0$ -- always the marker, whatever $Y$ contains -- giving $XY$. No $\mathtt{enc}$ is needed, in contrast to Theorem~\ref{thm:cat}. (ii) By Lemma~\ref{lem:doubled}, the factor with $\sigma = X[0]$ fires at position $0$, deleting the first $2|X|+1$ characters of $XXX$ and leaving $X[1:]$; the factors with $\sigma \neq X[0]$ are inert, and after the firing pass the string is shorter than every remaining pattern. For $X = \epsilon$ the scrutinee is $\epsilon$ and every factor is inert. (iii) Write $X = cR$. The pattern $R\cdot X\cdot d$ occurs in the scrutinee $cR\cdot cR\cdot d$ at position $1$, and deleting it leaves $c$. An occurrence at position $0$ forces, compared character by character, $X = c^k$ with $c = d$; then the pattern is $c^{2k}$ and deleting it from $c^{2k+1}$ still leaves exactly one $c$. The pattern is always nonempty (it ends in $d$), including for $X = \epsilon$, where it is $d$ and the scrutinee is $d$. (iv) If $X = Y$, pattern and scrutinee of $\mathtt{eqind}$ coincide and the whole string is the leftmost occurrence, giving $\bot$. If $X \neq Y$: no match can be whole (it would force $|X| = |Y|$ and $X\cdot YY = Y\cdot YY$), a proper match leaves $U\bot V$ with at least two characters, and when the pattern is longer than the scrutinee the pass is inert, leaving the scrutinee -- also of length at least $2$. So $\mathtt{eqind} \notin \{\epsilon, \bot\}$, and the final pass, on the fixed one-character scrutinee $\bot$, fires exactly when its pattern is $\bot$. (v) The pattern $\top dXdYd$ has exactly the length of the scrutinee, so it can occur only at position $0$, and does so iff $C = \top$; the second pass is inert on the result $X$ by length. (Verified: cat, tail and head on all inputs of length $\leq 4$ over $|\Sigma| = 2$ and $\leq 3$ over $|\Sigma| = 3$; eq and if on all inputs of length $\leq 3$ over both; with the head character $d$ ranging over the alphabet and the tail factors in both orders.)
 \end{proof}
 
 \begin{theorem}
@@ -944,11 +944,11 @@ The point: $XX$ is a marker that is \emph{fresh with respect to $X$ by length} (
 
 \begin{corollary}
     \label{cor:once-sep}
-    None of the following is once-reachable: replace-all $[\,a/b\,]$, $\mathtt{enc}$, $\mathtt{dec}$, $[\,xx/x\,]$, $S \mapsto \sigma^{|S|}$, $X \mapsto X^{|X|}$, or $\mathtt{escape}_f$ for any escaping function with $|U| \geq 2$. In particular $L \not\sqsubseteq \mathrm{ONCE}$, and the once-calculus has growth degree at most $1$ against $L$'s unbounded degree.
+    None of the following is reachable in the once-calculus $\mathrm{ONCE}$: replace-all $[\,a/b\,]$, $\mathtt{enc}$, $\mathtt{dec}$, $[\,xx/x\,]$, $S \mapsto \sigma^{|S|}$, $X \mapsto X^{|X|}$, or $\mathtt{escape}_f$ for any escaping function with $|U| \geq 2$. In particular $L \not\sqsubseteq \mathrm{ONCE}$, and the once-calculus has growth degree at most $1$ against $L$'s unbounded degree.
 \end{corollary}
 
 \begin{proof}
-    Each is killed on a one-parameter input family. $[\,a/b\,]$ maps $b^n \mapsto a^n$ with $\#a = n$ against the constant $\Phi_a(E)$, by (i); likewise $\mathtt{enc}$ on $b^n$ with $\#x = n$. $\mathtt{dec}$ maps $(xb)^n \mapsto b^n$ with $\mathrm{mr} = n$ against input runs of length $1$, by (ii). $[\,xx/x\,]$ maps $(xy)^n \mapsto (xxy)^n$ with $|\Psi| = n$ against $\Psi = 0$, by (iii). $S \mapsto \sigma^{|S|}$ has $\#\sigma = |S|$ on $\sigma$-free inputs, by (i). $X \mapsto X^{|X|}$ is quadratic against (iv). $\mathtt{escape}_f$ maps $u_2^n \mapsto (u_1 f(u_2))^n$ with $\#u_1 = n$ against $0$, by (i).
+    Each is killed on a one-parameter input family. $[\,a/b\,]$ maps $b^n \mapsto a^n$ with $\#a = n$ against the constant $\Phi_a(E)$, by (i); likewise $\mathtt{enc}$ on $b^n$ with $\#x = n$. $\mathtt{dec}$ maps $(xb)^n \mapsto b^n$ with $\mathrm{mr} = n$ against input runs of length $1$, by (ii). $[\,xx/x\,]$ maps $x^n y^n \mapsto x^{\lceil n/2\rceil}y^n$ with $|\Psi| = \lfloor n/2 \rfloor$ against $\Psi = 0$, by (iii). $S \mapsto \sigma^{|S|}$ has $\#\sigma = |S|$ on $\sigma$-free inputs, by (i). $X \mapsto X^{|X|}$ is quadratic against (iv). $\mathtt{escape}_f$ maps $u_2^n \mapsto (u_1 f(u_2))^n$ with $\#u_1 = n$ against $0$, by (i).
 \end{proof}
 
 \begin{proposition}
@@ -965,12 +965,12 @@ The point: $XX$ is a marker that is \emph{fresh with respect to $X$ by length} (
     On $X = b^n$ the pattern $H(X)\,b = b^{\lfloor n/2\rfloor+1}$ is longer than half the scrutinee, so two disjoint occurrences are impossible and the greedy scan finds at most one, necessarily at position $0$; replacing it by $H(X)$ leaves $b^{n-1}$. For $n = 0$ the pattern is $b$ and the scrutinee $\epsilon$: inert. (Verified for $n \leq 39$.)
 \end{proof}
 
-So any proof that the once-primitive is not $L$-reachable must use general position -- on unary, or otherwise anchored, domains, computed needles do the job; the same trick expresses $[\,A/B\,]_k$ on unary inputs for every $k$.
+So any proof that the once-primitive is not $L$-reachable must use general position -- on unary, or otherwise anchored, domains, computed needles do the job.
 
 \begin{remark}
     \emph{The mirror and the hinge.} The rightmost variant $[\,A/B\,]_1^{\mathrm{R}}$ (replace the rightmost occurrence) is the rev-conjugate of the once-calculus, and the conjugation of Theorem~\ref{thm:conjugation} below applies verbatim. Its anchor is the unconditional Suffix Substitution lemma, $A \neq \epsilon \Rightarrow [\,C/A\,]_1^{\mathrm{R}}(BA) = B\,C$: the rightmost occurrence of $A$ in $BA$ is always the final one. This gives the two-pass \emph{zipper} $\mathtt{cat}(X,Y) = [\,Y/a\,]_1^{\mathrm{R}}[\,X/b\,]_1^{\mathrm{R}}(ba)$. Nothing provable separates the two once-calculi without settling reversal: by conjugation, $L \sqsubseteq \mathrm{ONCE}^{\mathrm{R}}$ iff $\mathrm{R} \sqsubseteq \mathrm{ONCE}$, and the pair ``delete the leftmost $b$'' / ``delete the rightmost $b$'' are mutual witnesses of one statement. Where the rightmost calculus genuinely struggles is destructuring: $\mathtt{head}$, $\mathtt{tail}$, $\mathtt{eq}$, $\mathtt{if}$ are absent from every once-rightmost expression of size $\leq 7$ and every constant-pattern pipeline of depth $\leq 4$ -- deleting a left-anchored variable-length region seems to require computing that region first, which is the very function sought (conjecturally unreachable).
 
-    The central open problem of the variant: \emph{is the once-primitive $L$-reachable at all} -- say, is ``delete the leftmost $b$'' expressible? Proposition~\ref{prop:unary-once} rules out every unary-domain invariant; all bounded searches fail (exhaustive search over constant-pattern $L$-pipelines to depth $4$ on all inputs of length $\leq 4$: no witness among $417{,}853$ distinct behaviors; randomized search over $75$ million pipelines of $4$--$7$ passes: none; the closest misses differ at exactly one position).
+    The central open problem of the variant: \emph{is the once-primitive $L$-reachable at all} -- say, is ``delete the leftmost $b$'' expressible? Proposition~\ref{prop:unary-once} rules out every unary-domain invariant; all bounded searches fail: exhaustive breadth-first search over constant-pattern $L$-pipelines -- every pattern and replacement of length at most $2$ over a ternary alphabet, to depth $3$, with behavior dedup -- and randomized search over pipelines of $4$--$7$ passes find no witness, and the closest misses differ at exactly one position.
 \end{remark}
 
 \subsection{Positional Addressing}
@@ -999,7 +999,7 @@ The positional family replaces the scan by an \emph{address}: write at index $i$
 \end{proposition}
 
 \begin{proof}
-    (i) After the write, position $0$ holds $c$ and is necessarily the first $c$; deleting it leaves $X[1:]$; for $X = \epsilon$ both nodes are inert. (ii) Let $V = Xc^3$, so $|V| \geq 3$. The pattern $\mathtt{tail}(V)$ occurs in $V$ at position $1$; it can occur at position $0$ only if $V$ is uniform, and then deleting $c^{k-1}$ from $c^k$ still leaves one $c$: in both cases the inner node computes $\mathtt{head}(V)$, which is $X[0]$ if $X \neq \epsilon$ and $c$ if $X = \epsilon$. The cleanup pattern $P_2$ has length $|X|+1 \geq 2 > 1$ when $X \neq \epsilon$ (inert), and is exactly $c$ when $X = \epsilon$, deleting the residue to $\epsilon$. (Verified: all strings of length $\leq 6$ over $|\Sigma| = 2$, $\leq 5$ over $|\Sigma| = 3$ and $\leq 8$ over $|\Sigma| = 1$, every choice of $c$.)
+    (i) After the write, position $0$ holds $c$ and is necessarily the first $c$; deleting it leaves $X[1:]$; for $X = \epsilon$ both nodes are inert. (ii) Let $V = Xc^3$, so $|V| \geq 3$. The pattern $\mathtt{tail}(V)$ occurs in $V$ at position $1$; it can occur at position $0$ only if $V$ is uniform, and then deleting $c^{k-1}$ from $c^k$ still leaves one $c$: in both cases the inner node computes $\mathtt{head}(V)$, which is $X[0]$ if $X \neq \epsilon$ and $c$ if $X = \epsilon$. The cleanup pattern $P_2$ has length $|X|+1 \geq 2 > 1$ when $X \neq \epsilon$ (inert), and is exactly $c$ when $X = \epsilon$, deleting the residue to $\epsilon$. (Verified: all strings of length $\leq 6$ over $|\Sigma| = 2$, $\leq 5$ over $|\Sigma| = 3$ and $\leq 8$ over $|\Sigma| = 1$ -- and, for the head, $\leq 5$ over $|\Sigma| = 4$ -- every choice of $c$.)
 \end{proof}
 
 \begin{theorem}
@@ -1028,7 +1028,11 @@ The positional family replaces the scan by an \emph{address}: write at index $i$
     Over $\Sigma = \{a\}$:
     \begin{enumerate}[(i)]
         \item every positional length function $n \mapsto \big|\llbracket E \rrbracket(a^n)\big|$ is piecewise $\mathbb{Z}$-affine with finitely many pieces; hence halving $[\,a/a^2\,]$ -- a single $L$ node -- is not positional.
-        \item for every $j \geq 2$, the term $\mathtt{repOcc}\big(0,\, a,\, \mathtt{tail}(X)\cdots\mathtt{tail}(X)\cdot a^j,\, X\big)$ with $j-1$ factors $\mathtt{tail}$ maps $a^n$ to $a^{jn}$: replace-all \emph{with growth} is positional.
+        \item for every $j \geq 2$, the term
+        \begin{align}
+            \mathtt{repOcc}\big(0,\; a,\; \underbrace{\mathtt{tail}(X)\cdots\mathtt{tail}(X)}_{j-1 \text{ factors}}\cdot a^j,\; X\big)
+        \end{align}
+        maps $a^n$ to $a^{jn}$: replace-all \emph{with growth} is positional.
     \end{enumerate}
     So replace-all dies in the positional calculus exactly when a second letter exists to count.
 \end{theorem}
@@ -1052,10 +1056,10 @@ The positional family replaces the scan by an \emph{address}: write at index $i$
 \end{theorem}
 
 \begin{proof}
-    (i) $i \geq |X|$ iff $\mathtt{tail}^i X = \epsilon$, in which case the write is out of range and the identity applies; otherwise the $\mathtt{cat}$ reassembles $X[{:}i]\cdot c\cdot X[i{+}1{:}]$. (ii) Each factor $[\,M/B\,]_1$ replaces the current leftmost $B$ by a marker block; the blocks are never re-matched and no new $B$ can appear at or across one (disjoint alphabets, as in the Independent Substitution lemma), so $k$ factors convert the occurrences $o_0, \dots, o_{k-1}$ into marker blocks, the middle factor addresses $o_k$, and the last $k$ restore. If there are fewer than $k+1$ occurrences, the marking stops early, the middle factor is inert, and the unmarking restores everything -- the identity, matching the out-of-range clause. (iii) is then immediate. (Verified: (i) for $i \leq 3$ on all strings of length $\leq 5$, composed from the Section-2 constructions; (ii) for $k \leq 3$.)
+    (i) $i \geq |X|$ iff $\mathtt{tail}^i X = \epsilon$, in which case the write is out of range and the identity applies; otherwise the $\mathtt{cat}$ reassembles $X[{:}i]\cdot c\cdot X[i{+}1{:}]$. (ii) Each factor $[\,M/B\,]_1$ replaces the current leftmost $B$ by a marker block; the blocks are never re-matched and no new $B$ can appear at or across one (disjoint alphabets, as in the Independent Substitution lemma), so $k$ factors convert the occurrences $o_0, \dots, o_{k-1}$ into marker blocks, the middle factor addresses $o_k$, and the last $k$ restore. If there are fewer than $k+1$ occurrences, the marking stops early, the middle factor is inert, and the unmarking restores everything -- the identity, matching the out-of-range clause. (iii) is then immediate. (Verified: (i) for $i \leq 3$ on all strings of length $\leq 5$ over $|\Sigma| = 2$, composed from the Section-2 constructions; (ii) for $k \leq 3$ on the same inputs.)
 \end{proof}
 
-Equality testing, by contrast, is conjecturally not positional in any fragment: $\mathtt{eq}$ must broadcast a global comparison into a two-character output, while every positional detection mechanism is local -- fire or not, at one site; all searches to depth $3$ over a space of $2424$ computed-index node types fail.
+Equality testing, by contrast, is conjecturally not positional in any fragment: $\mathtt{eq}$ must broadcast a global comparison into a two-character output, while every positional detection mechanism is local -- fire or not, at one site; all searches to depth $3$ over the computed-index node space fail.
 
 \subsection{The Other Direction}
 \label{subsec:direction}
@@ -1067,7 +1071,7 @@ Equality testing, by contrast, is conjecturally not positional in any fragment: 
     \begin{align}
         [\,A/B\,]^{\mathrm{R}} C \;\triangleq\; \big([\,A/B\,]^{\mathrm{R}} X\big)\cdot A\cdot Y .
     \end{align}
-    The scan proceeds right to left, takes the rightmost occurrence, and resumes to the left of the inserted text; $[\,A/\epsilon\,]^{\mathrm{R}}$ is undefined. Write $\mathrm{rev}(T)$ for the reversal of $T$.
+    The scan proceeds right to left, takes the rightmost occurrence, and resumes to the left of the inserted text; $[\,A/\epsilon\,]^{\mathrm{R}}$ is undefined. The resulting calculus is denoted $\mathrm{R}$.
 \end{definition}
 
 \begin{theorem}
@@ -1116,7 +1120,7 @@ So the second open problem of Section~4 -- is reversal reachable? -- is directio
 \end{theorem}
 
 \begin{proof}
-    Every pass occurring in these constructions is direction-robust in one of three ways: (a) its pattern is a single character (Proposition~\ref{prop:r2l-agree}) -- this covers $\mathtt{enc}$'s pattern $b$, the $[\,\mathtt{enc}(X)/\top\,]$ pass of $\mathtt{if}$, and $[\,\sigma/\Sigma\,]$-style products; (b) its pattern is a fixed unbordered constant, of the form $xb^k$ with $x \neq b$ -- covering $\mathtt{dec}$ and the marker passes of $\mathtt{cat}$; (c) its pattern has at most one occurrence in every string arising at that point of the pipeline -- which is exactly what the occurrence analyses of Section~2 establish for the remaining passes of $\mathtt{cat}$, $\mathtt{tail}$, $\mathtt{head}$, $\mathtt{eq}$ and $\mathtt{if}$ (e.g.\ by Border Injectivity, $b\,\mathtt{enc}(Y)$ occurs in $b\,\mathtt{enc}(X)$ iff $X = Y$, and then as the whole string). Note that the variable patterns of (c) need not be unbordered -- $b\,\mathtt{enc}(\epsilon) = xbbxbb$ is bordered -- so it is the occurrence analysis, not the pattern's shape, that carries them; and that analysis is direction-free. A direction-robust pass computes the same function under both primitives; compose pass by pass. (Verified for $|\Sigma| \leq 4$ on all inputs up to the stated lengths.)
+    Every pass occurring in these constructions is direction-robust in one of three ways: (a) its pattern is a single character (Proposition~\ref{prop:r2l-agree}) -- this covers $\mathtt{enc}$'s pattern $b$ and the $[\,\mathtt{enc}(X)/\top\,]$ pass of $\mathtt{if}$; (b) its pattern is a fixed unbordered constant, of the form $xb^k$ with $x \neq b$ -- covering $\mathtt{dec}$ and the marker passes of $\mathtt{cat}$; (c) its pattern has at most one occurrence in every string arising at that point of the pipeline -- which is exactly what the occurrence analyses of Section~2 establish for the remaining passes of $\mathtt{cat}$, $\mathtt{tail}$, $\mathtt{head}$, $\mathtt{eq}$ and $\mathtt{if}$ (e.g.\ by Border Injectivity, $b\,\mathtt{enc}(Y)$ occurs in $b\,\mathtt{enc}(X)$ iff $X = Y$, and then as the whole string). Note that the variable patterns of (c) need not be unbordered -- $b\,\mathtt{enc}(\epsilon) = xbbxbb$ is bordered -- so it is the occurrence analysis, not the pattern's shape, that carries them; and that analysis is direction-free. A direction-robust pass computes the same function under both primitives; compose pass by pass. (Verified for $|\Sigma| = 2, 3, 4$, under both the left-to-right and right-to-left primitives: all inputs of length $\leq 5$, and of length $\leq 4$ for the $\mathtt{eq}$ and $\mathtt{if}$ scrutinees.)
 \end{proof}
 
 \begin{theorem}
@@ -1138,7 +1142,11 @@ The repair is to conjugate the whole construction:
 \end{theorem}
 
 \begin{proof}
-    Conjugate Theorem~\ref{lem:multiple substitution} by $\mathrm{rev}$ (Theorem~\ref{thm:conjugation}): the conjugated construction computes $\mathrm{rev}\big(\mathtt{rep}_n(\mathrm{rev}S;\,\mathrm{rev}X_i, \mathrm{rev}Y_i)\big)$, and leftmost-greedy freezing of $\mathrm{rev}X_i$ in $\mathrm{rev}S$ is rightmost-greedy freezing of $X_i$ in $S$. Verified on 16{,}140 instances ($n \leq 2$, $|\Sigma| \leq 3$, both choices of $(b,x)$).
+    Conjugate Theorem~\ref{lem:multiple substitution} by $\mathrm{rev}$ (Theorem~\ref{thm:conjugation}): the conjugated construction computes
+    \begin{align}
+        \mathrm{rev}\big(\mathtt{rep}_n(\mathrm{rev}S;\,\mathrm{rev}X_i, \mathrm{rev}Y_i)\big),
+    \end{align}
+    and leftmost-greedy freezing of $\mathrm{rev}X_i$ in $\mathrm{rev}S$ is rightmost-greedy freezing of $X_i$ in $S$. Verified on 16{,}140 instances, with both choices of $(b,x)$ throughout: $n = 1$ over $|\Sigma| = 2$ with all patterns and replacements of length $\leq 2$; $n = 2$ over $|\Sigma| = 2$ with all patterns of length $\leq 2$ and replacements of length $\leq 1$; and $n = 1$ over $|\Sigma| = 3$ with replacements of length $\leq 1$.
 \end{proof}
 
 \begin{theorem}
@@ -1148,13 +1156,13 @@ The repair is to conjugate the whole construction:
 \end{theorem}
 
 \begin{proof}
-    The three spurious classes of the phase-locking proof are excluded by the hypothesis: an $(\alpha)$-spurious match running into a marker needs the last data character of $E_i$ to be $b$; a $(\beta)$-match needs $X_i = x^k$; the $(\gamma)$ case needs $X_i = b$. So every $E_i$-match is genuine, and since for disjoint occurrence sets the two greedy directions select the same set, the rightmost-first scan takes exactly the rightmost-freezing set of round $i$. The repair pass is inert -- its pattern arises only at spurious junctions -- and instantiation replaces whole markers, by the Comma Code Lemma. Verified on 23{,}996 instances over $|\Sigma| = 3$.
+    The three spurious classes of the phase-locking proof are excluded by the hypothesis: an $(\alpha)$-spurious match running into a marker needs the last data character of $E_i$ to be $b$; a $(\beta)$-match needs $X_i = x^k$; the $(\gamma)$ case needs $X_i = b$. So every $E_i$-match is genuine, and since for disjoint occurrence sets the two greedy directions select the same set, the rightmost-first scan takes exactly the rightmost-freezing set of round $i$. The repair pass is inert -- its pattern arises only at spurious junctions -- and instantiation replaces whole markers, by the Comma Code Lemma. Verified on 23{,}996 instances over $|\Sigma| = 3$: $n = 1$ with all patterns of length $\leq 2$ ending outside $\{b,x\}$ and all replacements of length $\leq 2$, all three choices of $(b,x)$; $n = 2$ with replacements of length $\leq 1$.
 \end{proof}
 
 \begin{proposition}
     (\emph{Escape is Direction-Locked})
     \label{prop:escape-lock}
-    The pair scheme of Theorem~\ref{thm:escape} must match the scan direction. With the pre-fix pairs $u \mapsto u_1f(u)$ the round trip fails under rightmost-freezing: $U = \{b, x\}$, $f(b) = b$, $f(x) = c$, $u_1 = b$, $S = bx$ gives $\mathtt{escape}(S) = bbbc$ and the round trip returns $bbx$. With the post-fix pairs $u \mapsto f(u)u_1$ it fails under leftmost-freezing: $f(b) = b$, $f(x) = x$, $u_1 = b$, $S = xb$ gives $\mathtt{escape}(S) = xbbb$ and the round trip returns $xbb$. The matched pairings round-trip.
+    The pair scheme of Theorem~\ref{thm:escape} must match the scan direction. With the pre-fix pairs $u \mapsto u_1f(u)$ the round trip fails under rightmost-freezing: $U = \{b, x\}$, $f(b) = b$, $f(x) = c$, $u_1 = b$, $S = bx$ gives $\mathtt{escape}(S) = bbbc$ and the round trip returns $bbc$. With the post-fix pairs $u \mapsto f(u)u_1$ it fails under leftmost-freezing: $f(b) = b$, $f(x) = x$, $u_1 = b$, $S = xb$ gives $\mathtt{escape}(S) = xbbb$ and the round trip returns $xbb$. The matched pairings round-trip.
 \end{proposition}
 
 \begin{proof}
@@ -1164,14 +1172,14 @@ The repair is to conjugate the whole construction:
 \begin{theorem}
     (\emph{Constant Fragments are Incomparable})
     \label{thm:subsequential}
-    Every constant-pattern core $L$-pipeline over one variable is left-subsequential: computed by a deterministic finite-state transducer reading left to right and emitting as it goes, with a final output. The single pass $[\,b/aa\,]^{\mathrm{R}}$ is not left-subsequential. Hence $[\,b/aa\,]^{\mathrm{R}} \in \mathrm{R}\text{-core-const} \setminus L\text{-core-const}$ and, by mirror, $[\,b/aa\,] \in L\text{-core-const} \setminus \mathrm{R}\text{-core-const}$.
+    Every constant-pattern core $L$-pipeline over one variable is left-subsequential: computed by a deterministic finite-state transducer reading left to right and emitting as it goes, with a final output. The single pass $[\,b/aa\,]^{\mathrm{R}}$ is not left-subsequential. Hence $[\,b/aa\,]^{\mathrm{R}}$ is computed by no constant-pattern core $L$-pipeline, and, by mirror, $[\,b/aa\,]$ by no constant-pattern core $\mathrm{R}$-pipeline: the two constant fragments are incomparable.
 \end{theorem}
 
 \begin{proof}
     A single pass is realized by the machine whose state is the longest suffix of the text read so far that is a proper prefix of $B$; it emits the finalized part and resets on a match -- this is exactly the scan of Definition~\ref{def:subst}. The class is closed under composition: feed the first machine's online output into the second. For $[\,b/aa\,]^{\mathrm{R}}$: on $a^n$ the output is $b^{n/2}$ for even $n$ and $a\cdot b^{(n-1)/2}$ for odd $n$, so the first output character depends on the parity of an unbounded run. A deterministic streaming machine on $a^{\infty}$ either never emits -- its total output is then a bounded final output, contradicting the unbounded lengths -- or makes its first emission at some fixed step $k$ with fixed content; but then on $a^m$ and $a^{m+1}$ with $m \geq k$ the first emission is the same character, while the two outputs begin with different characters.
 \end{proof}
 
-Nothing about the direction breaks the complexity theory: the length bound of Lemma~\ref{lem:length} holds with the same degree (the greedy matches are disjoint either way), single passes run in linear time, and the polynomial-time soundness of Theorem~\ref{thm:fp} transfers verbatim. Likewise $X \mapsto X^{|X|}$ is $\mathrm{R}$-reachable (single-character patterns throughout) and $X \mapsto X^{2^{|X|}}$ is not. What \emph{is} direction-sensitive is the fine structure: the multiple-substitution construction needs its constants mirrored, the escape scheme needs its pairs on the correct side, and the constant fragments are provably incomparable.
+Nothing about the direction breaks the complexity theory: the length bound of Lemma~\ref{lem:length} holds with the same degree (the greedy matches are disjoint either way), single passes run in linear time, and the polynomial-time soundness of Theorem~\ref{thm:fp} transfers verbatim. Likewise $X \mapsto X^{|X|}$ is $\mathrm{R}$-reachable (single-character patterns throughout) and $X \mapsto X^{2^{|X|}}$ is not. What \emph{is} direction-sensitive is the fine structure: the multiple-substitution construction needs its constants mirrored (Theorems~\ref{thm:r2l-rep} and~\ref{thm:r2l-mirror}, or Theorem~\ref{thm:r2l-ends} under a stronger hypothesis), the escape scheme needs its pairs on the correct side (Proposition~\ref{prop:escape-lock}), and the constant fragments are provably incomparable (Theorem~\ref{thm:subsequential}).
 
 \subsection{Re-entering Inserted Text}
 
@@ -1236,11 +1244,11 @@ This is the precise content of the non-restart clause: it is exactly what makes 
 \end{proposition}
 
 \begin{proof}
-    For (ii): the first pass maps each $a$ to $aab$, so each maximal $a$-run becomes $(aab)^n$ and every $aba$ in the image sits at offset $1 \bmod 3$ within a run image -- the only junctions with the $b$-blocks spell $abb$ or $baa$. The greedy deletions of the second pass therefore consume one block at a time inside a run image and cannot cross run boundaries, collapsing $(aab)^n$ to $aab$; the third deletes the residual $ab$, leaving one $a$ per run. The mechanism -- a \emph{deletion} pass resuming at the deletion point and re-exposing junctions -- is available in the safe semantics of Definition~\ref{def:subst} and goes unused in Section~2. For the unsafe node: matches of $aa$ occur only inside $a$-runs, each match shortens the current run by one, and the frozen prefix carries the collapsed part. (Verified: all strings of length $\leq 12$ over $|\Sigma| = 2$ and $\leq 9$ over $|\Sigma| = 3$, 3000 random strings of length up to 60, and $a^{300}$; all strings of length $\leq 10$ for the unsafe node.)
+    For (ii): the first pass maps each $a$ to $aab$, so each maximal $a$-run becomes $(aab)^n$ and every $aba$ in the image sits at offset $1 \bmod 3$ within a run image -- the only junctions with the $b$-blocks spell $abb$ or $baa$. The greedy deletions of the second pass therefore consume one block at a time inside a run image and cannot cross run boundaries, collapsing $(aab)^n$ to $aab$; the third deletes the residual $ab$, leaving one $a$ per run. The mechanism -- a \emph{deletion} pass resuming at the deletion point and re-exposing junctions -- is available in the safe semantics of Definition~\ref{def:subst} and goes unused in Section~2. For the unsafe node: matches of $aa$ occur only inside $a$-runs, each match shortens the current run by one, and the frozen prefix carries the collapsed part. (Verified: all strings of length $\leq 12$ over $|\Sigma| = 2$ and $\leq 9$ over $|\Sigma| = 3$, 3000 random strings of length up to 60, and the three unary shapes $a^m$, $ba^m$, $a^mb$ up to $m = 300$; all strings of length $\leq 10$ over $|\Sigma| = 2$ for the unsafe node.)
 \end{proof}
 
 \begin{remark}
-    The two calculi are conjecturally \emph{incomparable}. In one direction, $X \mapsto X^{|X|}$ is $L$-reachable, but its construction's instantiation pass $[\,X_1/\sigma\,]^{\mathrm{u}}$ diverges exactly when $\sigma \subset X_1$, and no unsafe construction is known (bounded searches over 73{,}205 pipelines fail). In the other direction, the \emph{a-flood} $[\,a/ab\,]^{\mathrm{u}}$ -- a single node, mapping $b^i a^j W \mapsto b^i a^{\#a(W)}$ -- is absent from every constant-pattern $L$-pipeline of depth $\leq 4$ on the same finite domains. Both directions are open.
+    The two calculi are conjecturally \emph{incomparable}. In one direction, $X \mapsto X^{|X|}$ is $L$-reachable, but its construction's instantiation pass $[\,X_1/\sigma\,]^{\mathrm{u}}$ diverges exactly when $\sigma \subset X_1$, and no unsafe construction is known (bounded searches fail). In the other direction, the \emph{a-flood} $[\,a/ab\,]^{\mathrm{u}}$ -- a single node, mapping $b^i a^j W \mapsto b^i a^{\#a(W)}$ -- is absent from every constant-pattern $L$-pipeline of depth $\leq 4$ on the same finite domains. Both directions are open.
 \end{remark}
 
 \subsection{Restarting from Zero}
@@ -1266,7 +1274,7 @@ Fixpoints are $B$-free -- the process stops exactly when $B$ no longer occurs --
 \end{theorem}
 
 \begin{proof}
-    (i) Each step shortens the string. (ii) Let $i_1$ be the first position where $A$ and $B$ differ; assign digit $0$ to $A[i_1]$, digit $1$ to $B[i_1]$, digit $0$ to every other character, and let $V(s) = \sum_j \mathrm{digit}(s[j])\,2^{-j}$. A step at position $i$ changes the digit at $i + i_1$ from $1$ to $0$ -- a drop of exactly $2^{-(i+i_1)}$ -- while the positions after $i+i_1$, inside or beyond the replaced block, can rise by a total of at most $\sum_{j > i+i_1} 2^{-j} < 2^{-(i+i_1)}$. So $V$ strictly decreases along the trajectory and takes only finitely many values on strings of the fixed length. (iii) The replacement re-contains the pattern at the same site. (v) The four minimal binary length-increasing rules with $B \not\subset A$ that diverge are $[\,aabb/ba\,]$, $[\,abba/bab\,]$, $[\,baab/aba\,]$ and $[\,bbaa/ab\,]$; e.g.\ $[\,aabb/ba\,]^{\mathrm{m}}$ on $baa$ regenerates a junction $ba$ at every step and grows forever. Among the 930 binary rules with $|A|, |B| \leq 4$, run on all inputs of length $\leq 9$, exactly 166 diverge -- all accounted for by (iii) and these four.
+    (i) Each step shortens the string. (ii) Let $i_1$ be the first position where $A$ and $B$ differ; assign digit $0$ to $A[i_1]$, digit $1$ to $B[i_1]$, digit $0$ to every other character, and let $V(s) = \sum_j \mathrm{digit}(s[j])\,2^{-j}$. A step at position $i$ changes the digit at $i + i_1$ from $1$ to $0$ -- a drop of exactly $2^{-(i+i_1)}$ -- while the positions after $i+i_1$, inside or beyond the replaced block, can rise by a total of at most $\sum_{j > i+i_1} 2^{-j} < 2^{-(i+i_1)}$. So $V$ strictly decreases along the trajectory and takes only finitely many values on strings of the fixed length. (iii) The replacement re-contains the pattern at the same site. (v) The divergent rules of this class with $|A|, |B| \leq 4$ are, up to renaming, $[\,aabb/ba\,]$, $[\,aaab/ba\,]$, $[\,abbb/ba\,]$ and $[\,abba/bab\,]$, all with $|A| = 4$; e.g.\ $[\,aabb/ba\,]^{\mathrm{m}}$ on $baa$ goes $baa \to aabba \to aabaabba \to \cdots$, each splice -- a prefix ending $aab$ against the replacement $aabb$ -- re-creating a junction $ba$. Among the 930 binary rules with $|A|, |B| \leq 4$, run on all inputs of length $\leq 9$, exactly 170 diverge: the 162 with $B \subset A$, plus these eight.
 \end{proof}
 
 \begin{proposition}
@@ -1296,8 +1304,16 @@ Fixpoints are $B$-free -- the process stops exactly when $B$ no longer occurs --
 \begin{corollary}
     (\emph{Complexity Collapse})
     \label{cor:towers}
-    The length bound of Lemma~\ref{lem:length} and the polynomial-time soundness of Theorem~\ref{thm:fp} fail for the Markov calculus: a single node has exponential output growth, in exponentially many steps. Worse, the two-node block $[\,baa/ab\,]^{\mathrm{m}}\circ[\,ab/aa\,]^{\mathrm{m}}$ maps $b^m a^K$ to $b^{\,m+\lfloor K/2\rfloor}a^{\Theta(2^{K/2})}$, so $2t-1$ constant-pattern nodes produce output of tower height $t$ in the input length.
+    The length bound of Lemma~\ref{lem:length} and the polynomial-time soundness of Theorem~\ref{thm:fp} fail for the Markov calculus: a single node has exponential output growth, in exponentially many steps. Worse, the two-node block $[\,baa/ab\,]^{\mathrm{m}}\circ[\,ab/aa\,]^{\mathrm{m}}$ maps $b^m a^K$ to
+    \begin{align}
+        b^{\,m+\lfloor K/2\rfloor}\;a^{\,2^{\lfloor K/2\rfloor+1}-2+(K \bmod 2)},
+    \end{align}
+    so $2t-1$ constant-pattern nodes produce output of tower height $t$ in the input length.
 \end{corollary}
+
+\begin{proof}
+    The first node maps $b^m a^K$ to $b^m\,(ab)^{\lfloor K/2\rfloor}\,a^{K \bmod 2}$: each step turns the leftmost $aa$ into $ab$, an $ab$ contains no $aa$, and the $b$-prefix is untouched, so after $\lfloor K/2 \rfloor$ steps the $a$-run is exhausted. The second node is the amplifier of Theorem~\ref{thm:amplifier}: on that string the $a$'s are those of $(ab)^j$ with $j = \lfloor K/2 \rfloor$, the $i$-th seeing $j-i$ $b$'s, plus the trailing $a$ if $K$ is odd, so $v = 2^{\,j+1} - 2 + (K \bmod 2)$ and $\#b = m + j$. Iterating the block composes $K \mapsto 2^{\lfloor K/2 \rfloor}$, so $2t-1$ nodes turn length $n$ into a tower of height $t$. (Verified: the block formula for $m \leq 3$, $K \leq 8$, and the height-$2$ composition on $ab^{\,n-1}$ for $n \leq 5$.)
+\end{proof}
 
 This makes the closing remark of Section~4 quantitative: unbounded iteration of substitution is what lifts the system beyond polynomial time -- a single node suffices -- while every bounded pipeline of passes stays inside it.
 
@@ -1324,29 +1340,30 @@ This makes the closing remark of Section~4 quantitative: unbounded iteration of 
     \begin{enumerate}[(i)]
         \item $\mathtt{head}$, $\mathtt{tail}$, $\mathtt{eq}$, $\mathtt{cat}$ and $\mathtt{bdec}$ transfer verbatim: every pass performs exactly one effective operation and is then inert, the patterns containing $bb$ and the images not.
         \item $\mathtt{if}$ needs a redesign -- the node $[\,\mathtt{enc}(X)/\top\,]^{\mathrm{m}}$ diverges whenever $\top \subset \mathtt{enc}(X)$ -- and has a deletion-based one: put the control character \emph{inside} the patterns, so that each pass deletes exactly its branch.
-        \item the construction of Theorem~\ref{lem:multiple substitution} computes the freezing semantics if and only if no $X_i = b$. The renaming pass $[\,m_i/E_{X_i}\,]^{\mathrm{m}}$ diverges exactly when $E_{X_i} \subset m_i$, i.e.\ when $X_i = b$ (then $E_{X_i} = xb$, and $|E_{X_i}| \geq 4$ otherwise rules the inclusion out); the repair and instantiation passes never diverge (their patterns have $b$-runs of length at least $3$ and $2$, their replacements at most $2$ and $1$); and, with no $X_i$ equal to $b$, each restart node performs exactly its left-to-right pass, because no replacement creates or destroys an occurrence of its own pattern: an $E_i$ can neither lie inside the inserted marker (its even positions are $x$'s, the marker's interior is $b$'s) nor straddle it, and likewise for the repair and instantiation patterns. Verified on 8370 instances ($n \leq 2$, $|\Sigma| = 2$); unconditionally, 364 of 2604 tested instances fail, and the failures occur exactly when some $X_i = b$ meets unfrozen data.
+        \item the construction of Theorem~\ref{lem:multiple substitution} computes the freezing semantics if and only if no $X_i = b$. The renaming pass $[\,m_i/E_{X_i}\,]^{\mathrm{m}}$ diverges exactly when $E_{X_i} \subset m_i$, i.e.\ when $X_i = b$ (then $E_{X_i} = xb$, the one image that fits inside $m_i = xb^{\,i+1}$); the repair and instantiation passes never diverge (their patterns have $b$-runs of length at least $3$ and $2$, their replacements at most $2$ and $1$); and, with no $X_i$ equal to $b$, each restart node performs exactly its left-to-right pass, because no replacement creates or destroys an occurrence of its own pattern: an $E_i$ can neither lie inside the inserted marker (its even positions are $x$'s, the marker's interior is $b$'s) nor straddle it, and likewise for the repair and instantiation patterns. Verified on 8370 instances with no $X_i = b$, both choices of $(b,x)$ over $|\Sigma| = 2$: $n = 1$ with all patterns and replacements of length $\leq 2$, and $n = 2$ with replacements of length $\leq 1$. Unconditionally -- the $n = 1$ domain without the restriction -- 364 of 2604 instances fail, exactly those with $X_1 = b$ and $b$ in $S$.
     \end{enumerate}
 \end{proposition}
 
 \begin{remark}
-    Single restart nodes already compute nontrivial total functions: $[\,ba/ab\,]^{\mathrm{m}}$ sorts its input to $b^*a^*$; $[\,a/aa\,]^{\mathrm{m}}$ collapses $a$-runs -- one node, where the baseline needs the three-pass pipeline of Proposition~\ref{prop:rescan-survives}; and the sort and collapse nodes commute.
+    Single restart nodes already compute nontrivial total functions: $[\,ba/ab\,]^{\mathrm{m}}$ sorts its input to $b^*a^*$, and $[\,a/aa\,]^{\mathrm{m}}$ collapses $a$-runs -- one node, where the baseline needs the three-pass pipeline of Proposition~\ref{prop:rescan-survives}.
 \end{remark}
 
 \subsection{The Landscape}
 
 \begin{center}
+\small
 \begin{tabular}{l|llll}
     variant & $L \sqsubseteq V$ & $V \sqsubseteq L$ & toolkit & growth \\
     \hline
     once & refuted & open (the hinge) & rebuilt, no $\mathtt{enc}$ & linear \\
-    positional & refuted & iff once $\in L$ & $\mathtt{tail}$, $\mathtt{head}$; no $\mathtt{enc}$, no $\mathtt{eq}$ & linear \\
+    positional & refuted & iff once $\in L$ & $\mathtt{tail}$, $\mathtt{head}$; no $\mathtt{enc}$, $\mathtt{eq}$ & linear \\
     right-to-left & open & open & verbatim (robust) & polynomial \\
-    unsafe & open & open & collapses (no escape) & polynomial, total fragment \\
-    Markov & open (conjectured no) & refuted (amplifier) & black-box encoders & unbounded (towers)
+    unsafe & open & open & collapses (no escape) & poly., total fragment \\
+    Markov & open (conj.\ no) & refuted (amplifier) & black-box $\mathtt{enc}$ & unbounded (towers)
 \end{tabular}
 \end{center}
 
-Both inclusions for the right-to-left calculus hold if $\mathrm{rev}$ is reachable in either calculus, and no other route between $L$ and $\mathrm{R}$ is known (Theorem~\ref{thm:subsequential} separates only the constant fragments). The unsafe row's two ``open''s carry the conjectures after Proposition~\ref{prop:rescan-survives}; the Markov row's ``conjectured no'' is Conjecture~\ref{conj:ic}, with the doubling node of Theorem~\ref{thm:no-injective} the concrete obstacle.
+Both inclusions for the right-to-left calculus hold if $\mathrm{rev}$ is reachable in either calculus, and no other route between $L$ and $\mathrm{R}$ is known (Theorem~\ref{thm:subsequential} separates only the constant fragments). The two ``refuted'' entries of the once and positional rows are Corollaries~\ref{cor:once-sep} and~\ref{cor:pos-sep}; the Markov row's is Corollary~\ref{cor:towers}. The unsafe row's two ``open''s carry the conjectures after Proposition~\ref{prop:rescan-survives}; the Markov row's ``conjectured no'' is Conjecture~\ref{conj:ic}, with the doubling node of Theorem~\ref{thm:no-injective} the concrete obstacle.
 
 The web hangs on two ropes, and both are reachability questions about the baseline itself:
 \begin{enumerate}
@@ -1358,12 +1375,12 @@ Beyond the two hinges:
     \item Conjecture~\ref{conj:ic} (IC): no total injective growing core Markov expression. Either answer reorganizes the Markov row.
     \item The two incomparability witnesses for the unsafe calculus: is $X \mapsto X^{|X|}$ unsafe-reachable? Is the a-flood $L$-reachable?
     \item Is one-rule termination under the leftmost strategy decidable (Theorem~\ref{thm:termination}(v))? The known decidable classes -- length-decreasing, length-preserving, single-threaded, grid, one-overlap-pair -- do not obviously cover it.
-    \item Is there a growth dichotomy for total restart rules? Among the 162 total binary rules with $|A|, |B| \leq 3$, 144 grow linearly, 14 with slope $2$--$3$, and exactly 4 exponentially; nothing intermediate was found.
+    \item Is there a growth dichotomy for total restart rules? Among the 162 total binary rules with $|A|, |B| \leq 3$, 140 have linearly bounded output, 18 grow superlinearly but no faster than $3n$, and exactly 4 grow exponentially -- the amplifier $[\,baa/ab\,]$, its reversal, and their two renamings; nothing in between was found.
     \item The exact characterization of the reachable class for each variant -- open problem 1 of Section~4, now sevenfold.
 \end{enumerate}
 
 \begin{remark}
-    \emph{Methodology.} The computational statements in this section were verified by exhaustive enumeration over the finite domains stated where they occur: all strings up to the given lengths over the stated alphabets, all patterns and replacements up to the given lengths, both choices of the encoding characters where they matter. The negative claims rest on breadth-first search in function space over bounded expression depths, with every candidate found re-verified on strictly larger domains before being believed -- a necessary discipline, since short-domain artifacts are real: three halvings ``compute'' $\mathtt{head}$ on unary strings of length $\leq 8$ and fail at length $9$, and a two-pass near-miss computes $\mathtt{dec}$ on even lengths only. No enumeration reported here exceeds a few million evaluations.
+    \emph{Methodology.} The computational statements in this section were verified by exhaustive enumeration over the finite domains stated where they occur: all strings up to the given lengths over the stated alphabets, all patterns and replacements up to the given lengths, both choices of the encoding characters where they matter. The negative claims rest on breadth-first search in function space over bounded expression depths, with every candidate found re-verified on strictly larger domains before being believed -- a necessary discipline, since short-domain artifacts are real: three halvings $[\,a/aa\,]$ collapse exactly the $a$-runs of length at most $8$ and fail at length $9$, and an iterated positional node computes $\mathtt{dec}$ exactly on the even lengths and fails on the odd ones. Every enumeration and search reported here is reproducible from the stated domains in at most hours on a single core.
 \end{remark}
 
 \end{document}

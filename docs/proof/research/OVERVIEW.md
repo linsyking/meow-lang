@@ -169,21 +169,49 @@ Priority-ordered, with suggested target:
    dropped (H2). Lean port: `enc2`/`enc2Pass`/`dec2Pass`/`repC2` added with the
    code layer (`enc2Pass_eq`, `dec2Pass_enc2`); `repC2_correct` stated without
    (H) — the staging proof remains open (roadmap in its docstring).
-3. **A "direction" remark/section**: r2l results — direction-robustness of the
-   toolkit, mirrored rep_n hypothesis, escape direction-lock, and the
-   Conjugation Theorem tying r2l = L to reversal.
-4. **A "weaker primitives" section**: once/pos lower bounds (Fresh-Character,
-   Occurrence Bound, single-site alphabet bound, linear growth) — the
-   below-the-baseline zoo.
-5. **An "unbounded iteration" section**: restart amplifier, no-injective-node
-   theorem, termination classification + semi-Thue connection — the
-   above-the-baseline result, making the paper's Turing-completeness remark precise.
-6. **Update the open-problems list** with §6 above.
+3. **A "direction" remark/section** — **DONE (2026-09-19)**: promoted as the
+   paper's §5.3 (The Other Direction): Rev Duality, Conjugation (rev reachable
+   iff in L iff in R; decides L = R), unbordered agreement, the direction-robust
+   toolkit, the comma construction NOT direction-robust (counterexample + 708/5292
+   census) with the mirrored repair (16,140 checks) and the ends-outside variant
+   (23,996 checks), escape direction-lock, and left-subsequentiality giving
+   incomparable constant fragments.
+4. **A "weaker primitives" section** — **DONE (2026-09-19)**: promoted as §5.1
+   (Once) + §5.2 (Positional): Doubled Marker lemma, once-toolkit (cat/tail/
+   head/eq/if without enc), once-invariants (fresh-character, max-run, balance,
+   linear growth) ⟹ L ⊴ ONCE, unary simulation; positional toolkit (tail 2
+   nodes, head scaffold), invariants, unary dichotomy, and the once hinge
+   (POS ⊴ L ⟺ once-primitive ∈ L, via setAt ∈ L and repOcc-via-markers).
+   All constructions re-verified in
+   [scratch/paper_variants/verify_variants.py](scratch/paper_variants/verify_variants.py)
+   (chunks `once`, `pos`) plus the agents' own scripts.
+5. **An "unbounded iteration" section** — **DONE (2026-09-19)**: promoted as §5.4
+   (Unsafe/rescan: totality, exact agreement characterization, encoder-collapse,
+   no-escape, run-collapse in L and U) + §5.5 (Markov/restart: termination
+   classification, amplifier, towers, no-injective-nodes, IC conjecture,
+   black-box-encoder toolkit). **Corrections found during re-verification**
+   (verify_variants.py chunk `rescan`/`restart` + `verify_extra.py`/
+   `verify_extra2.py`): the divergent length-increasing binary rules with
+   |A|,|B| ≤ 4 are EIGHT, not four (add [aaab/ba], [abbb/ba], [baaa/ab],
+   [bbba/ab]); 170 of 930 rules diverge, not 166; the growth census of the 162
+   total rules |A|,|B| ≤ 3 is 140 linear / 18 superlinear (≤ 3n) / 4 exponential,
+   not 144/14/4; sort and collapse nodes do NOT commute (claim removed); the
+   report's amplifier v-recursion was garbled (correct: v(Ta) = v(T)+1,
+   v(Tb) = 2v(T)); comma-with-restart correct iff no X_i = b (8,370 checks,
+   364/2604 unconditional failures exactly X_1 = b ∧ b ∈ S).
+6. **Update the open-problems list** — **DONE (2026-09-19)**: the paper's §5.6
+   (The Landscape) tabulates the five variants, names the two hinges (once ∈ L,
+   rev ∈ L) and lists seven open problems; methodology remark documents the
+   computational-verification discipline.
 
 **Verification status**: (1) comma-code construction — verified (proof audit +
 independent reimplementation, see
 [verification-comma-code.md](verification-comma-code.md)); (2) the Independent
 Substitution erratum — verified and **fixed** in `main.tex` (+ the stale Lean
-`#eval` comments). Still awaiting independent verification: Fresh-Character
-Lemma / `L ⊴ ONCE` refutation (once-l.md Thm 4.5), restart amplifier +
-no-injective-node theorem (restart.md Thms 4.2, 5.1).
+`#eval` comments). Fresh-Character Lemma / `L ⊴ ONCE` refutation and the restart
+amplifier + no-injective-node theorem were re-verified 2026-09-19 during the
+§5 promotion (verify_variants.py chunks `once`, `restart`; census re-checked in
+`verify_extra.py`/`verify_extra2.py`, which found and fixed the errors listed in
+item 5 above). Search-evidence statistics quoted in remarks (depth-3/4 bounded
+searches, randomized 75M-pipeline sweep) are taken from the reports and
+described qualitatively in the paper.
