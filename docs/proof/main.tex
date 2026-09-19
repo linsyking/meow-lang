@@ -1,79 +1,86 @@
-\documentclass{article}
-%include polycode.fmt
-\usepackage[a4paper,left=2.5cm,right=2.5cm,top=\dimexpr15mm+1.5\baselineskip,bottom=2cm]{geometry}
+\documentclass[runningheads,envcountsect]{llncs}
 \usepackage{amsmath}
-\usepackage{graphicx}
-\usepackage{setspace}
-\usepackage{amsthm}
 \usepackage{amssymb}
 \usepackage{enumerate}
-\usepackage{hyperref}
-\usepackage{exscale}
-\usepackage{pdfpages}
 \usepackage{mathpartir}
-\usepackage{relsize}
-\usepackage{cases}
-\usepackage{mathrsfs}
-\usepackage{dutchcal}
-\usepackage{float}
-\usepackage{tcolorbox}
-\usepackage{array}
-\usepackage{xcolor}
 \usepackage{stmaryrd}
-\usepackage{calrsfs}
-\usepackage{mdframed}
-\usepackage{minted}
+\usepackage{hyperref}
 
-\theoremstyle{definition}
-\newtheorem{theorem}{Theorem}[section]
-\newtheorem{lemma}{Lemma}[section]
-\newtheorem{definition}{Definition}[section]
-\newtheorem*{remark}{Remark}
-\newtheorem{corollary}{Corollary}[section]
-\newtheorem{proposition}{Proposition}[section]
-\newtheorem{conjecture}{Conjecture}[section]
-\definecolor{bg}{rgb}{0.95,0.95,0.95}
-\newcommand{\ip}[1]{\langle #1 \rangle}
-\newcommand{\lp}{\cdot \mathtt{l}}
-\newcommand{\rp}{\cdot \mathtt{r}}
-\newcommand{\li}{\mathtt{l}\cdot}
-\newcommand{\ri}{\mathtt{r}\cdot}
+% llncs predefines the whole theorem family, numbered by section via the
+% class option; its remark is numbered, so we replace it with an unnumbered
+% variant, and its proof carries no QED symbol, so we append one.
+\renewenvironment{remark}
+  {\rmfamily\trivlist\item[\hskip\labelsep{\itshape Remark.}]\ignorespaces}
+  {\endtrivlist}
+\makeatletter
+\def\endproof{\leavevmode\unskip\nobreak\hfil\penalty50
+  \hskip1em\null\nobreak\hfil\hbox{$\squareforqed$}%
+  \parfillskip\z@\finalhyphendemerits\z@\endgraf\@endtheorem}
+\makeatother
 
 \allowdisplaybreaks
-\graphicspath{ {./figures/} }
+\emergencystretch=2em
 
 \hypersetup{
     colorlinks, linkcolor=black, urlcolor=cyan
 }
-\title{\vspace{-3em}String Substitution Theory for Finite Character Set\footnote{This note is licensed under a \href{https://creativecommons.org/licenses/by-nc-sa/2.0/}{CC BY-NC-SA 2.0} license.}\quad}
-\author{Yiming Xiang\vspace{1em}}
-\date{\today\vspace{-1em}}
+\title{A Theory of String Substitution over Finite Alphabets}
+\titlerunning{A Theory of String Substitution over Finite Alphabets}
+\author{Yiming Xiang\thanks{This note is licensed under a Creative Commons BY-NC-SA 2.0 license.}}
+\authorrunning{Y. Xiang}
+\institute{}
 \begin{document}
 \maketitle
 
+\begin{abstract}
+Search-and-replace is a primitive every programmer knows; this note takes it seriously as a model of computation. We study the single operation $[A/B]S$ -- replace, in one left-to-right pass over $S$, every occurrence of $B$ by $A$, taking the leftmost match first and never rescanning inserted text -- over a finite alphabet. A chain of elementary lemmas turns this one operation into a complete toolkit: escaping and unescaping, concatenation, head and tail, equality, selection, and simultaneous multiple substitution are each exactly a short composition of substitutions, for arbitrary strings. We then formalize ``built from substitution'' as a small expression calculus and measure its power: every reachable function is computable in polynomial time, with degree bounded by its expression, while quadratic growth is reachable and exponential growth is not. Finally we locate the primitive's design choices by varying them one at a time -- once-only, positional, right-to-left, rescanning, and Markov-style iteration -- obtaining concrete separations, collapses, and a classification of the divergent small rules. Every computational claim is verified by exhaustive enumeration over the finite domains stated where it occurs.
+
+\keywords{string substitution \and string rewriting \and finite alphabets \and rewriting calculus}
+\end{abstract}
+
 \section{Introduction}
 
-String substitution is widely used in computer programming. Many daily tasks need to be done by string substitution.
+Search-and-replace is everywhere in computing: text editors, regular expressions, templating macros, and the escaping rules of every string literal. This note is about what that single button can do when it is the \emph{only} thing on the toolbar.
 
-As an example, consider the ``backslash-escaping string'' problem.
-When we want to define a string that including special characters in a programming language, we usually use backslash to escape the special characters. For example, in Python, we can define a string that contains a backslash by ``$\backslash \backslash$'', and a string that contains a single quote by ``$\backslash \texttt{"}$''. And it seems that we can always transform a backslash-escaped string back to the original string. But how to prove its correctness? Is it possible that some string cannot be transformed back to the original string?
+Fix a finite alphabet $\Sigma$ and consider the operation
+\begin{align*}
+    [A/B]\,S,
+\end{align*}
+which scans $S$ once from left to right and replaces every occurrence of $B$ by $A$: the \emph{leftmost} match is taken first, matches do not overlap, and the scan never restarts inside the text it has just inserted. For a first taste, let $\Sigma = \{\mathtt{b}, \mathtt{x}\}$ and escape every $\mathtt{b}$ by prefixing an $\mathtt{x}$, the way a backslash escapes a quote:
+\begin{align*}
+    \mathtt{enc}(S) \triangleq [\mathtt{xb}/\mathtt{b}]\,S, \qquad \mathtt{dec}(T) \triangleq [\mathtt{b}/\mathtt{xb}]\,T.
+\end{align*}
+Then $\mathtt{dec}(\mathtt{enc}(S)) = S$ for \emph{every} string $S$ -- the round trip that makes string literals work, here a two-line theorem (Theorem~\ref{thm:enc} below; the reader is invited to find the subtlety: why is the second pass never confused by the $\mathtt{x}$'s the first pass inserted?). Pushing further: there is a \emph{fixed} template string and a chain of substitutions that concatenates \emph{arbitrary} strings through it,
+\begin{align*}
+    \mathtt{cat}(X,Y) \;=\; \mathtt{dec}\big([\mathtt{enc}(X)/\mathtt{xb}^2]\,[\mathtt{enc}(Y)/\mathtt{xb}^3]\,(\mathtt{xb}^2\mathtt{xb}^3)\big) \;=\; XY,
+\end{align*}
+and, harder still, one substitution chain that performs $n$ \emph{simultaneous} substitutions $\{X_i \mapsto Y_i\}_{i \le n}$ with no restrictions whatsoever on the patterns (Theorem~\ref{lem:multiple substitution}).
 
-In this note, we will investigate the theory behind string substitution.
+Three design choices are built into $[A/B]$: the scan goes left to right and takes the leftmost match; one pass replaces \emph{all} occurrences; and the scan never re-enters inserted text. Each is load-bearing. This note develops the theory of the chosen primitive along three axes.
 
-\section{Theorems}
+\paragraph{The toolkit (Section~\ref{sec:toolkit}).} We prove the basic lemmas of the primitive (elimination, independence, tail and head elimination, double substitution) and then build, each as an explicit composition of substitutions with a correctness proof: escaping and unescaping, concatenation, head and tail, equality testing, an \texttt{if} selector, and finally multiple substitution $\mathtt{rep}_n$, which performs $n$ pattern-replacement pairs in one shot over an arbitrary alphabet, patterns unrestricted.
 
-When we are talking about characters, we are talking about an element in a charset $\Sigma$. String, then, is a sequence of characters.
+\paragraph{The calculus (Section~\ref{sec:calculus}).} ``Constructible from substitution'' is made precise by a small expression calculus with variables, string constants, one substitution constructor, and concatenation. A syntactic safety condition implies totality; concatenation is eliminable (every expression is equivalent to a pure pipeline of passes); and every reachable function is computable in polynomial time, with the exponent bounded by the expression. The hierarchy is nontrivial: quadratic growth is reachable, while $X \mapsto X^{2^{|X|}}$ is not.
 
-We will not talk about the case when $\Sigma$ is infinite. Its behavior is different from the finite case. Moreover we assume $|\Sigma| > 1$.
+\paragraph{The variants (Section~\ref{sec:variants}).} We vary the design choices one at a time -- single-occurrence substitution, positional substitution, right-to-left scanning, rescanning of inserted text, and Markov-style iteration to a fixed point -- and measure the damage: which variants can simulate which, what survives of the toolkit, and how the growth rates separate. Among other things, the once-only primitive provably cannot simulate a full pass; rescan-based substitution agrees with the safe primitive exactly on a decidable local condition; and Markov iteration reaches arbitrary towers of exponentials while the bounded pipeline stays polynomial. A census of all binary rules with $|A|, |B| \le 4$ classifies every divergent one.
 
-For simplicity, we will use the following notation:
+Everything finite in this note -- every identity, counterexample, and census -- was verified by exhaustive enumeration over the domains stated in situ, by scripts accompanying the paper; the proofs are otherwise pen-and-paper.
+
+The primitive sits in a landscape of classical objects. Semi-Thue systems and Markov normal algorithms iterate rewriting without our bounded-pipeline restriction, and are Turing-complete; monadic string rewriting studies the single-character special case; rational transductions are the finite-state analogue of a pass with constant pattern. The calculus of this note -- bounded pipelines with \emph{variable} patterns -- appears to be new, and its exact characterization is open (Section~\ref{sec:limits}).
+
+\section{The Substitution Toolkit}
+\label{sec:toolkit}
+
+Characters are elements of a finite alphabet $\Sigma$; a string is a finite sequence of characters. Throughout Sections~\ref{sec:toolkit}--\ref{sec:limits} the alphabet is fixed with $|\Sigma| \ge 2$; the infinite case behaves differently and is not considered, and Section~\ref{sec:variants}, which varies the primitive itself, also tracks the unary case $|\Sigma| = 1$ explicitly wherever it differs.
+
+We use the following notation:
 
 \begin{itemize}
-    \item $\Sigma$ denotes a finite charset that has at least two elements.
-    \item Single capital letter denotes a string (possibly empty).
-    \item Single lower case letter denotes a single character.
-    \item $\epsilon$ denotes the empty string. $\epsilon A=A\epsilon=A$ for any string $A$.
-    \item When $B\neq \epsilon$, $[A/B]: \text{String} \rightarrow \text{String}, [A/B]C=C.\mathtt{replace}(B, A)$. ($[A/\epsilon]C$ is \textbf{undefined behavior})
+    \item $\Sigma$ denotes a finite alphabet with at least two elements; $\Sigma^*$ is the set of finite strings over $\Sigma$.
+    \item Single capital letters denote strings (possibly empty); single lower-case letters denote characters.
+    \item $\epsilon$ denotes the empty string; $\epsilon A=A\epsilon=A$ for any string $A$. $|A|$ is the length of $A$. $AB$ is the concatenation of $A$ and $B$ (also written $A\cdot B$ when a dot aids readability); $A^n$ is the $n$-fold concatenation of $A$.
+    \item $S[i]$ is the character of $S$ at position $i$, positions starting at $0$; $S[i{:}j]$ is the substring from position $i$ (inclusive) to $j$ (exclusive). An omitted bound is $0$ (left) or $|S|$ (right): $S[{:}j]$, $S[i{:}]$.
+    \item $[A/B]$ is the substitution function $\Sigma^* \rightarrow \Sigma^*$, defined in Definition~\ref{def:subst} below; $[A/\epsilon]$ is \textbf{undefined}.
     \item $A\subset B\Leftrightarrow \exists C, D,\ B = CAD$ ($A$ \emph{occurs in} $B$). In particular $A\subset A$.
     \item $A\sqsubset B\Leftrightarrow \exists C, B = AC$ ($A$ is a \emph{prefix} of $B$).
     \item $A\sqsupset B\Leftrightarrow \exists C, B = CA$ ($A$ is a \emph{suffix} of $B$).
@@ -128,7 +135,7 @@ There are several possible implementation of $\mathtt{replace}(B, A)$. We now as
 \end{proof}
 
 \begin{theorem}
-    (\emph{Substitution Elimitation})
+    (\emph{Substitution Elimination})
     If $B\not\subset S$,
     \begin{align}
         [A/B]S = S
@@ -149,15 +156,17 @@ There are several possible implementation of $\mathtt{replace}(B, A)$. We now as
 \end{lemma}
 
 \begin{proof}
+    Both directions are trivial when $A = \epsilon$ (the empty string occurs in every string), so assume $A \neq \epsilon$.
+
     First we prove $\Leftarrow$.
-    If $A \subset S$, let $S = XAY$. Since $A \cap C = \varnothing$, no occurrence of $C$ straddles $A$: we have $[B/C](XAY) = ([B/C]X)A([B/C]Y)$. Thus $A \subset [B/C]S$.
+    If $A \subset S$, let $S = XAY$. Since $A \cap C = \varnothing$, no occurrence of $C$ straddles $A$ (an occurrence touching $A$ shares a character with it): we have $[B/C](XAY) = ([B/C]X)A([B/C]Y)$. Thus $A \subset [B/C]S$.
 
     Now we prove $\Rightarrow$.
     If $A \subset [B/C]S$, we do induction on $|S|$.
 
-    If $|S| = 0$, then $A = \epsilon$, we are done. Suppose the statement is true for $|S|\leq n$. Now consider the case when $|S| = n+1$.
+    If $|S| = 0$, then $A \subset [B/C]\epsilon = \epsilon$ would force $A = \epsilon$, excluded; there is nothing to prove. Suppose the statement is true for $|S|\leq n$. Now consider the case when $|S| = n+1$.
 
-    Consider whether $C \subset S$. If $C \not\subset S$, then $[B/C]S = S$, we are done. If $C \subset S$, let $S = XCY$ where $C\not\subset X$.
+    Consider whether $C \subset S$. If $C \not\subset S$, then $[B/C]S = S$, we are done. If $C \subset S$, let $S = XCY$ exhibit the \emph{leftmost} occurrence of $C$ (no occurrence of $C$ starts at a position $< |X|$).
 
     Then we have $[B/C](XCY) = XB([B/C]Y)$. Since $B \neq \epsilon$ and $A \cap B = \varnothing$, no occurrence of $A$ straddles the inserted $B$, so $A \subset X \lor A \subset [B/C]Y$. By IH on $Y$, we have $A \subset X \lor A \subset Y$. In either case $A\subset XCY$ Thus $A \subset S$.
 \end{proof}
@@ -167,7 +176,7 @@ There are several possible implementation of $\mathtt{replace}(B, A)$. We now as
 \end{remark}
 
 \begin{lemma}
-    (\emph{Tail Elimitation})
+    (\emph{Tail Elimination})
     $B\neq\epsilon, B\cap A=\varnothing$, then
     \begin{align}
         CB\subset AB \Rightarrow C \sqsupset A
@@ -175,13 +184,13 @@ There are several possible implementation of $\mathtt{replace}(B, A)$. We now as
 \end{lemma}
 
 \begin{proof}
-    We first claim every occurrence of $B$ inside $AB$ is the final $B$. Suppose $B$ occurs at position $i$, so $B = AB[i\cdots i+|B|)$. If $i < |A|$, then $AB[i] = A[i]$, a character of $A$, while $AB[i] = B[0]$, a character of $B$; these share no character, a contradiction (note $B[0]$ exists since $B\neq\epsilon$). Hence $i = |A|$, the final $B$.
+    We first claim every occurrence of $B$ inside $AB$ is the final $B$. Suppose $B$ occurs at position $i$, so $AB[i{:}i+|B|] = B$. If $i < |A|$, then $AB[i] = A[i]$, a character of $A$, while $AB[i] = B[0]$, a character of $B$; these share no character, a contradiction (note $B[0]$ exists since $B\neq\epsilon$). Hence $i = |A|$, the final $B$.
 
     Now write $AB = X\,C\,B\,D$ (some $X, D$). The trailing $B$ of the occurrence is an occurrence of $B$ inside $AB$, hence is the final $B$; so $|X|+|C| = |A|$ (and $D = \epsilon$), and $C \sqsupset A$.
 \end{proof}
 
 \begin{lemma}
-    (\emph{Head Elimitation})
+    (\emph{Head Elimination})
     $B\neq\epsilon, B\cap A=\varnothing$, then
     \begin{align}
         BC\subset BA \Rightarrow C \sqsubset A
@@ -189,7 +198,7 @@ There are several possible implementation of $\mathtt{replace}(B, A)$. We now as
 \end{lemma}
 
 \begin{proof}
-    Symmetric to the Tail Elimitation: every occurrence of $B$ inside $BA$ is the initial $B$ (an occurrence at position $i \ge 1$ covers position $i+|B|-1 \ge |B|$, which lies in $A$'s territory, again forcing a shared character). Hence in $BA = X\,BC\,D$ the leading $B$ is the initial one, $X = \epsilon$, and $C \sqsubset A$.
+    Symmetric to the Tail Elimination: every occurrence of $B$ inside $BA$ is the initial $B$ (an occurrence at position $i \ge 1$ covers position $i+|B|-1 \ge |B|$, which lies in $A$'s territory, again forcing a shared character). Hence in $BA = X\,BC\,D$ the leading $B$ is the initial one, $X = \epsilon$, and $C \sqsubset A$.
 \end{proof}
 
 \begin{lemma}
@@ -234,55 +243,14 @@ There are several possible implementation of $\mathtt{replace}(B, A)$. We now as
         \item $p$ lies inside some gap $Z_i$. If the occurrence ended inside $Z_i$ as well, then $Y\subset Z_i$, hence $X \subset Z_i$ -- contradiction. (For the last gap $Z_k$ there is nothing after, so the occurrence must end inside it.) So it straddles the end of $Z_i$: $Y = AB$ where $A$ is a nonempty suffix of $Z_i$ and $B$ is a nonempty prefix of the exhibited copy following $Z_i$. Since $A\neq\epsilon$ and $AB = Y$, $B$ is a \emph{proper} prefix of that copy, i.e.\ a proper prefix of $Y$; and $B$ is simultaneously a suffix of $Y$ (as $Y = AB$), i.e.\ a border of $Y$ -- contradicting unborderedness.
         \item $p$ lies strictly inside an exhibited copy, at offset $i>0$. Comparing the occurrence with the exhibited copy character by character gives $Y[j] = Y[i+j]$ for all $0\le j < |Y|-i$, i.e.\ the prefix of $Y$ of length $|Y|-i$ equals its suffix of length $|Y|-i$: a proper border of $Y$ -- contradiction.
     \end{enumerate}
-    Now compute $[X/Y]W$ by the greedy scan. The leftmost occurrence of $Y$ is the first exhibited copy; it is replaced by $X$, and the scan resumes after the inserted $X$, facing a string of the same form $Z_i\,Y\,Z_{i+1}\cdots$. By the claim, no occurrence of $Y$ begins inside the inserted $X$ (it is shorter than $Y$) or inside a gap. Induction over the exhibited copies gives
+    Now compute $[X/Y]W$ by the greedy scan. The leftmost occurrence of $Y$ is the first exhibited copy; it is replaced by $X$, and the scan resumes after the inserted $X$ -- which it never re-enters -- facing a string of the same form $Z_i\,Y\,Z_{i+1}\cdots$. By the claim, no occurrence of $Y$ begins inside a gap, and occurrences inside the inserted $X$ are behind the scan. Induction over the exhibited copies gives
     \begin{align}
         [X/Y]W = Z_0\,X\,Z_1\cdots X\,Z_k = Z,
     \end{align}
     the last equality holding because the greedy scan of $[Y/X]$ selected exactly the occurrences of $X$ at these positions.
 \end{proof}
 
-The following theorem introduces the concept of escaping.
-
-% \begin{theorem}
-%     Let $b\neq x$, we define the following operations on strings:
-%     \begin{align}
-%         \mathtt{enc}_{b,x}(S) & \triangleq [xb/b][xx/x]S \\
-%         \mathtt{dec}_{b,x}(S) & \triangleq [x/xx][b/xb]S
-%     \end{align}
-
-%     % $b$ is called the \textbf{escaped character}, and $x$ is called the \textbf{backslash character} of $\Sigma$. Usually one charset has one fixed backslash character and many escaped characters. In this case, $b$ and $x$ are fixed-points of the escaping function.
-
-%     Then we have:
-%     \begin{enumerate}[(i)]
-%         \item For any string $S$, we have:
-%               \begin{align}
-%                   \mathtt{dec}(\mathtt{enc}(S)) & =S
-%               \end{align}
-%         \item For any $b'\neq x$, we have:
-%               \begin{align}
-%                   b'b \not\subset \mathtt{enc}(S)
-%               \end{align}
-%               Specifically,
-%               \begin{align}
-%                   bb \not\subset \mathtt{enc}(S)
-%               \end{align}
-%     \end{enumerate}
-% \end{theorem}
-
-% \begin{proof}
-%     We prove that $yb \subset [xb/b][xx/x]S \Rightarrow y=x$.
-
-%     Suppose $y\neq x$. Let $S' = [xx/x]S$. If $b\notin S'$, then $[xb/b]S'=S'$. $yb \not\subset S'$, contradiction. If $b\in S'$, let $S'=AbB$ where $b\notin A$.
-
-%     We do induction on the length of $S'$ to prove that $ye \not\subset [xb/b]S'$. When $|S'|=0$, we are done. Suppose the statement is true for $|S'|\leq n$. Now consider the case when $|S'|=n+1$.
-
-%     $[xb/b]S' = Axb([xb/b]B)$. Since $yb \not\subset Axb$, and by IH we know that $yb \not\subset [xb/b]B$. Hence, $yb \not\subset [xb/b]S'$, contradiction.
-
-%     This has proved (ii). (i) is simply by lemma \ref{lem:double substitution}.
-% \end{proof}
-
-
-% For simplicity, we can define a single-step encoder and decoder:
+The first construction is the escape of the introduction: one substitution escapes a character, one undoes it.
 
 \begin{theorem}
     (\emph{Encoding / Decoding})
@@ -315,11 +283,11 @@ The following theorem introduces the concept of escaping.
 
     (i) Take $X := b$ and $Y := xb$ in the Double Substitution Lemma: $b \subset xb$, and $xb$ is unbordered (a proper prefix $\mathtt{x}$ is not a suffix). Note $[Y/X] = [xb/b] = \mathtt{enc}$ and $[X/Y] = [b/xb] = \mathtt{dec}$, so
     \begin{align}
-        \mathtt{dec}(\mathtt{enc}(S)) = [b/xb][xb/b]\,S = S. \qedhere
+        \mathtt{dec}(\mathtt{enc}(S)) = [b/xb][xb/b]\,S = S.
     \end{align}
 \end{proof}
 
-Later we will define the escaping function.
+This is the engine behind every construction that follows, and behind the character-escaping function at the end of the section.
 
 \begin{lemma}
     (\emph{Encoding Monotonicity})
@@ -350,7 +318,7 @@ We will need the \texttt{cat} macro extensively:
 
 \begin{remark}
     \label{rem:cat-markers}
-    The markers $xb^k$ with $k \ge 2$ are chosen so that every occurrence of a marker in the intermediate strings is a whole marker. A marker contains $bb$, and an $\mathtt{enc}$-image contains none (Theorem (ii) above), so a marker never occurs inside an image; and a marker begins with $x$, so an occurrence straddling the junction between an image and a marker would need its $b$'s to come from the image's end -- two $b$'s, which the image does not contain. The order of the two substitutions matters as well: $xb^2 \subset xb^3$, so the pattern $xb^2$ would also match inside a surviving $xb^3$ marker if $[\mathtt{enc}(Y)/xb^3]$ did not run first.
+    The markers $xb^k$ with $k \ge 2$ are chosen so that every occurrence of a marker in the intermediate strings is a whole marker. A marker contains $bb$, and an $\mathtt{enc}$-image contains none (Theorem~\ref{thm:enc}(ii)), so a marker never occurs inside an image; and a marker begins with $x$, so an occurrence straddling the junction between an image and a marker would need its $b$'s to come from the image's end -- two $b$'s, which the image does not contain. The order of the two substitutions matters as well: $xb^2 \subset xb^3$, so the pattern $xb^2$ would also match inside a surviving $xb^3$ marker if $[\mathtt{enc}(Y)/xb^3]$ did not run first.
 \end{remark}
 
 \begin{proof}
@@ -363,9 +331,9 @@ We will need the \texttt{cat} macro extensively:
     \emph{Step 3}: $E_XE_Y = \mathtt{enc}(X)\mathtt{enc}(Y) = \mathtt{enc}(XY)$ by (iii), and $\mathtt{dec}(\mathtt{enc}(XY)) = XY$ by (i).
 \end{proof}
 
-We can now directly write $XY$ in the expression (automatically convert to the above macro). In fact concatenation is eliminable syntax altogether; see Theorem~\ref{thm:core}.
+Concatenation of arbitrary strings is therefore itself a substitution expression; from now on we write $XY$ freely, reading it as an abbreviation of $\mathtt{cat}(X,Y)$. In fact concatenation is eliminable syntax altogether; see Theorem~\ref{thm:core}.
 
-It is possible to extract the first character of one string.
+The primitives can also take strings apart: the first character of a string, and the rest.
 
 \begin{lemma}
     (\emph{Single Character Substitution})
@@ -388,23 +356,20 @@ It is possible to extract the first character of one string.
 \end{proof}
 
 \begin{theorem}
-    Assume that $\Sigma = \{\sigma_1,\cdots,\sigma_N\}$.
+    (\emph{Head and Tail})
+    \label{thm:headtail}
+    Assume that $\Sigma = \{\sigma_1,\cdots,\sigma_N\}$ (so $N \ge 2$).
 
     We define the following functions (let $\mathtt{enc}=\mathtt{enc}_{\sigma_1,\sigma_2},\mathtt{dec}=\mathtt{dec}_{\sigma_1,\sigma_2}$):
     \begin{align}
-        \mathtt{tail}(X) & \triangleq \mathtt{dec}\left([\epsilon/\sigma_1\sigma_1][\epsilon/\sigma_1\sigma_1\sigma_2][\epsilon/\sigma_1\sigma_1\sigma_2\sigma_1](\prod_i^{3\rightarrow N}[\epsilon/\sigma_1\sigma_1\sigma_i]) (\sigma_1\sigma_1\mathtt{enc}(X))\right) \\
+        \mathtt{tail}(X) & \triangleq \mathtt{dec}\big([\epsilon/\sigma_1\sigma_1][\epsilon/\sigma_1\sigma_1\sigma_2][\epsilon/\sigma_1\sigma_1\sigma_2\sigma_1] \notag\\
+        & \qquad\cdot (\textstyle\prod_i^{3\rightarrow N}[\epsilon/\sigma_1\sigma_1\sigma_i])\,(\sigma_1\sigma_1\,\mathtt{enc}(X))\big) \\
         \mathtt{head}(X) & \triangleq \mathtt{dec}([\epsilon/\mathtt{enc}(\mathtt{tail}(X))\sigma_1\sigma_1](\mathtt{enc}(X)\sigma_1\sigma_1))
     \end{align}
-    Then we have:
+    Then for every character $a$ and string $S$:
     \begin{align}
-        \mathtt{tail}(aS) & = \begin{cases}
-                                  \epsilon, & aS=\epsilon     \\
-                                  S,        & aS\neq \epsilon
-                              \end{cases} \\
-        \mathtt{head}(aS) & = \begin{cases}
-                                  \epsilon, & aS=\epsilon     \\
-                                  a,        & aS\neq \epsilon
-                              \end{cases}
+        \mathtt{tail}(\epsilon) & = \epsilon, & \mathtt{tail}(aS) & = S, \\
+        \mathtt{head}(\epsilon) & = \epsilon, & \mathtt{head}(aS) & = a.
     \end{align}
 \end{theorem}
 
@@ -438,7 +403,7 @@ It is possible to extract the first character of one string.
     Hence the leftmost (and only) occurrence of $Q$ in $T$ is the suffix one; the deletion leaves $\mathtt{enc}(a)$, and $\mathtt{dec}(\mathtt{enc}(a)) = a$.
 \end{proof}
 
-We can also define the equality.
+Equality of strings is definable too. The idea: frame each side with border markers, and let one substitution test whether the frames coincide.
 
 \begin{definition}
     (\emph{Border Encoding Decoding})
@@ -458,7 +423,7 @@ We can also define the equality.
 \end{lemma}
 
 \begin{proof}
-    The pattern $xb^2$ contains $bb$, so it cannot occur inside $\mathtt{enc}(X)$ (Theorem (ii)); nor can it straddle the junction $\mathtt{enc}(X)\cdot xb^2$: an occurrence starting inside the image would need its two $b$'s at the image's end, impossible, and one starting at the border's $x$ is the border itself. Hence the greedy scan of $[\epsilon/xb^2]$ deletes exactly the two borders.
+    The pattern $xb^2$ contains $bb$, so it cannot occur inside $\mathtt{enc}(X)$ (Theorem~\ref{thm:enc}(ii)); nor can it straddle the junction $\mathtt{enc}(X)\cdot xb^2$: an occurrence starting inside the image would need its two $b$'s at the image's end, impossible, and one starting at the border's $x$ is the border itself. Hence the greedy scan of $[\epsilon/xb^2]$ deletes exactly the two borders.
 \end{proof}
 
 \begin{lemma}
@@ -473,8 +438,7 @@ We can also define the equality.
 
 \begin{theorem}
     (\emph{Equality})
-    Choose any two distinct characters $\top, \bot \in \Sigma$,
-    we can define the equality by:
+    Choose any two distinct characters $\top, \bot \in \Sigma$. We define equality by:
     \begin{align}
         \mathtt{eq}(X,Y) \triangleq [\bot/\mathtt{benc}_{b, x}(X)][\top/\mathtt{benc}_{b, x}(Y)](\mathtt{benc}_{b, x}(X))
     \end{align}
@@ -493,7 +457,7 @@ We can also define the equality.
     If $X \neq Y$: by Border Injectivity (contrapositive), $\mathtt{benc}(Y) \not\subset \mathtt{benc}(X)$, so the $\top$-substitution is inert; and $[\bot/\mathtt{benc}(X)](\mathtt{benc}(X)) = \bot$ by Direct Substitution.
 \end{proof}
 
-We can define a \texttt{if} selector:
+An \texttt{if} selector is definable in the same style:
 
 \begin{theorem}
     (\emph{Selection})
@@ -513,7 +477,7 @@ We can define a \texttt{if} selector:
 \begin{proof}
     Read the composition right-to-left (Remark~\ref{rem:order}).
 
-    If $C = \top$: the rightmost substitution $[bb/\bot]$ is inert ($\bot \not\subset \top$ since $\top \neq \bot$), leaving $\top$. Then $[\mathtt{enc}(X)/\top](\top) = \mathtt{enc}(X)$ by Direct Substitution. Finally $[\mathtt{enc}(Y)/bb](\mathtt{enc}(X)) = \mathtt{enc}(X)$ by Substitution Elimination, since $\mathtt{enc}$-images contain no $bb$ (Theorem (ii)). So $\mathtt{dec}(\mathtt{enc}(X)) = X$.
+    If $C = \top$: the rightmost substitution $[bb/\bot]$ is inert ($\bot \not\subset \top$ since $\top \neq \bot$), leaving $\top$. Then $[\mathtt{enc}(X)/\top](\top) = \mathtt{enc}(X)$ by Direct Substitution. Finally $[\mathtt{enc}(Y)/bb](\mathtt{enc}(X)) = \mathtt{enc}(X)$ by Substitution Elimination, since $\mathtt{enc}$-images contain no $bb$ (Theorem~\ref{thm:enc}(ii)). So $\mathtt{dec}(\mathtt{enc}(X)) = X$.
 
     If $C = \bot$: $[bb/\bot](\bot) = bb$ by Direct Substitution. Then $[\mathtt{enc}(X)/\top](bb) = bb$: were it not inert, $bb$ would contain $\top$, forcing $\top = b$ -- excluded. Finally $[\mathtt{enc}(Y)/bb](bb) = \mathtt{enc}(Y)$, and $\mathtt{dec}(\mathtt{enc}(Y)) = Y$.
 \end{proof}
@@ -522,18 +486,25 @@ We can define a \texttt{if} selector:
     Both the hypothesis and the order are essential.
     \begin{itemize}
         \item \emph{$\top \neq b$ is needed}: if $\top = b$, take $C = \bot$, any $X \neq \epsilon$: then $[bb/\bot](\bot) = bb$ and $[\mathtt{enc}(X)/\top](bb) = [\mathtt{enc}(X)/b](bb)$ replaces \emph{both} characters, corrupting the marker for the final substitution.
-        \item \emph{The order is load-bearing}: swapping the inner two substitutions to $[bb/\bot][\mathtt{enc}(X)/\top]$ breaks the $C = \top$ case as soon as $X$ contains $\bot$: $[\mathtt{enc}(X)/\top](\top) = \mathtt{enc}(X)$ is then followed by $[bb/\bot]$, which fires inside $\mathtt{enc}(X)$.
+        \item \emph{The order is load-bearing}: swapping the inner two substitutions to
+        \begin{align*}
+            [bb/\bot]\,[\mathtt{enc}(X)/\top]
+        \end{align*}
+        breaks the $C = \top$ case as soon as $X$ contains $\bot$: $[\mathtt{enc}(X)/\top](\top) = \mathtt{enc}(X)$ is then followed by $[bb/\bot]$, which fires inside $\mathtt{enc}(X)$.
     \end{itemize}
     This is the same phenomenon as Remark~\ref{rem:order}: each substitution in the pipeline assumes the invariants established by the ones to its right.
 \end{remark}
 
-Next, we can do the multiple substitution. Its semantics requires some care: iterating $[Y_1/X_1], [Y_2/X_2], \dots$ sequentially would let later passes rescan inserted text, so the intended semantics \emph{freezes} matches instead:
+Next we construct multiple substitution. Its semantics requires some care: iterating $[Y_1/X_1], [Y_2/X_2], \dots$ sequentially would let later passes rescan inserted text, so the intended semantics \emph{freezes} matches instead:
 
 \begin{definition}
     (\emph{Multiple Substitution, Semantics})
     \label{def:rep}
-    Let $n \geq 1$ and $X_1, \dots, X_n \neq \epsilon$. The multiple substitution
-    $\mathtt{rep}_n(S;\, X_1,Y_1;\,\dots;\,X_n,Y_n)$ is defined by \emph{freezing}: scan $S$ from the left for occurrences of $X_1$ -- leftmost-first, non-overlapping, as in Definition~\ref{def:subst} -- and \emph{freeze} the matched positions; then scan the unfrozen positions for occurrences of $X_2$ and freeze; and so on up to $X_n$. (A match is admissible only if it lies entirely in unfrozen positions; each scan is greedy leftmost-first.) Finally, replace every frozen occurrence of $X_i$ by $Y_i$, simultaneously.
+    Fix $n \geq 1$ and nonempty patterns $X_1, \dots, X_n$. The multiple substitution
+    \begin{align*}
+        \mathtt{rep}_n(S;\, X_1,Y_1;\,\dots;\,X_n,Y_n)
+    \end{align*}
+    is defined by \emph{freezing}: scan $S$ from the left for occurrences of $X_1$ -- leftmost-first, non-overlapping, as in Definition~\ref{def:subst} -- and \emph{freeze} the matched positions; then scan the unfrozen positions for occurrences of $X_2$ and freeze; and so on up to $X_n$. (A match is admissible only if it lies entirely in unfrozen positions; each scan is greedy leftmost-first.) Finally, replace every frozen occurrence of $X_i$ by $Y_i$, simultaneously.
 \end{definition}
 
 We now compute $\mathtt{rep}_n$. The construction encodes the input so that patterns, frozen positions, and inserted text cannot interfere: every character $c$ is escaped as the two-character block $xc$ -- a \emph{comma} in front of every character, whence the name.
@@ -551,14 +522,14 @@ We now compute $\mathtt{rep}_n$. The construction encodes the input so that patt
 \begin{lemma}
     (\emph{Comma Code})
     \begin{enumerate}[(i)]
-        \item $\mathtt{enc}^2_{x}(S)$ is the concatenation of the blocks $xS[0],\, xS[1],\, \dots,\, xS[|S|-1]$. In particular every $x$ of an image is the comma of a block and every $b$ is a data character, and $\mathtt{dec}^2_{x}(\mathtt{enc}^2_{x}(S)) = S$.
-        \item An $\mathtt{enc}^2$-image contains no $bb$ and never begins with $b$. Consequently, in a concatenation of $\mathtt{enc}^2$-images and markers $xb^{i+1}$ ($i \geq 1$), every occurrence of a marker is a whole marker.
+        \item $\mathtt{enc}^2_{x}(S)$ is the concatenation of the blocks $xS[0],\, xS[1],\, \dots,\, xS[|S|-1]$. In particular every $x$ of an image is the comma of a block, every character other than $x$ is data, and $\mathtt{dec}^2_{x}(\mathtt{enc}^2_{x}(S)) = S$.
+        \item An $\mathtt{enc}^2$-image contains no $bb$ and never begins with $b$. Consequently, in a concatenation of $\mathtt{enc}^2$-images and markers $xb^{i+1}$ ($i \geq 1$), every occurrence of a marker starts at the head of one of the markers and is a prefix of it -- the whole marker if the two have the same length, and no occurrence at all if it is longer than the marker it starts at (whatever follows a marker begins with $x$, or is the end).
     \end{enumerate}
 \end{lemma}
 
 \begin{proof}
     (i) For $\mathtt{enc}^2$: after the doubling pass the text is a concatenation of units, one per character of $S$ -- the block $xx$ for each $x$, a bare $c$ for each $c \neq x$ -- and each pass $[xc/c]$ replaces precisely its own bare units $c$ by the block $xc$: a single-character pattern never straddles a boundary, and no other unit contains $c$ (a processed block $xc'$ holds $c' \neq c$, and $xx$ holds none), while inserted text is never rescanned. At the end every unit is a block $xc$, which is the claim. For $\mathtt{dec}^2$: in an image every $x$ is a comma, so a pattern $xc$ ($c \neq x$) can only match at a comma, i.e.\ exactly at the blocks with data $c$ (a data character would have to equal the pattern's first character $x$, and a data $x$ is followed by a comma, not by $c$). Each pass collapses its own blocks to bare characters, which no later pass touches, and after all of them the text is $S$ with each $x$ doubled; the final pass $[x/xx]$ halves it back, the $x$-runs being exactly concatenations of the intact $xx$-blocks.
-    (ii) Every $b$ of an image is a data character immediately followed by the next block's comma, so $b$-runs have length $\leq 1$. A marker contains $bb$, so it cannot occur inside an image; it begins with $x$, so an occurrence straddling a junction adjacent to an image would need its $b$'s from the image's end -- impossible.
+    (ii) Every $b$ of an image is a data character immediately followed by the next block's comma, so $b$-runs have length $\leq 1$. A marker contains $bb$, so it cannot occur inside an image; it begins with $x$, so an occurrence straddling a junction adjacent to an image would need its $b$'s from the image's end -- impossible. An occurrence starting at a marker's head reads along that marker's $b$-run, which ends with the marker (an image or another marker follows, both beginning with $x$, or the text ends); so the occurrence is a prefix of the marker, whole exactly when the lengths agree.
 \end{proof}
 
 \begin{theorem}
@@ -577,7 +548,7 @@ We now compute $\mathtt{rep}_n$. The construction encodes the input so that patt
 \end{theorem}
 
 \begin{proof}
-    Write $E = E_{X_i}$ for the round-$i$ pattern and $k = |X_i|$. Call an intermediate text \emph{normal} if it is a concatenation of \emph{fragments} ($\mathtt{enc}^2$-images) and markers $m_1, \dots, m_j$, every marker followed by a non-$b$ character or the end. Its \emph{skeleton} is the string read off from the data characters of its fragments. We show by induction on $i$ that after round $i$ (the composition $[E b/m_{i+1}][m_i/E]$) the text is normal, its skeleton being $S$ with exactly the matches frozen by Definition~\ref{def:rep} through round $i$ replaced by markers $m_i$. By the Comma Code Lemma, fragments have $b$-runs $\leq 1$ and markers occur only whole.
+    Write $E = E_{X_i}$ for the round-$i$ pattern and $k = |X_i|$. Call an intermediate text \emph{normal} if it is a concatenation of \emph{fragments} ($\mathtt{enc}^2$-images) and markers $m_1, \dots, m_j$, every marker followed by a non-$b$ character or the end. Its \emph{skeleton} is the string read off from the data characters of its fragments. We show by induction on $i$ that after round $i$ (the composition $[E b/m_{i+1}][m_i/E]$) the text is normal, its skeleton being $S$ with exactly the matches frozen by Definition~\ref{def:rep} through round $i$ replaced by markers $m_i$. By the Comma Code Lemma, fragments have $b$-runs $\leq 1$, and every occurrence of a marker starts at a marker's head.
 
     \emph{Classification of matches.} $E$ begins with the comma $x$, so an occurrence of $E$ in a normal text starts at ($\alpha$) a block comma, ($\beta$) a data character, or ($\gamma$) a marker's $x$ (deeper marker positions hold $b \neq E[0]$).
     \begin{itemize}
@@ -591,7 +562,7 @@ We now compute $\mathtt{rep}_n$. The construction encodes the input so that patt
 
     \emph{The repair $[E b/m_{i+1}]$.} The pattern $m_{i+1} = xb^{i+2}$ occurs in the renamed text exactly at the spurious markers followed by their first remaining $b$: an occurrence must begin at a marker's $x$ (fragments have $b$-runs $\leq 1$); an older marker $m_j$, $j \leq i$, supplies only $j + 1 \leq i + 1$ $b$'s and is followed by a non-$b$; and a genuine $m_i$ is followed by a non-$b$. The replacement $E b$ restores the text exactly: in the ($\alpha$) case $E b$ spells the $(k-1)$ blocks, the eaten marker's $x$, and one $b$ (recall $X_i$ ends with $b$), so followed by the marker's remaining $b$'s it reproduces the eaten text character for character; in the ($\gamma$) case ($X_i = b$) it spells $x$ and two $b$'s, again exactly the eaten text. The text is normal again, with markers $m_1, \dots, m_i$ at exactly the round-$i$ frozen sites.
 
-    \emph{The instantiation $[E_{Y_i}/m_i]$, $i = n, \dots, 1$.} At pass $i$ the remaining markers are $m_1, \dots, m_i$; $m_i$ is not a prefix of any of them and matches nowhere else (whole-marker occurrences only, by the Comma Code Lemma (ii)), so the pass replaces exactly the round-$i$ markers by the images $E_{Y_i}$, which are fragments and hence undisturbed by the later passes (whose patterns contain $bb$).
+    \emph{The instantiation $[E_{Y_i}/m_i]$, $i = n, \dots, 1$.} At pass $i$ the remaining markers are $m_1, \dots, m_i$, and $m_i$ is the longest. By the Comma Code Lemma (ii) every occurrence of $m_i$ starts at a marker head and is that marker's prefix, hence (nothing longer remains) the whole marker; so the pass replaces exactly the round-$i$ markers by the images $E_{Y_i}$, which are fragments and hence undisturbed by the later passes (whose patterns contain $bb$).
 
     \emph{Decoding.} The final text is $\mathtt{enc}^2$ of the skeleton with each frozen occurrence of $X_i$ replaced by $Y_i$ -- that is, $\mathtt{enc}^2(Z)$ with $Z$ the right-hand side of Definition~\ref{def:rep} -- and $\mathtt{dec}^2$ returns $Z$. The only pass patterns that can be empty are the $E_{X_i}$, exactly when $X_i = \epsilon$: the undefinedness of the expression matches that of the semantics.
 \end{proof}
@@ -602,10 +573,15 @@ We now compute $\mathtt{rep}_n$. The construction encodes the input so that patt
 \end{remark}
 
 \begin{remark}
-    As a partial function, $\mathtt{rep}_n$ is undefined when some $X_i = \epsilon$ (the expression itself is undefined). A total variant that agrees with Definition~\ref{def:rep} everywhere it is defined can be built by guarding each round with $\mathtt{if}(\mathtt{eq}(X_i, \epsilon), \text{identity}, \text{round}_i)$, replacing the round by the identity when $X_i = \epsilon$; we omit the routine details.
+    \label{rem:total-rep}
+    As a partial function, $\mathtt{rep}_n$ is undefined when some $X_i = \epsilon$ (the expression itself is undefined: its renaming pattern $\mathtt{enc}^2(X_i)$ is empty). A \emph{total} variant, agreeing with Definition~\ref{def:rep} wherever the latter is defined and treating empty patterns as inert, does exist -- but not by the obvious guard: since the calculus evaluates eagerly (Definition~\ref{def:den}), an $\mathtt{if}(\mathtt{eq}(X_i,\epsilon), \text{identity}, \text{round}_i)$ still \emph{evaluates} $\text{round}_i$, whose pattern is empty, and is itself undefined. The guard must be applied to the \emph{pattern}. Replace each renaming pattern $E_{X_i}$ by
+    \begin{align}
+        E_{X_i} \cdot G_i, \qquad G_i \;\triangleq\; \mathtt{if}\big(\mathtt{eq}(X_i, \epsilon),\; m_{n+3},\; \epsilon\big),
+    \end{align}
+    where $m_{n+3} = xb^{n+4}$. All sub-expressions here are total: the patterns of $\mathtt{if}$ are the nonempty constants $\top$ and $bb$, those of $\mathtt{eq}$ are the bordered images $xb^2\,\mathtt{enc}(X_i)\,xb^2$ (never empty), and that of $\mathtt{dec}$ is $xb$. If $X_i \neq \epsilon$ then $G_i = \epsilon$ and the pattern is exactly $E_{X_i}$, so the round behaves as before; if $X_i = \epsilon$ the pattern is the whole $m_{n+3}$, which at that moment occurs nowhere (the text is normal with markers $m_1, \dots, m_{i-1}$ only, and every marker head supplies at most $i \leq n$ consecutive $b$'s, fewer than $n+4$), so the round is inert -- and its repair pass is inert too, the text then containing no marker followed by a $b$. \emph{Verified} ($\Sigma = \{\mathtt{a},\mathtt{b}\}$ and $\{\mathtt{a},\mathtt{b},\mathtt{c}\}$, all rule sets with $n \leq 3$ containing at least one empty pattern, patterns and arguments of length $\leq 1$ and $\leq 4$ respectively: $317{,}855$ evaluations, agreement with the skip-empty-patterns semantics in all of them).
 \end{remark}
 
-It turns out that we can build \texttt{cat} function by using multiple substitution.
+Multiple substitution also subsumes the earlier constructions, as two quick examples show.
 
 \begin{theorem}
     (\emph{Concatenation via Multiple Substitution})
@@ -613,7 +589,7 @@ It turns out that we can build \texttt{cat} function by using multiple substitut
     \begin{align}
         \mathtt{cat}(X,Y) \triangleq \mathtt{rep}_{2}(ab, a, X, b, Y)
     \end{align}
-    which is what we known as the ``string concatenation'' function.
+    the usual string concatenation.
     For any string $X,Y$, we have
     \begin{align}
         \mathtt{cat}(X,Y) = XY
@@ -624,17 +600,19 @@ It turns out that we can build \texttt{cat} function by using multiple substitut
     Both patterns $a$ and $b$ are single characters, and Theorem~\ref{lem:multiple substitution} places no restriction on the patterns, so it applies for \emph{any} choice of the encoding characters $b, x$ -- including $a = x$ or $a = b$, which matters when $|\Sigma| = 2$. By Definition~\ref{def:rep}, the first round freezes the occurrence of $a$ at position $0$ of $ab$; the second round freezes the occurrence of $b$ at position $1$ (still unfrozen). Replacing gives $X\,Y$.
 \end{proof}
 
-Now to formally define the escaping function, we need to introduce the concept of \textbf{escaping charset} and \textbf{escaped charset}.
+Finally we define character escaping in general. The concept needed is a pair of \emph{escaped} and \emph{escaping} alphabets.
 
 \begin{definition}
-    $f$ is an escaping function of $\Sigma$ if there exists two nonempty subsets $U,V\subset \Sigma$ and $f$ is a bijection from $U$ to $V$ such that there exists at least one fixed point $x_0$, $f(x_0)=x_0$. Then $U$ is called the \textbf{escaped charset} of $f$, and $V$ is called the \textbf{escaping charset} of $f$.
+    (\emph{Escaping Function})
+    An \emph{escaping function} of $\Sigma$ is a bijection $f: U \rightarrow V$ between two nonempty subsets $U, V \subset \Sigma$ that has a fixed point: $f(x_0) = x_0$ for some $x_0 \in U$. Then $U$ is the \textbf{escaped alphabet} of $f$ and $V$ its \textbf{escaping alphabet}.
+    \label{def:escaping}
 \end{definition}
 
 \begin{theorem}
     (\emph{Character Escaping})
     \label{thm:escape}
 
-    Suppose $f: U\rightarrow V, U=\{u_1,\cdots,u_n\}$, has a fixed point; without loss of generality $f(u_1) = u_1$ (the enumeration of the set $U$ is chosen so that the fixed point comes \emph{first}). Let $b, x \in \Sigma$ with $b\neq x$ be the characters of the substitution construction. We define:
+    Let $f$ be an escaping function of $\Sigma$ (Definition~\ref{def:escaping}) with escaped alphabet $U=\{u_1,\cdots,u_n\}$; without loss of generality $f(u_1) = u_1$ (the enumeration of $U$ is chosen so that the fixed point comes \emph{first}). Let $b, x \in \Sigma$ with $b\neq x$ be the characters of the substitution construction. We define:
     \begin{align}
         \mathtt{escape}_f(S)   & \triangleq \mathtt{rep}_n(S,u_1,u_1f(u_1),\cdots, u_n,u_1f(u_n))  \\
         \mathtt{unescape}_f(S) & \triangleq \mathtt{rep}_n(S,u_1f(u_1),u_1,\cdots, u_1f(u_n), u_n)
@@ -664,6 +642,7 @@ Now to formally define the escaping function, we need to introduce the concept o
 \end{proof}
 
 \section{The Substitution Calculus}
+\label{sec:calculus}
 
 Section~2 built, one by one, a repertoire of functions -- concatenation, head and tail, equality, selection, multiple substitution, escaping -- out of the single operation $[A/B]$. This section formalizes that activity itself: what does it mean for a function to be \emph{constructible from substitution alone}? The $\mathtt{rep}_n$ of Theorem~\ref{lem:multiple substitution} and the $\mathtt{cat}$ of Theorem~\ref{thm:cat} will fall out as instances of the general notion.
 
@@ -696,7 +675,7 @@ Section~2 built, one by one, a repertoire of functions -- concatenation, head an
 \begin{definition}
     (\emph{Reachable Functions})
     \label{def:reachable}
-    A total function $f : (\Sigma^*)^n \rightarrow \Sigma^*$ is \emph{reachable} if $f = \llbracket E \rrbracket$ for some $E \in \mathrm{Exp}_n$.
+    A total function $f : (\Sigma^*)^n \rightarrow \Sigma^*$ is \emph{reachable} if $f = \llbracket E \rrbracket$ for some $E \in \mathrm{Exp}_n$. A partial function is \emph{reachable} if it is the restriction of $\llbracket E \rrbracket$ to a subdomain of its domain of definition, for some $E$.
 \end{definition}
 
 \begin{lemma}
@@ -710,12 +689,19 @@ Section~2 built, one by one, a repertoire of functions -- concatenation, head an
 \end{lemma}
 
 \begin{proof}
-    Induction on $E$. For $X_i$, $W$, and $E_1E_2$ this is immediate. For $[\,R/P\,]\,E$, substitution into the three sub-expressions commutes with the operation by construction, and the undefinedness conditions match: $\llbracket P[F_i/X_i] \rrbracket(\vec T) = \llbracket P \rrbracket(\llbracket F_1 \rrbracket(\vec T), \dots)$ is $\epsilon$ exactly when the right-hand side's pattern is.
+    Induction on $E$. For $X_i$, $W$, and $E_1E_2$ this is immediate. For $[\,R/P\,]\,E$, substitution into the three sub-expressions commutes with the operation by construction, and the undefinedness conditions match:
+    \begin{align*}
+        \llbracket P[F_i/X_i] \rrbracket(\vec T) \;=\; \llbracket P \rrbracket\big(\llbracket F_1 \rrbracket(\vec T), \dots\big)
+    \end{align*}
+    is $\epsilon$ exactly when the right-hand side's pattern is.
 \end{proof}
 
 \begin{corollary}
     \label{cor:closure}
-    The reachable functions are closed under composition: if $g$ is $n$-ary reachable and $h_1, \dots, h_n$ are $m$-ary reachable, then so is $\vec T \mapsto g(h_1(\vec T), \dots, h_n(\vec T))$.
+    The reachable functions are closed under composition: if $g$ is $n$-ary reachable and $h_1, \dots, h_n$ are $m$-ary reachable, then so is
+    \begin{align*}
+        \vec T \;\mapsto\; g\big(h_1(\vec T), \dots, h_n(\vec T)\big).
+    \end{align*}
 \end{corollary}
 
 \begin{proof}
@@ -777,15 +763,16 @@ Section~2 built, one by one, a repertoire of functions -- concatenation, head an
 \begin{proposition}
     (\emph{Instances})
     \label{prop:instances}
-    The following are reachable, via the expressions of Section~2:
+    The following are reachable, via the expressions of Section~\ref{sec:toolkit}:
     \begin{enumerate}[(i)]
         \item every constant $\vec S \mapsto W$ and every projection $\vec S \mapsto S_i$;
-        \item $\mathtt{enc}_{b,x}$, $\mathtt{dec}_{b,x}$, $\mathtt{cat}$, $\mathtt{head}$, $\mathtt{tail}$, $\mathtt{eq}$, $\mathtt{if}$ (with $\top, \bot, b, x$ fixed distinct characters as required), and, for a fixed escaping function $f$, $\mathtt{escape}_f$ and $\mathtt{unescape}_f$;
-        \item $\mathtt{rep}_n$, for each fixed $n$, on the domain $\{X_i \neq \epsilon \ \forall i\}$: the expression of Theorem~\ref{lem:multiple substitution} is safe and total there (its variable patterns $\mathtt{enc}^2(X_i)$ are anchored precisely when $X_i \neq \epsilon$), though not safe on all of $(\Sigma^*)^{2n+1}$; a totally safe guarded variant exists via $\mathtt{if}(\mathtt{eq}(X_i, \epsilon), \cdot, \cdot)$.
+        \item $\mathtt{enc}_{b,x}$, $\mathtt{dec}_{b,x}$, $\mathtt{cat}$, $\mathtt{head}$, $\mathtt{tail}$, $\mathtt{eq}$, $\mathtt{if}$ (besides $b \neq x$, the constructions need two further characters $\top \neq \bot$ with $\top \neq b$, available since $|\Sigma| \geq 2$: take $\top = x$ if necessary), and, for a fixed escaping function $f$, $\mathtt{escape}_f$ and $\mathtt{unescape}_f$;
+        \item $\mathtt{rep}_n$, for each fixed $n$, as a partial function on the domain $\{X_i \neq \epsilon \ \forall i\}$: the only variable patterns in the expression of Theorem~\ref{lem:multiple substitution} are the renamings' $\mathtt{enc}^2(X_i)$, whose values are empty exactly when $X_i = \epsilon$, so the expression is defined exactly there and computes the semantics of Definition~\ref{def:rep}; a total variant on all of $(\Sigma^*)^{2n+1}$ is given by Remark~\ref{rem:total-rep}.
     \end{enumerate}
 \end{proposition}
 
 \section{Power and Limits of Reachable Functions}
+\label{sec:limits}
 
 How strong is the substitution calculus? This section gives a pipeline normal form, a polynomial-time soundness theorem, and a first separation.
 
@@ -868,6 +855,7 @@ How strong is the substitution calculus? This section gives a pipeline normal fo
 \end{remark}
 
 \section{Variants of the Primitive}
+\label{sec:variants}
 
 Definition~\ref{def:subst} made three design choices: the scan proceeds left to right and takes the leftmost match; one pass replaces \emph{all} occurrences; and the scan never re-enters inserted text. Each choice is load-bearing, in a different way. This section varies them one at a time and measures the damage -- to the toolkit of Section~2 and to the class of reachable functions of Section~3.
 
@@ -894,7 +882,7 @@ What dies is everything simultaneous: $[\,xb/b\,]_1$ escapes only the first $b$,
 \end{lemma}
 
 \begin{proof}
-    An occurrence at $q$ needs $q + 2|X| + 1 \leq 3|X|$, so $q \leq |X|-1$ and $X^3[q{:}q+2|X|] = X^2$; comparing the first $|X|$ characters of that occurrence with $X^3[0{:}|X|]$ gives $X^3[q{:}q+|X|] = X$, i.e.\ $X$ is a rotation of itself by $q$. Hence $X$ is a power of the word of length $p = \gcd(q, |X|)$ with $p \mid q$. Then $\sigma = X^3[q+2|X|] = X[q] = X[0]$, while $XX\,X[0]$ occurs at position $0$ and every occurrence of $X^2$ in $X^3$ other than at $0$ sits at a positive multiple of $p$.
+    An occurrence at $q$ needs $q + 2|X| + 1 \leq 3|X|$, so $q \leq |X|-1$, and it gives $X^3[q{:}q+2|X|] = X^2$; in particular $X^3[q{:}q+|X|] = X$. But $X^3[q{:}q+|X|]$ is the factor of length $|X|$ of the periodic word $X^3$ starting at offset $q$ -- the rotation of $X$ by $q$. So $X$ equals its own rotation by $q$, which forces $X$ to be a power of the word of length $p = \gcd(q, |X|)$, with $p \mid q$ (and $q > 0$, else there is nothing to prove). Then $\sigma = X^3[q+2|X|] = X[q] = X[0]$, while $XX\,X[0]$ occurs at position $0$ and every occurrence of $X^2$ in $X^3$ other than at $0$ sits at a positive multiple of $p$.
 \end{proof}
 
 The point: $XX$ is a marker that is \emph{fresh with respect to $X$ by length} ($|XX| = 2|X| > |X|$) and nevertheless survives whole inside $XXX$. It replaces the $\mathtt{enc}$-based markers wherever a bounded-length fresh marker is needed.
@@ -944,7 +932,7 @@ The point: $XX$ is a marker that is \emph{fresh with respect to $X$ by length} (
 
 \begin{corollary}
     \label{cor:once-sep}
-    None of the following is reachable in the once-calculus $\mathrm{ONCE}$: replace-all $[\,a/b\,]$, $\mathtt{enc}$, $\mathtt{dec}$, $[\,xx/x\,]$, $S \mapsto \sigma^{|S|}$, $X \mapsto X^{|X|}$, or $\mathtt{escape}_f$ for any escaping function with $|U| \geq 2$. In particular $L \not\sqsubseteq \mathrm{ONCE}$, and the once-calculus has growth degree at most $1$ against $L$'s unbounded degree.
+    Over $|\Sigma| \geq 2$, none of the following is reachable in the once-calculus $\mathrm{ONCE}$: replace-all $[\,a/b\,]$, $\mathtt{enc}$, $\mathtt{dec}$, $[\,xx/x\,]$, $S \mapsto \sigma^{|S|}$, $X \mapsto X^{|X|}$, or $\mathtt{escape}_f$ for any escaping function with $|U| \geq 2$. In particular $L \not\sqsubseteq \mathrm{ONCE}$. The separation survives the unary alphabet: over $|\Sigma| = 1$ the items needing two distinct characters vanish and $S \mapsto \sigma^{|S|}$ degenerates to the identity (trivially once-reachable), but $X \mapsto X^{|X|}$ is still $L$-reachable -- the expression $[\,X_1/\sigma\,][\,\sigma/\Sigma\,]\,X_1$ of Section~\ref{sec:limits} works verbatim, $[\,\sigma/\Sigma\,]$ being the identity over the unary alphabet -- and is killed by (iv) as before. So $L \not\sqsubseteq \mathrm{ONCE}$ over every finite alphabet, and the once-calculus has growth degree at most $1$ against $L$'s unbounded degree.
 \end{corollary}
 
 \begin{proof}
@@ -993,7 +981,11 @@ The positional family replaces the scan by an \emph{address}: write at index $i$
     \label{prop:pos-toolkit}
     \begin{enumerate}[(i)]
         \item $\mathtt{tail}(X) = \mathtt{repOcc}(0, c, \epsilon, \mathtt{setAt}(0, c, X))$: mark position $0$ with any character $c$, then delete the first $c$. Two literal nodes, total on every alphabet including $|\Sigma| = 1$.
-        \item $\mathtt{head}(X) = \mathtt{repOcc}\big(0, P_2, \epsilon, \mathtt{repOcc}(0, \mathtt{tail}(X\,c^3), \epsilon, X\,c^3)\big)$ with $P_2 = \mathtt{tail}(\mathtt{tail}(X\,c^3))$: total on every alphabet (the scaffold $c^3$ pads the $\epsilon$-edge, where the pattern would otherwise be empty).
+        \item with $P_2 = \mathtt{tail}(\mathtt{tail}(X\,c^3))$,
+        \begin{align*}
+            \mathtt{head}(X) \;=\; \mathtt{repOcc}\big(0, P_2, \epsilon, \mathtt{repOcc}(0, \mathtt{tail}(X\,c^3), \epsilon, X\,c^3)\big),
+        \end{align*}
+        total on every alphabet (the scaffold $c^3$ pads the $\epsilon$-edge, where the pattern would otherwise be empty).
         \item consequently $\mathtt{char}_j = \mathtt{head} \circ \mathtt{tail}^j$ and $\mathtt{prefix}_j$ are positional.
     \end{enumerate}
 \end{proposition}
@@ -1007,7 +999,11 @@ The positional family replaces the scan by an \emph{address}: write at index $i$
     \label{thm:pos-invariants}
     Let $E$ be a positional term, $c \in \Sigma$, and let $C_E(c)$ be the number of $c$'s in the constant leaves of $E$.
     \begin{enumerate}[(i)]
-        \item \emph{(single-site alphabet bound)} on inputs whose components all avoid $c$: $\#c\big(\llbracket E \rrbracket(\vec X)\big) \leq C_E(c)$ -- in every fragment, up to computed indices.
+        \item \emph{(single-site alphabet bound)} on inputs whose components all avoid $c$:
+        \begin{align*}
+            \#c\big(\llbracket E \rrbracket(\vec X)\big) \;\leq\; C_E(c),
+        \end{align*}
+        in every fragment, up to computed indices.
         \item \emph{(linear growth)} there are $V_E, K_E$ with $\big|\llbracket E \rrbracket(\vec X)\big| \leq V_E \cdot M + K_E$, where $M = \sum_i |X_i|$.
         \item for terms with \emph{literal} patterns there is $D_E$ with $\big|\llbracket E \rrbracket(X)\big| \geq |X| - D_E$.
     \end{enumerate}
@@ -1047,7 +1043,8 @@ The positional family replaces the scan by an \emph{address}: write at index $i$
     \begin{enumerate}[(i)]
         \item $\mathtt{setAt}(i, c)$ is $L$-reachable:
         \begin{align}
-            \mathtt{setAt}(i,c)(X) \;=\; \mathtt{if}\Big(\mathtt{eq}\big(\mathtt{tail}^i X, \epsilon\big),\; X,\; \mathtt{cat}\big(\mathtt{cat}(\mathtt{prefix}_i X, c), \mathtt{tail}^{i+1} X\big)\Big),
+            \mathtt{setAt}(i,c)(X) \;=\; \mathtt{if}\Big(&\mathtt{eq}\big(\mathtt{tail}^i X, \epsilon\big),\; X,\notag\\
+            &\mathtt{cat}\big(\mathtt{cat}(\mathtt{prefix}_i X, c), \mathtt{tail}^{i+1} X\big)\Big),
         \end{align}
         with $\mathtt{prefix}_i$ the $i$-fold product of heads ($i$ fixed, as the index is).
         \item given a marker constant $M$ fresh for $B$, $A$ and the input, $\mathtt{repOcc}(k, B, A) = [\,M/B\,]_1^k\,[\,A/B\,]_1\,[\,B/M\,]_1^k$.
@@ -1209,7 +1206,7 @@ Nothing about the direction breaks the complexity theory: the length bound of Le
 \end{theorem}
 
 \begin{proof}
-    ($\Leftarrow$) Under the two conditions no occurrence of $B$ can start inside an inserted copy of $A$: one lying entirely inside gives $B \subset A$; one starting at the copy's first character and extending past it makes $A$ a proper prefix of $B$; one straddling the copy's end makes a nonempty suffix of $A$ a proper prefix of $B$. So after every insertion the first possible match start is exactly where the safe scan resumes, and induction over match events shows the two processes freeze identical prefixes. ($\Rightarrow$) If $B \subset A$, take $C = B$: the work string begins with $A \supsetneq B$ forever. Otherwise let $i$ be minimal with $A[i{:}]$ a proper prefix of $B$, and put $\beta = B[|A|-i{:}]$, $C = B\cdot\beta$. The safe pass gives $A\cdot\beta$, the residue $\beta$ being shorter than $B$. The unsafe pass gives the work string $T_1 = A\cdot\beta$, whose leftmost $B$ sits at position $i$ -- none earlier, by $B \not\subset A$ and the minimality of $i$ -- consuming exactly $A[i{:}]\cdot\beta = B$ and leaving $T_2 = A[{:}i]\cdot A$, which is $B$-free: an occurrence straddling the splice would make some $A[j{:}]$ with $j < i$ a proper prefix of $B$, and one inside a copy is excluded. If $A[{:}i]\cdot A \neq A\cdot\beta$, the values differ. If they are equal, then $|\beta| = i$ and $\beta$ is the last $i$ characters of $A$, and comparing the middles forces $A$ to have period $i$; then $B = A[i{:}]\cdot\beta = A$, contradicting $B \not\subset A$. (Verified as a biconditional: all $A, B, C$ with $|A| \leq 4$, $|B| \leq 3$, $|C| \leq 6$ over $|\Sigma| = 2$, and smaller domains over $|\Sigma| = 3$.)
+    ($\Leftarrow$) Under the two conditions no occurrence of $B$ can start inside an inserted copy of $A$: one lying entirely inside gives $B \subset A$; one starting at the copy's first character and extending past it makes $A$ a proper prefix of $B$; one straddling the copy's end makes a nonempty suffix of $A$ a proper prefix of $B$. So after every insertion the first possible match start is exactly where the safe scan resumes, and induction over match events shows the two processes freeze identical prefixes. ($\Rightarrow$) If $B \subset A$, take $C = B$: the work string begins with $A \supsetneq B$ forever. Otherwise, negating the second condition, some nonempty suffix of $A$ is a proper prefix of $B$; let $i < |A|$ be minimal with $A[i{:}]$ a proper prefix of $B$, and put $\beta = B[|A|-i{:}]$, $C = B\cdot\beta$. The safe pass gives $A\cdot\beta$, the residue $\beta$ being shorter than $B$. The unsafe pass gives the work string $T_1 = A\cdot\beta$, whose leftmost $B$ sits at position $i$ -- none earlier: an occurrence at $j < i$ with $j+|B| \leq |A|$ would exhibit $B \subset A$, and one straddling the splice makes $A[j{:}]$ a proper prefix of $B$, contradicting the minimality of $i$. The match at $i$ consumes $A[i{:}]\cdot\beta = B$, which is exactly the suffix of $T_1$ from position $i$ on, since $i+|B| = |A|+|\beta|$; so the pass freezes $A[{:}i]$ and leaves the work string $T_2 = A$, which is $B$-free by hypothesis -- the process halts, with value $A[{:}i]\cdot A$. If $A[{:}i]\cdot A \neq A\cdot\beta$, the values differ. If they are equal, then $|\beta| = i$ and $\beta$ is the last $i$ characters of $A$, and comparing the middles forces $A$ to have period $i$; then $B = A[i{:}]\cdot\beta = A$, contradicting $B \not\subset A$. (Verified as a biconditional: all $A, B, C$ with $|A| \leq 4$, $|B| \leq 3$, $|C| \leq 6$ over $|\Sigma| = 2$, and smaller domains over $|\Sigma| = 3$.)
 \end{proof}
 
 \begin{corollary}
@@ -1351,19 +1348,19 @@ This makes the closing remark of Section~4 quantitative: unbounded iteration of 
 \subsection{The Landscape}
 
 \begin{center}
-\small
+\footnotesize
 \begin{tabular}{l|llll}
     variant & $L \sqsubseteq V$ & $V \sqsubseteq L$ & toolkit & growth \\
     \hline
-    once & refuted & open (the hinge) & rebuilt, no $\mathtt{enc}$ & linear \\
-    positional & refuted & iff once $\in L$ & $\mathtt{tail}$, $\mathtt{head}$; no $\mathtt{enc}$, $\mathtt{eq}$ & linear \\
-    right-to-left & open & open & verbatim (robust) & polynomial \\
-    unsafe & open & open & collapses (no escape) & poly., total fragment \\
-    Markov & open (conj.\ no) & refuted (amplifier) & black-box $\mathtt{enc}$ & unbounded (towers)
+    once & refuted & open & rebuilt & linear \\
+    positional & refuted & iff once $\in L$ & $\mathtt{tail}$, $\mathtt{head}$ & linear \\
+    right-to-left & open & open & verbatim & polynomial \\
+    unsafe & open & open & collapses & poly.\ fragment \\
+    Markov & conj.\ no & refuted & black-box $\mathtt{enc}$ & towers
 \end{tabular}
 \end{center}
 
-Both inclusions for the right-to-left calculus hold if $\mathrm{rev}$ is reachable in either calculus, and no other route between $L$ and $\mathrm{R}$ is known (Theorem~\ref{thm:subsequential} separates only the constant fragments). The two ``refuted'' entries of the once and positional rows are Corollaries~\ref{cor:once-sep} and~\ref{cor:pos-sep}; the Markov row's is Corollary~\ref{cor:towers}. The unsafe row's two ``open''s carry the conjectures after Proposition~\ref{prop:rescan-survives}; the Markov row's ``conjectured no'' is Conjecture~\ref{conj:ic}, with the doubling node of Theorem~\ref{thm:no-injective} the concrete obstacle.
+Both inclusions for the right-to-left calculus hold if $\mathrm{rev}$ is reachable in either calculus, and no other route between $L$ and $\mathrm{R}$ is known (Theorem~\ref{thm:subsequential} separates only the constant fragments). The two ``refuted'' entries of the once and positional rows are Corollaries~\ref{cor:once-sep} and~\ref{cor:pos-sep}; the Markov row's is Corollary~\ref{cor:towers}. The unsafe row's two ``open''s carry the conjectures after Proposition~\ref{prop:rescan-survives}; the Markov row's ``conj.\ no'' is Conjecture~\ref{conj:ic}, with the doubling node of Theorem~\ref{thm:no-injective} the concrete obstacle.
 
 The web hangs on two ropes, and both are reachability questions about the baseline itself:
 \begin{enumerate}

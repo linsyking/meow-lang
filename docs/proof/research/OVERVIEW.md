@@ -215,3 +215,63 @@ amplifier + no-injective-node theorem were re-verified 2026-09-19 during the
 item 5 above). Search-evidence statistics quoted in remarks (depth-3/4 bounded
 searches, randomized 75M-pipeline sweep) are taken from the reports and
 described qualitatively in the paper.
+
+## 8. Polish pass (2026-09-19, later)
+
+Template, rigor audit and front-matter rewrite of `main.tex`:
+
+- **Template**: switched from `article` to **Springer LNCS (`llncs.cls` v2.26,
+  `[runningheads,envcountsect]`)** — the field-standard template available in
+  TeX Live. LIPIcs (the other current cs.FL standard: STACS/ICALP/DLT/WORDS)
+  is NOT on CTAN and Dagstuhl's URLs were unreachable from here; swap is
+  mechanical if targeting a LIPIcs venue. amsthm is incompatible with llncs's
+  predefined theorem family — resolved by going fully native (llncs envs,
+  `\renewenvironment{remark}` for unnumbered remarks, a patched `\endproof`
+  that appends the QED box; the single `\qedhere` was dropped). 25 unused
+  packages removed. Compiles clean: 37 pages, **0 overfull boxes, 0 undefined
+  refs**. One cosmetic font warning (`U/stmry/b/n` — llncs+stmaryrd+hyperref
+  artifact, brackets render in the only stmary shape there is).
+- **Front matter**: new title ("A Theory of String Substitution over Finite
+  Alphabets"), abstract + keywords, rewritten concrete introduction (worked
+  enc/dec and cat examples, contributions by section, related-work
+  positioning: Thue systems, Markov algorithms, monadic rewriting, rational
+  transductions).
+- **Rigor fixes** (from a full read-through of Sections 2-4):
+  - notation block now defines Σ*, |A|, concatenation, powers, and **slices**
+    S[i], S[i:j], S[:j], S[i:] (previously used but never defined); "charset"
+    → "alphabet" throughout.
+  - |Σ|-convention restated: Sections 2-4 assume |Σ| ≥ 2; Section 5 tracks the
+    unary case explicitly.
+  - **thm:rescan-agree (⇒) proof fixed**: the claim "T₂ = A[:i]·A is B-free"
+    was FALSE (120 counterexamples); corrected route: the match at i consumes
+    exactly the suffix of T₁ (since i+|B| = |A|+|β|), leaving work string A
+    (B-free by hypothesis), so the process halts with value A[:i]·A.
+  - **cor:once-sep unary case added**: over |Σ| = 1, X ↦ X^{|X|} is
+    L-reachable ([X₁/σ][σ/Σ]X₁ verbatim, [σ/Σ] being the identity there) and
+    killed by invariant (iv) — L ⋢ ONCE holds over every finite alphabet.
+  - **Remark (total rep) CORRECTED**: the naive guard
+    if(eq(X_i,ε), id, round_i) FAILS — the calculus evaluates eagerly
+    (def:den), so the guarded expression still evaluates round_i's empty
+    pattern. Correct construction (verified, see below): patch each renaming
+    pattern to enc²(X_i)·G_i with G_i = if(eq(X_i,ε), m_{n+3}, ε) — appends
+    nothing when X_i ≠ ε, an unmatchable marker when X_i = ε (round inert).
+    prop:instances(iii) reworded accordingly; def:reachable extended with the
+    partial-function notion.
+  - **Comma Code Lemma (ii) restated**: "every occurrence of a marker is a
+    whole marker" was false (a short marker occurs as a proper prefix of a
+    longer one); now: every occurrence starts at a marker head and is its
+    prefix — with the instantiation-pass citation updated (m_i is longest
+    remaining).
+  - Independent Substitution proof: A = ε trivial case split added; the
+    X-choice in the induction restated as the leftmost occurrence (C ⊄ X was
+    too weak).
+  - head/tail theorem statement fixed (tail(aS)=ε if aS=ε was malformed →
+    tail(ε)=ε, tail(aS)=S); named "Head and Tail".
+  - Double Substitution proof: dropped the false "(it is shorter than Y)"
+    (X = Y is legal); now argues the scan never re-enters the inserted copy.
+  - "Elimitation" typos, dead commented-out theorem block, ~15 grammar /
+    transition fixes.
+- **New verification**: `verify_total_rep.py` — the guarded-pattern total rep
+  variant (above): 317,855 evaluations over |Σ| = 2 and 3 (rule sets n ≤ 3
+  with ≥ 1 empty pattern, patterns ≤ 1, inputs ≤ 4), 0 failures against the
+  skip-empty-patterns semantics.

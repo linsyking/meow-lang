@@ -1923,6 +1923,281 @@ def repC2 (b x : α) (σ : List α) (pairs : List (List α × List α)) (S : Lis
   dec2Pass x σ (instantiate2 b x σ pairs.length pairs.reverse
     (renameRepair2 b x σ 1 pairs (enc2Pass x σ S)))
 
+/-! ### Normal-form items and occurrence toolkit
+
+  A round's invariant is kept structurally: the intermediate texts are the
+  concatenation of *items* -- `enc2`-fragments and markers -- rather than
+  raw characters.  A *damaged* marker (`dmg`) is the intermediate state in
+  which a spurious round-`i` match has eaten an older marker's first two
+  characters; it remembers the eaten fragment tail `W` so that the repair
+  pass can restore it. -/
+
+/-- An item of the normal form: an `enc2`-image (a fragment), the round-`i`
+marker `x b^{i+1}`, or a damaged marker -- a round-`i` marker followed by
+`j` trailing `b`'s (the remains of the round-`j` marker `x b^{j+1}` whose
+first two characters were eaten by a spurious match; `W` records the
+fragment tail eaten along with them). -/
+inductive NFItem (α : Type)
+  | frag (W : List α)
+  | mark (i : Nat)
+  | dmg (W : List α) (i j : Nat)
+
+/-- The flat text of an item list. -/
+def itext (b x : α) : List (NFItem α) → List α
+  | [] => []
+  | NFItem.frag W :: ns => enc2 x W ++ itext b x ns
+  | NFItem.mark i :: ns => marker x b (i + 1) ++ itext b x ns
+  | NFItem.dmg _ i j :: ns => (marker x b (i + 1) ++ List.replicate j b) ++ itext b x ns
+
+omit [DecidableEq α] in
+/-- An occurrence of the middle part of an occurring block. -/
+theorem occ_mid {u p v l : List α} (h : Occ (u ++ p ++ v) l) : Occ p l := by
+  obtain ⟨s, t, ht⟩ := h
+  refine ⟨s ++ u, v ++ t, ?_⟩
+  rw [ht]
+  simp [List.append_assoc]
+
+omit [DecidableEq α] in
+/-- An occurrence of `p` in `l₁ ++ l₂` lies in `l₁`, lies in `l₂`, or
+straddles the boundary -- and then a nonempty suffix `p₂` of `p` is a
+nonempty prefix of `l₂`. -/
+theorem occ_app_cases {p l₁ l₂ : List α} (h : Occ p (l₁ ++ l₂)) :
+    Occ p l₁ ∨ Occ p l₂ ∨ ∃ p₁ p₂ v, p = p₁ ++ p₂ ∧ p₁ ≠ [] ∧ p₂ ≠ [] ∧
+      l₂ = p₂ ++ v := by
+  obtain ⟨u, v, hv⟩ := h
+  rw [List.append_assoc] at hv
+  by_cases hu1 : l₁.length ≤ u.length
+  · obtain ⟨A, hA, hS⟩ := pref_of l₁ u l₂ (p ++ v) hv hu1
+    exact Or.inr (Or.inl ⟨A, v, by rw [hS, List.append_assoc]⟩)
+  · by_cases hu2 : u.length + p.length ≤ l₁.length
+    · obtain ⟨A, hA, hS⟩ := pref_of u l₁ (p ++ v) l₂ hv.symm (by omega)
+      -- hA : l₁ = u ++ A,  hS : p ++ v = A ++ l₂
+      obtain ⟨B, hA', hB⟩ := pref_of p A v l₂ hS (by
+        have hA2 : u.length + A.length = l₁.length := by rw [hA, List.length_append]
+        omega)
+      refine Or.inl ⟨u, B, ?_⟩
+      rw [hA, hA']
+      simp [List.append_assoc]
+    · obtain ⟨A, hA, hS⟩ := pref_of u l₁ (p ++ v) l₂ hv.symm (by omega)
+      -- hA : l₁ = u ++ A,  hS : p ++ v = A ++ l₂
+      have hA2 : u.length + A.length = l₁.length := by rw [hA, List.length_append]
+      have hAlt : A.length < p.length := by omega
+      obtain ⟨p₂, hp2, hS2⟩ := pref_of A p l₂ v hS.symm (by omega)
+      have hpp : p.length = A.length + p₂.length := by rw [hp2]; exact List.length_append
+      refine Or.inr (Or.inr ⟨A, p₂, v, hp2, ?_, ?_, hS2⟩)
+      · cases A with
+        | nil => simp only [List.length_nil] at hA2; omega
+        | cons a A' => simp
+      · cases p₂ with
+        | nil => simp only [List.length_nil] at hpp; omega
+        | cons c p₂' => simp
+
+/-! ### Text-level facts about `enc2`-images and markers -/
+
+omit [DecidableEq α] in
+theorem enc2_head (x c : α) (W : List α) : enc2 x (c :: W) = x :: c :: enc2 x W := by
+  simp [enc2_cons]
+
+omit [DecidableEq α] in
+theorem replicate_append (a : α) : ∀ (m n : Nat),
+    List.replicate m a ++ List.replicate n a = List.replicate (m + n) a := by
+  intro m
+  induction m with
+  | zero => intro n; rw [Nat.zero_add]; rfl
+  | succ m ih =>
+      intro n
+      show a :: (List.replicate m a ++ List.replicate n a) = List.replicate (Nat.succ m + n) a
+      rw [ih, Nat.succ_add]
+      rfl
+
+omit [DecidableEq α] in
+/-- A nonempty suffix of a run of `a`'s starts with `a`. -/
+theorem replicate_suffix (a : α) : ∀ (k : Nat) (s p : List α),
+    s ++ p = List.replicate k a → p ≠ [] → ∃ r, p = a :: r := by
+  intro k
+  induction k with
+  | zero =>
+      intro s p h hp
+      cases p with
+      | nil => exact absurd rfl hp
+      | cons c p' => exact absurd h (by simp)
+  | succ k ih =>
+      intro s p h hp
+      rw [show List.replicate (Nat.succ k) a = a :: List.replicate k a from rfl] at h
+      cases s with
+      | nil =>
+          rw [List.nil_append] at h
+          cases p with
+          | nil => exact absurd rfl hp
+          | cons c p' =>
+              injection h with hc _
+              exact ⟨p', by rw [hc]⟩
+      | cons d s' =>
+          rw [List.cons_append] at h
+          injection h with hd h'
+          subst hd
+          exact ih s' p h' hp
+
+omit [DecidableEq α] in
+/-- A proper suffix of a marker `x b^k` starts with `b`. -/
+theorem marker_straddle (x b : α) (k : Nat) (p₁ p₂ : List α)
+    (h : marker x b k = p₁ ++ p₂) (h1 : p₁ ≠ []) (h2 : p₂ ≠ []) :
+    ∃ r, p₂ = b :: r := by
+  cases p₁ with
+  | nil => exact absurd rfl h1
+  | cons d s =>
+      rw [List.cons_append, marker] at h
+      injection h with hd h'
+      subst hd
+      exact replicate_suffix b k s p₂ h'.symm h2
+
+omit [DecidableEq α] in
+/-- The head of an `enc2`-image: empty or comma-first. -/
+theorem enc2_nil_or_x (x : α) : ∀ W : List α, enc2 x W = [] ∨ ∃ T, enc2 x W = x :: T := by
+  intro W
+  cases W with
+  | nil => exact Or.inl rfl
+  | cons c W' => exact Or.inr ⟨c :: enc2 x W', enc2_head x c W'⟩
+
+omit [DecidableEq α] in
+/-- The head of an item list's text: empty or comma/marker-first. -/
+theorem itext_nil_or_x (b x : α) : ∀ ns : List (NFItem α),
+    itext b x ns = [] ∨ ∃ T, itext b x ns = x :: T := by
+  intro ns
+  induction ns with
+  | nil => exact Or.inl rfl
+  | cons it ns ih =>
+      cases it with
+      | frag W =>
+          rcases enc2_nil_or_x x W with h | ⟨T, h⟩
+          · rw [itext, h, List.nil_append]; exact ih
+          · exact Or.inr ⟨T ++ itext b x ns, by rw [itext, h, List.cons_append]⟩
+      | mark i => exact Or.inr ⟨_, rfl⟩
+      | dmg W i j => exact Or.inr ⟨_, rfl⟩
+
+/-- An `enc2`-image contains no `bb` (every `b` is data, followed by the
+next block's comma). -/
+theorem no_bb_enc2 (x b : α) (hxb : x ≠ b) : ∀ W : List α, ¬ Occ [b, b] (enc2 x W) := by
+  intro W
+  induction W with
+  | nil =>
+      intro h
+      have hl := occ_length h
+      rw [enc2_nil] at hl
+      simp at hl
+  | cons c W' ih =>
+      intro h
+      rw [enc2_cons] at h
+      rcases occ_app_cases h with h1 | h1 | ⟨p₁, p₂, v, hp, h1, h2, h3⟩
+      · -- Occ [b,b] [x,c] forces x = b
+        obtain ⟨u, w, hw⟩ := h1
+        cases u with
+        | nil =>
+            rw [List.nil_append, List.cons_append, List.cons_append, List.nil_append] at hw
+            injection hw with hx _
+            exact hxb hx
+        | cons d u' =>
+            have hl := congrArg List.length hw
+            simp only [List.length_append, List.length_cons] at hl
+            omega
+      · exact ih h1
+      · -- straddle: a nonempty suffix of `[b,b]` starts with `b`, so `enc2 W'`
+        -- would start with `b`, but an image is empty or comma-first
+        obtain ⟨r, hr⟩ := replicate_suffix b 2 p₁ p₂ (by show p₁ ++ p₂ = [b, b]; rw [hp]) h2
+        have hst : enc2 x W' = p₂ ++ v := h3
+        rcases enc2_nil_or_x x W' with hnil | ⟨T, hcons⟩
+        · rw [hnil] at hst; exact nomatch hst
+        · rw [hr, hcons] at hst
+          injection hst with hbx _
+          exact hxb hbx
+
+omit [DecidableEq α] in
+/-- A marker with at least two `b`'s contains `bb`. -/
+theorem marker_occ_bb {x b : α} {n : Nat} (l : List α) (hn : 2 ≤ n)
+    (h : Occ (marker x b n) l) : Occ [b, b] l := by
+  obtain ⟨m, hm⟩ := Nat.exists_eq_add_of_le hn
+  rw [Nat.add_comm 2 m] at hm
+  subst hm
+  have hsplit : marker x b (m + 2) = ([x] ++ [b, b]) ++ List.replicate m b := rfl
+  rw [hsplit] at h
+  exact occ_mid h
+
+/-! ### The construction over `enc2` directly
+
+  `enc2Pass_eq` and `dec2Pass_enc2` (both proven above) bridge the
+  pass-composition definitions to the block map `enc2`.  We record the
+  construction in `enc2` form; the remaining work is purely about `subst`
+  over texts that are concatenations of `enc2`-images and markers. -/
+
+/-- The rename/repair rounds, `i = 1..n`, with the code layer bridged to
+`enc2` (see `renameRepair2_eq`). -/
+def renameRR (b x : α) : Nat → List (List α × List α) → List α → List α
+  | _, [], T => T
+  | i, (Xi, _) :: ps, T =>
+      renameRR b x (i + 1) ps
+        (subst (enc2 x Xi ++ [b]) (marker x b (i + 2))
+          (subst (marker x b (i + 1)) (enc2 x Xi) T))
+
+/-- The instantiation passes, `i = n..1`, in `enc2` form (see
+`instantiate2_eq`). -/
+def instRR (b x : α) : Nat → List (List α × List α) → List α → List α
+  | _, [], T => T
+  | i, (_, Yi) :: ps, T => instRR b x (i - 1) ps (subst (enc2 x Yi) (marker x b (i + 1)) T)
+
+theorem renameRepair2_eq (b x : α) (σ : List α) (hnd : σ.Pairwise (· ≠ ·))
+    (pairs : List (List α × List α)) (hp : ∀ p ∈ pairs, ∀ c ∈ p.1 ++ p.2, c ∈ σ) :
+    ∀ (ps : List (List α × List α)) (i : Nat), (∀ p ∈ ps, p ∈ pairs) → ∀ T : List α,
+    renameRepair2 b x σ i ps T = renameRR b x i ps T := by
+  intro ps
+  induction ps with
+  | nil => intro _ _ T; rfl
+  | cons p ps ih =>
+      intro i hmem T
+      have hXi : ∀ c ∈ p.1, c ∈ σ := fun c hc =>
+        hp p (hmem p (List.mem_cons_self ..)) c (List.mem_append_left _ hc)
+      have hps : ∀ q ∈ ps, q ∈ pairs := fun q hq => hmem q (List.mem_cons_of_mem _ hq)
+      show renameRepair2 b x σ (i + 1) ps
+          (subst (enc2Pass x σ p.1 ++ [b]) (marker x b (i + 2))
+            (subst (marker x b (i + 1)) (enc2Pass x σ p.1) T))
+        = renameRR b x (i + 1) ps
+          (subst (enc2 x p.1 ++ [b]) (marker x b (i + 2))
+            (subst (marker x b (i + 1)) (enc2 x p.1) T))
+      rw [enc2Pass_eq x σ hnd p.1 hXi, ih (i + 1) hps _]
+
+theorem instantiate2_eq (b x : α) (σ : List α) (hnd : σ.Pairwise (· ≠ ·))
+    (pairs : List (List α × List α)) (hp : ∀ p ∈ pairs, ∀ c ∈ p.1 ++ p.2, c ∈ σ) :
+    ∀ (ps : List (List α × List α)) (i : Nat), (∀ p ∈ ps, p ∈ pairs) → ∀ T : List α,
+    instantiate2 b x σ i ps T = instRR b x i ps T := by
+  intro ps
+  induction ps with
+  | nil => intro _ _ T; rfl
+  | cons p ps ih =>
+      intro i hmem T
+      have hYi : ∀ c ∈ p.2, c ∈ σ := fun c hc =>
+        hp p (hmem p (List.mem_cons_self ..)) c (List.mem_append_right _ hc)
+      have hps : ∀ q ∈ ps, q ∈ pairs := fun q hq => hmem q (List.mem_cons_of_mem _ hq)
+      show instantiate2 b x σ (i - 1) ps (subst (enc2Pass x σ p.2) (marker x b (i + 1)) T)
+        = instRR b x (i - 1) ps (subst (enc2 x p.2) (marker x b (i + 1)) T)
+      rw [enc2Pass_eq x σ hnd p.2 hYi, ih (i - 1) hps _]
+
+theorem mem_reverse_of {β : Type} {l : List β} {q : β} (h : q ∈ l) : q ∈ l.reverse :=
+  List.mem_reverse.mpr h
+
+/-- The construction, with the code layer bridged: everything after this
+point works with `enc2` and `subst` only. -/
+theorem repC2_eq (b x : α) (σ : List α) (hnd : σ.Pairwise (· ≠ ·))
+    (pairs : List (List α × List α)) (S : List α) (hS : ∀ c ∈ S, c ∈ σ)
+    (hp : ∀ p ∈ pairs, ∀ c ∈ p.1 ++ p.2, c ∈ σ) :
+    repC2 b x σ pairs S =
+      dec2Pass x σ (instRR b x pairs.length pairs.reverse
+        (renameRR b x 1 pairs (enc2 x S))) := by
+  have hall : ∀ p ∈ pairs.reverse, p ∈ pairs := fun p hp2 =>
+    List.mem_reverse.mp hp2
+  unfold repC2
+  rw [renameRepair2_eq b x σ hnd pairs hp pairs 1 (fun _ h => h),
+    instantiate2_eq b x σ hnd pairs hp pairs.reverse pairs.length hall,
+    enc2Pass_eq x σ hnd S hS]
+
 /-- Theorem (Multiple Substitution): the comma-code construction
 computes the freezing semantics for ARBITRARY nonempty patterns -- no
 restriction on the patterns.  The patterns, replacements, and `S` must be
