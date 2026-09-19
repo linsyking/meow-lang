@@ -583,11 +583,75 @@ Next, we can do the multiple substitution. Its semantics requires some care: ite
 
 \begin{remark}
     \label{rem:rep-hyp}
-    The hypothesis ``$|X_i| = 1$ or $X_i$ does not end with $x$'' is essential: if some $X_i$ with $|X_i| \ge 2$ ends with $x$, the construction can go wrong. Take $b = \sigma_1$, $x = \sigma_2$, $S = \sigma_1\sigma_2\sigma_1\sigma_1\sigma_2$, $X_1 = \sigma_1\sigma_2$, $Y_1 = \sigma_2\sigma_2\sigma_2\sigma_1$, $X_2 = \sigma_2\sigma_2\sigma_2$, $Y_2 = \sigma_1\sigma_1$: the construction returns $\sigma_2\sigma_2\sigma_2\sigma_1\sigma_1\sigma_1\sigma_2$ instead of $\sigma_2\sigma_2\sigma_2\sigma_1\sigma_1\sigma_2\sigma_2\sigma_2\sigma_1$. The failure is a \emph{shadowing}: a spurious match of $\mathtt{enc}(X_1)$ ending at an escape $x$ precedes and overlaps a genuine match, so the genuine one is never scanned (the scan does not restart inside inserted text). Nesting among the patterns, on the other hand, is permitted: the theorem applies for instance to $X_1 = \mathtt{c} \subset X_2 = \mathtt{cd}$ (take $b = \mathtt{d}$, $x = \mathtt{c}$). The exact characterization of the pattern families for which the construction is sound is open; the condition above is a convenient sufficient one.
+    The hypothesis ``$|X_i| = 1$ or $X_i$ does not end with $x$'' is essential: if some $X_i$ with $|X_i| \ge 2$ ends with $x$, the construction can go wrong. Take $b = \sigma_1$, $x = \sigma_2$, $S = \sigma_1\sigma_2\sigma_1\sigma_1\sigma_2$, $X_1 = \sigma_1\sigma_2$, $Y_1 = \sigma_2\sigma_2\sigma_2\sigma_1$, $X_2 = \sigma_2\sigma_2\sigma_2$, $Y_2 = \sigma_1\sigma_1$: the construction returns $\sigma_2\sigma_2\sigma_2\sigma_1\sigma_1\sigma_1\sigma_2$ instead of $\sigma_2\sigma_2\sigma_2\sigma_1\sigma_1\sigma_2\sigma_2\sigma_2\sigma_1$. The failure is a \emph{shadowing}: a spurious match of $\mathtt{enc}(X_1)$ ending at an escape $x$ precedes and overlaps a genuine match, so the genuine one is never scanned (the scan does not restart inside inserted text). Nesting among the patterns, on the other hand, is permitted: the theorem applies for instance to $X_1 = \mathtt{c} \subset X_2 = \mathtt{cd}$ (take $b = \mathtt{d}$, $x = \mathtt{c}$). The exact characterization of the pattern families for which \emph{this} construction is sound remains open; the condition above is a convenient sufficient one. The construction below removes the restriction altogether.
 \end{remark}
 
 \begin{remark}
     As a partial function, $\mathtt{rep}_n$ is undefined when some $X_i = \epsilon$ (the expression itself is undefined). A total variant that agrees with Definition~\ref{def:rep} everywhere it is defined can be built by guarding each round with $\mathtt{if}(\mathtt{eq}(X_i, \epsilon), \text{identity}, \text{round}_i)$, replacing the round by the identity when $X_i = \epsilon$; we omit the routine details.
+\end{remark}
+
+Hypothesis (H), however, is an artifact of the encoding $\mathtt{enc}$, not an intrinsic boundary of the problem: a \emph{uniform} code removes it entirely.
+
+\begin{definition}
+    (\emph{Comma Code})
+    Let $x \in \Sigma$ and fix an enumeration $\Sigma \setminus \{x\} = \{c_1, \cdots, c_M\}$ (the order is immaterial). Define
+    \begin{align}
+        \mathtt{enc}^2_{x}(S) & \triangleq [xc_1/c_1]\cdots[xc_M/c_M][xx/x]\,S \\
+        \mathtt{dec}^2_{x}(S) & \triangleq [x/xx][c_M/xc_M]\cdots[c_1/xc_1]\,S
+    \end{align}
+    (right-to-left as always: in $\mathtt{enc}^2$ the doubling pass $[xx/x]$ runs \emph{first}, so that the commas inserted by the later passes are not themselves doubled; in $\mathtt{dec}^2$ the halving pass runs \emph{last}). Every character $c$ is escaped as the block $xc$: all code words have length $2$.
+\end{definition}
+
+\begin{lemma}
+    (\emph{Comma Code})
+    \begin{enumerate}[(i)]
+        \item $\mathtt{enc}^2_{x}(S)$ is the concatenation of the blocks $xS[0],\, xS[1],\, \dots,\, xS[|S|-1]$. In particular every $x$ of an image is the comma of a block and every $b$ is a data character, and $\mathtt{dec}^2_{x}(\mathtt{enc}^2_{x}(S)) = S$.
+        \item An $\mathtt{enc}^2$-image contains no $bb$ and never begins with $b$. Consequently, in a concatenation of $\mathtt{enc}^2$-images and markers $xb^{i+1}$ ($i \geq 1$), every occurrence of a marker is a whole marker.
+    \end{enumerate}
+\end{lemma}
+
+\begin{proof}
+    (i) For $\mathtt{enc}^2$: after the doubling pass the text is a concatenation of units, one per character of $S$ -- the block $xx$ for each $x$, a bare $c$ for each $c \neq x$ -- and each pass $[xc/c]$ replaces precisely its own bare units $c$ by the block $xc$: a single-character pattern never straddles a boundary, and no other unit contains $c$ (a processed block $xc'$ holds $c' \neq c$, and $xx$ holds none), while inserted text is never rescanned. At the end every unit is a block $xc$, which is the claim. For $\mathtt{dec}^2$: in an image every $x$ is a comma, so a pattern $xc$ ($c \neq x$) can only match at a comma, i.e.\ exactly at the blocks with data $c$ (a data character would have to equal the pattern's first character $x$, and a data $x$ is followed by a comma, not by $c$). Each pass collapses its own blocks to bare characters, which no later pass touches, and after all of them the text is $S$ with each $x$ doubled; the final pass $[x/xx]$ halves it back, the $x$-runs being exactly concatenations of the intact $xx$-blocks.
+    (ii) Every $b$ of an image is a data character immediately followed by the next block's comma, so $b$-runs have length $\leq 1$. The rest is the argument of Remark~\ref{rem:cat-markers}: a marker contains $bb$, so it cannot occur inside an image; it begins with $x$, so an occurrence straddling a junction adjacent to an image would need its $b$'s from the image's end -- impossible.
+\end{proof}
+
+\begin{theorem}
+    (\emph{Unrestricted Multiple Substitution})
+    Let $n \in \mathbb{N}^*$, $b, x \in \Sigma$ with $b \neq x$, and let $X_1, \dots, X_n \neq \epsilon$ be \emph{arbitrary} patterns. With the abbreviations $E_Z \triangleq \mathtt{enc}^2_{x}(Z)$ and $m_i \triangleq xb^{i+1}$, define
+    \begin{multline}
+        \mathtt{rep}^2_n(S, X_1, Y_1, \cdots, X_n, Y_n) \triangleq \\
+        \mathtt{dec}^2_{x}\left((\prod_i^{1\rightarrow n} [E_{Y_i}/m_i])(\prod_i^{1\leftarrow n} ([E_{X_i}b/m_{i+1}][m_i/E_{X_i}]))\,E_S\right)
+    \end{multline}
+    -- the same architecture as Theorem~\ref{lem:multiple substitution} (rename, then repair, per round $i = 1, \dots, n$; then instantiation, $i = n, \dots, 1$; then decoding). Then for all $S, Y_1, \dots, Y_n$,
+    \begin{align}
+        \mathtt{rep}^2_n(S, X_1, Y_1, \cdots, X_n, Y_n) \;=\; \mathtt{rep}_n(S;\, X_1,Y_1;\,\dots;\,X_n,Y_n).
+    \end{align}
+    In particular, the multiple substitution of Definition~\ref{def:rep} is reachable with \emph{no} restriction on the patterns beyond $X_i \neq \epsilon$. \label{thm:unrestricted rep}
+\end{theorem}
+
+\begin{proof}
+    Write $E = E_{X_i}$ for the round-$i$ pattern and $k = |X_i|$. Call an intermediate text \emph{normal} if it is a concatenation of \emph{fragments} ($\mathtt{enc}^2$-images) and markers $m_1, \dots, m_j$, every marker followed by a non-$b$ character or the end. Its \emph{skeleton} is the string read off from the data characters of its fragments. We show by induction on $i$ that after round $i$ (the composition $[E b/m_{i+1}][m_i/E]$) the text is normal, its skeleton being $S$ with exactly the matches frozen by Definition~\ref{def:rep} through round $i$ replaced by markers $m_i$. By the Comma Code Lemma, fragments have $b$-runs $\leq 1$ and markers occur only whole.
+
+    \emph{Classification of matches.} $E$ begins with the comma $x$, so an occurrence of $E$ in a normal text starts at ($\alpha$) a block comma, ($\beta$) a data character, or ($\gamma$) a marker's $x$ (deeper marker positions hold $b \neq E[0]$).
+    \begin{itemize}
+        \item ($\alpha$) Reading from a comma, $E$ alternates commas and data. If the next $k$ blocks are intact and spell $X_i$, the occurrence is \emph{genuine}: a run of $k$ skeleton characters spelling $X_i$ (comma-aligned blocks decode to characters, and $E_W = E$ implies $W = X_i$ by injectivity of $\mathtt{enc}^2$). Otherwise the read runs off the fragment's end into a marker: $E$'s comma slot meets the marker's $x$ and its final data slot meets the marker's first $b$ -- possible only when $X_i$ ends with $b$ -- the match covering $(k-1)$ intact blocks plus the marker's first two characters. Such a match is \emph{spurious}, and is followed by the marker's second $b$ (markers have at least two).
+        \item ($\beta$) A data character $d$ must equal $E[0] = x$; then $E[1] = x_1$ meets the next comma $x$, forcing $x_1 = x$, and inductively $X_i = x^k$, so $E = (xx)^k$ is all $x$'s. But then the comma one position earlier also starts an occurrence (it is an $x$, followed by the same $2k-1$ characters), and the greedy scan reaches a data position only across the comma before it, which must just have failed to match -- whereas a ($\beta$)-occurrence at $d$ implies an occurrence at that comma, which would have matched and consumed $d$. So ($\beta$)-occurrences are never taken: they are \emph{shadowed}.
+        \item ($\gamma$) $E[1] = x_1$ meets the marker's first $b$, forcing $x_1 = b$; $E[2]$ is a comma slot and meets the marker's second $b$ -- dead unless $k = 1$, i.e.\ $X_i = b$ and $E = xb$, which matches the first two characters of every marker: \emph{spurious}, followed by the marker's next $b$.
+    \end{itemize}
+    No occurrence crosses a marker beyond its first two characters, and no genuine match starts inside a marker.
+
+    \emph{The rename $[m_i/E]$.} The genuine matches are exactly the comma-aligned, within-one-fragment occurrences spelling $X_i$ -- that is, the occurrences of $X_i$ among the unfrozen skeleton runs, which cannot straddle a frozen site (frozen sites are markers, and crossing one makes the occurrence spurious or dead). The greedy scan takes them leftmost-first, resuming after each insertion at the next comma (the next skeleton position): non-overlapping, in text order -- precisely the round-$i$ freezing of Definition~\ref{def:rep}, applied to the skeleton furnished by the induction hypothesis. \emph{No spurious match can shadow a genuine one}: ($\beta$) is never taken; ($\gamma$) covers only marker characters, and the first comma after the marker lies beyond it; an ($\alpha$)-spurious match covers $(k-1)$ blocks immediately followed by a marker, and from any of those blocks a genuine match would need $k$ intact blocks -- fewer than $k$ remain before the marker. So the scan takes the spurious matches only where they overlap no genuine match. After a spurious match the scan resumes inside the eaten marker's $b$'s (dead for $E$, which begins with $x$) and rejoins the next comma without loss: those $k-1$ blocks cannot host a round-$i$ match start. Genuine markers are followed by non-$b$ (a comma, a marker's $x$, or the end); spurious ones by at least one $b$ -- the remains of the eaten marker.
+
+    \emph{The repair $[E b/m_{i+1}]$.} The pattern $m_{i+1} = xb^{i+2}$ occurs in the renamed text exactly at the spurious markers followed by their first remaining $b$: an occurrence must begin at a marker's $x$ (fragments have $b$-runs $\leq 1$); an older marker $m_j$, $j \leq i$, supplies only $j + 1 \leq i + 1$ $b$'s and is followed by a non-$b$; and a genuine $m_i$ is followed by a non-$b$. The replacement $E b$ restores the text exactly: in the ($\alpha$) case $E b$ spells the $(k-1)$ blocks, the eaten marker's $x$, and one $b$ (recall $X_i$ ends with $b$), so followed by the marker's remaining $b$'s it reproduces the eaten text character for character; in the ($\gamma$) case ($X_i = b$) it spells $x$ and two $b$'s, again exactly the eaten text. The text is normal again, with markers $m_1, \dots, m_i$ at exactly the round-$i$ frozen sites.
+
+    \emph{The instantiation $[E_{Y_i}/m_i]$, $i = n, \dots, 1$.} At pass $i$ the remaining markers are $m_1, \dots, m_i$; $m_i$ is not a prefix of any of them and matches nowhere else (whole-marker occurrences only, by the Comma Code Lemma (ii)), so the pass replaces exactly the round-$i$ markers by the images $E_{Y_i}$, which are fragments and hence undisturbed by the later passes (whose patterns contain $bb$).
+
+    \emph{Decoding.} The final text is $\mathtt{enc}^2$ of the skeleton with each frozen occurrence of $X_i$ replaced by $Y_i$ -- that is, $\mathtt{enc}^2(Z)$ with $Z$ the right-hand side of Definition~\ref{def:rep} -- and $\mathtt{dec}^2$ returns $Z$. The only pass patterns that can be empty are the $E_{X_i}$, exactly when $X_i = \epsilon$: the undefinedness of the expression matches that of the semantics.
+\end{proof}
+
+\begin{remark}
+    \label{rem:comma}
+    The difference between the two constructions is the \emph{uniformity} of the code. The code words of $\mathtt{enc}$ ($xb$ for $b$, $c$ for $c \neq b$) have different lengths, so an image of a pattern can start at a unit boundary and end \emph{mid-unit} -- at an escape $x$ -- and such a spurious occurrence can precede and overlap a genuine one, which the scan then never reaches: this is precisely the shadowing of Remark~\ref{rem:rep-hyp}, and hypothesis (H) is exactly the condition excluding such patterns. In the comma code all code words have length $2$: the parity is locked, every occurrence starting at a unit boundary is genuine (or runs off the fragment's end into a marker, where the uniform repair catches it), and every misaligned occurrence is preceded, one position earlier, by an overlapping aligned one. Nothing analogous to (H) is needed.
 \end{remark}
 
 It turns out that we can build \texttt{cat} function by using multiple substitution.
@@ -606,7 +670,7 @@ It turns out that we can build \texttt{cat} function by using multiple substitut
 \end{theorem}
 
 \begin{proof}
-    Both patterns $a$ and $b$ are single characters, so the hypothesis of Theorem~\ref{lem:multiple substitution} holds for \emph{any} choice of the encoding characters $b, x$ of that theorem -- including $a = x$, which matters when $|\Sigma| = 2$. By Definition~\ref{def:rep}, the first round freezes the occurrence of $a$ at position $0$ of $ab$; the second round freezes the occurrence of $b$ at position $1$ (still unfrozen). Replacing gives $X\,Y$.
+    Both patterns $a$ and $b$ are single characters, so Theorem~\ref{thm:unrestricted rep} applies for \emph{any} choice of the encoding characters $b, x$ of that theorem -- including $a = x$ or $a = b$, which matters when $|\Sigma| = 2$. By Definition~\ref{def:rep}, the first round freezes the occurrence of $a$ at position $0$ of $ab$; the second round freezes the occurrence of $b$ at position $1$ (still unfrozen). Replacing gives $X\,Y$.
 \end{proof}
 
 Now to formally define the escaping function, we need to introduce the concept of \textbf{escaping charset} and \textbf{escaped charset}.
@@ -618,10 +682,9 @@ Now to formally define the escaping function, we need to introduce the concept o
 \begin{theorem}
     (\emph{Character Escaping})
 
-    Suppose $f: U\rightarrow V, U=\{u_1,\cdots,u_n\}, f(u_k)=u_k$, and let $b, x \in \Sigma$ with $b\neq x$ be the characters of the $\mathtt{rep}_n$ construction. Assume:
+    Suppose $f: U\rightarrow V, U=\{u_1,\cdots,u_n\}, f(u_k)=u_k$, and let $b, x \in \Sigma$ with $b\neq x$ be the characters of the substitution construction. Assume:
     \begin{enumerate}[(H1)]
-        \item \label{H1} the enumeration is chosen such that $u_1 = u_k$ (the fixed point comes \emph{first}); since $U$ is a set, this is a convention, not a restriction;
-        \item \label{H2} $x \notin V$.
+        \item \label{H1} the enumeration is chosen such that $u_1 = u_k$ (the fixed point comes \emph{first}); since $U$ is a set, this is a convention, not a restriction.
     \end{enumerate}
     We define:
     \begin{align}
@@ -635,7 +698,7 @@ Now to formally define the escaping function, we need to introduce the concept o
 \end{theorem}
 
 \begin{proof}
-    By Theorem~\ref{lem:multiple substitution} the two $\mathtt{rep}_n$ expressions compute their freezing semantics: the patterns of $\mathtt{escape}$ are single characters, and the patterns $u_kf(u_i)$ of $\mathtt{unescape}$ are two characters ending in $f(u_i) \neq x$ by (H2). So we argue purely in the semantics of Definition~\ref{def:rep}.
+    By Theorem~\ref{thm:unrestricted rep} the two $\mathtt{rep}$ expressions compute their freezing semantics for arbitrary patterns, so we argue purely in the semantics of Definition~\ref{def:rep}.
 
     \emph{Step 1: what $\mathtt{escape}$ does.} Its patterns $u_1, \dots, u_n$ are distinct single characters, so each character of $S$ lying in $U$ is frozen, in its own round, and every other character is untouched. Hence
     \begin{align}
@@ -656,7 +719,7 @@ Now to formally define the escaping function, we need to introduce the concept o
     \label{rem:escape-hyp}
     \begin{itemize}
         \item Hypothesis~\ref{H1} is essential -- the round trip fails when the fixed point is not enumerated first. Take $\Sigma = \{p, q, r\}$, $b = p$, $x = q$, $U = \{q, p\}$ enumerated $(u_1, u_2) = (q, p)$ with $f(q) = r$, $f(p) = p$ (the fixed point is $u_2 = u_k$, not $u_1$), and $S = \mathtt{pr}$. Then $\mathtt{escape}_f(S) = \mathtt{ppr}$, but $\mathtt{unescape}_f(\mathtt{ppr}) = \mathtt{pq} \neq \mathtt{pr}$: round 1 of $\mathtt{unescape}$ has pattern $u_kf(u_1) = \mathtt{pr}$, which matches at positions $1$--$2$ -- the \emph{second character} of the $\mathtt{pp}$-pair followed by the untouched $r$ -- freezing the wrong region; the self-pair $\mathtt{pp}$ is only round 2's pattern, and position 1 is frozen by then. The role of (H1) is to make the self-pair $u_ku_k$ the \emph{first} round of $\mathtt{unescape}$: by Step 2 its second character is the only $u_1$ that does not begin a pair, and round 1's greedy leftmost consumption eats the self-pairs before any straddling pattern gets scanned.
-        \item Hypothesis~\ref{H2} ($x \notin V$) is used only to satisfy Theorem~\ref{lem:multiple substitution}. Whether it can be dropped from this round trip -- in particular, whether the round trip still holds when some $f(u_i) = x$ -- is open.
+        \item An earlier version of this theorem carried a second hypothesis, $x \notin V$, used only to satisfy the (H)-restricted construction of Theorem~\ref{lem:multiple substitution}; the comma code makes it unnecessary (Theorem~\ref{thm:unrestricted rep}), and nothing in the semantic proof above refers to the contents of $V$.
     \end{itemize}
 \end{remark}
 
@@ -782,7 +845,7 @@ Section~2 built, one by one, a repertoire of functions -- concatenation, head an
     \begin{enumerate}[(i)]
         \item every constant $\vec S \mapsto W$ and every projection $\vec S \mapsto S_i$;
         \item $\mathtt{enc}_{b,x}$, $\mathtt{dec}_{b,x}$, $\mathtt{cat}$, $\mathtt{head}$, $\mathtt{tail}$, $\mathtt{eq}$, $\mathtt{if}$ (with $\top, \bot, b, x$ fixed distinct characters as required), and, for a fixed escaping function $f$, $\mathtt{escape}_f$ and $\mathtt{unescape}_f$;
-        \item $\mathtt{rep}_n$, for each fixed $n$, on the domain $\{X_i \neq \epsilon \ \forall i\}$: the expression is safe and total there (the variable patterns $\mathtt{enc}(X_i)$ are anchored precisely when $X_i \neq \epsilon$), though not safe on all of $(\Sigma^*)^{2n+1}$; a totally safe guarded variant exists via $\mathtt{if}(\mathtt{eq}(X_i, \epsilon), \cdot, \cdot)$.
+        \item $\mathtt{rep}_n$, for each fixed $n$, on the domain $\{X_i \neq \epsilon \ \forall i\}$: the expression is safe and total there (the variable patterns $\mathtt{enc}(X_i)$ are anchored precisely when $X_i \neq \epsilon$), though not safe on all of $(\Sigma^*)^{2n+1}$; a totally safe guarded variant exists via $\mathtt{if}(\mathtt{eq}(X_i, \epsilon), \cdot, \cdot)$. The comma-code construction of Theorem~\ref{thm:unrestricted rep} gives an alternative expression, likewise safe exactly on the same domain (its variable patterns $\mathtt{enc}^2(X_i)$ are anchored precisely when $X_i \neq \epsilon$).
     \end{enumerate}
 \end{proposition}
 
@@ -864,7 +927,7 @@ How strong is the substitution calculus? This section gives a pipeline normal fo
         \item Give an exact characterization of the reachable functions. With constant patterns, each pass is close to a rational transduction; variable patterns (as in $\mathtt{rep}_n$'s renamings) take the class beyond that. Is there a known matching class?
         \item Is string reversal, $S \mapsto \mathrm{reverse}(S)$, reachable?
         \item Is equivalence of two expressions ($\llbracket E \rrbracket = \llbracket E' \rrbracket$ as partial functions) decidable?
-        \item Which functions are reachable over \emph{every} alphabet with $|\Sigma| \geq 2$? Does a larger alphabet ever add power (cf.\ the alphabet-sensitive hypotheses of Theorem~\ref{lem:multiple substitution})?
+        \item Which functions are reachable over \emph{every} alphabet with $|\Sigma| \geq 2$? Does a larger alphabet ever add power (both the $\mathtt{enc}$- and $\mathtt{enc}^2$-constructions must enumerate $\Sigma$)?
     \end{enumerate}
 \end{remark}
 
