@@ -286,6 +286,7 @@ The following theorem introduces the concept of escaping.
 
 \begin{theorem}
     (\emph{Encoding / Decoding})
+    \label{thm:enc}
     Let $b, x \in \Sigma$ with $b \neq x$. We define the following operations on strings:
     \begin{align}
         \mathtt{enc}_{b,x}(S) & \triangleq [xb/b]S \\
@@ -535,62 +536,7 @@ Next, we can do the multiple substitution. Its semantics requires some care: ite
     $\mathtt{rep}_n(S;\, X_1,Y_1;\,\dots;\,X_n,Y_n)$ is defined by \emph{freezing}: scan $S$ from the left for occurrences of $X_1$ -- leftmost-first, non-overlapping, as in Definition~\ref{def:subst} -- and \emph{freeze} the matched positions; then scan the unfrozen positions for occurrences of $X_2$ and freeze; and so on up to $X_n$. (A match is admissible only if it lies entirely in unfrozen positions; each scan is greedy leftmost-first.) Finally, replace every frozen occurrence of $X_i$ by $Y_i$, simultaneously.
 \end{definition}
 
-\begin{theorem}
-    (\emph{Multiple Substitution})
-
-    Let $n\in \mathbb{N}^*$, let $b, x \in \Sigma$ with $b \neq x$, and let $X_1,\dots,X_n \neq \epsilon$ be patterns such that for each $i$, either $|X_i| = 1$ or $X_i$ does not end with $x$. We define the following functions:
-    \begin{multline}
-        \mathtt{rep}_n(S, X_1, Y_1, \cdots, X_n, Y_n) \triangleq \\
-        \mathtt{dec}_{b,x}\left((\prod_i^{1\rightarrow n} [\mathtt{enc}_{b,x}(Y_i)/x\underbrace{b\cdots b}_{i+1}])(\prod_i^{1\leftarrow n} ([\mathtt{enc}_{b,x}(X_i)b/x\underbrace{b\cdots b}_{i+2}][x\underbrace{b\cdots b}_{i+1}/\mathtt{enc}_{b,x}(X_i)]))\mathtt{enc}_{b,x}(S)\right)
-    \end{multline}
-    (recall the products compose right-to-left: the renaming passes run $i = 1, 2, \dots, n$, the instantiation passes run $i = n, \dots, 1$). Then for any $S, Y_1, \dots, Y_n$,
-    \begin{align}
-        \mathtt{rep}_n(S, X_1, Y_1, \cdots, X_n, Y_n) \;=\; \mathtt{rep}_n(S;\, X_1,Y_1;\,\dots;\,X_n,Y_n).
-    \end{align}
-    \label{lem:multiple substitution}
-\end{theorem}
-
-\begin{proof}
-    Write $E_W = \mathtt{enc}_{b,x}(W)$ and $m_i = xb^{i+1}$. Call an intermediate string a \emph{text}. A text is in \emph{normal form} if it is a concatenation of \emph{fragments} ($\mathtt{enc}$-images) and \emph{markers} $m_j$. Two structural facts hold for every text in normal form, immediate from the Encoding Theorem:
-    \begin{itemize}
-        \item[(F1)] a fragment is a concatenation of \emph{units}: single characters $c \neq b$, or the two-character blocks $xb$ encoding a $b$. Every $b$ of a fragment is preceded by its $x$; so fragments contain no $bb$ and never begin with $b$.
-        \item[(F2)] every marker contains $bb$ and begins with $x$; so markers occur only as whole markers: never inside a fragment, and never straddling a fragment--marker junction (that would need two $b$'s at the fragment's end).
-    \end{itemize}
-
-    \emph{Stage 1: the renaming passes.} We show by induction on $i$ that after pass $i$ (the composition $[E_{X_i}b/m_{i+1}]\,[m_i/E_{X_i}]$), the text is in normal form, and equals $\mathtt{enc}(S)$ with exactly the matches frozen by Definition~\ref{def:rep} through round $i$ replaced by markers $m_i$. Write $E = E_{X_i}$ for the round-$i$ pattern.
-
-    \emph{Classification of matches.} Consider any occurrence of $E$ in a text in normal form, at interval $[q, r)$. Since $E$ never begins with $b$ (F1), $q$ is a unit start or a marker start. If $q$ were a marker start, $E$ would contain the marker, hence $bb$ -- impossible; so $q$ is a unit start inside a fragment. Likewise $E$ contains no $bb$, so the match cannot cross a marker (F2); it either ends at a unit boundary within a fragment, or ends at the $x$ of a unit, or ends inside a marker (having consumed the marker's $x$ plus at most one $b$). Now:
-    \begin{itemize}
-        \item \emph{Aligned matches} (ending at a unit boundary): they lie within one fragment and decode to an occurrence of $X_i$ inside the skeleton (unit-aligned sub-images decode to sub-strings, and $E_W = E_{X_i}$ implies $W = X_i$ by injectivity of $\mathtt{enc}$). The character after the match is the next unit's first character, a marker's $x$, or the end of text -- in each case \emph{not} $b$. Conversely every occurrence of $X_i$ in an unfrozen skeleton run corresponds to an aligned match. These are the \emph{genuine} matches.
-        \item \emph{Spurious matches} (ending at a unit's $x$, or inside a marker): the next character is $b$ (the unit's $b$, resp.\ a marker $b$; a match cannot end at a marker's last $b$, as it would contain the whole marker and hence $bb$). These are exactly the matches for which the character after the match is $b$.
-    \end{itemize}
-
-    \emph{The rename.} $[m_i/E]$ replaces every greedy non-overlapping match by the marker $m_i$. Genuine matches become markers followed by a non-$b$ character; spurious matches become markers followed by $b$, i.e.\ junctions $xb^{i+2}$.
-
-    \emph{No shadowing.} We claim no spurious match can prevent a genuine match from being taken: whenever a spurious match at $[q, r)$ overlaps a genuine match at $[s, t)$, the genuine one starts strictly earlier, $s < q$. Both have length $|E|$; the spurious ends inside a unit or a marker, the genuine ends at a unit boundary. Two cases:
-    \begin{itemize}
-        \item \emph{The spurious ends inside a marker} starting at $m_0$, having consumed $d \in \{1, 2\}$ characters of it. A genuine match ending after $m_0$ would contain the marker, hence $bb$ -- impossible; so $t \le m_0$, giving $s = t - |E| \le m_0 - |E| < m_0 + d - |E| = r - |E| = q$.
-        \item \emph{The spurious ends at a unit's $x$}, the unit being $[r-1, r+1)$. If the genuine match ends before the spurious ($t < r$), then again $s = t - |E| < r - |E| = q$. If it ends after ($t > r$), then necessarily $t \geq r + 1$ (the next unit boundary); comparing the two reads of the overlap $[s, r)$ gives $E[j] = E[j + (s-q)]$ for $0 \le j < |E| - (s-q)$: a border of $E$ whose last character is the spurious match's last character, an $x$. A border of $E$ ending in $x$ forces $E$ to end with $x$ (and $|E| \geq 2$), which means $X_i$ ends with $x$ and $|X_i| \geq 2$ -- excluded by hypothesis. (For $|X_i| = 1$, $E$ is a single character and overlaps are vacuous.)
-    \end{itemize}
-    Hence the greedy scan, which always takes the leftmost match first, takes the genuine one, and a spurious match is taken only when it overlaps no genuine match. The set of genuine matches taken is then exactly the greedy non-overlapping set of the corresponding skeleton occurrences -- i.e.\ the round-$i$ freezing of Definition~\ref{def:rep}, by the induction hypothesis that the skeleton of the text is $S$ with earlier rounds frozen.
-
-    \emph{The repair.} $[E b/m_{i+1}]$ must now delete exactly the spurious markers and restore the original text. Since every spurious match is followed by a $b$ that no later match consumed (a match starting at that $b$ would begin with $b$, impossible), the text contains, at each spurious marker, the junction $m_i \cdot b = xb^{i+2}$. Conversely, every occurrence of $xb^{i+2}$ in the renamed text is such a junction: a run of $i+2 \geq 3$ $b$'s preceded by an $x$ cannot arise inside a fragment (runs there have length $\leq 1$ by F1), nor inside an older marker $m_j$, $j < i$ (its run has length $j + 1 \leq i$, and markers are followed by non-$b$: fragments never begin with $b$, markers begin with $x$), nor inside a repaired region (the re-inserted $Eb$ is followed by the character after the original spurious match, and a count of the $b$-run shows it stays $\leq i+1$). Hence the repair deletes exactly the spurious markers together with their following $b$, restoring the original characters. The text is back in normal form, now with markers at exactly the genuine matches.
-
-    \emph{Stage 2: the instantiation passes.} At the pass for index $i$ (descending), the remaining markers are $m_j$ with $j \leq i$. The pattern $m_i = xb^{i+1}$ matches exactly the whole markers of index $i$: it cannot occur inside fragments or inside inserted $E_{Y_j}$-images (they contain no $bb$), cannot straddle junctions (images never begin with $b$), and cannot match a proper part of a shorter marker $m_j$, $j < i$. So each pass replaces exactly the markers of its index, and the inserted images are untouched by later passes (whose patterns all contain $bb$).
-
-    \emph{Stage 3: decoding.} After Stage 2 the text is $\mathtt{enc}(S)$ with each frozen occurrence of $X_i$ replaced by $E_{Y_i}$. By the morphism property (iii) this is $\mathtt{enc}(Z)$, where $Z$ is $S$ with each frozen occurrence replaced by $Y_i$ -- which is exactly the right-hand side of Definition~\ref{def:rep}. Finally $\mathtt{dec}(\mathtt{enc}(Z)) = Z$ by (i).
-\end{proof}
-
-\begin{remark}
-    \label{rem:rep-hyp}
-    The hypothesis ``$|X_i| = 1$ or $X_i$ does not end with $x$'' is essential: if some $X_i$ with $|X_i| \ge 2$ ends with $x$, the construction can go wrong. Take $b = \sigma_1$, $x = \sigma_2$, $S = \sigma_1\sigma_2\sigma_1\sigma_1\sigma_2$, $X_1 = \sigma_1\sigma_2$, $Y_1 = \sigma_2\sigma_2\sigma_2\sigma_1$, $X_2 = \sigma_2\sigma_2\sigma_2$, $Y_2 = \sigma_1\sigma_1$: the construction returns $\sigma_2\sigma_2\sigma_2\sigma_1\sigma_1\sigma_1\sigma_2$ instead of $\sigma_2\sigma_2\sigma_2\sigma_1\sigma_1\sigma_2\sigma_2\sigma_2\sigma_1$. The failure is a \emph{shadowing}: a spurious match of $\mathtt{enc}(X_1)$ ending at an escape $x$ precedes and overlaps a genuine match, so the genuine one is never scanned (the scan does not restart inside inserted text). Nesting among the patterns, on the other hand, is permitted: the theorem applies for instance to $X_1 = \mathtt{c} \subset X_2 = \mathtt{cd}$ (take $b = \mathtt{d}$, $x = \mathtt{c}$). The exact characterization of the pattern families for which \emph{this} construction is sound remains open; the condition above is a convenient sufficient one. The construction below removes the restriction altogether.
-\end{remark}
-
-\begin{remark}
-    As a partial function, $\mathtt{rep}_n$ is undefined when some $X_i = \epsilon$ (the expression itself is undefined). A total variant that agrees with Definition~\ref{def:rep} everywhere it is defined can be built by guarding each round with $\mathtt{if}(\mathtt{eq}(X_i, \epsilon), \text{identity}, \text{round}_i)$, replacing the round by the identity when $X_i = \epsilon$; we omit the routine details.
-\end{remark}
-
-Hypothesis (H), however, is an artifact of the encoding $\mathtt{enc}$, not an intrinsic boundary of the problem: a \emph{uniform} code removes it entirely.
+We now compute $\mathtt{rep}_n$. The construction encodes the input so that patterns, frozen positions, and inserted text cannot interfere: every character $c$ is escaped as the two-character block $xc$ -- a \emph{comma} in front of every character, whence the name.
 
 \begin{definition}
     (\emph{Comma Code})
@@ -612,21 +558,22 @@ Hypothesis (H), however, is an artifact of the encoding $\mathtt{enc}$, not an i
 
 \begin{proof}
     (i) For $\mathtt{enc}^2$: after the doubling pass the text is a concatenation of units, one per character of $S$ -- the block $xx$ for each $x$, a bare $c$ for each $c \neq x$ -- and each pass $[xc/c]$ replaces precisely its own bare units $c$ by the block $xc$: a single-character pattern never straddles a boundary, and no other unit contains $c$ (a processed block $xc'$ holds $c' \neq c$, and $xx$ holds none), while inserted text is never rescanned. At the end every unit is a block $xc$, which is the claim. For $\mathtt{dec}^2$: in an image every $x$ is a comma, so a pattern $xc$ ($c \neq x$) can only match at a comma, i.e.\ exactly at the blocks with data $c$ (a data character would have to equal the pattern's first character $x$, and a data $x$ is followed by a comma, not by $c$). Each pass collapses its own blocks to bare characters, which no later pass touches, and after all of them the text is $S$ with each $x$ doubled; the final pass $[x/xx]$ halves it back, the $x$-runs being exactly concatenations of the intact $xx$-blocks.
-    (ii) Every $b$ of an image is a data character immediately followed by the next block's comma, so $b$-runs have length $\leq 1$. The rest is the argument of Remark~\ref{rem:cat-markers}: a marker contains $bb$, so it cannot occur inside an image; it begins with $x$, so an occurrence straddling a junction adjacent to an image would need its $b$'s from the image's end -- impossible.
+    (ii) Every $b$ of an image is a data character immediately followed by the next block's comma, so $b$-runs have length $\leq 1$. A marker contains $bb$, so it cannot occur inside an image; it begins with $x$, so an occurrence straddling a junction adjacent to an image would need its $b$'s from the image's end -- impossible.
 \end{proof}
 
 \begin{theorem}
-    (\emph{Unrestricted Multiple Substitution})
-    Let $n \in \mathbb{N}^*$, $b, x \in \Sigma$ with $b \neq x$, and let $X_1, \dots, X_n \neq \epsilon$ be \emph{arbitrary} patterns. With the abbreviations $E_Z \triangleq \mathtt{enc}^2_{x}(Z)$ and $m_i \triangleq xb^{i+1}$, define
+    (\emph{Multiple Substitution})
+
+    Let $n \in \mathbb{N}^*$, let $b, x \in \Sigma$ with $b \neq x$, and let $X_1, \dots, X_n \neq \epsilon$ be arbitrary patterns. With the abbreviations $E_Z \triangleq \mathtt{enc}^2_{x}(Z)$ and $m_i \triangleq xb^{i+1}$, we define the following functions:
     \begin{multline}
-        \mathtt{rep}^2_n(S, X_1, Y_1, \cdots, X_n, Y_n) \triangleq \\
+        \mathtt{rep}_n(S, X_1, Y_1, \cdots, X_n, Y_n) \triangleq \\
         \mathtt{dec}^2_{x}\left((\prod_i^{1\rightarrow n} [E_{Y_i}/m_i])(\prod_i^{1\leftarrow n} ([E_{X_i}b/m_{i+1}][m_i/E_{X_i}]))\,E_S\right)
     \end{multline}
-    -- the same architecture as Theorem~\ref{lem:multiple substitution} (rename, then repair, per round $i = 1, \dots, n$; then instantiation, $i = n, \dots, 1$; then decoding). Then for all $S, Y_1, \dots, Y_n$,
+    (recall the products compose right-to-left: the renaming passes run $i = 1, 2, \dots, n$, the instantiation passes run $i = n, \dots, 1$). Then for all $S, Y_1, \dots, Y_n$,
     \begin{align}
-        \mathtt{rep}^2_n(S, X_1, Y_1, \cdots, X_n, Y_n) \;=\; \mathtt{rep}_n(S;\, X_1,Y_1;\,\dots;\,X_n,Y_n).
+        \mathtt{rep}_n(S, X_1, Y_1, \cdots, X_n, Y_n) \;=\; \mathtt{rep}_n(S;\, X_1,Y_1;\,\dots;\,X_n,Y_n).
     \end{align}
-    In particular, the multiple substitution of Definition~\ref{def:rep} is reachable with \emph{no} restriction on the patterns beyond $X_i \neq \epsilon$. \label{thm:unrestricted rep}
+    No restriction on the patterns is needed beyond $X_i \neq \epsilon$. \label{lem:multiple substitution}
 \end{theorem}
 
 \begin{proof}
@@ -634,7 +581,7 @@ Hypothesis (H), however, is an artifact of the encoding $\mathtt{enc}$, not an i
 
     \emph{Classification of matches.} $E$ begins with the comma $x$, so an occurrence of $E$ in a normal text starts at ($\alpha$) a block comma, ($\beta$) a data character, or ($\gamma$) a marker's $x$ (deeper marker positions hold $b \neq E[0]$).
     \begin{itemize}
-        \item ($\alpha$) Reading from a comma, $E$ alternates commas and data. If the next $k$ blocks are intact and spell $X_i$, the occurrence is \emph{genuine}: a run of $k$ skeleton characters spelling $X_i$ (comma-aligned blocks decode to characters, and $E_W = E$ implies $W = X_i$ by injectivity of $\mathtt{enc}^2$). Otherwise the read runs off the fragment's end into a marker: $E$'s comma slot meets the marker's $x$ and its final data slot meets the marker's first $b$ -- possible only when $X_i$ ends with $b$ -- the match covering $(k-1)$ intact blocks plus the marker's first two characters. Such a match is \emph{spurious}, and is followed by the marker's second $b$ (markers have at least two).
+        \item ($\alpha$) Reading from a comma, $E$ alternates commas and data. If the next $k$ blocks are intact and spell $X_i$, the occurrence is \emph{genuine}: a run of $k$ skeleton characters spelling $X_i$ (comma-aligned blocks decode to characters, and $E_W = E$ implies $W = X_i$ by injectivity of $\mathtt{enc}^2$, i.e.\ the Comma Code Lemma (i)). Otherwise the read runs off the fragment's end into a marker: $E$'s comma slot meets the marker's $x$ and its final data slot meets the marker's first $b$ -- possible only when $X_i$ ends with $b$ -- the match covering $(k-1)$ intact blocks plus the marker's first two characters. Such a match is \emph{spurious}, and is followed by the marker's second $b$ (markers have at least two).
         \item ($\beta$) A data character $d$ must equal $E[0] = x$; then $E[1] = x_1$ meets the next comma $x$, forcing $x_1 = x$, and inductively $X_i = x^k$, so $E = (xx)^k$ is all $x$'s. But then the comma one position earlier also starts an occurrence (it is an $x$, followed by the same $2k-1$ characters), and the greedy scan reaches a data position only across the comma before it, which must just have failed to match -- whereas a ($\beta$)-occurrence at $d$ implies an occurrence at that comma, which would have matched and consumed $d$. So ($\beta$)-occurrences are never taken: they are \emph{shadowed}.
         \item ($\gamma$) $E[1] = x_1$ meets the marker's first $b$, forcing $x_1 = b$; $E[2]$ is a comma slot and meets the marker's second $b$ -- dead unless $k = 1$, i.e.\ $X_i = b$ and $E = xb$, which matches the first two characters of every marker: \emph{spurious}, followed by the marker's next $b$.
     \end{itemize}
@@ -651,7 +598,11 @@ Hypothesis (H), however, is an artifact of the encoding $\mathtt{enc}$, not an i
 
 \begin{remark}
     \label{rem:comma}
-    The difference between the two constructions is the \emph{uniformity} of the code. The code words of $\mathtt{enc}$ ($xb$ for $b$, $c$ for $c \neq b$) have different lengths, so an image of a pattern can start at a unit boundary and end \emph{mid-unit} -- at an escape $x$ -- and such a spurious occurrence can precede and overlap a genuine one, which the scan then never reaches: this is precisely the shadowing of Remark~\ref{rem:rep-hyp}, and hypothesis (H) is exactly the condition excluding such patterns. In the comma code all code words have length $2$: the parity is locked, every occurrence starting at a unit boundary is genuine (or runs off the fragment's end into a marker, where the uniform repair catches it), and every misaligned occurrence is preceded, one position earlier, by an overlapping aligned one. Nothing analogous to (H) is needed.
+    The \emph{uniformity} of the code is what makes the construction work. Running the same architecture over the non-uniform code $\mathtt{enc}$ of Theorem~\ref{thm:enc} ($xb$ for $b$, bare $c$ for $c \neq b$) instead fails: code words of different lengths let an image of a pattern start at a unit boundary and end \emph{mid-unit} -- at an escape $x$ -- and such a spurious occurrence can precede and overlap a genuine one, which the scan then never reaches (it does not restart inside inserted text). Concretely, with $b = \sigma_1$, $x = \sigma_2$, $S = \sigma_1\sigma_2\sigma_1\sigma_1\sigma_2$, $X_1 = \sigma_1\sigma_2$, $Y_1 = \sigma_2\sigma_2\sigma_2\sigma_1$, $X_2 = \sigma_2\sigma_2\sigma_2$, $Y_2 = \sigma_1\sigma_1$, the $\mathtt{enc}$-based pipeline returns $\sigma_2\sigma_2\sigma_2\sigma_1\sigma_1\sigma_1\sigma_2$ instead of $\sigma_2\sigma_2\sigma_2\sigma_1\sigma_1\sigma_2\sigma_2\sigma_2\sigma_1$; the condition ``every $X_i$ is a single character or does not end with $x$'' rules out such patterns and is essential for that variant (the exact characterization of the pattern families for which it is sound remains open). In the comma code all code words have length $2$: the parity is locked, every occurrence starting at a unit boundary is genuine (or runs off the fragment's end into a marker, where the uniform repair catches it), and every misaligned occurrence is preceded, one position earlier, by an overlapping aligned one -- the shadowing failure is structurally impossible.
+\end{remark}
+
+\begin{remark}
+    As a partial function, $\mathtt{rep}_n$ is undefined when some $X_i = \epsilon$ (the expression itself is undefined). A total variant that agrees with Definition~\ref{def:rep} everywhere it is defined can be built by guarding each round with $\mathtt{if}(\mathtt{eq}(X_i, \epsilon), \text{identity}, \text{round}_i)$, replacing the round by the identity when $X_i = \epsilon$; we omit the routine details.
 \end{remark}
 
 It turns out that we can build \texttt{cat} function by using multiple substitution.
@@ -670,7 +621,7 @@ It turns out that we can build \texttt{cat} function by using multiple substitut
 \end{theorem}
 
 \begin{proof}
-    Both patterns $a$ and $b$ are single characters, so Theorem~\ref{thm:unrestricted rep} applies for \emph{any} choice of the encoding characters $b, x$ of that theorem -- including $a = x$ or $a = b$, which matters when $|\Sigma| = 2$. By Definition~\ref{def:rep}, the first round freezes the occurrence of $a$ at position $0$ of $ab$; the second round freezes the occurrence of $b$ at position $1$ (still unfrozen). Replacing gives $X\,Y$.
+    Both patterns $a$ and $b$ are single characters, and Theorem~\ref{lem:multiple substitution} places no restriction on the patterns, so it applies for \emph{any} choice of the encoding characters $b, x$ -- including $a = x$ or $a = b$, which matters when $|\Sigma| = 2$. By Definition~\ref{def:rep}, the first round freezes the occurrence of $a$ at position $0$ of $ab$; the second round freezes the occurrence of $b$ at position $1$ (still unfrozen). Replacing gives $X\,Y$.
 \end{proof}
 
 Now to formally define the escaping function, we need to introduce the concept of \textbf{escaping charset} and \textbf{escaped charset}.
@@ -698,7 +649,7 @@ Now to formally define the escaping function, we need to introduce the concept o
 \end{theorem}
 
 \begin{proof}
-    By Theorem~\ref{thm:unrestricted rep} the two $\mathtt{rep}$ expressions compute their freezing semantics for arbitrary patterns, so we argue purely in the semantics of Definition~\ref{def:rep}.
+    By Theorem~\ref{lem:multiple substitution} the two $\mathtt{rep}$ expressions compute their freezing semantics, so we argue purely in the semantics of Definition~\ref{def:rep}.
 
     \emph{Step 1: what $\mathtt{escape}$ does.} Its patterns $u_1, \dots, u_n$ are distinct single characters, so each character of $S$ lying in $U$ is frozen, in its own round, and every other character is untouched. Hence
     \begin{align}
@@ -719,7 +670,7 @@ Now to formally define the escaping function, we need to introduce the concept o
     \label{rem:escape-hyp}
     \begin{itemize}
         \item Hypothesis~\ref{H1} is essential -- the round trip fails when the fixed point is not enumerated first. Take $\Sigma = \{p, q, r\}$, $b = p$, $x = q$, $U = \{q, p\}$ enumerated $(u_1, u_2) = (q, p)$ with $f(q) = r$, $f(p) = p$ (the fixed point is $u_2 = u_k$, not $u_1$), and $S = \mathtt{pr}$. Then $\mathtt{escape}_f(S) = \mathtt{ppr}$, but $\mathtt{unescape}_f(\mathtt{ppr}) = \mathtt{pq} \neq \mathtt{pr}$: round 1 of $\mathtt{unescape}$ has pattern $u_kf(u_1) = \mathtt{pr}$, which matches at positions $1$--$2$ -- the \emph{second character} of the $\mathtt{pp}$-pair followed by the untouched $r$ -- freezing the wrong region; the self-pair $\mathtt{pp}$ is only round 2's pattern, and position 1 is frozen by then. The role of (H1) is to make the self-pair $u_ku_k$ the \emph{first} round of $\mathtt{unescape}$: by Step 2 its second character is the only $u_1$ that does not begin a pair, and round 1's greedy leftmost consumption eats the self-pairs before any straddling pattern gets scanned.
-        \item An earlier version of this theorem carried a second hypothesis, $x \notin V$, used only to satisfy the (H)-restricted construction of Theorem~\ref{lem:multiple substitution}; the comma code makes it unnecessary (Theorem~\ref{thm:unrestricted rep}), and nothing in the semantic proof above refers to the contents of $V$.
+        \item An earlier version of this theorem carried a second hypothesis, $x \notin V$, needed so that the patterns $u_k f(u_i)$ would satisfy the restriction the original enc-based construction of Remark~\ref{rem:comma} imposed on patterns; the comma code makes it unnecessary, and nothing in the semantic proof above refers to the contents of $V$.
     \end{itemize}
 \end{remark}
 
@@ -845,7 +796,7 @@ Section~2 built, one by one, a repertoire of functions -- concatenation, head an
     \begin{enumerate}[(i)]
         \item every constant $\vec S \mapsto W$ and every projection $\vec S \mapsto S_i$;
         \item $\mathtt{enc}_{b,x}$, $\mathtt{dec}_{b,x}$, $\mathtt{cat}$, $\mathtt{head}$, $\mathtt{tail}$, $\mathtt{eq}$, $\mathtt{if}$ (with $\top, \bot, b, x$ fixed distinct characters as required), and, for a fixed escaping function $f$, $\mathtt{escape}_f$ and $\mathtt{unescape}_f$;
-        \item $\mathtt{rep}_n$, for each fixed $n$, on the domain $\{X_i \neq \epsilon \ \forall i\}$: the expression is safe and total there (the variable patterns $\mathtt{enc}(X_i)$ are anchored precisely when $X_i \neq \epsilon$), though not safe on all of $(\Sigma^*)^{2n+1}$; a totally safe guarded variant exists via $\mathtt{if}(\mathtt{eq}(X_i, \epsilon), \cdot, \cdot)$. The comma-code construction of Theorem~\ref{thm:unrestricted rep} gives an alternative expression, likewise safe exactly on the same domain (its variable patterns $\mathtt{enc}^2(X_i)$ are anchored precisely when $X_i \neq \epsilon$).
+        \item $\mathtt{rep}_n$, for each fixed $n$, on the domain $\{X_i \neq \epsilon \ \forall i\}$: the expression of Theorem~\ref{lem:multiple substitution} is safe and total there (its variable patterns $\mathtt{enc}^2(X_i)$ are anchored precisely when $X_i \neq \epsilon$), though not safe on all of $(\Sigma^*)^{2n+1}$; a totally safe guarded variant exists via $\mathtt{if}(\mathtt{eq}(X_i, \epsilon), \cdot, \cdot)$.
     \end{enumerate}
 \end{proposition}
 

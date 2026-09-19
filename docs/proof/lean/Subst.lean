@@ -10,12 +10,20 @@
   * Composition is right-to-left, as in the paper:
     `subst A B (subst C D E)` is `[A/B][C/D]E`.
 
-  Status: every theorem of Section 2 is proven except `repC_correct` (the
-  multiple-substitution / Theorem (rep_n) correctness), which is stated with
-  the paper's hypothesis (H) and left as `sorry`.  Also proven along the way:
-  the Double Substitution Lemma, cat, benc/bdec border coding, eq, ite,
-  head, and tail (the last two need `X ⊆ Σ`, as the paper assumes
-  `Σ = {σ₁..σ_N}` throughout).
+  Status: every theorem of Section 2 is proven except `repC2_correct` (the
+  paper's Theorem (Multiple Substitution): the unrestricted comma-code
+  construction, no hypothesis on the patterns beyond `X_i ≠ ε` and
+  everything over `σ`; roadmap in its docstring).  For the comma code the
+  *code layer* is proven: `enc2Pass_eq` (the pass composition computes the
+  block map) and `dec2Pass_enc2` (the decode round trip); the
+  phase-locking staging argument is the remaining work.  `repC` -- the
+  paper's original enc-based variant, now only a remark in the paper -- is
+  kept as a demo of the shadowing failure; under its (H) condition it
+  should equal `repRef`, but that statement is not proven here.  (Theorem
+  (escaping) is `repC2` on special pair sets; not formalized.)  Also proven
+  along the way: the Double Substitution Lemma, cat, benc/bdec border
+  coding, eq, ite, head, and tail (the last two need `X ⊆ Σ`, as the paper
+  assumes `Σ = {σ₁..σ_N}` throughout).
 
   Build: `lake build`.  Quick iteration: `lake env lean Subst.lean`.
 -/
@@ -1461,19 +1469,14 @@ def instantiate (b x : α) : Nat → List (List α × List α) → List α → L
   | i, (_, Yi) :: ps, T =>
       instantiate b x (i - 1) ps (subst (enc b x Yi) (marker x b (i + 1)) T)
 
-/-- Theorem (rep_n): the construction of the paper. -/
+/-- The enc-based construction -- the paper's original variant of multiple
+substitution (now only a remark there: it computes the freezing semantics
+only under the condition that every `X_i` is a single character or does
+not end in `x`, a statement not proven in this file).  Kept for the
+shadowing demo below. -/
 def repC (b x : α) (pairs : List (List α × List α)) (S : List α) : List α :=
   dec b x (instantiate b x pairs.length pairs.reverse
     (renameRepair b x 1 pairs (enc b x S)))
-
-/-- Theorem (rep_n): the construction computes the freezing semantics, under
-the paper's hypothesis (H): every `X_i` is a single character or does not
-end with `x`.  (Theorem (escaping) is `repC` on special pair sets; not yet
-formalized.) -/
-theorem repC_correct (b x : α) (hxb : x ≠ b) (pairs : List (List α × List α))
-    (hne : ∀ p ∈ pairs, p.1 ≠ [])
-    (hH : ∀ p ∈ pairs, p.1.length = 1 ∨ p.1.getLast? ≠ some x)
-    (S : List α) : repC b x pairs S = repRef pairs S := sorry
 
 #eval repRef [(['a'], ['b', 'a'])] ['a', 'b', 'a']                     -- [b, a, b, b, a]
 #eval repC 'a' 'c' [(['a'], ['b', 'a'])] ['a', 'b', 'a']               -- [b, a, b, b, a]
@@ -1500,6 +1503,474 @@ theorem repC_correct (b x : α) (hxb : x ≠ b) (pairs : List (List α × List �
       for X2 in pats do
         let pairs := [(X1, ['x']), (X2, ['y'])]
         if repC 'a' 'c' pairs S != repRef pairs S then
+          allOk := false
+  return allOk
+-- true
+
+/-! ## The comma code and the unrestricted multiple substitution
+
+The paper's Theorem (Multiple Substitution): the same
+rename/repair/instantiate architecture as `repC`, run over the *comma code*
+`enc2` (every character escaped as the block `x·c` -- all code words length
+2, phase-locked).  It computes the freezing semantics for *arbitrary*
+nonempty patterns: no hypothesis on the patterns is needed (the failure of
+the enc-based variant is a remark in the paper -- `repC` above).  The code
+layer is proven here (`enc2Pass_eq`, `dec2Pass_enc2`); the staging argument
+is stated as `repC2_correct` with a roadmap. -/
+
+/-- The comma code as a function: every character `c` of `S` becomes the
+block `x·c`.  The paper defines it as the pass composition `[xx/x]` then
+`[xc/c]` per `c ≠ x`; see `enc2Pass_eq` for the bridge. -/
+def enc2 (x : α) (S : List α) : List α := (S.map fun c => [x, c]).flatten
+
+omit [DecidableEq α] in
+theorem enc2_nil (x : α) : enc2 x [] = [] := rfl
+
+omit [DecidableEq α] in
+theorem enc2_cons (x c : α) (S : List α) :
+    enc2 x (c :: S) = [x, c] ++ enc2 x S := by
+  simp [enc2, List.map_cons, List.flatten_cons]
+
+omit [DecidableEq α] in
+theorem enc2_append (x : α) (S T : List α) :
+    enc2 x (S ++ T) = enc2 x S ++ enc2 x T := by
+  simp [enc2, List.map_append, List.flatten_append]
+
+theorem enc2_injective (x : α) : ∀ S T : List α, enc2 x S = enc2 x T → S = T := by
+  intro S
+  induction S with
+  | nil =>
+      intro T h
+      cases T with
+      | nil => rfl
+      | cons t T' => simp [enc2] at h
+  | cons c S' ih =>
+      intro T h
+      cases T with
+      | nil => simp [enc2] at h
+      | cons d T' =>
+          rw [enc2_cons, enc2_cons] at h
+          simp only [List.cons_append, List.nil_append] at h
+          injection h with _ h1
+          injection h1 with h3 h4
+          subst h3
+          exact congrArg (c :: ·) (ih T' h4)
+
+/-- A unit of the comma code in progress: the block `x·c` once the character
+has been escaped (or is `x` itself, doubled by the first pass), bare before
+that.  `l` is the list of already-processed characters. -/
+def encUnit (x : α) (l : List α) (c : α) : List α :=
+  if c = x ∨ c ∈ l then [x, c] else [c]
+
+/-- The doubling pass `[xx/x]` produces the unit text with nothing
+processed: `xx` for each `x`, bare `c` for each `c ≠ x`. -/
+theorem subst_double_pass (x : α) : ∀ S : List α,
+    subst [x, x] [x] S = (S.map (encUnit x [])).flatten := by
+  intro S
+  induction S with
+  | nil =>
+      simp only [List.map_nil, List.flatten_nil]
+      exact subst_nil _ _
+  | cons c S ih =>
+      by_cases hcx : c = x
+      · rw [hcx, subst_cons_match [x, x] [x] (by simp) x S S (matchHere_one_self x S),
+          ih]
+        simp [encUnit]
+      · rw [subst_cons_none [x, x] [x] c S (matchHere_one_ne x c S hcx), ih]
+        simp [encUnit, hcx]
+
+/-- A single-character pass never touches a unit that does not contain it. -/
+theorem subst_pass_unit {x c : α} : ∀ (u T : List α), c ∉ u →
+    subst [x, c] [c] (u ++ T) = u ++ subst [x, c] [c] T := by
+  intro u
+  induction u with
+  | nil => intro T _; rfl
+  | cons d u' ih =>
+      intro T h
+      have hd : d ≠ c := fun he => h (by rw [he]; exact List.mem_cons_self)
+      rw [List.cons_append,
+        subst_cons_none [x, c] [c] d (u' ++ T) (matchHere_one_ne c d (u' ++ T) hd),
+        List.cons_append, ih T (fun hm => h (List.mem_cons_of_mem _ hm))]
+
+/-- The pass escapes exactly its own bare unit. -/
+theorem subst_pass_escape {x c : α} (T : List α) :
+    subst [x, c] [c] ([c] ++ T) = [x, c] ++ subst [x, c] [c] T := by
+  show subst [x, c] [c] (c :: T) = [x, c] ++ subst [x, c] [c] T
+  rw [subst_cons_match [x, c] [c] (by simp) c T T (matchHere_one_self c T)]
+
+theorem encUnit_stable {x c d : α} (hdc : d ≠ c) (l : List α) :
+    encUnit x (c :: l) d = encUnit x l d := by
+  by_cases hdx : d = x
+  · subst hdx; simp [encUnit]
+  · by_cases hdl : d ∈ l
+    · simp [encUnit, hdx, hdl]
+    · simp [encUnit, hdx, hdl, hdc]
+
+/-- Inserting the (never processed) `x` into the processed list changes no
+unit: `x` is escaped by the doubling pass, not by a `[xc/c]` pass. -/
+theorem encUnit_cons_x (x : α) (u w : List α) (d : α) :
+    encUnit x (u ++ [x] ++ w) d = encUnit x (u ++ w) d := by
+  by_cases hdx : d = x
+  · subst hdx; simp [encUnit]
+  · simp [encUnit, List.mem_append, hdx]
+
+/-- One encoding pass on a unit text: `[xc/c]` escapes the bare units `c`
+and leaves every other unit untouched. -/
+theorem subst_pass_units {x c : α} (hcx : c ≠ x) : ∀ (l S : List α), c ∉ l →
+    subst [x, c] [c] ((S.map (encUnit x l)).flatten) =
+      (S.map (encUnit x (c :: l))).flatten := by
+  intro l S hcl
+  induction S with
+  | nil =>
+      simp only [List.map_nil, List.flatten_nil]
+      exact subst_nil _ _
+  | cons d S' ih =>
+      rw [List.map_cons, List.map_cons, List.flatten_cons, List.flatten_cons]
+      by_cases hdc : d = c
+      · rw [hdc]
+        have hu : encUnit x l c = [c] := by simp [encUnit, hcx, hcl]
+        have hu' : encUnit x (c :: l) c = [x, c] := by simp [encUnit]
+        rw [hu, subst_pass_escape, ih, hu']
+      · have hcu : c ∉ encUnit x l d := by
+          by_cases hP : d = x ∨ d ∈ l
+          · have hu : encUnit x l d = [x, d] := ite_eq_left hP
+            rw [hu]
+            intro hc
+            simp only [List.mem_cons, List.not_mem_nil, or_false] at hc
+            rcases hc with hc | hc
+            · exact absurd hc hcx
+            · exact absurd hc.symm hdc
+          · have hu : encUnit x l d = [d] := ite_eq_right hP
+            rw [hu]
+            intro hc
+            simp only [List.mem_cons, List.not_mem_nil, or_false] at hc
+            exact absurd hc.symm hdc
+        have hu : encUnit x (c :: l) d = encUnit x l d := encUnit_stable hdc l
+        rw [subst_pass_unit (encUnit x l d) ((S'.map (encUnit x l)).flatten) hcu, ih, hu]
+
+/-- The encoding passes of the comma code: `[xx/x]` first, then `[xc/c]`
+for each `c ∈ σ` with `c ≠ x` (in σ's order; the order is immaterial). -/
+def enc2Go (x : α) : List α → List α → List α
+  | [], T => T
+  | c :: σ, T => if c = x then enc2Go x σ T else enc2Go x σ (subst [x, c] [c] T)
+
+/-- The comma code as the pass composition of the paper. -/
+def enc2Pass (x : α) (σ S : List α) : List α := enc2Go x σ (subst [x, x] [x] S)
+
+theorem enc2Go_units (x : α) : ∀ (σ l S : List α), σ.Pairwise (· ≠ ·) →
+    (∀ d ∈ l, ∀ e ∈ σ, d ≠ e) →
+    enc2Go x σ ((S.map (encUnit x l)).flatten) =
+      (S.map (encUnit x (σ.reverse ++ l))).flatten := by
+  intro σ
+  induction σ with
+  | nil => intro l S _ _; rfl
+  | cons c σ' ih =>
+      intro l S hnd hdis
+      rw [List.pairwise_cons] at hnd
+      by_cases hcx : c = x
+      · simp only [enc2Go]
+        rw [ite_eq_left hcx,
+          ih l S hnd.2 (fun d hd e he => hdis d hd e (List.mem_cons_of_mem _ he)),
+          hcx, List.reverse_cons, List.append_assoc]
+        have hmap : S.map (encUnit x (σ'.reverse ++ l))
+            = S.map (encUnit x (σ'.reverse ++ [x] ++ l)) := by
+          refine List.map_congr_left fun d _ => ?_
+          exact (encUnit_cons_x x σ'.reverse l d).symm
+        rw [hmap]
+      · have hcl : c ∉ l := fun hc => absurd rfl (hdis c hc c List.mem_cons_self)
+        have hdis' : ∀ d ∈ c :: l, ∀ e ∈ σ', d ≠ e := by
+          intro d hd e he
+          rcases List.mem_cons.mp hd with hd | hd
+          · subst hd; exact hnd.1 e he
+          · exact hdis d hd e (List.mem_cons_of_mem _ he)
+        have happ : σ'.reverse ++ c :: l = (c :: σ').reverse ++ l := by
+          rw [List.reverse_cons, List.append_assoc, List.cons_append, List.nil_append]
+        simp only [enc2Go]
+        rw [ite_eq_right hcx, subst_pass_units hcx l S hcl,
+          ih (c :: l) S hnd.2 hdis', happ]
+
+/-- The pass composition of the paper computes the block map: the comma code
+is an expression of the baseline calculus (Lemma (Comma Code) (i), first
+half). -/
+theorem enc2Pass_eq (x : α) (σ : List α) (hnd : σ.Pairwise (· ≠ ·)) (S : List α)
+    (hS : ∀ c ∈ S, c ∈ σ) : enc2Pass x σ S = enc2 x S := by
+  rw [enc2Pass, subst_double_pass, enc2Go_units x σ [] S hnd (by simp), List.append_nil]
+  have hunit : ∀ d ∈ S, encUnit x σ.reverse d = [x, d] := by
+    intro d hd
+    by_cases hdx : d = x
+    · subst hdx; simp [encUnit]
+    · simp [encUnit, hdx, List.mem_reverse.mpr (hS d hd)]
+  have hmap : S.map (encUnit x σ.reverse) = S.map (fun c => [x, c]) :=
+    List.map_congr_left hunit
+  rw [enc2]
+  exact congrArg List.flatten hmap
+
+/-- A decoding unit: the intact block `x·d`, or the bare character `d` once
+its block has been collapsed.  The guard `d ≠ x` reflects that `x` is never
+processed by these passes (`xx`-blocks are handled by the final halving
+pass), and makes the definition insensitive to `x` in the processed list. -/
+def decUnit (x : α) (l : List α) (d : α) : List α :=
+  if d ≠ x ∧ d ∈ l then [d] else [x, d]
+
+theorem decUnit_stable {x c d : α} (hdc : d ≠ c) (l : List α) :
+    decUnit x (c :: l) d = decUnit x l d := by
+  by_cases hdx : d = x
+  · subst hdx; simp [decUnit]
+  · by_cases hdl : d ∈ l
+    · simp [decUnit, hdx, hdl]
+    · simp [decUnit, hdx, hdl, hdc]
+
+theorem decUnit_cons_x (x : α) (u w : List α) (d : α) :
+    decUnit x (u ++ [x] ++ w) d = decUnit x (u ++ w) d := by
+  by_cases hdx : d = x
+  · subst hdx; simp [decUnit]
+  · simp [decUnit, List.mem_append, hdx]
+
+theorem decUnit_collapse {x c : α} (hcx : c ≠ x) (l : List α) :
+    decUnit x (c :: l) c = [c] := by
+  simp [decUnit, hcx]
+
+/-- In a unit text, no single-character pattern of a not-yet-processed `c`
+starts at the head: the flattened units begin with a comma `x` or with an
+already-processed character. -/
+theorem dec_head_none {x c : α} (hcx : c ≠ x) (l : List α) (hcl : c ∉ l) :
+    ∀ Z : List α, matchHere [c] ((Z.map (decUnit x l)).flatten) = none := by
+  intro Z
+  induction Z with
+  | nil => rfl
+  | cons d Z' ih =>
+      rw [List.map_cons, List.flatten_cons]
+      by_cases h : d ≠ x ∧ d ∈ l
+      · have hdc : d ≠ c := fun he => hcl (he ▸ h.2)
+        have hu : decUnit x l d = [d] := ite_eq_left h
+        rw [hu, List.cons_append, matchHere_one_ne c d _ hdc]
+      · have hu : decUnit x l d = [x, d] := ite_eq_right h
+        rw [hu, List.cons_append, List.cons_append,
+          matchHere_one_ne c x _ (Ne.symm hcx)]
+
+/-- One decoding pass on a unit text: `[c/xc]` collapses the intact blocks
+`x·c` and leaves every other unit untouched.  (The potential straddle at
+the data `x` of an `xx`-block dies by `dec_head_none`.) -/
+theorem subst_collapse_units {x c : α} (hcx : c ≠ x) : ∀ (l Z : List α), c ∉ l →
+    (∀ e ∈ l, e ≠ x) →
+    subst [c] [x, c] ((Z.map (decUnit x l)).flatten) =
+      (Z.map (decUnit x (c :: l))).flatten := by
+  intro l Z hcl hlx
+  induction Z with
+  | nil =>
+      simp only [List.map_nil, List.flatten_nil]
+      exact subst_nil _ _
+  | cons d Z' ih =>
+      rw [List.map_cons, List.map_cons, List.flatten_cons, List.flatten_cons]
+      by_cases hdc : d = c
+      · rw [hdc]
+        have hu : decUnit x l c = [x, c] := by simp [decUnit, hcl]
+        rw [hu]
+        show subst [c] [x, c] (x :: c :: (Z'.map (decUnit x l)).flatten) = _
+        rw [subst_cons_match [c] [x, c] (by simp) x
+            (c :: (Z'.map (decUnit x l)).flatten) ((Z'.map (decUnit x l)).flatten)
+            (matchHere_two_self x c ((Z'.map (decUnit x l)).flatten)),
+          ih, decUnit_collapse hcx l]
+      · by_cases hdx : d = x
+        · rw [hdx]
+          have hu : decUnit x l x = [x, x] := by simp [decUnit]
+          have hu' : decUnit x (c :: l) x = [x, x] := by simp [decUnit]
+          rw [hu, hu']
+          show subst [c] [x, c] (x :: x :: (Z'.map (decUnit x l)).flatten) = _
+          rw [subst_cons_none [c] [x, c] x (x :: (Z'.map (decUnit x l)).flatten)
+              (matchHere_two_head x c (x :: (Z'.map (decUnit x l)).flatten)
+                (matchHere_one_ne c x _ (Ne.symm hcx))),
+            subst_cons_none [c] [x, c] x ((Z'.map (decUnit x l)).flatten)
+              (matchHere_two_head x c ((Z'.map (decUnit x l)).flatten)
+                (dec_head_none hcx l hcl Z')),
+            ih]
+          rfl
+        · by_cases hdl : d ∈ l
+          · have hbar : decUnit x l d = [d] := by simp [decUnit, hdx, hdl]
+            have hu' : decUnit x (c :: l) d = [d] := by
+              rw [decUnit_stable hdc l, hbar]
+            rw [hbar, hu']
+            show subst [c] [x, c] (d :: (Z'.map (decUnit x l)).flatten) = _
+            rw [subst_cons_none [c] [x, c] d ((Z'.map (decUnit x l)).flatten)
+                (matchHere_two_ne x c d _ hdx), ih]
+            rfl
+          · have hint : decUnit x l d = [x, d] := by simp [decUnit, hdx, hdl]
+            have hu' : decUnit x (c :: l) d = [x, d] := by
+              rw [decUnit_stable hdc l, hint]
+            rw [hint, hu']
+            show subst [c] [x, c] (x :: d :: (Z'.map (decUnit x l)).flatten) = _
+            rw [subst_cons_none [c] [x, c] x (d :: (Z'.map (decUnit x l)).flatten)
+                (matchHere_two_head x c (d :: (Z'.map (decUnit x l)).flatten)
+                  (matchHere_one_ne c d _ hdc)),
+              subst_cons_none [c] [x, c] d ((Z'.map (decUnit x l)).flatten)
+                (matchHere_two_ne x c d _ hdx), ih]
+            rfl
+
+/-- The decoding passes of the comma code: `[c/xc]` for each `c ∈ σ` with
+`c ≠ x`, with `[x/xx]` last (the order among the `c`'s is immaterial). -/
+def dec2Passes (x : α) : List α → List α → List α
+  | [], T => T
+  | c :: σ, T => if c = x then dec2Passes x σ T else dec2Passes x σ (subst [c] [x, c] T)
+
+/-- `dec2` as the pass composition of the paper. -/
+def dec2Pass (x : α) (σ S : List α) : List α := subst [x] [x, x] (dec2Passes x σ S)
+
+theorem dec2Passes_units (x : α) : ∀ (σ l Z : List α), σ.Pairwise (· ≠ ·) →
+    (∀ e ∈ l, e ≠ x) → (∀ d ∈ l, ∀ e ∈ σ, d ≠ e) →
+    dec2Passes x σ ((Z.map (decUnit x l)).flatten) =
+      (Z.map (decUnit x (σ.reverse ++ l))).flatten := by
+  intro σ
+  induction σ with
+  | nil => intro l Z _ _ _; rfl
+  | cons c σ' ih =>
+      intro l Z hnd hlx hdis
+      rw [List.pairwise_cons] at hnd
+      by_cases hcx : c = x
+      · simp only [dec2Passes]
+        rw [ite_eq_left hcx,
+          ih l Z hnd.2 hlx (fun d hd e he => hdis d hd e (List.mem_cons_of_mem _ he)),
+          hcx, List.reverse_cons, List.append_assoc]
+        have hmap : Z.map (decUnit x (σ'.reverse ++ l))
+            = Z.map (decUnit x (σ'.reverse ++ [x] ++ l)) := by
+          refine List.map_congr_left fun d _ => ?_
+          exact (decUnit_cons_x x σ'.reverse l d).symm
+        rw [hmap]
+      · have hcl : c ∉ l := fun hc => absurd rfl (hdis c hc c List.mem_cons_self)
+        have hlx' : ∀ e ∈ c :: l, e ≠ x := by
+          intro e he
+          rcases List.mem_cons.mp he with he | he
+          · subst he; exact hcx
+          · exact hlx e he
+        have hdis' : ∀ d ∈ c :: l, ∀ e ∈ σ', d ≠ e := by
+          intro d hd e he
+          rcases List.mem_cons.mp hd with hd | hd
+          · subst hd; exact hnd.1 e he
+          · exact hdis d hd e (List.mem_cons_of_mem _ he)
+        have happ : σ'.reverse ++ c :: l = (c :: σ').reverse ++ l := by
+          rw [List.reverse_cons, List.append_assoc, List.cons_append, List.nil_append]
+        simp only [dec2Passes]
+        rw [ite_eq_right hcx, subst_collapse_units hcx l Z hcl hlx,
+          ih (c :: l) Z hnd.2 hlx' hdis', happ]
+
+/-- The final halving pass `[x/xx]` on `Z` with every `x` doubled. -/
+theorem subst_halve (x : α) : ∀ Z : List α,
+    subst [x] [x, x] ((Z.map (fun d => if d = x then [x, x] else [d])).flatten) = Z := by
+  intro Z
+  induction Z with
+  | nil =>
+      simp only [List.map_nil, List.flatten_nil]
+      exact subst_nil _ _
+  | cons d Z' ih =>
+      rw [List.map_cons, List.flatten_cons]
+      by_cases hdx : d = x
+      · have hu : (if d = x then [x, x] else [d]) = [x, x] := ite_eq_left hdx
+        rw [hu]
+        show subst [x] [x, x] (x :: x :: (Z'.map (fun d => if d = x then [x, x] else [d])).flatten) = _
+        rw [subst_cons_match [x] [x, x] (by simp) x
+            (x :: (Z'.map (fun d => if d = x then [x, x] else [d])).flatten)
+            ((Z'.map (fun d => if d = x then [x, x] else [d])).flatten)
+            (matchHere_two_self x x ((Z'.map (fun d => if d = x then [x, x] else [d])).flatten)),
+          ih]
+        rw [hdx]
+        rfl
+      · have hu : (if d = x then [x, x] else [d]) = [d] := ite_eq_right hdx
+        rw [hu]
+        show subst [x] [x, x] (d :: (Z'.map (fun d => if d = x then [x, x] else [d])).flatten) = _
+        rw [subst_cons_none [x] [x, x] d ((Z'.map (fun d => if d = x then [x, x] else [d])).flatten)
+            (matchHere_two_ne x x d _ hdx), ih]
+
+/-- The decode round trip: `dec2` inverts `enc2` on inputs over `σ` (Lemma
+(Comma Code) (i), second half). -/
+theorem dec2Pass_enc2 (x : α) (σ : List α) (hnd : σ.Pairwise (· ≠ ·)) (Z : List α)
+    (hZ : ∀ c ∈ Z, c ∈ σ) : dec2Pass x σ (enc2 x Z) = Z := by
+  have hmap : Z.map (fun c => [x, c]) = Z.map (decUnit x []) := by
+    refine List.map_congr_left fun d _ => ?_
+    simp [decUnit]
+  have hstart : enc2 x Z = (Z.map (decUnit x [])).flatten :=
+    congrArg List.flatten hmap
+  rw [dec2Pass, hstart, dec2Passes_units x σ [] Z hnd (by simp) (by simp), List.append_nil]
+  have hfinal : Z.map (decUnit x σ.reverse)
+      = Z.map (fun d => if d = x then [x, x] else [d]) := by
+    refine List.map_congr_left fun d hd => ?_
+    by_cases hdx : d = x
+    · subst hdx; simp [decUnit]
+    · have hmem : d ∈ σ.reverse := List.mem_reverse.mpr (hZ d hd)
+      simp [decUnit, hdx, hmem]
+  rw [hfinal, subst_halve]
+
+/-- Theorem (Multiple Substitution), construction: the same
+rename/repair architecture as `repC`, over the comma code. -/
+def renameRepair2 (b x : α) (σ : List α) :
+    Nat → List (List α × List α) → List α → List α
+  | _, [], T => T
+  | i, (Xi, _) :: ps, T =>
+      renameRepair2 b x σ (i + 1) ps
+        (subst (enc2Pass x σ Xi ++ [b]) (marker x b (i + 2))
+          (subst (marker x b (i + 1)) (enc2Pass x σ Xi) T))
+
+/-- Theorem (Multiple Substitution), construction:
+instantiation passes, `i = n..1`. -/
+def instantiate2 (b x : α) (σ : List α) :
+    Nat → List (List α × List α) → List α → List α
+  | _, [], T => T
+  | i, (_, Yi) :: ps, T =>
+      instantiate2 b x σ (i - 1) ps (subst (enc2Pass x σ Yi) (marker x b (i + 1)) T)
+
+/-- Theorem (Multiple Substitution): the construction of the
+paper -- `dec2` then instantiation then rename/repair then `enc2`, all as
+`subst` passes over the alphabet. -/
+def repC2 (b x : α) (σ : List α) (pairs : List (List α × List α)) (S : List α) : List α :=
+  dec2Pass x σ (instantiate2 b x σ pairs.length pairs.reverse
+    (renameRepair2 b x σ 1 pairs (enc2Pass x σ S)))
+
+/-- Theorem (Multiple Substitution): the comma-code construction
+computes the freezing semantics for ARBITRARY nonempty patterns -- no
+hypothesis (H).  The patterns, replacements, and `S` must be over `σ` (the
+paper works over a fixed finite alphabet throughout).  This subsumes the
+paper's original Theorem (rep_n), whose construction genuinely needs (H).
+
+The proof is the phase-locking argument: in a normal text (a concatenation
+of `enc2`-fragments and markers) every misaligned occurrence of `enc2(X_i)`
+is shadowed by an aligned occurrence starting one position earlier (the
+all-`x` patterns), and every aligned-but-spurious occurrence runs into a
+marker and is exactly repaired by the following pass (the patterns ending
+in `b`).  Roadmap: (1) the code layer -- `enc2Pass_eq`, `dec2Pass_enc2` --
+is PROVEN above; (2) the normal-form invariant through rename and repair
+(fragments + markers, `b`-runs ≤ 1); (3) the occurrence classification
+(α)/(β)/(γ) with (β) shadowed; (4) repair exactness; (5) instantiation by
+whole markers. -/
+theorem repC2_correct (b x : α) (hxb : x ≠ b) (σ : List α) (hnd : σ.Pairwise (· ≠ ·))
+    (pairs : List (List α × List α)) (hne : ∀ p ∈ pairs, p.1 ≠ [])
+    (S : List α) (hS : ∀ c ∈ S, c ∈ σ)
+    (hp : ∀ p ∈ pairs, ∀ c ∈ p.1 ++ p.2, c ∈ σ) :
+    repC2 b x σ pairs S = repRef pairs S := sorry
+
+#eval repC2 'a' 'c' ['a', 'b', 'c'] [(['a'], ['b', 'a'])] ['a', 'b', 'a']  -- [b, a, b, b, a]
+#eval repC2 'a' 'c' ['a', 'b', 'c'] [(['a', 'b'], ['c']), (['b', 'a'], ['a', 'a'])] ['a', 'b', 'a']  -- [c, a]
+
+-- The paper's shadowing instance, where `repC` (the enc-based construction)
+-- fails: `X₁ = "ab"` and `X₂ = "bbb"` both end with `x = 'b'` -- hypothesis
+-- (H) violated -- yet the comma code computes the freezing semantics.
+#eval repC2 'a' 'b' ['a', 'b'] [("ab".toList, "bbba".toList), ("bbb".toList, "aa".toList)] "abaab".toList
+#eval repRef [("ab".toList, "bbba".toList), ("bbb".toList, "aa".toList)] "abaab".toList
+-- [b, b, b, a, a, b, b, b, a] both times (`repC` returns [b, b, b, a, a, a, b])
+
+-- Regression sweep: repC2 against the freezing semantics, now with
+-- (H)-violating patterns included (b = 'a', x = 'c'; `ac` and `cc` end with
+-- `x = 'c'`); all strings, patterns, and replacements over σ = {a, b, c}.
+-- (The full domain -- all strings ≤ 8 over σ -- was verified against the
+-- independent Python model: 984,100 evaluations, 0 failures.)
+#eval Id.run do
+  let mut allOk := true
+  let strs : List (List Char) :=
+    ["", "a", "b", "c", "ab", "ba", "ca", "bc", "abc", "aab", "bcc", "abaab"].map String.toList
+  let pats : List (List Char) :=
+    ["a", "b", "c", "ab", "ba", "aa", "bb", "cab", "ac", "cc"].map String.toList
+  for S in strs do
+    for X1 in pats do
+      for X2 in pats do
+        let pairs := [(X1, ['a', 'b']), (X2, ['b'])]
+        if repC2 'a' 'c' ['a', 'b', 'c'] pairs S != repRef pairs S then
           allOk := false
   return allOk
 -- true

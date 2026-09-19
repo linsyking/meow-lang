@@ -31,6 +31,11 @@ Notation `X ⊴ Y`: every function reachable in calculus X is reachable in calcu
    artifact of its escaping scheme, not an intrinsic boundary. The paper's own
    shadowing counterexample instance *is* computable by an explicit 10-pass
    (minimizable to 8) constant pipeline. *(multi.md §4)*
+   **PROMOTED (2026-09-19):** this is now the paper's Theorem (Multiple
+   Substitution) — the old (H)-restricted Theorem 2.9 was removed and replaced
+   by the comma-code version (full phase-locking proof); the enc-based variant
+   survives only as Remark rem:comma (its shadowing failure + the open
+   characterization question), and the escape theorem lost hypothesis (H2).
 2. **Escape hypothesis (H2) is droppable (PROVEN).** The paper's Remark (escape-hyp)
    asked whether `x ∉ V` can be dropped; answer: yes, the round trip needs only (H1)
    (fixed point enumerated first). Verified on 133 escaping functions. *(multi.md)*
@@ -127,8 +132,8 @@ match the comments.
 
 | Paper's open question | Status |
 |---|---|
-| Exact characterization of sound pattern families for rep_n (Remark rep-hyp) | **Resolved**: no restriction needed — comma code gives multi ≡ L; the paper's *construction* genuinely needs (H) (2,937/9,604 n=2 families disagree without it) |
-| Can (H2) (`x ∉ V`) be dropped from the escape round trip? (Remark escape-hyp) | **Resolved**: yes, PROVEN (only (H1) needed) |
+| Exact characterization of sound pattern families for rep_n (Remark rep-hyp) | **Resolved and promoted**: no restriction needed — comma code gives multi ≡ L, now the paper's Theorem (Multiple Substitution); the enc-based construction genuinely needs (H) (2,937/9,604 n=2 families disagree without it) and is now a remark with the characterization question |
+| Can (H2) (`x ∉ V`) be dropped from the escape round trip? (Remark escape-hyp) | **Resolved and promoted**: yes, PROVEN (only (H1) needed); (H2) removed from the theorem |
 | Is string reversal reachable? | Still open — but now the proven hinge of the whole direction web (`rev ∈ L ⟺ rev ∈ r2l ⟺ rev ∈ once-l ⟺ rev ∈ once-r`); partial: `lastchar, droplast ∈ R2L` PROVEN |
 | Alphabet-sensitivity | Partial: pos shows a strict unary dichotomy (`[a^j/a] ∈ pos` iff `|Σ| = 1`); once-l's unary case is expressible |
 | Poly-time characterization | Refined: restart is the first variant breaking it (towers); all other variants' total fragments stay poly-time |
@@ -155,7 +160,15 @@ Priority-ordered, with suggested target:
    independent reimplementation (from the report's spec only, anchored to the
    Lean `#eval` outputs) agreed with the freezing semantics on **1,254,505
    evaluations, 0 failures** — see
-   [verification-comma-code.md](verification-comma-code.md). Ready to promote.
+   [verification-comma-code.md](verification-comma-code.md).
+   **DONE (2026-09-19)**: promoted into the paper. The old (H)-restricted
+   Theorem 2.9 was *removed* and the comma-code construction is now Theorem
+   (Multiple Substitution), with Definition/Lemma (Comma Code) and the full
+   phase-locking proof; Remark rem:comma keeps the enc-variant's shadowing
+   counterexample and its open characterization question; the escape theorem
+   dropped (H2). Lean port: `enc2`/`enc2Pass`/`dec2Pass`/`repC2` added with the
+   code layer (`enc2Pass_eq`, `dec2Pass_enc2`); `repC2_correct` stated without
+   (H) — the staging proof remains open (roadmap in its docstring).
 3. **A "direction" remark/section**: r2l results — direction-robustness of the
    toolkit, mirrored rep_n hypothesis, escape direction-lock, and the
    Conjugation Theorem tying r2l = L to reversal.
