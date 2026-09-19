@@ -632,6 +632,7 @@ Now to formally define the escaping function, we need to introduce the concept o
 
 \begin{theorem}
     (\emph{Character Escaping})
+    \label{thm:escape}
 
     Suppose $f: U\rightarrow V, U=\{u_1,\cdots,u_n\}$, has a fixed point; without loss of generality $f(u_1) = u_1$ (the enumeration of the set $U$ is chosen so that the fixed point comes \emph{first}). Let $b, x \in \Sigma$ with $b\neq x$ be the characters of the substitution construction. We define:
     \begin{align}
@@ -864,6 +865,505 @@ How strong is the substitution calculus? This section gives a pipeline normal fo
         \item Is equivalence of two expressions ($\llbracket E \rrbracket = \llbracket E' \rrbracket$ as partial functions) decidable?
         \item Which functions are reachable over \emph{every} alphabet with $|\Sigma| \geq 2$? Does a larger alphabet ever add power (both the $\mathtt{enc}$- and $\mathtt{enc}^2$-constructions must enumerate $\Sigma$)?
     \end{enumerate}
+\end{remark}
+
+\section{Variants of the Primitive}
+
+Definition~\ref{def:subst} made three design choices: the scan proceeds left to right and takes the leftmost match; one pass replaces \emph{all} occurrences; and the scan never re-enters inserted text. Each choice is load-bearing, in a different way. This section varies them one at a time and measures the damage -- to the toolkit of Section~2 and to the class of reachable functions of Section~3.
+
+A \emph{variant calculus} is the grammar of Definition~\ref{def:exp} with the node $[\,R/P\,]\,E$ reinterpreted: sub-expressions still denote by Definition~\ref{def:den}, and the node applies the variant primitive to $\llbracket E \rrbracket(\vec S)$ with pattern $\llbracket P \rrbracket(\vec S)$ and replacement $\llbracket R \rrbracket(\vec S)$, undefinedness propagating as there. $V$-reachability is as in Definition~\ref{def:reachable}; we write $V \sqsubseteq W$ when every $V$-reachable function is $W$-reachable, and $L$ for the calculus of Sections~2--4. Statements below marked \emph{verified} were confirmed by exhaustive enumeration over the finite domains stated where they occur.
+
+\subsection{One Occurrence at a Time}
+
+\begin{definition}
+    (\emph{Once Substitution})
+    \label{def:once}
+    For $B \neq \epsilon$ and $C = XBY$ with $|X|$ minimal,
+    \begin{align}
+        [\,A/B\,]_1\,C \;\triangleq\; XAY,
+    \end{align}
+    and $[\,A/B\,]_1\,C = C$ when $B \not\subset C$; $[\,A/\epsilon\,]_1$ is undefined. A once-pass makes one splice: it replaces the leftmost occurrence, and only it.
+\end{definition}
+
+What dies is everything simultaneous: $[\,xb/b\,]_1$ escapes only the first $b$, so $\mathtt{enc}$, $\mathtt{dec}$, $\mathtt{rep}_n$ and the escape round trip all fail as written. What survives is everything single-site -- and it rebuilds more simply than in $L$, because ``replace only the leftmost'' is a built-in form of marker protection.
+
+\begin{lemma}
+    (\emph{Doubled Marker})
+    \label{lem:doubled}
+    Let $X \neq \epsilon$ and $\sigma \in \Sigma$. Every occurrence of $XX\sigma$ in $XXX$ has $\sigma = X[0]$, and the leftmost one is at position $0$.
+\end{lemma}
+
+\begin{proof}
+    An occurrence at $q$ needs $q + 2|X| + 1 \leq 3|X|$, so $q \leq |X|-1$ and $X^3[q{:}q+2|X|] = X^2$; comparing the first $|X|$ characters of that occurrence with $X^3[0{:}|X|]$ gives $X^3[q{:}q+|X|] = X$, i.e.\ $X$ is a rotation of itself by $q$. Hence $X$ is a power of the word of length $p = \gcd(q, |X|)$ with $p \mid q$. Then $\sigma = X^3[q+2|X|] = X[q] = X[0]$, while $XX\,X[0]$ occurs at position $0$ and every occurrence of $X^2$ in $X^3$ other than at $0$ sits at a positive multiple of $p$.
+\end{proof}
+
+The point: $XX$ is a marker that is \emph{fresh with respect to $X$ by length} ($|XX| = 2|X| > |X|$) and nevertheless survives whole inside $XXX$. It replaces the $\mathtt{enc}$-based markers wherever a bounded-length fresh marker is needed.
+
+\begin{theorem}
+    (\emph{Once Toolkit})
+    \label{thm:once-toolkit}
+    Over any $\Sigma$ with $|\Sigma| \geq 2$, with fixed distinct characters $\top, \bot, d$ as required:
+    \begin{enumerate}[(i)]
+        \item $\mathtt{cat}(X,Y) = [\,X/a\,]_1[\,Y/b\,]_1\,(ab)$ for any two characters $a \neq b$;
+        \item $\mathtt{tail}(X) = \prod_{\sigma \in \Sigma} [\,\epsilon/XX\sigma\,]_1\,(XXX)$, the factors in any order (at most one can fire);
+        \item $\mathtt{head}(X) = [\,\epsilon/\,\mathtt{tail}(X)\cdot X\cdot d\,]_1\,(X\cdot X\cdot d)$, for any character $d$;
+        \item $\mathtt{eq}(X,Y) = [\,\top/\,\mathtt{eqind}(X,Y)\,]_1\,(\bot)$, where
+        \begin{align}
+            \mathtt{eqind}(X,Y) \;\triangleq\; [\,\bot/X\cdot YY\cdot\bot d\,]_1\,(Y\cdot YY\cdot\bot d);
+        \end{align}
+        \item $\mathtt{if}(C,X,Y) = [\,Y/\bot dXdYd\,]_1[\,X/\top dXdYd\,]_1\,(C\cdot d\cdot X\cdot d\cdot Y\cdot d)$, for $C \in \{\top,\bot\}$.
+    \end{enumerate}
+    All are once-core, so concatenation is eliminable in the once-calculus: the induction of Theorem~\ref{thm:core} transfers verbatim, using (i).
+\end{theorem}
+
+\begin{proof}
+    (i) The leftmost $b$ of $ab$ is at position $1$, giving $aY$; the leftmost $a$ of $aY$ is at position $0$ -- always the marker, whatever $Y$ contains -- giving $XY$. No $\mathtt{enc}$ is needed, in contrast to Theorem~\ref{thm:cat}. (ii) By Lemma~\ref{lem:doubled}, the factor with $\sigma = X[0]$ fires at position $0$, deleting the first $2|X|+1$ characters of $XXX$ and leaving $X[1:]$; the factors with $\sigma \neq X[0]$ are inert, and after the firing pass the string is shorter than every remaining pattern. For $X = \epsilon$ the scrutinee is $\epsilon$ and every factor is inert. (iii) Write $X = cR$. The pattern $R\cdot X\cdot d$ occurs in the scrutinee $cR\cdot cR\cdot d$ at position $1$, and deleting it leaves $c$. An occurrence at position $0$ forces, compared character by character, $X = c^k$ with $c = d$; then the pattern is $c^{2k}$ and deleting it from $c^{2k+1}$ still leaves exactly one $c$. The pattern is always nonempty (it ends in $d$), including for $X = \epsilon$, where it is $d$ and the scrutinee is $d$. (iv) If $X = Y$, pattern and scrutinee of $\mathtt{eqind}$ coincide and the whole string is the leftmost occurrence, giving $\bot$. If $X \neq Y$: no match can be whole (it would force $|X| = |Y|$ and $X\cdot YY = Y\cdot YY$), a proper match leaves $U\bot V$ with at least two characters, and when the pattern is longer than the scrutinee the pass is inert, leaving the scrutinee -- also of length at least $2$. So $\mathtt{eqind} \notin \{\epsilon, \bot\}$, and the final pass, on the fixed one-character scrutinee $\bot$, fires exactly when its pattern is $\bot$. (v) The pattern $\top dXdYd$ has exactly the length of the scrutinee, so it can occur only at position $0$, and does so iff $C = \top$; the second pass is inert on the result $X$ by length. (Verified: all inputs of length $\leq 4$ over $|\Sigma| = 2$ and $\leq 3$ over $|\Sigma| = 3$, all choices of the fixed characters.)
+\end{proof}
+
+\begin{theorem}
+    (\emph{Once Invariants})
+    \label{thm:once-invariants}
+    Let $E$ be a once-expression. For a character $c$, let $\Phi_c(E)$ be the number of $c$'s in the constant leaves of $E$ and $\nu_i(E)$ the number of occurrences of $X_i$ in $E$; let $w(E)$ be the number of variable leaves; write $\#c(T)$ for the number of $c$'s of $T$ and $\mathrm{mr}(T)$ for the longest run of a single character in $T$. Then, whenever defined:
+    \begin{enumerate}[(i)]
+        \item \emph{(fresh character)} $\#c\big(\llbracket E \rrbracket(\vec S)\big) \;\leq\; \Phi_c(E) + \sum_i \nu_i(E)\,\#c(S_i)$;
+        \item \emph{(max run)} there are constants $\alpha(E), \beta_1(E), \dots, \beta_n(E)$ with
+        $\mathrm{mr}\big(\llbracket E \rrbracket(\vec S)\big) \leq \alpha(E) + \sum_i \beta_i(E)\,\mathrm{mr}(S_i)$;
+        \item \emph{(balance)} for characters $x \neq y$ and $\Psi(T) = \#x(T) - \#y(T)$, there are $K(E), v_i(E)$ with $\big|\Psi\big(\llbracket E \rrbracket(\vec S)\big)\big| \leq K(E) + \sum_i v_i(E)\,\big|\Psi(S_i)\big|$;
+        \item \emph{(linear growth)} $\big|\llbracket E \rrbracket(\vec S)\big| \;\leq\; C_E + w(E)\cdot \max_i |S_i|$.
+    \end{enumerate}
+\end{theorem}
+
+\begin{proof}
+    One induction on $E$; the node case reduces to a computation about a single splice $T = U P_0 V \mapsto U R_0 V$ (with $P_0 \neq \epsilon$):
+    $\#c(UR_0V) = \#c(T) - \#c(P_0) + \#c(R_0) \leq \#c(T) + \#c(R_0)$;
+    a run of $UR_0V$ is contained in $U$, in $R_0$, in $V$, or straddles a splice point, contributing at most $\mathrm{mr}(U) + \mathrm{mr}(R_0) + \mathrm{mr}(V) \leq 2\,\mathrm{mr}(T) + \mathrm{mr}(R_0)$;
+    $\Psi$ is additive over concatenation and $|\Psi(U)| + |\Psi(V)| \leq |\Psi(T)| + |\Psi(P_0)|$, so $|\Psi(UR_0V)| \leq |\Psi(T)| + |\Psi(P_0)| + |\Psi(R_0)|$;
+    and $|UR_0V| \leq |T| - |P_0| + |R_0| \leq |T| + |R_0|$.
+    Substituting the induction hypotheses for $E$ and $R$ and adding the leaf budgets along the tree gives the coefficient recursions.
+\end{proof}
+
+\begin{corollary}
+    \label{cor:once-sep}
+    None of the following is once-reachable: replace-all $[\,a/b\,]$, $\mathtt{enc}$, $\mathtt{dec}$, $[\,xx/x\,]$, $S \mapsto \sigma^{|S|}$, $X \mapsto X^{|X|}$, or $\mathtt{escape}_f$ for any escaping function with $|U| \geq 2$. In particular $L \not\sqsubseteq \mathrm{ONCE}$, and the once-calculus has growth degree at most $1$ against $L$'s unbounded degree.
+\end{corollary}
+
+\begin{proof}
+    Each is killed on a one-parameter input family. $[\,a/b\,]$ maps $b^n \mapsto a^n$ with $\#a = n$ against the constant $\Phi_a(E)$, by (i); likewise $\mathtt{enc}$ on $b^n$ with $\#x = n$. $\mathtt{dec}$ maps $(xb)^n \mapsto b^n$ with $\mathrm{mr} = n$ against input runs of length $1$, by (ii). $[\,xx/x\,]$ maps $(xy)^n \mapsto (xxy)^n$ with $|\Psi| = n$ against $\Psi = 0$, by (iii). $S \mapsto \sigma^{|S|}$ has $\#\sigma = |S|$ on $\sigma$-free inputs, by (i). $X \mapsto X^{|X|}$ is quadratic against (iv). $\mathtt{escape}_f$ maps $u_2^n \mapsto (u_1 f(u_2))^n$ with $\#u_1 = n$ against $0$, by (i).
+\end{proof}
+
+\begin{proposition}
+    (\emph{Unary Simulation})
+    \label{prop:unary-once}
+    Restricted to the unary domain $\{b\}^*$, the function $b^n \mapsto b^{n-1}$ -- delete one $b$ -- is $L$-reachable.
+\end{proposition}
+
+\begin{proof}
+    Let $H \triangleq [\,b/a\,][\,\epsilon/b\,][\,a/bb\,]$ (read right-to-left, as always): on $b^n$ the first pass gives $a^{\lfloor n/2\rfloor}b^{\,n \bmod 2}$, the second deletes the residue, the third restores, so $H(b^n) = b^{\lfloor n/2\rfloor}$ -- floor-halving. Now set
+    \begin{align}
+        D(X) \;\triangleq\; [\,H(X)/H(X)\,b\,]\,X .
+    \end{align}
+    On $X = b^n$ the pattern $H(X)\,b = b^{\lfloor n/2\rfloor+1}$ is longer than half the scrutinee, so two disjoint occurrences are impossible and the greedy scan finds at most one, necessarily at position $0$; replacing it by $H(X)$ leaves $b^{n-1}$. For $n = 0$ the pattern is $b$ and the scrutinee $\epsilon$: inert. (Verified for $n \leq 39$.)
+\end{proof}
+
+So any proof that the once-primitive is not $L$-reachable must use general position -- on unary, or otherwise anchored, domains, computed needles do the job; the same trick expresses $[\,A/B\,]_k$ on unary inputs for every $k$.
+
+\begin{remark}
+    \emph{The mirror and the hinge.} The rightmost variant $[\,A/B\,]_1^{\mathrm{R}}$ (replace the rightmost occurrence) is the rev-conjugate of the once-calculus, and the conjugation of Theorem~\ref{thm:conjugation} below applies verbatim. Its anchor is the unconditional Suffix Substitution lemma, $A \neq \epsilon \Rightarrow [\,C/A\,]_1^{\mathrm{R}}(BA) = B\,C$: the rightmost occurrence of $A$ in $BA$ is always the final one. This gives the two-pass \emph{zipper} $\mathtt{cat}(X,Y) = [\,Y/a\,]_1^{\mathrm{R}}[\,X/b\,]_1^{\mathrm{R}}(ba)$. Nothing provable separates the two once-calculi without settling reversal: by conjugation, $L \sqsubseteq \mathrm{ONCE}^{\mathrm{R}}$ iff $\mathrm{R} \sqsubseteq \mathrm{ONCE}$, and the pair ``delete the leftmost $b$'' / ``delete the rightmost $b$'' are mutual witnesses of one statement. Where the rightmost calculus genuinely struggles is destructuring: $\mathtt{head}$, $\mathtt{tail}$, $\mathtt{eq}$, $\mathtt{if}$ are absent from every once-rightmost expression of size $\leq 7$ and every constant-pattern pipeline of depth $\leq 4$ -- deleting a left-anchored variable-length region seems to require computing that region first, which is the very function sought (conjecturally unreachable).
+
+    The central open problem of the variant: \emph{is the once-primitive $L$-reachable at all} -- say, is ``delete the leftmost $b$'' expressible? Proposition~\ref{prop:unary-once} rules out every unary-domain invariant; all bounded searches fail (exhaustive search over constant-pattern $L$-pipelines to depth $4$ on all inputs of length $\leq 4$: no witness among $417{,}853$ distinct behaviors; randomized search over $75$ million pipelines of $4$--$7$ passes: none; the closest misses differ at exactly one position).
+\end{remark}
+
+\subsection{Positional Addressing}
+
+The positional family replaces the scan by an \emph{address}: write at index $i$, or replace the $k$-th occurrence.
+
+\begin{definition}
+    (\emph{Positional Primitives})
+    \label{def:pos}
+    \begin{enumerate}[(i)]
+        \item $\mathtt{setAt}(i, c, S) = S[{:}i]\cdot c\cdot S[i{+}1{:}]$ if $0 \leq i < |S|$, and $S$ otherwise: an out-of-range write is the identity. (As in the baseline, totality; and no length smuggling -- an extending write would let a constant index create unbounded length.)
+        \item $\mathrm{occ}(S, B)$ is the list of start positions of the greedy leftmost-first, non-overlapping occurrences of $B$ in $S$ -- exactly the scan of Definition~\ref{def:subst} stopped at each hit.
+        \item $\mathtt{repOcc}(k, B, A, S)$: with $O = \mathrm{occ}(S, B)$ (undefined for $B = \epsilon$), replace $S[O[k]{:}O[k]{+}|B|]$ by $A$ if $|O| > k$, and return $S$ otherwise. The rank counts in scan order and is re-indexed after each edit; $\mathtt{repOcc}(0, B, A)$ is the once-primitive.
+    \end{enumerate}
+    The \emph{positional calculus} $\mathrm{POS}$ has terms over variables, constants, $\mathtt{cat}$, $\mathtt{setAt}$ and $\mathtt{repOcc}$, with literal or computed patterns, replacements and characters, and indices that are either literals or the \emph{length} of a subterm's value -- length being the only number a string calculus has.
+\end{definition}
+
+\begin{proposition}
+    (\emph{Positional Toolkit})
+    \label{prop:pos-toolkit}
+    \begin{enumerate}[(i)]
+        \item $\mathtt{tail}(X) = \mathtt{repOcc}(0, c, \epsilon, \mathtt{setAt}(0, c, X))$: mark position $0$ with any character $c$, then delete the first $c$. Two literal nodes, total on every alphabet including $|\Sigma| = 1$.
+        \item $\mathtt{head}(X) = \mathtt{repOcc}\big(0, P_2, \epsilon, \mathtt{repOcc}(0, \mathtt{tail}(X\,c^3), \epsilon, X\,c^3)\big)$ with $P_2 = \mathtt{tail}(\mathtt{tail}(X\,c^3))$: total on every alphabet (the scaffold $c^3$ pads the $\epsilon$-edge, where the pattern would otherwise be empty).
+        \item consequently $\mathtt{char}_j = \mathtt{head} \circ \mathtt{tail}^j$ and $\mathtt{prefix}_j$ are positional.
+    \end{enumerate}
+\end{proposition}
+
+\begin{proof}
+    (i) After the write, position $0$ holds $c$ and is necessarily the first $c$; deleting it leaves $X[1:]$; for $X = \epsilon$ both nodes are inert. (ii) Let $V = Xc^3$, so $|V| \geq 3$. The pattern $\mathtt{tail}(V)$ occurs in $V$ at position $1$; it can occur at position $0$ only if $V$ is uniform, and then deleting $c^{k-1}$ from $c^k$ still leaves one $c$: in both cases the inner node computes $\mathtt{head}(V)$, which is $X[0]$ if $X \neq \epsilon$ and $c$ if $X = \epsilon$. The cleanup pattern $P_2$ has length $|X|+1 \geq 2 > 1$ when $X \neq \epsilon$ (inert), and is exactly $c$ when $X = \epsilon$, deleting the residue to $\epsilon$. (Verified: all strings of length $\leq 6$ over $|\Sigma| = 2$, $\leq 5$ over $|\Sigma| = 3$ and $\leq 8$ over $|\Sigma| = 1$, every choice of $c$.)
+\end{proof}
+
+\begin{theorem}
+    (\emph{Positional Invariants})
+    \label{thm:pos-invariants}
+    Let $E$ be a positional term, $c \in \Sigma$, and let $C_E(c)$ be the number of $c$'s in the constant leaves of $E$.
+    \begin{enumerate}[(i)]
+        \item \emph{(single-site alphabet bound)} on inputs whose components all avoid $c$: $\#c\big(\llbracket E \rrbracket(\vec X)\big) \leq C_E(c)$ -- in every fragment, up to computed indices.
+        \item \emph{(linear growth)} there are $V_E, K_E$ with $\big|\llbracket E \rrbracket(\vec X)\big| \leq V_E \cdot M + K_E$, where $M = \sum_i |X_i|$.
+        \item for terms with \emph{literal} patterns there is $D_E$ with $\big|\llbracket E \rrbracket(X)\big| \geq |X| - D_E$.
+    \end{enumerate}
+\end{theorem}
+
+\begin{proof}
+    Each node edits at most one contiguous site, and every subterm value is used exactly once, as a tree -- nothing is duplicated -- and an index value contributes only through its \emph{length}, which is then discarded. (i): a $\mathtt{setAt}$ writes one character; a $\mathtt{repOcc}$ deletes a nonempty block (deletion cannot add $c$'s) and inserts the replacement, whose $c$'s are budgeted by induction; $\mathtt{cat}$ adds the budgets. (ii): the site edit changes the length by at most the replacement's budget, $\mathtt{setAt}$ preserves length, $\mathtt{cat}$ adds. (iii): a literal-pattern $\mathtt{repOcc}$ deletes at most the maximal literal pattern length; $\mathtt{setAt}$ preserves length; $\mathtt{cat}$ adds the deficits.
+\end{proof}
+
+\begin{corollary}
+    \label{cor:pos-sep}
+    $L \not\sqsubseteq \mathrm{POS}$, on every alphabet and in every fragment: letter-changing replace-all $[\,b/a\,]$ and $\mathtt{enc}$ violate (i) for $|\Sigma| \geq 2$ (on $a^n$, respectively $b^n$: $\#b = n$, respectively $\#x = n$, against the constant $C_E$), and $X \mapsto X^{|X|}$ violates (ii) on every alphabet. Moreover $\mathtt{head}$, $\mathtt{truncate}_j$ and $\mathtt{dec}$ are not reachable with literal patterns, by (iii): each must delete $n - O(1)$ characters on $a^n$, respectively $(xb)^n$.
+\end{corollary}
+
+\begin{theorem}
+    (\emph{Unary Dichotomy})
+    \label{thm:unary}
+    Over $\Sigma = \{a\}$:
+    \begin{enumerate}[(i)]
+        \item every positional length function $n \mapsto \big|\llbracket E \rrbracket(a^n)\big|$ is piecewise $\mathbb{Z}$-affine with finitely many pieces; hence halving $[\,a/a^2\,]$ -- a single $L$ node -- is not positional.
+        \item for every $j \geq 2$, the term $\mathtt{repOcc}\big(0,\, a,\, \mathtt{tail}(X)\cdots\mathtt{tail}(X)\cdot a^j,\, X\big)$ with $j-1$ factors $\mathtt{tail}$ maps $a^n$ to $a^{jn}$: replace-all \emph{with growth} is positional.
+    \end{enumerate}
+    So replace-all dies in the positional calculus exactly when a second letter exists to count.
+\end{theorem}
+
+\begin{proof}
+    (i) On a unary alphabet every string is its length: $\mathrm{occ}(a^q, a^p)$ has $q-p+1$ elements; $\mathtt{repOcc}(k, a^p, a^r, a^q)$ is $a^{q-p+r}$ if $q \geq p+k$ and $a^q$ otherwise; $\mathtt{setAt}$ writes $a$ over $a$; computed indices are themselves piecewise-affine lengths. Inductively each subterm's length is piecewise $\mathbb{Z}$-affine in $n$, with at most one new breakpoint per node, where a fire-condition flips. Halving has slope $1/2$ on infinitely many points. (ii) The replacement has length $(j-1)(n-1)+j$; replacing the first $a$ leaves $(n-1) + (j-1)(n-1) + j = jn$ characters, and on unary strings content is determined by length. (Verified: $j \leq 5$, $n \leq 24$.)
+\end{proof}
+
+\begin{theorem}
+    (\emph{The Once Hinge, Positionally})
+    \label{thm:pos-hinge}
+    \begin{enumerate}[(i)]
+        \item $\mathtt{setAt}(i, c)$ is $L$-reachable:
+        \begin{align}
+            \mathtt{setAt}(i,c)(X) \;=\; \mathtt{if}\Big(\mathtt{eq}\big(\mathtt{tail}^i X, \epsilon\big),\; X,\; \mathtt{cat}\big(\mathtt{cat}(\mathtt{prefix}_i X, c), \mathtt{tail}^{i+1} X\big)\Big),
+        \end{align}
+        with $\mathtt{prefix}_i$ the $i$-fold product of heads ($i$ fixed, as the index is).
+        \item given a marker constant $M$ fresh for $B$, $A$ and the input, $\mathtt{repOcc}(k, B, A) = [\,M/B\,]_1^k\,[\,A/B\,]_1\,[\,B/M\,]_1^k$.
+        \item Hence $\mathrm{POS} \sqsubseteq L$ iff the once-primitive is $L$-reachable: (i) and (ii) simulate every positional constructor, and $\mathtt{repOcc}(0, B, A)$ \emph{is} the once-primitive.
+    \end{enumerate}
+\end{theorem}
+
+\begin{proof}
+    (i) $i \geq |X|$ iff $\mathtt{tail}^i X = \epsilon$, in which case the write is out of range and the identity applies; otherwise the $\mathtt{cat}$ reassembles $X[{:}i]\cdot c\cdot X[i{+}1{:}]$. (ii) Each factor $[\,M/B\,]_1$ replaces the current leftmost $B$ by a marker block; the blocks are never re-matched and no new $B$ can appear at or across one (disjoint alphabets, as in the Independent Substitution lemma), so $k$ factors convert the occurrences $o_0, \dots, o_{k-1}$ into marker blocks, the middle factor addresses $o_k$, and the last $k$ restore. If there are fewer than $k+1$ occurrences, the marking stops early, the middle factor is inert, and the unmarking restores everything -- the identity, matching the out-of-range clause. (iii) is then immediate. (Verified: (i) for $i \leq 3$ on all strings of length $\leq 5$, composed from the Section-2 constructions; (ii) for $k \leq 3$.)
+\end{proof}
+
+Equality testing, by contrast, is conjecturally not positional in any fragment: $\mathtt{eq}$ must broadcast a global comparison into a two-character output, while every positional detection mechanism is local -- fire or not, at one site; all searches to depth $3$ over a space of $2424$ computed-index node types fail.
+
+\subsection{The Other Direction}
+\label{subsec:direction}
+
+\begin{definition}
+    (\emph{Rightmost Substitution})
+    \label{def:r2l}
+    For $B \neq \epsilon$ and $C = XBY$ with $|Y|$ \emph{minimal},
+    \begin{align}
+        [\,A/B\,]^{\mathrm{R}} C \;\triangleq\; \big([\,A/B\,]^{\mathrm{R}} X\big)\cdot A\cdot Y .
+    \end{align}
+    The scan proceeds right to left, takes the rightmost occurrence, and resumes to the left of the inserted text; $[\,A/\epsilon\,]^{\mathrm{R}}$ is undefined. Write $\mathrm{rev}(T)$ for the reversal of $T$.
+\end{definition}
+
+\begin{theorem}
+    (\emph{Rev Duality})
+    \label{thm:rev-duality}
+    For all $A$, $B \neq \epsilon$, $C$:
+    \begin{align}
+        [\,A/B\,]^{\mathrm{R}} C \;=\; \mathrm{rev}\big([\,\mathrm{rev}A/\mathrm{rev}B\,]\,(\mathrm{rev}C)\big).
+    \end{align}
+\end{theorem}
+
+\begin{proof}
+    Induction on $|C|$. Occurrences of $B$ in $C$ at position $s$ correspond bijectively to occurrences of $\mathrm{rev}B$ in $\mathrm{rev}C$ at position $|C|-|B|-s$, so the rightmost occurrence of $B$ corresponds to the leftmost of $\mathrm{rev}B$. Write $C = XBY$ with $|Y|$ minimal; then $\mathrm{rev}C = \mathrm{rev}Y\cdot\mathrm{rev}B\cdot\mathrm{rev}X$ exhibits the leftmost occurrence of $\mathrm{rev}B$, and Definition~\ref{def:subst} gives $[\,\mathrm{rev}A/\mathrm{rev}B\,](\mathrm{rev}C) = \mathrm{rev}Y\cdot\mathrm{rev}A\cdot[\,\mathrm{rev}A/\mathrm{rev}B\,](\mathrm{rev}X)$. Applying $\mathrm{rev}$ and the induction hypothesis ($|X| < |C|$) gives $([\,A/B\,]^{\mathrm{R}}X)\cdot A\cdot Y$. If $B \not\subset C$ then $\mathrm{rev}B \not\subset \mathrm{rev}C$ and both sides are $C$.
+\end{proof}
+
+\begin{theorem}
+    (\emph{Conjugation})
+    \label{thm:conjugation}
+    For an expression $E$ let $\overline{E}$ be its rev-conjugate: every constant $W$ replaced by $\mathrm{rev}W$, every node $[\,R/P\,]$ by $[\,\overline{R}/\overline{P}\,]^{\mathrm{R}}$, the children of every concatenation swapped. Then
+    \begin{align}
+        \llbracket \overline{E} \rrbracket^{\mathrm{R}}(\mathrm{rev}S_1, \dots, \mathrm{rev}S_n) \;=\; \mathrm{rev}\big(\llbracket E \rrbracket(S_1, \dots, S_n)\big),
+    \end{align}
+    both sides being undefined together. Consequently $\mathrm{rev}$ is $L$-reachable iff it is $\mathrm{R}$-reachable; and if $\mathrm{rev}$ is reachable in either calculus, then $L$ and $\mathrm{R}$ have exactly the same reachable functions.
+\end{theorem}
+
+\begin{proof}
+    Induction on $E$: the node case is Theorem~\ref{thm:rev-duality}, the concatenation case is $\mathrm{rev}(XY) = \mathrm{rev}Y\,\mathrm{rev}X$, and undefinedness is preserved because $\mathrm{rev}\,\epsilon = \epsilon$. For the consequences: if $\llbracket E \rrbracket = \mathrm{rev}$, then $\llbracket \overline{E} \rrbracket^{\mathrm{R}}(\mathrm{rev}S) = \mathrm{rev}(\mathrm{rev}S) = S$, so $\overline{E}$ defines $\mathrm{rev}$ in $\mathrm{R}$; the converse is the mirror. If $\mathrm{rev} \in L$, every $\mathrm{R}$-node is $L$-expressible by Theorem~\ref{thm:rev-duality} and closure under composition (Corollary~\ref{cor:closure}), and concatenation is eliminable in both calculi (Theorem~\ref{thm:core}; for $\mathrm{R}$, see Theorem~\ref{thm:r2l-toolkit}), so $\mathrm{R} \sqsubseteq L$; the other inclusion uses $\mathrm{rev} \in \mathrm{R}$, equivalent to the first.
+\end{proof}
+
+So the second open problem of Section~4 -- is reversal reachable? -- is direction-independent, and it decides whether $L = \mathrm{R}$.
+
+\begin{proposition}
+    (\emph{Agreement})
+    \label{prop:r2l-agree}
+    If $B$ is unbordered -- in particular if $B$ is a single character -- then $[\,A/B\,]^{\mathrm{R}} = [\,A/B\,]$.
+\end{proposition}
+
+\begin{proof}
+    Two overlapping occurrences of $B$ at distance $d < |B|$ would give $B$ a border of length $|B|-d$; unborderedness excludes this, so all occurrences in any $C$ are pairwise disjoint, and the greedy scan -- from either end -- selects and replaces all of them, resuming each time after the inserted text. Induction on $|C|$.
+\end{proof}
+
+\begin{theorem}
+    (\emph{Direction-Robust Toolkit})
+    \label{thm:r2l-toolkit}
+    The constructions of Section~2 -- $\mathtt{enc}$, $\mathtt{dec}$, $\mathtt{cat}$, $\mathtt{head}$, $\mathtt{tail}$, $\mathtt{eq}$, $\mathtt{if}$ -- compute the same functions under rightmost-first semantics. In particular $\mathtt{enc}^{\mathrm{R}} = \mathtt{enc}$ exactly, and concatenation is eliminable in the right-to-left calculus.
+\end{theorem}
+
+\begin{proof}
+    Every pass occurring in these constructions is direction-robust in one of three ways: (a) its pattern is a single character (Proposition~\ref{prop:r2l-agree}) -- this covers $\mathtt{enc}$'s pattern $b$, the $[\,\mathtt{enc}(X)/\top\,]$ pass of $\mathtt{if}$, and $[\,\sigma/\Sigma\,]$-style products; (b) its pattern is a fixed unbordered constant, of the form $xb^k$ with $x \neq b$ -- covering $\mathtt{dec}$ and the marker passes of $\mathtt{cat}$; (c) its pattern has at most one occurrence in every string arising at that point of the pipeline -- which is exactly what the occurrence analyses of Section~2 establish for the remaining passes of $\mathtt{cat}$, $\mathtt{tail}$, $\mathtt{head}$, $\mathtt{eq}$ and $\mathtt{if}$ (e.g.\ by Border Injectivity, $b\,\mathtt{enc}(Y)$ occurs in $b\,\mathtt{enc}(X)$ iff $X = Y$, and then as the whole string). Note that the variable patterns of (c) need not be unbordered -- $b\,\mathtt{enc}(\epsilon) = xbbxbb$ is bordered -- so it is the occurrence analysis, not the pattern's shape, that carries them; and that analysis is direction-free. A direction-robust pass computes the same function under both primitives; compose pass by pass. (Verified for $|\Sigma| \leq 4$ on all inputs up to the stated lengths.)
+\end{proof}
+
+\begin{theorem}
+    (\emph{The Construction is Not Direction-Robust})
+    \label{thm:r2l-rep}
+    Read with rightmost-first passes, the construction of Theorem~\ref{lem:multiple substitution} does not compute the rightmost-freezing $\mathtt{rep}$. With $b = \sigma_1$, $x = \sigma_2$, $S = \sigma_2\sigma_1$, $X_1 = \sigma_2$, $Y_1 = \epsilon$, the rightmost-freezing semantics gives $\sigma_1$; the construction gives $\sigma_2\sigma_1$.
+\end{theorem}
+
+\begin{proof}
+    The encoded input is $\mathtt{enc}^2(\sigma_2\sigma_1) = \sigma_2\sigma_2\cdot\sigma_2\sigma_1$, and $E = \mathtt{enc}^2(\sigma_2) = \sigma_2\sigma_2$ occurs in it at position $0$ -- comma-aligned, genuine -- and at position $1$, misaligned, starting at the data character $\sigma_2$. Under leftmost-first the aligned occurrence is taken first and the misaligned one is shadowed; this is the $(\beta)$ case of the phase-locking proof, and the shadowing is a \emph{leftmost} phenomenon. Under rightmost-first the misaligned occurrence is taken first; it overlaps the genuine one, which is therefore never frozen, and the repair stage then restores the text as if nothing had happened. (Over $|\Sigma| = 2$, $n = 1$, all $|S| \leq 5$, $|X_1| \leq 2$, $|Y_1| \leq 2$, both choices of $(b,x)$: 708 disagreements in 5292 instances.)
+\end{proof}
+
+The repair is to conjugate the whole construction:
+
+\begin{theorem}
+    (\emph{Mirrored Construction})
+    \label{thm:r2l-mirror}
+    Replace every constant of the construction by its reversal -- the encoder becomes ``every $c$ \emph{followed} by its comma'', the markers become $b^{i+1}x$, the repair pass becomes $[\,b\,E'_i/b^{\,i+2}x\,]^{\mathrm{R}}$, and so on -- and run it right-to-left. It then computes the rightmost-freezing $\mathtt{rep}_n$, with no restriction on the patterns.
+\end{theorem}
+
+\begin{proof}
+    Conjugate Theorem~\ref{lem:multiple substitution} by $\mathrm{rev}$ (Theorem~\ref{thm:conjugation}): the conjugated construction computes $\mathrm{rev}\big(\mathtt{rep}_n(\mathrm{rev}S;\,\mathrm{rev}X_i, \mathrm{rev}Y_i)\big)$, and leftmost-greedy freezing of $\mathrm{rev}X_i$ in $\mathrm{rev}S$ is rightmost-greedy freezing of $X_i$ in $S$. Verified on 16{,}140 instances ($n \leq 2$, $|\Sigma| \leq 3$, both choices of $(b,x)$).
+\end{proof}
+
+\begin{theorem}
+    (\emph{Original Constants, Stronger Hypothesis})
+    \label{thm:r2l-ends}
+    If every $X_i$ ends with a character outside $\{b, x\}$ -- possible iff $|\Sigma| \geq 3$ -- then the construction of Theorem~\ref{lem:multiple substitution} with its own constants, read right-to-left, computes the rightmost-freezing $\mathtt{rep}_n$.
+\end{theorem}
+
+\begin{proof}
+    The three spurious classes of the phase-locking proof are excluded by the hypothesis: an $(\alpha)$-spurious match running into a marker needs the last data character of $E_i$ to be $b$; a $(\beta)$-match needs $X_i = x^k$; the $(\gamma)$ case needs $X_i = b$. So every $E_i$-match is genuine, and since for disjoint occurrence sets the two greedy directions select the same set, the rightmost-first scan takes exactly the rightmost-freezing set of round $i$. The repair pass is inert -- its pattern arises only at spurious junctions -- and instantiation replaces whole markers, by the Comma Code Lemma. Verified on 23{,}996 instances over $|\Sigma| = 3$.
+\end{proof}
+
+\begin{proposition}
+    (\emph{Escape is Direction-Locked})
+    \label{prop:escape-lock}
+    The pair scheme of Theorem~\ref{thm:escape} must match the scan direction. With the pre-fix pairs $u \mapsto u_1f(u)$ the round trip fails under rightmost-freezing: $U = \{b, x\}$, $f(b) = b$, $f(x) = c$, $u_1 = b$, $S = bx$ gives $\mathtt{escape}(S) = bbbc$ and the round trip returns $bbx$. With the post-fix pairs $u \mapsto f(u)u_1$ it fails under leftmost-freezing: $f(b) = b$, $f(x) = x$, $u_1 = b$, $S = xb$ gives $\mathtt{escape}(S) = xbbb$ and the round trip returns $xbb$. The matched pairings round-trip.
+\end{proposition}
+
+\begin{proof}
+    In each failing case the round-$1$ pattern has an occurrence straddling two pairs that \emph{starts later} than the genuine one; the unmatched direction takes the straddler first, freezing positions that block the genuine pair. The matched pairings are Theorem~\ref{thm:escape} and its rev-conjugate.
+\end{proof}
+
+\begin{theorem}
+    (\emph{Constant Fragments are Incomparable})
+    \label{thm:subsequential}
+    Every constant-pattern core $L$-pipeline over one variable is left-subsequential: computed by a deterministic finite-state transducer reading left to right and emitting as it goes, with a final output. The single pass $[\,b/aa\,]^{\mathrm{R}}$ is not left-subsequential. Hence $[\,b/aa\,]^{\mathrm{R}} \in \mathrm{R}\text{-core-const} \setminus L\text{-core-const}$ and, by mirror, $[\,b/aa\,] \in L\text{-core-const} \setminus \mathrm{R}\text{-core-const}$.
+\end{theorem}
+
+\begin{proof}
+    A single pass is realized by the machine whose state is the longest suffix of the text read so far that is a proper prefix of $B$; it emits the finalized part and resets on a match -- this is exactly the scan of Definition~\ref{def:subst}. The class is closed under composition: feed the first machine's online output into the second. For $[\,b/aa\,]^{\mathrm{R}}$: on $a^n$ the output is $b^{n/2}$ for even $n$ and $a\cdot b^{(n-1)/2}$ for odd $n$, so the first output character depends on the parity of an unbounded run. A deterministic streaming machine on $a^{\infty}$ either never emits -- its total output is then a bounded final output, contradicting the unbounded lengths -- or makes its first emission at some fixed step $k$ with fixed content; but then on $a^m$ and $a^{m+1}$ with $m \geq k$ the first emission is the same character, while the two outputs begin with different characters.
+\end{proof}
+
+Nothing about the direction breaks the complexity theory: the length bound of Lemma~\ref{lem:length} holds with the same degree (the greedy matches are disjoint either way), single passes run in linear time, and the polynomial-time soundness of Theorem~\ref{thm:fp} transfers verbatim. Likewise $X \mapsto X^{|X|}$ is $\mathrm{R}$-reachable (single-character patterns throughout) and $X \mapsto X^{2^{|X|}}$ is not. What \emph{is} direction-sensitive is the fine structure: the multiple-substitution construction needs its constants mirrored, the escape scheme needs its pairs on the correct side, and the constant fragments are provably incomparable.
+
+\subsection{Re-entering Inserted Text}
+
+\begin{definition}
+    (\emph{Unsafe Substitution})
+    \label{def:rescan}
+    For $B \neq \epsilon$, $[\,A/B\,]^{\mathrm{u}} C$ is the process maintaining a frozen prefix $O$ and a work string $T$, initialized $\epsilon$ and $C$: while $B \subset T$, freeze $T[{:}q]$ into $O$ -- where $q$ is the leftmost occurrence of $B$ in $T$ -- and set $T := A\cdot T[q{+}|B|{:}]$. The value is $O\cdot T$. This is Definition~\ref{def:subst} with the single clause ``the scanning never restarts inside inserted text'' \emph{deleted}: the scan re-enters $A$ at its first character. The process may diverge.
+\end{definition}
+
+\begin{theorem}
+    (\emph{Totality})
+    \label{thm:rescan-total}
+    \begin{enumerate}[(i)]
+        \item $[\,A/B\,]^{\mathrm{u}}$ is total iff $B \not\subset A$; its divergence domain is exactly $\{C : B \subset A \wedge B \subset C\}$.
+        \item When $B \not\subset A$, the number of matches is at most $|C|-|B|+1$, and $\big|[\,A/B\,]^{\mathrm{u}}C\big| \leq |C|\,(1+|A|)$.
+    \end{enumerate}
+\end{theorem}
+
+\begin{proof}
+    If $B \subset A$ and $B \subset C$, every subsequent work string begins with $A \supseteq B$ and the loop never exits. If $B \not\subset A$: for $k \geq 1$ the work string $T_k$ begins with $A$, and a match at $q_k$ with $q_k + |B| \leq |A|$ would exhibit an occurrence of $B$ inside $A$ -- excluded; so $|T_{k+1}| = |A| + |T_k| - q_k - |B| \leq |T_k| - 1$, while $|T_k| \geq |A|$ always. After the first match there is room for at most $|T_1| - |A| \leq |C| - |B|$ further steps, giving the match bound; the net length change per match is $|A|-|B|$, giving the length bound.
+\end{proof}
+
+\begin{theorem}
+    (\emph{Exact Agreement})
+    \label{thm:rescan-agree}
+    $[\,A/B\,]^{\mathrm{u}} = [\,A/B\,]$, as functions of $C$, if and only if $B \not\subset A$ and no nonempty suffix of $A$ -- $A$ itself included -- is a proper prefix of $B$.
+\end{theorem}
+
+\begin{proof}
+    ($\Leftarrow$) Under the two conditions no occurrence of $B$ can start inside an inserted copy of $A$: one lying entirely inside gives $B \subset A$; one starting at the copy's first character and extending past it makes $A$ a proper prefix of $B$; one straddling the copy's end makes a nonempty suffix of $A$ a proper prefix of $B$. So after every insertion the first possible match start is exactly where the safe scan resumes, and induction over match events shows the two processes freeze identical prefixes. ($\Rightarrow$) If $B \subset A$, take $C = B$: the work string begins with $A \supsetneq B$ forever. Otherwise let $i$ be minimal with $A[i{:}]$ a proper prefix of $B$, and put $\beta = B[|A|-i{:}]$, $C = B\cdot\beta$. The safe pass gives $A\cdot\beta$, the residue $\beta$ being shorter than $B$. The unsafe pass gives the work string $T_1 = A\cdot\beta$, whose leftmost $B$ sits at position $i$ -- none earlier, by $B \not\subset A$ and the minimality of $i$ -- consuming exactly $A[i{:}]\cdot\beta = B$ and leaving $T_2 = A[{:}i]\cdot A$, which is $B$-free: an occurrence straddling the splice would make some $A[j{:}]$ with $j < i$ a proper prefix of $B$, and one inside a copy is excluded. If $A[{:}i]\cdot A \neq A\cdot\beta$, the values differ. If they are equal, then $|\beta| = i$ and $\beta$ is the last $i$ characters of $A$, and comparing the middles forces $A$ to have period $i$; then $B = A[i{:}]\cdot\beta = A$, contradicting $B \not\subset A$. (Verified as a biconditional: all $A, B, C$ with $|A| \leq 4$, $|B| \leq 3$, $|C| \leq 6$ over $|\Sigma| = 2$, and smaller domains over $|\Sigma| = 3$.)
+\end{proof}
+
+\begin{corollary}
+    (\emph{The Encoder is the Load-Bearing Violation})
+    \label{cor:rescan-collapse}
+    The encoder $\mathtt{enc} = [\,xb/b\,]$ has $B = b \subset xb = A$: under the unsafe primitive it diverges on every $b$-containing input, and likewise every escape pass $[\,xc/c\,]^{\mathrm{u}}$ of the comma code on every $c$-containing one. The whole of Section~2 routes through the encoder, and read with unsafe passes every one of $\mathtt{cat}$, $\mathtt{head}$, $\mathtt{tail}$, $\mathtt{eq}$, $\mathtt{if}$, $\mathtt{rep}_n$ and the escape round trip diverges or miscomputes. The syntactic totality discipline fails as well: $[\,a/a\,]^{\mathrm{u}}X_1$ satisfies $\mathrm{Safe}$ (Definition~\ref{def:safe}) and diverges on every $a$-containing input.
+\end{corollary}
+
+\begin{theorem}
+    (\emph{No Escape from Constant Passes})
+    \label{thm:no-escape}
+    Every total constant-pattern unsafe pipeline is non-injective. In particular, no per-character encoding $c \mapsto w_c$ is computed by a total constant-pattern unsafe pipeline.
+\end{theorem}
+
+\begin{proof}
+    Let the innermost pass be $[\,W_1/P_1\,]^{\mathrm{u}}$ on the scrutinee. Totality forces $P_1 \not\subset W_1$, since the input $P_1$ otherwise diverges by Theorem~\ref{thm:rescan-total}(i). But then the pass maps $P_1$ to $W_1$ -- one insertion, and $W_1$ is $P_1$-free, so the process halts -- and maps $W_1$ to $W_1$, with $P_1 \neq W_1$: two scrutinee values on which the suffix pipeline sees the same string.
+\end{proof}
+
+This is the precise content of the non-restart clause: it is exactly what makes an encoder -- a pass whose \emph{replacement contains its pattern} -- possible.
+
+\begin{proposition}
+    (\emph{What Survives})
+    \label{prop:rescan-survives}
+    \begin{enumerate}[(i)]
+        \item The total fragment keeps the complexity theory: by Theorem~\ref{thm:rescan-total}(ii) each node performs at most linearly many matches under the same per-pass length bound, so the degree induction of Lemma~\ref{lem:length} and the polynomial-time soundness of Theorem~\ref{thm:fp} carry over verbatim. In particular $X \mapsto X^{2^{|X|}}$ is not unsafe-reachable.
+        \item \emph{Run-collapse} -- the function mapping every maximal $a$-run to a single $a$, other characters untouched -- is $L$-reachable by three constant passes,
+        \begin{align}
+            \mathtt{collapse}(S) \;\triangleq\; [\,\epsilon/ab\,][\,\epsilon/aba\,][\,aab/a\,]\,S,
+        \end{align}
+        and unsafe-reachable by the single node $[\,a/aa\,]^{\mathrm{u}}$.
+    \end{enumerate}
+\end{proposition}
+
+\begin{proof}
+    For (ii): the first pass maps each $a$ to $aab$, so each maximal $a$-run becomes $(aab)^n$ and every $aba$ in the image sits at offset $1 \bmod 3$ within a run image -- the only junctions with the $b$-blocks spell $abb$ or $baa$. The greedy deletions of the second pass therefore consume one block at a time inside a run image and cannot cross run boundaries, collapsing $(aab)^n$ to $aab$; the third deletes the residual $ab$, leaving one $a$ per run. The mechanism -- a \emph{deletion} pass resuming at the deletion point and re-exposing junctions -- is available in the safe semantics of Definition~\ref{def:subst} and goes unused in Section~2. For the unsafe node: matches of $aa$ occur only inside $a$-runs, each match shortens the current run by one, and the frozen prefix carries the collapsed part. (Verified: all strings of length $\leq 12$ over $|\Sigma| = 2$ and $\leq 9$ over $|\Sigma| = 3$, 3000 random strings of length up to 60, and $a^{300}$; all strings of length $\leq 10$ for the unsafe node.)
+\end{proof}
+
+\begin{remark}
+    The two calculi are conjecturally \emph{incomparable}. In one direction, $X \mapsto X^{|X|}$ is $L$-reachable, but its construction's instantiation pass $[\,X_1/\sigma\,]^{\mathrm{u}}$ diverges exactly when $\sigma \subset X_1$, and no unsafe construction is known (bounded searches over 73{,}205 pipelines fail). In the other direction, the \emph{a-flood} $[\,a/ab\,]^{\mathrm{u}}$ -- a single node, mapping $b^i a^j W \mapsto b^i a^{\#a(W)}$ -- is absent from every constant-pattern $L$-pipeline of depth $\leq 4$ on the same finite domains. Both directions are open.
+\end{remark}
+
+\subsection{Restarting from Zero}
+
+\begin{definition}
+    (\emph{Markov Substitution})
+    \label{def:markov}
+    For $B \neq \epsilon$, $[\,A/B\,]^{\mathrm{m}} C$ is the trajectory $s_0 = C$, $s_{k+1} = s_k[{:}i]\cdot A\cdot s_k[i{+}|B|{:}]$ with $i$ the leftmost occurrence of $B$ in $s_k$: the value is the first $B$-free $s_k$; if there is none, the expression diverges. This is the leftmost-strategy normalization of the single rewrite rule $B \to A$ -- a one-rule Markov algorithm, the semantics the closing remark of Section~4 contrasted with bounded pipelines.
+\end{definition}
+
+Fixpoints are $B$-free -- the process stops exactly when $B$ no longer occurs -- whereas baseline outputs may contain their pattern ($[\,ab/b\,]$ applied to $b$ gives $ab$): the root of every difference below.
+
+\begin{theorem}
+    (\emph{Termination Classification})
+    \label{thm:termination}
+    \begin{enumerate}[(i)]
+        \item $|A| < |B|$: total, in at most $|C|$ steps.
+        \item $|A| = |B|$ and $A \neq B$: total.
+        \item $A = B$ or $B \subset A$: diverges on every $B$-containing input.
+        \item So for $|A| \leq |B|$: total iff $A \neq B$.
+        \item For $|A| > |B|$ with $B \not\subset A$ there is no known criterion; the problem embeds the one-rule semi-Thue termination problem, which is open in general.
+    \end{enumerate}
+\end{theorem}
+
+\begin{proof}
+    (i) Each step shortens the string. (ii) Let $i_1$ be the first position where $A$ and $B$ differ; assign digit $0$ to $A[i_1]$, digit $1$ to $B[i_1]$, digit $0$ to every other character, and let $V(s) = \sum_j \mathrm{digit}(s[j])\,2^{-j}$. A step at position $i$ changes the digit at $i + i_1$ from $1$ to $0$ -- a drop of exactly $2^{-(i+i_1)}$ -- while the positions after $i+i_1$, inside or beyond the replaced block, can rise by a total of at most $\sum_{j > i+i_1} 2^{-j} < 2^{-(i+i_1)}$. So $V$ strictly decreases along the trajectory and takes only finitely many values on strings of the fixed length. (iii) The replacement re-contains the pattern at the same site. (v) The four minimal binary length-increasing rules with $B \not\subset A$ that diverge are $[\,aabb/ba\,]$, $[\,abba/bab\,]$, $[\,baab/aba\,]$ and $[\,bbaa/ab\,]$; e.g.\ $[\,aabb/ba\,]^{\mathrm{m}}$ on $baa$ regenerates a junction $ba$ at every step and grows forever. Among the 930 binary rules with $|A|, |B| \leq 4$, run on all inputs of length $\leq 9$, exactly 166 diverge -- all accounted for by (iii) and these four.
+\end{proof}
+
+\begin{proposition}
+    (\emph{Agreement})
+    \label{prop:restart-agree}
+    If $A$ and $B$ share no character and both are nonempty, then $[\,A/B\,]^{\mathrm{m}} = [\,A/B\,]$.
+\end{proposition}
+
+\begin{proof}
+    No occurrence of $B$ can touch an inserted copy of $A$ -- it would have to share a character -- so each step destroys the leftmost occurrence and creates none; after the step, the next leftmost occurrence starts exactly where the greedy scan resumes. The number of occurrences strictly decreases, and induction gives identical outputs.
+\end{proof}
+
+\begin{theorem}
+    (\emph{Amplifier})
+    \label{thm:amplifier}
+    For every binary string $S$,
+    \begin{align}
+        [\,baa/ab\,]^{\mathrm{m}}(S) \;=\; b^{\#b(S)}\cdot a^{v(S)},
+    \end{align}
+    where $v$ is the Horner evaluation of $S$ read left to right, $a$ adding $1$ and $b$ doubling: $v(\epsilon) = 0$, $v(Ta) = v(T) + 1$, $v(Tb) = 2\,v(T)$. The trajectory has exactly $v(S) - \#a(S)$ steps; on input $ab^{\,n-1}$ the output has length $2^{n-1} + n - 1$ and the process runs for exactly $2^{n-1} - 1$ steps.
+\end{theorem}
+
+\begin{proof}
+    Track $\#b$, $v$ and $\#a$ along the trajectory. Replacing the leftmost $ab$ by $baa$ preserves $\#b$ (one $b$ either way) and $v$: the single $a$ of $ab$ has $1+k$ $b$'s to its right, where $k$ is the number of $b$'s after the site, and contributes $2^{1+k}$; the two $a$'s of $baa$ each see $k$ and contribute $2\cdot 2^{k}$. It increases $\#a$ by exactly one. Since $v \geq \#a$ always, the trajectory has exactly $v(S) - \#a(S)$ steps and terminates at an $ab$-free string with $\#a = v(S)$ and $\#b = \#b(S)$ -- necessarily $b^{\#b}a^{v}$. For $ab^{\,n-1}$, $v = 2^{n-1}$. (Verified on all binary strings of length $\leq 10$; step counts on all of length $\leq 9$.)
+\end{proof}
+
+\begin{corollary}
+    (\emph{Complexity Collapse})
+    \label{cor:towers}
+    The length bound of Lemma~\ref{lem:length} and the polynomial-time soundness of Theorem~\ref{thm:fp} fail for the Markov calculus: a single node has exponential output growth, in exponentially many steps. Worse, the two-node block $[\,baa/ab\,]^{\mathrm{m}}\circ[\,ab/aa\,]^{\mathrm{m}}$ maps $b^m a^K$ to $b^{\,m+\lfloor K/2\rfloor}a^{\Theta(2^{K/2})}$, so $2t-1$ constant-pattern nodes produce output of tower height $t$ in the input length.
+\end{corollary}
+
+This makes the closing remark of Section~4 quantitative: unbounded iteration of substitution is what lifts the system beyond polynomial time -- a single node suffices -- while every bounded pipeline of passes stays inside it.
+
+\begin{theorem}
+    (\emph{No Injective Nodes})
+    \label{thm:no-injective}
+    A total restart node $[\,A/B\,]^{\mathrm{m}}$ satisfies $B \not\subset A$ and maps both $A$ and $B$ to $A$, with $A \neq B$: no total restart node is injective. Consequently every total constant-pattern core Markov expression with at least one node is non-injective, while the single $L$-node $[\,aa/a\,]$ -- doubling the $a$'s -- is total and injective: the constant-pattern core fragments of $L$ and of the Markov calculus are incomparable.
+\end{theorem}
+
+\begin{proof}
+    Totality forces $B \not\subset A$, by Theorem~\ref{thm:termination}(iii). Then $A$ contains no $B$, so the trajectory from $A$ stops immediately; the trajectory from $B$ stops after one step, at $A$; and $A = B$ would give $B \subset A$. For the second claim, write the expression as a pipeline over an atomic scrutinee (Proposition~\ref{prop:pipeline}): its innermost pass is total, hence identifies two values of the scrutinee, and the suffix pipeline cannot separate them.
+\end{proof}
+
+\begin{conjecture}
+    (\emph{IC})
+    \label{conj:ic}
+    No one-variable core Markov expression -- variable patterns allowed, no concatenation -- computes a total, injective, somewhere-growing function. If true, then $\mathtt{enc}$ is not Markov-core-reachable, and with it the whole architecture of Section~2, which relocates variable text and so needs exactly such a function. Concatenation alone does restore injective growth ($X \mapsto XX$), so the conjecture is genuinely about the core.
+\end{conjecture}
+
+\begin{proposition}
+    (\emph{Toolkit with Black-Box Encoders})
+    \label{prop:restart-toolkit}
+    Take $\mathtt{enc}^2$ and $\mathtt{dec}^2$ as black boxes and read every other pass of the Section-2 constructions as a restart node. Then:
+    \begin{enumerate}[(i)]
+        \item $\mathtt{head}$, $\mathtt{tail}$, $\mathtt{eq}$, $\mathtt{cat}$ and $\mathtt{bdec}$ transfer verbatim: every pass performs exactly one effective operation and is then inert, the patterns containing $bb$ and the images not.
+        \item $\mathtt{if}$ needs a redesign -- the node $[\,\mathtt{enc}(X)/\top\,]^{\mathrm{m}}$ diverges whenever $\top \subset \mathtt{enc}(X)$ -- and has a deletion-based one: put the control character \emph{inside} the patterns, so that each pass deletes exactly its branch.
+        \item the construction of Theorem~\ref{lem:multiple substitution} computes the freezing semantics if and only if no $X_i = b$. The renaming pass $[\,m_i/E_{X_i}\,]^{\mathrm{m}}$ diverges exactly when $E_{X_i} \subset m_i$, i.e.\ when $X_i = b$ (then $E_{X_i} = xb$, and $|E_{X_i}| \geq 4$ otherwise rules the inclusion out); the repair and instantiation passes never diverge (their patterns have $b$-runs of length at least $3$ and $2$, their replacements at most $2$ and $1$); and, with no $X_i$ equal to $b$, each restart node performs exactly its left-to-right pass, because no replacement creates or destroys an occurrence of its own pattern: an $E_i$ can neither lie inside the inserted marker (its even positions are $x$'s, the marker's interior is $b$'s) nor straddle it, and likewise for the repair and instantiation patterns. Verified on 8370 instances ($n \leq 2$, $|\Sigma| = 2$); unconditionally, 364 of 2604 tested instances fail, and the failures occur exactly when some $X_i = b$ meets unfrozen data.
+    \end{enumerate}
+\end{proposition}
+
+\begin{remark}
+    Single restart nodes already compute nontrivial total functions: $[\,ba/ab\,]^{\mathrm{m}}$ sorts its input to $b^*a^*$; $[\,a/aa\,]^{\mathrm{m}}$ collapses $a$-runs -- one node, where the baseline needs the three-pass pipeline of Proposition~\ref{prop:rescan-survives}; and the sort and collapse nodes commute.
+\end{remark}
+
+\subsection{The Landscape}
+
+\begin{center}
+\begin{tabular}{l|llll}
+    variant & $L \sqsubseteq V$ & $V \sqsubseteq L$ & toolkit & growth \\
+    \hline
+    once & refuted & open (the hinge) & rebuilt, no $\mathtt{enc}$ & linear \\
+    positional & refuted & iff once $\in L$ & $\mathtt{tail}$, $\mathtt{head}$; no $\mathtt{enc}$, no $\mathtt{eq}$ & linear \\
+    right-to-left & open & open & verbatim (robust) & polynomial \\
+    unsafe & open & open & collapses (no escape) & polynomial, total fragment \\
+    Markov & open (conjectured no) & refuted (amplifier) & black-box encoders & unbounded (towers)
+\end{tabular}
+\end{center}
+
+Both inclusions for the right-to-left calculus hold if $\mathrm{rev}$ is reachable in either calculus, and no other route between $L$ and $\mathrm{R}$ is known (Theorem~\ref{thm:subsequential} separates only the constant fragments). The unsafe row's two ``open''s carry the conjectures after Proposition~\ref{prop:rescan-survives}; the Markov row's ``conjectured no'' is Conjecture~\ref{conj:ic}, with the doubling node of Theorem~\ref{thm:no-injective} the concrete obstacle.
+
+The web hangs on two ropes, and both are reachability questions about the baseline itself:
+\begin{enumerate}
+    \item \emph{Is the once-primitive $L$-reachable?} By Theorem~\ref{thm:pos-hinge} this decides $\mathrm{POS} \sqsubseteq L$, and with it the whole once-family's relation to $L$. Proposition~\ref{prop:unary-once} rules out the easy invariants, and every bounded search fails.
+    \item \emph{Is reversal $L$-reachable?} This decides whether $L = \mathrm{R}$ (Theorem~\ref{thm:conjugation}), and by the mirror symmetry of the once-calculi it is also the hinge between once-left and once-right.
+\end{enumerate}
+Beyond the two hinges:
+\begin{enumerate} \setcounter{enumi}{2}
+    \item Conjecture~\ref{conj:ic} (IC): no total injective growing core Markov expression. Either answer reorganizes the Markov row.
+    \item The two incomparability witnesses for the unsafe calculus: is $X \mapsto X^{|X|}$ unsafe-reachable? Is the a-flood $L$-reachable?
+    \item Is one-rule termination under the leftmost strategy decidable (Theorem~\ref{thm:termination}(v))? The known decidable classes -- length-decreasing, length-preserving, single-threaded, grid, one-overlap-pair -- do not obviously cover it.
+    \item Is there a growth dichotomy for total restart rules? Among the 162 total binary rules with $|A|, |B| \leq 3$, 144 grow linearly, 14 with slope $2$--$3$, and exactly 4 exponentially; nothing intermediate was found.
+    \item The exact characterization of the reachable class for each variant -- open problem 1 of Section~4, now sevenfold.
+\end{enumerate}
+
+\begin{remark}
+    \emph{Methodology.} The computational statements in this section were verified by exhaustive enumeration over the finite domains stated where they occur: all strings up to the given lengths over the stated alphabets, all patterns and replacements up to the given lengths, both choices of the encoding characters where they matter. The negative claims rest on breadth-first search in function space over bounded expression depths, with every candidate found re-verified on strictly larger domains before being believed -- a necessary discipline, since short-domain artifacts are real: three halvings ``compute'' $\mathtt{head}$ on unary strings of length $\leq 8$ and fail at length $9$, and a two-pass near-miss computes $\mathtt{dec}$ on even lengths only. No enumeration reported here exceeds a few million evaluations.
 \end{remark}
 
 \end{document}
