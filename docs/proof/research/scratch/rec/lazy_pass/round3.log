@@ -1,0 +1,18 @@
+== (A) shortlex successor next = rev.incr.rev ==
+  orbit of next from eps: 127 strings == shortlex enumeration of all strings of length <= 6 -> OK
+== (B) pattern-gated minimization: SQRT(X) = mu Y. YY = X ==
+  SQRT on all 15 squares X = w.w with |w| <= 3: exact -> OK
+  SQRT on 5 non-squares: no value within cap (divergent as intended) -> OK
+== (C) structural recursion with parameters: ADD, MULT on tallies ==
+  ADD and MULT on all 36 tally pairs (<= 5): 72 evaluations, exact -> OK
+== (D) Horner coding V and its inverse DIGITS ==
+  HALF (raw-L pipeline) and ODD on tallies 0..39: exact
+  V and DIGITS(V(X)) == X on all 63 strings of length <= 5 (126 evaluations) -> OK
+== (E) mutual recursion definable from self: even/odd on tallies ==
+  direct mutual (even,odd) and single-F tagged version agree with parity on tallies 0..8 (18 pairs) -> OK
+== (F) two-counter machines, compiled to definitions and RUN ==
+  doubling 2CM: MAIN(a^n) = a^2n for n = 0..5 -> OK
+  adder 2CM on RUN(config) for 20 (n,m) pairs: c2 = n+m -> OK
+
+ROUND3 RESULT: A(next)=PASS B(mu)=PASS C(ADD/MULT)=PASS D(coding)=PASS E(mutual)=PASS F(2CM)=PASS fails=0
+EXIT=0

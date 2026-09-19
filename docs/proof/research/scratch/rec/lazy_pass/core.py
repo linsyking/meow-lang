@@ -30,6 +30,9 @@ paper's Definition def:den.
 never rescanning inserted text), copied from verify_variants.py.
 """
 
+import sys
+sys.setrecursionlimit(200000)
+
 # --------------------------------------------------------------------------
 # the primitive
 

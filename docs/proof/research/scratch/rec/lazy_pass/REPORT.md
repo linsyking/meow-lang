@@ -342,14 +342,602 @@ disagreements.  (c) the strict-extension witness above.
 
 ---
 
-## 3. Pattern gates and guarded recursion — planned (round 2)
+---
 
-## 4. Universality — planned (round 3)
+## 3. Pattern gates and guarded recursion
 
-## 5. Consequences — planned (round 4)
 
-## 6. Undecidability of totality — planned (round 4)
+### 3.0 Guarding: what does and does not guard, and a finding
 
-## 7. Verification summary — planned
+**Under the EAGER denotation nothing guards.**  `def:den` evaluates all
+three sub-expressions of every node, so a recursive call in any position of
+a branch of the paper's `if` — or of any other expression — is forced
+unconditionally; this is exactly the paper's pain in Remark `rem:total-rep`
+("an if(eq(X_i,eps), identity, round_i) still *evaluates* round_i").  The
+only conditional in the calculus must therefore come from the runtime.
 
-## 8. PROVED / VERIFIED / CONJECTURAL — planned
+**Finding (the paper's `if` is already a pattern gate under lazy-pass).**
+Look at the Selection construction under rule (11):
+
+    if(C,X,Y) = dec( [enc(Y)/bb] ( [enc(X)/TOP] [bb/BOT] C ) )
+
+For C = TOP: the pass [bb/BOT] is inert (BOT not in TOP), the pass
+[enc(X)/TOP] fires (Direct Substitution on the one-character scrutinee) and
+forces X — and the final pass [enc(Y)/bb] sees the enc-image of X, which
+contains no bb (Theorem `thm:enc`(ii)), so it is INERT and Y is never
+forced.  For C = BOT symmetrically: [bb/BOT]BOT = bb, [enc(X)/TOP] is inert
+(X never forced), [enc(Y)/bb]bb = enc(Y) forces Y.  So under the lazy-pass
+machine:
+
+* the condition is forced;
+* exactly the taken branch is forced (once);
+* the taken branch's value is returned verbatim (dec o enc = id).
+
+**[VERIFIED]** (`verify_round4.py` D1, D1b, D1c): probes in the two branch
+slots of `if(C, probeT(u), probeE(v))` — only the taken branch's probe
+activates, for C in {TOP, BOT}; `if(TOP, X, Omega) = if(BOT, Omega, X) = X`
+with Omega never forced, while the SAME program text diverges under the
+eager semantics; and an entire structural-recursion scheme runs through
+`if` with no gate machinery at all — `revif(X) = if(isne X,
+cat(revif(tail X), head X), eps)` reverses all 127 strings of length <= 6
+exactly.
+
+Two consequences.  First, the lazy-pass discipline is the *minimal* repair
+of the eager calculus's one visible defect: the guarded `rep` of Remark
+`rem:total-rep` can be written naively — put the round in the branch of an
+`if` on `eq(X_i, eps)`; the round's renaming pattern `enc^2(X_i)` is only
+evaluated when the branch is taken, i.e. when it is nonempty.  Second, all
+guarding still *goes through pattern gates* — `if` gates through the
+[enc(X)/TOP] pass, whose pattern occurs in the intermediate value exactly
+when C = TOP.  The explicit gate below (`sel`) makes the gate VALUE a
+constant (P or Q) and is used for the schemes; `if` itself is a verified
+alternative (D1c).
+
+**Why the naive one-way gate is unsound.**  The scheme
+`F(X) = [B(X, F(tail X))/P] if(isne X, P, H(X))` — a recursive call in the
+replacement of a pass whose gate value is P exactly when X != eps — looks
+like the natural guarded recursion, but the *closed*-gate value H(eps) may
+itself contain P, in which case the pass fires inside the base value.
+Witness (verified in `verify_round4.py` D2):
+`F(X) = [Omega(X)/a] if(isne X, a, a)` diverges on X = eps although the
+intended base case is the constant a.  The two-way gate avoids this: the
+gate values are the constants P and Q, and branch values travel through
+`enc^2` — they never meet the patterns.
+
+### 3.1 The two-way gate
+
+**Definition (sel).**  Fix the encoding characters b != x (of enc^2) and set
+
+    P = b b x,      Q = x b b
+
+(three-character markers; both contain bb; P not-sub-of Q; Q not-sub-of P).
+Define the 3-ary function sel by
+
+    sel(C, u, v) = dec^2_x( [enc^2_x(X3)/Q] [enc^2_x(X2)/P] if(X1, P, Q) )
+
+— the definition `sel(X1,X2,X3)` with the displayed body, where `if` is the
+paper's Selection and enc^2/dec^2 the Comma Code.  (For Sigma = {a,b},
+b = a, x = b: P = "aab", Q = "baa".)
+
+**Theorem 3.1 (two-way gate).**  For C in {TOP, BOT} and any values u, v:
+(i) sel(TOP, u, v) = u and sel(BOT, u, v) = v;
+(ii) the machine on (TOP, u, v) forces X1 and X2 (each exactly once) and
+never X3; on (BOT, u, v) it forces X1 and X3 and never X2.
+*Proof.*  (i) By the Selection theorem if(TOP,P,Q) = P.  The inner pass
+`[enc^2(X2)/P]` has pattern P != eps and P occurs in the gate value (it
+*is* the gate value), so rule (11) evaluates the replacement enc^2(X2) —
+whose innermost pass has X2 as scrutinee, forcing it — and by **Direct
+Substitution** `[enc^2(X2)/P]P = enc^2(X2)`.  The outer pass
+`[enc^2(X3)/Q]`: its pattern Q = xbb contains bb, and enc^2-images have
+b-runs of length <= 1 (Comma Code Lemma (ii)), so Q does not occur in
+enc^2(X2); the pass is inert.  Finally dec^2(enc^2(u)) = u (Comma Code
+Lemma (i)).  The case C = BOT is symmetric: P = bbx does not occur in
+Q = xbb (compare character-wise at positions 0 and 2), so the P-pass is
+inert; `[enc^2(X3)/Q]Q = enc^2(X3)` by Direct Substitution; dec^2 returns
+v.  (ii) X1 is the scrutinee of the if-construction's innermost pass
+`[bb/BOT]X1` — forced unconditionally.  X2 occurs in the body exactly once,
+inside enc^2(X2) in the *replacement* slot of the P-pass: a replacement is
+evaluated only when its pattern occurs (rule 11), which is exactly when
+C = TOP; X3 symmetrically for Q and C = BOT.  "Exactly once" is
+call-by-need memoization (Prop. 2). []
+
+**Corollary 3.2 (verbatim return).**  sel returns the taken branch's value
+unchanged (dec^2 o enc^2 = id).  This is what makes sel usable as a
+*definition scheme*: no wrapping discipline is imposed on branch values.
+
+**Remark (the naive one-way gate is unsound).**  The scheme
+`F(X) = [B(X, F(tail X))/P] if(isne X, P, H(X))` — a recursive call in the
+replacement of a pass whose gate value is P exactly when X != eps — looks
+like the natural guarded recursion, but the *closed*-gate value H(eps) may
+itself contain P, in which case the pass fires inside the base value.
+Toy witness (verified in `verify_round4.py` (D)):
+`F(X) = [Omega(X)/a] if(isne X, a, a)` diverges on X = eps although the
+intended base case is the constant a.  The two-way gate avoids this
+entirely: the closed-gate value is the constant Q, the open-gate value the
+constant P, and the branch values travel through enc^2 — they never
+interact with the patterns.  All guarding below goes through sel.
+
+### 3.2 The expansion (macro) lemma
+
+**Lemma 3.3 (heap extension).**  If <e, rho, H> << <w, H1> then for every
+heap H' extending H by fresh cells, <e, rho, H'> << <w, H1'> where H1'
+extends H1 by fresh cells.  The derivation reads only cells reachable from
+rho and allocates only fresh cells.
+*Proof.*  Induction on the derivation: each rule's premises read the
+environment's cells or cells allocated by the sub-derivations; by the
+freshness invariant (Sec. 1.4, Call Lemma) these are disjoint from the
+extension. []
+
+**Lemma 3.4 (expansion / beta for extended expressions).**  Let E be an
+extended expression with distinguished variable Z, and G an extended
+expression (calls allowed).  Then the machine value of `E[G/Z]` under rho
+agrees with the machine value of E under rho with Z bound to a cell holding
+`thunk(G, rho)`: same value, same stuckness, same divergence.
+*Proof.*  Structural induction on E, via Theorem A (big-step).  At a
+Z-site, `E[G/Z]` carries a syntactic copy of G; each *forced* copy
+evaluates under rho in a heap state that differs only by fresh cells
+(Lemma 3.3), so by determinism all forced copies yield the same value v,
+and the shared cell of the right-hand side yields the same v.  For the
+substitution node the case analysis of rule (11) depends only on the
+pattern and scrutinee values, which agree by the induction hypothesis;
+when the pass is inert the replacement copy (resp. the thunk) is never
+entered.  Termination agreement follows: a forced copy terminates iff the
+thunk does (identical evaluations, Lemma 3.3). []
+
+This is the extended-calculus analogue of the paper's Lemma lem:beta;
+it licenses inlining an arbitrary (call-containing) expression into a
+call-free scheme body, which is how the schemes below are written.
+
+### 3.3 The guarded structural-recursion scheme
+
+**Definition (scheme S1).**  Given call-free total expressions
+B(X, Y_, Z) (the step; Z the recursion variable) and H(X, Y_) (the base),
+define
+
+    F(X, Y_) = sel( isne(X),
+                    B(X, Y_)[ F(tail X, Y_) / Z ],
+                    H(X, Y_) )
+
+— the definition F whose body is the sel-call shown, with the recursive
+call inlined at Z's occurrences in B.  (isne(X) = if(eq(X,eps),BOT,TOP),
+call-free and total.)
+
+**Theorem 3.5 (guarded structural recursion).**  Under the lazy-pass
+machine the definition of scheme S1 is total on (Sigma*)^{1+k} and
+satisfies
+
+    F(eps, Y_)     = H(eps, Y_)
+    F(aT, Y_)      = B(aT, Y_, F(T, Y_))        for every a in Sigma, T in Sigma*.
+
+*Proof.*  Termination and the equations together, by strong induction on
+|X|.  If X = eps: isne(eps) = BOT, so by Theorem 3.1(ii) the machine forces
+X3 = H(eps, Y_) — call-free and total, hence terminating (Prop. 1) with
+the value of its eager denotation (T1) — and never X2; sel returns that
+value: F(eps, Y_) = H(eps, Y_).  If X = aT: isne(aT) = TOP; the machine
+forces X2 = B(aT, Y_)[F(T, Y_)/Z].  By Lemma 3.4 this evaluates as B with
+Z's value = the value of the call F(T, Y_).  Each forced Z-site activates
+that call, whose arguments have |T| < |X|; by the induction hypothesis and
+the Call Lemma it terminates with a value w_T independent of the
+activation.  B is call-free total, so its evaluation terminates on any
+inputs; if Z is never forced its value is irrelevant, otherwise it is w_T.
+Hence X2 terminates with B(aT, Y_, w_T), and sel returns it:
+F(aT, Y_) = B(aT, Y_, F(T, Y_)). []
+
+### 3.4 Reversal
+
+**Theorem 3.6 (reversal is computable).**  The definition
+
+    rev(X) = sel( isne(X), cat( rev(tail X), head X ), eps )
+
+i.e. B(X, Z) = cat(Z, head X), H(X) = eps, is total and computes
+S |-> reverse(S).  The Sec. 5.6 hinge ("is reversal L-reachable?") therefore
+dissolves once recursion is admitted: reversal is lazy-pass computable.
+*Proof.*  B and H are call-free and total (cat, head, tail are raw-L, Thm
+thm:headtail / thm:cat).  Theorem 3.5 gives totality and
+rev(eps) = eps, rev(aT) = cat(rev(T), a) = rev(T)·a; induction on |S| gives
+rev(S) = reverse(S). []
+
+**Verification (round 2).  [VERIFIED]**  `verify_round2.py`:
+(A) small-step = big-step: 400 random 3-definition recursive programs
+(extended grammar, arities 1-2, depth <= 3, including pattern-empty and
+blackhole cases): 400/400 agreements — 119 with equal values, 51 both-stuck,
+230 both-no-value-within-cap; 0 disagreements.
+(B) sel: B1 — 200 random triples (branches of length <= 8): values exact.
+B2 — 100 runs with identity probes as branches: taken branch's probe
+activated exactly once, untaken branch's probe never activated, in all 100.
+B3 — sel(TOP, X, Omega(X)) with Omega(X) = cat(Omega(X), X): lazy machine
+returns X (Omega never forced); the *same program text* diverges under the
+eager semantics.
+(C) scheme: C1 — rev on ALL 127 strings of length <= 6 over {a,b}: exact
+(max 1701 machine steps), plus 20 random strings of length <= 10: exact.
+C2 — len (S |-> a^|S|) on all 127 strings of length <= 6: exact.
+C3 — par (step function built from if/eq, not cat) on all 255 strings of
+length <= 7 plus 60 random of length <= 12: exact.
+
+---
+
+## 4. Universality
+
+### 4.0 The general scheme
+
+The scheme of Sec. 3.3 generalizes: the recursion argument need not be
+`tail X`.
+
+**Scheme S.**  Given call-free total expressions C (a {TOP,BOT}-valued
+*gate*), t (the *descent*), B (the *step*), H (the *base*), define
+
+    F(X, Y_) = sel( C(X,Y_),  B(X,Y_)[ F(t(X,Y_), Y_) / Z ],  H(X,Y_) )
+
+with |t(X,Y_)| < |X| whenever C(X,Y_) = TOP.  (S1 is C = isne, t = tail.)
+
+**Theorem 4.0.**  Scheme S is total and satisfies
+F = (C ? B(-, F(t(-))) : H(-)) pointwise.
+*Proof.*  As Theorem 3.5, with the measure |X| and the descent |t| < |X|
+when the gate is open.  Note the base case fires exactly when C = BOT, and
+the taken branch is returned verbatim (Cor. 3.2). []
+
+**Theorem 4.1 (primitive-recursive closure).**  Every function obtained
+from the raw-L toolkit (constants, projections, cat, head, tail, eq, if,
+and with it every call-free total expression) by composition and structural
+recursion on a string argument with parameters — i.e. every
+*string-primitive-recursive* function — is definable in the lazy-pass
+calculus.
+*Proof.*  Composition: a definition may call any earlier definition (the
+program is a list; the construction is stratified), and inlining a
+call-containing expression into a call-free body is sound by Lemma 3.4.
+Structural recursion on the first argument with parameters is Scheme S
+with C = isne, t = tail.  The equations hold by Theorem 4.0. []
+**[VERIFIED]** instances: rev, len, par (Sec. 3), ADD, MULT, the parsers
+PCNT / DROPB / TAKEA / SKIPAB, V, ODD, DIGITS (Sec. 4.4 and
+`verify_round3.py`).
+
+### 4.1 Pattern-gated minimization
+
+**Theorem 4.2 (the mu-scheme).**  Let P : Sigma* -> {TOP,BOT} and next :
+Sigma* -> Sigma* be total definable.  Define
+
+    W(X_, Y) = sel( P(X_,Y),  Y,  W(X_, next(Y)) )
+    F(X_)    = W(X_, eps)
+
+Then F(X_) = the shortlex-least Y with P(X_,Y) = TOP, and F(X_) diverges if
+there is none.  (Shortlex = the order whose successor is next.)
+*Proof.*  The recursive call sits in the ELSE branch of the gate, so it is
+forced exactly when P = BOT (Theorem 3.1).  If the trajectory
+Y_0 = eps, Y_{k+1} = next(Y_k) first satisfies P at step n, then by
+induction on n the machine returns Y_n: each unfolding computes P (total),
+takes the THEN branch exactly at depth n.  If no Y_k satisfies P: by
+induction on k, after k unfoldings the machine is in the same
+configuration shape with Y = Y_k and P(X_,Y_k) = BOT, so the gate never
+closes; no rule errors (all sub-expressions total); the run is infinite
+(the call rule (7) is a tail transfer, so the stack stays bounded — this is
+divergence by unrolling, not by regress). []
+
+The needed `next` is itself definable:
+
+    incr(X)  = sel( isne X, sel( eq(head X, b),  a . incr(tail X),
+                                   succch(head X) . tail X ),  a )
+    next(S)  = rev( incr( rev(S) ) )
+
+— little-endian increment (Scheme S) conjugated by reversal (Thm 3.6).
+**[VERIFIED]**: the orbit of next from eps lists all 127 strings of length
+<= 6 over {a,b} in exactly the shortlex order.
+
+**Corollary 4.3 (a mu-search, executed).**  SQRT(X) = mu Y. cat(Y,Y) = X
+(the string square root): W as above with P = eq(cat(Y,Y), X).
+**[VERIFIED]**: exact on all 15 squares X = w.w with |w| <= 3; on six
+non-squares no value is produced within the step cap (divergent, as the
+mu-scheme predicts).
+
+### 4.2 Two-counter machines, compiled
+
+**Definition (2CM configurations).**  A configuration of a two-counter
+machine with instructions 1..s (pc 0 = halt) is coded by the string
+
+    b^i . a^{x+1} . b . a^{y+1} . b        (i = pc, x = counter 1, y = counter 2).
+
+**The compiler** (`verify_round3.py, cm2_defs`) maps an instruction list
+over {halt; inc(r,j); decjz(r,jz,jnz)} to definitions:
+parsers PCNT (leading b-run = the pc, as a b-tally), DROPB, TAKEA, SKIPAB
+(four Scheme-S definitions, machine-independent); projections
+Xc = tail(TAKEA(DROPB c)), Yc = tail(TAKEA(SKIPAB(DROPB c))); the
+constructor MK(i,x,y) = b^i a a^x b a a^y b (raw-L cat); the step function
+as a sel-tree over eq(PCNT(c), b^i) with one raw-L case per instruction
+(inc: append a tally a; decjz: eq(Xc,eps) selects the jump); and the driver
+
+    RUN(c) = sel( eq(PCNT(c), eps), out(c), RUN(step(c)) )
+
+— the pattern-gated while loop: the recursive call is forced exactly while
+the machine has not halted.  **[VERIFIED]**: a doubling machine
+(c2 := 2 c1) — MAIN(a^n) = a^{2n} for n = 0..5; an adder —
+RUN on 20 initial configurations (n,m), c2 = n + m exactly.
+
+### 4.3 The universality theorem
+
+**Theorem T4 (universality).**  For |Sigma| >= 2 the lazy-pass calculus
+computes exactly the partial computable functions (Sigma*)^n -> Sigma*.
+*Proof.*  (a) Every partial computable f is definable.  The coding
+V : Sigma* -> a-tallies (Horner with a sentinel bit, Scheme S:
+V(eps) = a, V(cT) = 2 V(T) + idx(c)) is injective, and its inverse DIGITS
+(Scheme S over the raw-L floor-halving pipeline [a/b][eps/a][b/aa] — the
+mirror of the paper's Section 5.6 halving pipeline) is definable;
+**[VERIFIED]**: DIGITS(V(X)) = X on all 63 strings of length <= 5.
+By Minsky's theorem the partial function n |-> m with n = V(X),
+m = V(f(X)) is computed by some two-counter machine M_f; Section 4.2's
+compiler turns M_f into definitions, and f = DIGITS(RUN_M(INIT(V(X))))
+composes them.  (b) Every definable function is partial computable: the
+machine of Sec. 1 is effective (each rule is primitive recursive in its
+data; the accompanying interpreter is a witness), so by Church's thesis —
+or a direct coding of configurations — its partial functions are partial
+computable. []
+
+**Proposition 4.4 (self-recursion suffices; mutual recursion is
+definable).**
+(i) Every construction in Sections 3-4 is *stratified*: a definition calls
+only itself and definitions introduced before it.  The dependency graph of
+the universality construction is a DAG plus self-loops.  Hence NO MUTUAL
+RECURSION IS NEEDED.
+(ii) Mutual recursion is nonetheless available: given mutually recursive
+f, g, define one self-recursive F on tagged pairs.  Verified instance
+(even/odd on tallies): tags b / bb on a-tallies; the dispatch is the
+raw-L occurrence test contains(P, bb); the tag is stripped by the deletion
+pipeline [eps/b][eps/bb] (inert on the other tag since tallies contain no
+b); the flip is cat(newtag, T).  In general the two components are
+protected by enc (marker-immune images) and the tags chosen among the
+markers bbx, xbb of Sec. 3.1, with the projections definable by Scheme-S
+marker scans.  So mutual recursion adds no expressive power.
+**[VERIFIED]**: direct mutual (even, odd) and the single-F tagged version
+agree with parity on tallies 0..8 (18 pairs, exact). []
+
+**Remark (alphabet).**  Everything in this report — the gate, the schemes,
+the mu-loop, the 2CM compiler — ran over Sigma = {a,b}, the weakest
+alphabet of the paper's hypothesis.
+
+---
+
+## 5. Consequences
+
+### 5.1  The Section-4-unreachable function X |-> X^{2^{|X|}}  (T5)
+
+**Definition** (`verify_round4.py`, test_T5):
+
+    A(S, W)   =  sel( isne(S),  A(tail S, cat(W, W)),  W )
+    EXP(X)    =  A(X, X)
+
+**Theorem 5.1.**  EXP is total and EXP(X) = X^{2^{|X|}}.
+*Proof.*  This is Scheme S (Thm 4.0) on S, so total; the value is by
+induction on |S|: A(eps, W) = W = W^{2^0}, and
+A(aT, W) = A(T, W^2) = (W^2)^{2^{|T|}} = W^{2^{|T|+1}} = W^{2^{|aT|}};
+EXP(X) = A(X, X) = X^{2^{|X|}}. []
+
+The function is unreachable in L: the paper's Section 4 shows any L-value
+of X has length <= C(1+|X|)^d (Lemma lem:length), and |X|.2^{|X|} exceeds
+every such bound.  What breaks is informative: a recursive definition
+unrolls |X| times, so the *degree of an expression* no longer bounds the
+growth of its value — the length/degree machinery of Section 4 is a
+statement about pipelines (Prop. prop:pipeline), and recursion is not a
+pipeline.
+**[VERIFIED]**: EXP exact on ALL 31 strings of length <= 4 (|X| = 4 gives
+output length 64).
+
+### 5.2  The executed mu-search and two-counter machines  (T6)
+
+The mu-search SQRT (Sec. 4.1) and the 2CM compiler (Sec. 4.2) were executed
+on the machine: SQRT on the 15 squares |w| <= 3 (exact) and 5 non-squares
+(no value within cap, as intended); the doubling 2CM on n = 0..5 and the
+adder 2CM on 20 configurations (exact).  Together with Thm 4.3 these are
+the task's "mu-search or counter-machine example actually run".
+
+### 5.3  Re-gating: eager-divergent programs that terminate lazily  (T7)
+
+Three witnesses, all run under BOTH semantics on the SAME text
+(`verify_round4.py` D/E; D2's counterpart in round 2 B3):
+
+* **E1 (discarded replacement).**  `[Omega(X)/b]X` on X = a: the pattern b
+  does not occur in a, so the machine returns a and never forces Omega;
+  the eager denotation evaluates the replacement slot and diverges.
+* **E2 / D1b (gated branch).**  `sel(TOP, X, Omega(X))` and
+  `if(TOP, X, Omega(X))`: the untaken branch is a thunk that is never
+  forced; call-by-value forces it and diverges.
+* **D3 (no gate at all).**  Ungated `F(X) = cat(F(tail X), head X)`
+  diverges under BOTH semantics — a structural recursion needs the gate;
+  with it (D1c, round 2 C1) the very same body is `rev`.
+
+Moral: the eager calculus's only obstruction to recursion is that every
+position is strict; the lazy-pass machine removes precisely the two
+strictnesses that matter (the replacement slot, and the argument slots of
+calls), and this suffices for universality (Sec. 4) while changing nothing
+on the eager-defined domain (T1).
+
+### 5.4  Tower growth from a TOTAL definition  (T9)
+
+**Definitions** (`verify_round4.py`, tower_defs) — the paper's once-primitive
+REPL rebuilt by structural recursion, then the two restarts of Sec. 5.6 as
+gated while loops:
+
+    PRE(B,S)    =  S starts with B                       (Scheme S on B)
+    LEN(S)      =  a^{|S|}                               (Scheme S on S)
+    DROP(S,k)   =  S minus |k| characters                (Scheme S on k)
+    REPL(A,B,S) =  replace the LEFTMOST occurrence of B in S by A
+                   (Scheme S on S; the once-primitive of Sec. 5.1)
+    AMP1(S)     =  sel( contains(S,ab),  AMP1(REPL(baa,ab,S)),  S )
+    AMP2(S)     =  sel( contains(S,aa),  AMP2(REPL(ab,aa,S)),  S )
+    BLOCK(S)    =  AMP1(AMP2(S))
+    TWR(S)      =  sel( isne(S),  [eps/b](BLOCK(TWR(tail S))),  aaaa )
+
+AMP1 and AMP2 are exactly the paper's restart nodes `[baa/ab]^m` and
+`[ab/aa]^m` (Def. def:markov) — the mu-scheme of Thm 4.2 with the
+recursive call forced precisely while the pattern still occurs.  Both
+terminate (below), so these particular while loops cannot diverge; BLOCK
+composes them in the order of Corollary cor:towers ([ab/aa]-restart
+first, then the amplifier), and TWR iterates BLOCK down |S|.
+
+**Theorem 5.4 (tower growth from a total definition).**  TWR is total,
+and TWR(S) = a^{K_{|S|}} for every S, where K_0 = 4 and
+K_{n+1} = 2^{K_n/2 + 1} - 2.  Hence |TWR(S)| >= 2^{K_{|S|-1}/2}: each
+additional input character adds one exponentiation level — the output
+length is a tower of exponentials of height |S| in the input length.
+Consequently the polynomial length bound (Lemma lem:length) and the
+polynomial-time soundness (Thm thm:fp) fail for TOTAL recursive programs,
+not merely for divergent ones.
+*Proof.*  Totality: PRE, LEN, DROP, REPL are Scheme-S instances (Thm 4.0);
+AMP2 is the restart of a length-preserving rule with A != B, total by the
+paper's Thm thm:termination(ii); AMP1 is the restart of the amplifier,
+total by Thm thm:amplifier (exactly v(S) - #a(S) steps); BLOCK and TWR
+are Scheme-S compositions of total definitions.  Growth: by the amplifier
+formula (Cor. cor:towers), BLOCK(b^m a^K) = b^{m+j} a^{2^{j+1}-2+(K mod 2)}
+with j = floor(K/2).  Induction on |S|, all K_n even (K_0 = 4 and
+2^{t+1}-2 is even): TWR(tail S) = a^{K_n} with n = |S|-1, so
+BLOCK(a^{K_n}) = b^{K_n/2} a^{2^{K_n/2+1}-2}, and the [eps/b] pass strips
+the b-prefix, giving K_{n+1} = 2^{K_n/2+1} - 2 >= 2^{K_n/2}. []
+**[VERIFIED]**: REPL vs Python single-leftmost on 240 cases — exact;
+AMP1 and AMP2 vs the paper's `restart()` primitive (imported from
+paper_variants/verify_variants.py) on 80 random strings len <= 7 — exact
+agreement; BLOCK vs the amplifier formula on 24 inputs (m <= 2, K <= 8) —
+exact; TWR on ALL 15 strings of length <= 3: TWR(S) = a^K with
+K = 4, 6, 14, 254 by |S| — exact.  (K_4 = 2^128 - 2 is forced by the
+verified formula but lies beyond any feasible run.)
+
+### 5.5  What this means for the paper's landscape
+
+* The Sec. 5.6 hinge "is reversal L-reachable?" **dissolves one level
+  up**: reversal is lazy-pass-computable (Thm 3.6, and through the paper's
+  own `if`, Sec. 3.0/D1c).  The question for call-free L is untouched —
+  every construction here uses recursion, so we contribute no evidence
+  either way about raw L.
+* The complexity row gains a clean entry: bounded pipelines = polynomial
+  (thm:fp); recursive definitions = all partial computable functions,
+  with totality undecidable (Sec. 6) and tower growth already inside TOTAL
+  programs (Thm 5.4).  The paper's Markov row (cor:towers) exhibits the
+  same growth, but there via the variant primitive; here it sits inside a
+  conservative extension of the baseline calculus.
+* The Remark rem:total-rep repair: under lazy-pass the naive guard
+  `if(eq(X_i,eps), identity, round_i)` is sound — the round's renaming
+  pattern enc^2(X_i) is evaluated only when its branch is taken, i.e. only
+  when X_i is nonempty (the if-gate finding, Sec. 3.0).  The paper's
+  pattern-position guard remains the right construction for the EAGER
+  calculus.
+
+---
+
+## 6.  Totality of a definition is undecidable  (T8)  [SKETCH]
+
+**Proposition 6.**  There is no algorithm deciding, given a definition F
+of the lazy-pass calculus, whether F is total (i.e. F(w) is defined for
+every w in Sigma*).
+*Sketch (reduction from the 2CM halting problem; routine given the
+compiler of Sec. 4.2).*  Given a 2CM M and input w, the compiler produces
+definitions RUN_M and INIT_M; add
+
+    H_{M,w}(X)  =  out( RUN_M( INIT_M(w) ) )
+
+whose body does not mention X.  By the driver analysis of Thm 4.2,
+H_{M,w} is total iff M halts on w, and diverges on every input otherwise.
+A totality decider would decide 2CM halting, which is undecidable
+(Minsky).  Replacing `out` by any non-constant decidable post-processing
+gives the Rice-style extension to every nontrivial extensional property
+of the computed partial function.  The same reduction shows: whether a
+given F converges on a GIVEN input is undecidable. []
+
+---
+
+## 7.  Verification summary
+
+Interpreter: `core.py` (small-step machine of Sec. 1, big-step demand
+semantics, eager reference for def:den) + `toolkit.py` (raw-L builders
+transcribed from the paper's Section 2, incl. the pass-order convention
+"rightmost listed pass runs first").  All runs over Sigma = {a,b} with
+b_ = a, x_ = b, TOP = b, BOT = a.  Logs: round1..4.log.
+
+| round | test | domain | result |
+|---|---|---|---|
+| 1 (a) | toolkit builders vs Python truth | 400 random pairs per family, 8 families | 8/8 OK |
+| 1 (b) | conservativity (T1) | 9000 random call-free exprs | 5475/5475 agree where eager defined; 3525 eager-undefined of which 3200 Err + 325 strictly-more-defined; 0 mismatches |
+| 1 (c) | strict-extension witness | 1 | OK |
+| 2 (A) | small-step = big-step | 400 random recursive programs, caps 150k steps / 4000 depth | 400/400 agree (119 value, 51 stuck, 230 no-value both) |
+| 2 (B) | sel values / forcing / divergent 3rd arg | 200 triples / 100 runs / 1 | all OK |
+| 2 (C) | rev / len / par schemes | all 127 strings <= 6 + 20 random <= 10 / 127 / 315 <= 7 + 60 random <= 12 | all exact |
+| 3 (A) | next = rev.incr.rev vs shortlex | orbit of 127 strings from eps | exact |
+| 3 (B) | mu-search SQRT | 15 squares + 5 non-squares | exact / no value (as intended) |
+| 3 (C) | ADD, MULT on tallies | 36 pairs, 72 evals | exact |
+| 3 (D) | HALF, ODD, V, DIGITS | 40 tallies; 63 strings roundtrip (126 evals) | exact |
+| 3 (E) | mutual vs single-F even/odd | tallies 0..8, 18 pairs | exact |
+| 3 (F) | 2CM compiler | doubling n=0..5; adder 20 configs | exact |
+| 4 (D) | if-gate finding, naive-gate witness, ungated recursion | probes (2), divergent branches (2), rev through if (127), witnesses (3) | all OK |
+| 4 (E) | eager-vs-lazy, same text | 2 witnesses | OK |
+| 4 (T5) | EXP = X^{2^{|X|}} | all 31 strings \|X\| <= 4 | exact |
+| 4 (T9) | REPL / AMP1 / AMP2 / BLOCK / TWR | 240 / 80 / 24 / 15 | all exact |
+
+No FAIL line in any log; all four `verify_roundN.py` exit 0.
+
+---
+
+## 8.  PROVED / VERIFIED / CONJECTURAL
+
+**PROVED** (full proof in this report):
+P0 determinism of the machine; P1 call-free termination (machine = paper's
+denotation, no infinite runs); P2 forcing coincidence (once-if-any =
+once-per-match; the value does not depend on when R is forced, only on
+whether); P3 blackhole detection = divergence; Theorem 3.1 (the two-way
+gate sel); the Sec. 3.0 finding that the paper's `if` IS a pattern gate
+under lazy-pass (both directions, with the thm:enc(ii) non-occurrence
+argument) and that the NAIVE one-way gate is unsound (witness D2);
+Theorem 3.5 / 4.0 (Scheme S, guarded structural recursion); Theorem 3.6
+(reversal); Sec. 4.1 (PR closure); Theorem 4.2 (the mu-scheme);
+Theorem 4.3 (universality — the definability half is constructive from
+the 2CM compiler, the other half is the interpreter); Proposition 4.4
+(self-recursion suffices; mutual definable from self); Theorem 5.1
+(X^{2^{|X|}}); Theorem 5.4 (tower growth from a total definition).
+
+**PROVED at routine-induction level** (proof given as a sketch with the
+full induction spine; cross-checked by machine):
+Theorem A (small-step = big-step, 400/400); Lemmas 3.3/3.4 (heap
+extension, expansion); the LFP remark of Sec. 1.6 (monotone, continuous,
+Kleene chain = big-step semantics).
+
+**SKETCH** (labeled as such): Proposition 6 (totality undecidable);
+the coding details of the 2CM compiler's non-termination half of Thm 4.3
+(configuration bookkeeping is routine and machine-checked, not written out
+to the last clause); Sec. 1.6's claim that the lazy denotation is the
+least fixed point.
+
+**VERIFIED**: the table of Sec. 7 — in particular everything the task
+demanded: reversal on all strings <= 6 (127 strings, and again through the
+paper's own if); X^{2^{|X|}} for |X| <= 4; the mu-search and a 2CM
+executed; eager-divergent programs terminating once re-gated; tower growth
+4, 6, 14, 254 on all 15 strings of length <= 3; conservativity on 9000
+expressions; machine consistency on 400 recursive programs.
+
+**CONJECTURAL / OPEN** (new questions this work raises):
+1. **The eager recursive calculus is probably NOT universal.**  Under the
+   eager semantics every position is strict, so every call node in a body
+   is evaluated at every activation; a terminating eager definition needs
+   every forced-call chain well-founded.  Ackermann is eager-computable
+   (both nested calls decrease a lexicographic measure), but an
+   unbounded mu search seems to have no strict-position encoding —
+   the guard itself is what is missing.  We did not attempt the precise
+   characterization.  Confidence in non-universality: medium-high.
+2. **Which single non-strictness suffices?**  Universality here used the
+   replacement slot's non-strictness (via if/sel); call-by-need argument
+   slots alone (strict replacement) were not investigated.  Sec. 4.3's
+   inlining observation suggests replacement-laziness ALONE suffices
+   (macro-expand arguments); whether argument-laziness alone suffices is
+   open.  Confidence that replacement-laziness suffices: high.
+3. **Nothing here bears on the paper's open hinges for call-free L**
+   (once in L? reversal in L? right-to-left behavior).  All constructions
+   use recursion; no evidence either way about raw L is contributed.
+
+### Confidence in the headline results
+
+| result | status | confidence |
+|---|---|---|
+| T1 conservative extension | PROVED + 9000-case sweep | very high |
+| if is a pattern gate (lazy) | PROVED (mechanism) + probes + 127-string scheme | very high |
+| T2/T3 guarded recursion + reversal | PROVED + exhaustive <= 6 | very high |
+| T4 universality, self-recursion suffices | construction PROVED, converse witnessed | high |
+| T5 X^{2^{\|X\|}} | PROVED + exhaustive <= 4 | very high |
+| T7 re-gating dissolves eager divergence | PROVED + witnesses | very high |
+| T8 totality undecidable | SKETCH (routine reduction) | high |
+| T9 tower from a total definition | PROVED + formula-verified + 15 inputs | very high |
+| small = big step | PROVED (sketch) + 400 programs | high |
+
+*End of report.*

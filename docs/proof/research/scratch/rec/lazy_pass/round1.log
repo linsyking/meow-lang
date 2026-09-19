@@ -1,0 +1,20 @@
+== (a) raw-L toolkit builders vs Python truth ==
+  enc/dec   : OK  (400 random pairs, len<=8)
+  cat       : OK  (400 random pairs, len<=8)
+  head/tail : OK  (400 random pairs, len<=8)
+  eq        : OK  (400 random pairs, len<=8)
+  if        : OK  (400 random pairs, len<=8)
+  enc2/dec2 : OK  (400 random pairs, len<=8)
+  benc      : OK  (400 random pairs, len<=8)
+  contains  : OK  (400 random pairs, len<=8)
+== (b) conservativity: call-free expressions, lazy machine vs eager denotation ==
+  trials=30x300 random call-free expressions (vars<=2, depth<=3)
+  eager defined        : 5475 cases, machine agreed on all: 5475 / 5475
+  eager undefined       : 3525 cases; machine Err: 3200, machine Value (strict extension): 325
+  machine timeouts     : 0
+== (c) strict extension: a call-free expression undefined eagerly, defined lazily ==
+  E = [[X1/"eps"]"eps"/"b"]X1
+  on X='a':  eager = ('undef',),  lazy = ('val', 'a', 6)
+
+ROUND1 RESULT: toolkit=PASS conservativity=PASS extension=PASS fails=0
+EXIT=0

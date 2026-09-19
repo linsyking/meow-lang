@@ -1,0 +1,15 @@
+== (A) small-step machine == big-step semantics, random recursive programs ==
+  programs tried: 400; agreements: 400 (value: 119, stuck/err: 51); disagreements: 0
+== (B) the two-way pattern gate sel ==
+  markers: P = aab, Q = baa  (both contain bb = 'aa'; P not in Q, Q not in P)
+  B1 values: 200 random triples -> OK
+  B2 forcing: 100 runs: taken branch forced exactly once, untaken branch never activated -> OK
+  B3 sel(TOP, X, Omega(X)) on X='ab': lazy = ('val', 'ab'), eager = ('diverge',) -> OK
+== (C) guarded structural recursion ==
+  C1 rev: all 127 strings of length <= 6 over {a,b} -> OK (max machine steps 1701)
+     plus 20 random strings of length <= 10 -> OK
+  C2 len -> a^|S|: all 127 strings of length <= 6 -> OK
+  C3 par (if/eq step fn): all 315 strings of length <= 7 plus 60 random of length <= 12 -> OK
+
+ROUND2 RESULT: A(small==big)=PASS B(sel)=PASS C(scheme)=PASS fails=0
+EXIT=0

@@ -375,3 +375,139 @@ Proof architecture: phase-locking via renLoop/insLoop over marked rounds
 (markRounds/assemble), enc2/dec2 code layer, dec2Pass_enc2 finish; S = []
 split. Header status comment updated (was stale: claimed the theorem unproven).
 Section 2 of the paper is now fully machine-checked.
+
+## 12. Recursion stage: eager + lazy_args COMPLETE (2026-09-19, late)
+
+Both vacuity agents finished; suites independently re-run by the coordinator
+(eager: 31,995 checks 0 failed; lazy_args: checks.py rerun byte-identical to
+the agent's log, ALL CHECKS PASSED).
+
+### eager (research/scratch/rec/eager/) — recursion is inert
+- **Theorem G**: L_rec = L exactly, over every finite nonempty alphabet
+  (incl. unary). LFP semantics (Φ monotone + continuous), operational
+  trichotomy Halt/Err/Div with agreement theorem.
+- Refinements over the conjecture: (i) the vacuous class is everything that
+  can REACH a call-graph cycle, not just cycle members; (ii) "diverges" must
+  read "never returns" (error-or-divergence, order-dependent which);
+  (iii) my König sketch had a gap — the call tree is NOT syntax-determined
+  (children need defined argument values; sibling errors preempt). König
+  belongs to the converse (Div ⇒ j ∈ C via infinite path + pigeonhole).
+- Acyclic never diverges (halt or error); "fails on all inputs" decidable in
+  linear time (j ∈ C); stabilization bound φⁿ = lfp for n ≥ max D(j)+1.
+
+### lazy_args (research/scratch/rec/lazy_args/) — inert, differently
+- Liveness = LEAST fixpoint μF (greatest is wrong: f(x)=g(x), g(y)=f(y));
+  polytime computable. Theorems: Confinement (forced ⊆ S*), Full Visitation,
+  Adequacy (⟦M⟧ = ⟦E′⟧, ε-pattern partiality data-dependent as in L),
+  class = exactly L's partial functions (all PTIME).
+- Termination input-independent and polytime-decidable (live dependency
+  graph acyclicity). 253-program corpus, 13,141 halting runs, 0 mismatches.
+- Minimal operational separations (exhaustive search, 68,101 programs):
+  size 4 (0-ary), size 6, size 7 = the dead-argument identity; Lemma 8.1:
+  no 1-function strong separation. Hand-off note §8.5 for lazy_pass: under
+  operator-level non-strictness everything becomes data-dependent
+  (F(X)=[F(X)/b]X terminates exactly on b-free inputs).
+
+### PAPER BUG found by the eager agent (P10) and FIXED in main.tex
+- **Lemma β (§3) was FALSE as stated**: "both sides being undefined
+  together" fails when some X_i does not occur in E and ⟦F_i⟧(T⃗) is
+  undefined (E = W: LHS defined, RHS not). Naive β-inlining is call-by-name
+  flavored; eager call nodes are strict in ALL arguments (dead ones too).
+- Fix: β now states the equation for defined RHS + a strictness clause
+  (undefinedness propagates exactly for OCCURRING variables), proof redone.
+- cor:closure's proof now uses def:reachable's restriction clause
+  explicitly; exact-composition witness added as a parenthetical (identity
+  passes [E_hi·σ/E_hi·σ] force discarded arguments, by Identity Substitution).
+- meow remark updated (expansion value-preserving; the gap is macro
+  laziness). Rebuilt: 41 pages, 0 overfulls, 0 undefined.
+
+## 13. Recursion stage: lazy_pass COMPLETE — TURING-COMPLETE (2026-09-19, late)
+
+All four rounds re-run fresh by the coordinator: fails=0 everywhere.
+REPORT.md (943 lines) in research/scratch/rec/lazy_pass/.
+
+- **T4 (universality)**: lazy-pass recursive L computes exactly the PARTIAL
+  COMPUTABLE functions (Sigma*)^n -> Sigma*, already over Sigma = {a,b}.
+  Injective tally coding V (Horner + sentinel), DIGITS inverse via the raw-L
+  halving pipeline [a/b][eps/a][b/aa], Minsky 2CM compiler into gated
+  definitions, f = DIGITS(RUN(INIT(V(X)))). Executed: mu-sqrt (15 squares
+  exact, 5 non-squares no-value), doubling + adder 2CMs.
+  **Self-recursion suffices** (stratified; mutual recursion definable from
+  self via tagged pairs — even/odd verified).
+- **Finding D (headline)**: the paper's own §2 Selection
+  if(C,X,Y)=dec([enc(Y)/bb]([enc(X)/TOP][bb/BOT]C)) puts the branches ONLY in
+  replacement slots — so under lazy-pass **the paper's if is already a
+  two-way pattern gate**: only the taken branch is ever forced
+  (if(TOP,X,Omega)=X). Reversal runs through if alone, no gate machinery:
+  revif(X)=if(isne X, cat(revif(tail X), head X), eps) — all 127 strings
+  of length <= 6. This is the minimal repair of rem:total-rep's eager-if
+  pain: the guarded rep can be written NAIVELY under lazy-pass.
+- **Naive one-way gate UNSOUND** (D2 witness diverges on eps): the
+  closed-gate base value may contain the gate pattern. The two-way gate
+  sel (P=bbx, Q=xbb constant gate values, enc^2 transport) avoids it;
+  Corollary: verbatim branch return (dec2.enc2 = id).
+- **T5**: EXP(X)=X^{2^{|X|}} total recursive (exact on all 31 strings
+  |X|<=4). §4's length/degree machinery dies: recursion is not a pipeline.
+- **T9**: TWR a TOTAL definition with tower growth (4,6,14,254 by |S|,
+  K_{n+1}=2^{K_n/2+1}-2; K_4=2^128-2), built from gated while-loop
+  versions of the paper's own amplifier rules — AMP1/AMP2 cross-checked
+  against restart() on 80 strings, BLOCK vs the cor:towers formula.
+  Totality does not save the polynomial bound.
+- **T8**: totality of a definition undecidable [SKETCH via 2CM compiler].
+- T1 conservative extension (5475/5475 eager-defined agreement, 325
+  strict extensions); small≡big-step equivalence on 400 random programs.
+
+Landscape now settled on three of four semantics: eager = L (inert),
+lazy-args = L (inert), lazy-pass = partial computable (universal).
+Streams agent still running. Next: draft the paper's recursion section.
+
+## 14. Recursion stage COMPLETE — all four semantics + §6 drafted (2026-09-19, night)
+
+All suites re-run fresh by the coordinator (verify1/2/3.py etc.): ALL OK.
+Streams REPORT.md in research/scratch/rec/streams/.
+
+- **Streams (F1 fragment: one unary def, constants, cat, constant-pattern
+  passes; coinductive values, causal pass = thm:subsequential process)**:
+  - T1 adequacy machine iff Kleene least fixpoint (21/21 zoo); B1: 300
+    random non-recursive exprs vs paper sub() composition, 0 mismatches.
+  - **No syntactic guardedness** — semantic only. e(W) = pre-pull emission:
+    T3 deadlock e(W)=eps => stall, no output (300/300); T4(a) |R|>=|P| ^
+    |W|>=|P| => live (proved, length growth); T4(c) |P|=1 ^ e!=eps =>
+    live (relay); T4(b) fresh char in e(W) outside alphabet(P) => live
+    (560/560, flow proof only sketched). Refutations: deletion eats the
+    junction buffer ([eps/ab](X.f(X)) on aab stalls after 'a'); geometric
+    decay |R|<|P| (76 stall configs in the region); fresh-char-in-R alone
+    fails (4 counterexamples). Grid 1890 configs, 0 violations.
+  - **Least vs productive**: W=bab,P=bab,R=b: b^omega is a fixpoint but
+    the LEAST is the partial 'b|' — semantics selects least, machine
+    stalls. Guardedness must guarantee productivity OF THE LEAST.
+  - **C2 beyond finite state**: f(X)=X.b.f(X.X) on a emits a b aa b aaaa
+    b a^8 b... (non-ultimately-periodic, pigeonhole vs finite-state
+    emitters; counter f(X)=X.b.f(X.a) same with linear runs). LIVE to 40+
+    chars.
+  - T5 replacement-slot trichotomy f(X)=[f(X)/a]X: no match => TERM
+    scrutinee; first char => STALL; later => LIVE s^omega. T6 forcing
+    frontier <= l+1 (l = longest pattern prefix occurring as a factor);
+    infinite patterns never complete a match. T7 finite conservativity vs
+    flat lazy-pass (146 + 120 programs, TERM/completed-LIVE agree, flat
+    bottom splits stall/live).
+- **Paper §6 "Recursive Definitions" DRAFTED** (main.tex, now 49 pages,
+  0 overfull, 0 undefined): setup + def:recprog + 4 runtimes; 6.1 eager
+  (thm:eager) + lazy-args (thm:lazyargs) inertness with the separation
+  example (68,101 two-def programs size<=7, no 1-def separation); 6.2 lazy
+  passes: prop:lpcons conservativity, def:gate sel (p=bbx,q=xbb),
+  thm:gate, rem:ifgate (if was already a gate; rev; rem:total-rep naive
+  guard now sound), ex:naivegate, thm:universal (Minsky 2CM, minsky67
+  added to bib), cor:barriers (reversal, EXP, TWR towers K4=2^128-2,
+  totality undecidable); 6.3 streams: prop:streamadeq, thm:guardedness,
+  rem:leastfix, thm:beyondfinite, T5/T6 paragraph; 6.4 landscape table +
+  4 open problems (borderline non-strictness, stream boundary O1,
+  structural-recursion-only fragment, gates per variant — once-if splices
+  branches into the scrutinee so is NOT a gate).
+- Also: abstract + intro paragraph + §4/§5.6 reversal pointers + Related
+  Work border sentence + Conclusion (now §7) extended.
+
+FINAL LANDSCAPE: eager = L (inert); lazy args = L (inert, operationally
+separated); lazy passes = partial computable (universal); streams =
+beyond every finite-state emitter (characterization open). The whole
+distance rides on one clause: [A/B]S = S when B not< S, regardless of A.

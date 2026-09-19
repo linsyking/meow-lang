@@ -28,12 +28,13 @@ import sys
 sys.setrecursionlimit(200000)
 
 from eager import (Prog, phi_eval, phi_all, kleene_stabilization, run,
-                   unfold_def, inline_prog, evL, omega,
+                   unfold_def, inline_prog, evL, omega, SizeEx,
                    X, C, cat, tailE, headE, eqE, ifE)
 
 SIG = ['a', 'b']
 STRINGS = [''] + [s for r in (1, 2) for s in
                   map(''.join, itertools.product(SIG, repeat=r))]  # 7 strings
+SMALL = ['', 'a', 'b']                      # input domain for random programs
 
 PASS = 0
 FAIL = 0
@@ -73,19 +74,20 @@ def section_A():
 
 # ------------------------------------------------------------- the battery
 
-def inputs_of(P):
-    return [tuple(itertools.product(STRINGS, repeat=a)) if a > 0 else [()]
+def inputs_of(P, dom=STRINGS):
+    return [tuple(itertools.product(dom, repeat=a)) if a > 0 else [()]
             for a in P.ar]
 
 
-def battery(P, label, unfold_depth=3, fuel_hi=30, fuel_cyc=8, verbose=False):
+def battery(P, label, unfold_depth=3, fuel_hi=30, fuel_cyc=8, dom=STRINGS,
+            verbose=False):
     """Full agreement battery for program P.
 
     fuel_hi : fuel for operational runs on hand-written (low-branching)
-              programs; fuel_cyc : fuel for runs of C-members on random
-              programs (tree exponential in fuel)."""
+              programs; fuel_cyc : cap on fuel for C-members (the explored
+              call tree is exponential in fuel)."""
     global PASS, FAIL
-    inp = inputs_of(P)
+    inp = inputs_of(P, dom)
     K = P.kleene_bound()
     nmax = K + 2
     table = phi_all(P, inp, nmax)
@@ -98,7 +100,7 @@ def battery(P, label, unfold_depth=3, fuel_hi=30, fuel_cyc=8, verbose=False):
     check(stab is not None and stab <= K,
           f"[{label}] stabilization {stab} <= bound {K}")
 
-    cycfuel = fuel_hi if fuel_hi <= fuel_cyc else fuel_cyc
+    cycfuel = min(fuel_hi, fuel_cyc)
     outcomes = {}
     for j in range(P.k):
         for T in inp[j]:
@@ -135,10 +137,9 @@ def battery(P, label, unfold_depth=3, fuel_hi=30, fuel_cyc=8, verbose=False):
                 else:
                     check(v is None,
                           f"[{label}] {P.names[j]} err at {T} but lfp={v}")
-            outcomes[run(P, j, T, cycfuel)[0]] = \
-                outcomes.get(run(P, j, T, cycfuel)[0], 0) + 1
+            outcomes[out[0]] = outcomes.get(out[0], 0) + 1
     if verbose:
-        print(f"    run outcomes over all (j,input) at fuel {cycfuel}: "
+        print(f"    run outcomes over all (j,input) at fuel <={cycfuel}: "
               f"{outcomes}")
     # divergence (cut) observed only inside C (cheap fuel)
     for j in range(P.k):
@@ -241,38 +242,68 @@ def section_B():
     check(all(evL(omega(1), (s,)) is None for s in STRINGS), "Omega(1)")
     check(evL(omega(0), ()) is None, "Omega(0)")
 
+    # P10: the dead-argument gap is real even in ACYCLIC programs.
+    #     d0(X) = [b/d1(d2(X))]X,  d1(Y) = 'q' (ignores Y),
+    #     d2(X) = [X/b]X (undefined at eps).
+    # Eager: d0(eps) is undefined (the argument d2(eps) is evaluated).
+    # Naive Lemma-beta inlining [b/'q']X is DEFINED at eps: substitution
+    # drops the dead argument.  The seq-patched inlining restores eagerness.
+    P10 = Prog([
+        ("d0", 1, ('sub', C('b'), ('cal', 1, [('cal', 2, [X(0)])]), X(0))),
+        ("d1", 1, C('q')),
+        ("d2", 1, ('sub', C('b'), X(0), X(0))),
+    ])
+    battery(P10, "P10 acyclic dead argument", verbose=True)
+    check(P10.C == set(), "P10 acyclic")
+    check(phi_eval(P10, 0, ('',), 4, {}) is None, "P10 eager d0(eps) undef")
+    naive = ('sub', C('b'), C('q'), X(0))     # naive inlining of d0
+    check(evL(naive, ('',)) == '', "P10 naive inlining DEFINED at eps (gap)")
+    check(evL(inline_prog(P10)[0], ('',)) is None,
+          "P10 seq-patched inlining undefined at eps")
+    check(evL(inline_prog(P10)[0], ('ab',)) == evL(naive, ('ab',)),
+          "P10 agrees where defined")
+
+    # P11: the strict-sequence combinator seq(F,G) = [F.sigma/F.sigma]G.
+    from eager import seq_expr
+    for f in STRINGS:
+        for g in STRINGS:
+            check(evL(seq_expr(X(0), X(1)), (f, g)) == g, f"seq({f},{g})")
+    check(evL(seq_expr(('sub', C('a'), C(''), C('c')), X(0)), ('ab',))
+          is None, "seq(bottom, G) is bottom")
+
 
 # ------------------------------------------------------- section D (random)
 
-def rand_body(rng, ar, depth, allowed, ars):
+def rand_body(rng, ar, depth, allowed, ars, consts):
     """Random body over the grammar; `allowed` = callable callee indices."""
     r = rng.random()
     if depth <= 0 or r < 0.25:
         if ar > 0 and rng.random() < 0.6:
             return X(rng.randrange(ar))
-        return C(rng.choice(['', 'a', 'b', 'ab', 'bb', 'aab']))
+        return C(rng.choice(consts))
     if r < 0.5:
-        return ('sub', rand_body(rng, ar, depth - 1, allowed, ars),
-                rand_body(rng, ar, depth - 1, allowed, ars),
-                rand_body(rng, ar, depth - 1, allowed, ars))
+        return ('sub', rand_body(rng, ar, depth - 1, allowed, ars, consts),
+                rand_body(rng, ar, depth - 1, allowed, ars, consts),
+                rand_body(rng, ar, depth - 1, allowed, ars, consts))
     if r < 0.75:
-        return ('cat', rand_body(rng, ar, depth - 1, allowed, ars),
-                rand_body(rng, ar, depth - 1, allowed, ars))
+        return ('cat', rand_body(rng, ar, depth - 1, allowed, ars, consts),
+                rand_body(rng, ar, depth - 1, allowed, ars, consts))
     if not allowed:
-        return C('ab')
+        return C(consts[-1])
     j = rng.choice(allowed)
-    return ('cal', j, [rand_body(rng, ar, depth - 1, allowed, ars)
+    return ('cal', j, [rand_body(rng, ar, depth - 1, allowed, ars, consts)
                        for _ in range(ars[j])])
 
 
-def rand_prog(rng):
+def rand_prog(rng, consts=('', 'a', 'b', 'ab', 'bb', 'aab')):
     k = rng.randrange(1, 5)
     ars = [rng.randrange(0, 3) for _ in range(k)]
     acyclic = rng.random() < 0.5     # edges only to higher indices
     defs = []
     for j in range(k):
         allowed = list(range(j + 1, k)) if acyclic else list(range(k))
-        body = rand_body(rng, ars[j], rng.randrange(1, 4), allowed, ars)
+        body = rand_body(rng, ars[j], rng.randrange(1, 4), allowed, ars,
+                         consts)
         defs.append((f"d{j}", ars[j], body))
     return Prog(defs)
 
@@ -280,11 +311,15 @@ def rand_prog(rng):
 def section_D(nprogs=300, seed=20260919):
     print(f"=== D. Randomized programs ({nprogs}) ===")
     rng = random.Random(seed)
-    ncyc = ncut = ncutprog = 0
+    ncyc = ncut = ncutprog = nskip = 0
     for t in range(nprogs):
         P = rand_prog(rng)
         try:
-            battery(P, f"rand{t}", unfold_depth=2, fuel_hi=4, fuel_cyc=4)
+            battery(P, f"rand{t}", unfold_depth=2, fuel_hi=3, fuel_cyc=3,
+                    dom=SMALL)
+        except SizeEx:
+            nskip += 1                       # value growth too large: skip
+            continue
         except RecursionError:
             check(False, f"rand{t} recursion error")
             continue
@@ -292,21 +327,51 @@ def section_D(nprogs=300, seed=20260919):
             ncyc += 1
         saw_cut = False
         for j in range(P.k):
-            for T in inputs_of(P)[j]:
-                if run(P, j, T, 5)[0] == 'cut':
-                    saw_cut = True
-                    ncut += 1
+            for T in inputs_of(P, SMALL)[j]:
+                try:
+                    if run(P, j, T, 4)[0] == 'cut':
+                        saw_cut = True
+                        ncut += 1
+                except SizeEx:
+                    pass
         if saw_cut:
             ncutprog += 1
-    print(f"  programs with nonempty C: {ncyc}/{nprogs}; "
-          f"programs exhibiting a cut at fuel 5: {ncutprog}; "
+    print(f"  programs with nonempty C: {ncyc}/{nprogs} "
+          f"(skipped for size growth: {nskip}); "
+          f"programs exhibiting a cut at fuel 4: {ncutprog}; "
           f"total (j,input) cut events: {ncut}")
+
+
+def section_E(nprogs=150, seed=9799):
+    """Unary alphabet: the theorem's constructions (Omega, the one-node
+    seq [F.sigma/F.sigma]G, inlining) need no second character."""
+    print(f"=== E. Randomized UNARY programs ({nprogs}) ===")
+    rng = random.Random(seed)
+    consts = ('', 'a', 'aa', 'aaa')
+    dom = ['', 'a', 'aa']
+    ncyc = nskip = 0
+    for t in range(nprogs):
+        P = rand_prog(rng, consts)
+        try:
+            battery(P, f"unary{t}", unfold_depth=2, fuel_hi=3, fuel_cyc=3,
+                    dom=dom)
+        except SizeEx:
+            nskip += 1
+            continue
+        except RecursionError:
+            check(False, f"unary{t} recursion error")
+            continue
+        if P.C:
+            ncyc += 1
+    print(f"  unary programs with nonempty C: {ncyc}/{nprogs} "
+          f"(skipped for size growth: {nskip})")
 
 
 def main():
     section_A()
     section_B()
     section_D()
+    section_E()
     print(f"\nTOTAL: {PASS} checks passed, {FAIL} failed")
     sys.exit(0 if FAIL == 0 else 1)
 

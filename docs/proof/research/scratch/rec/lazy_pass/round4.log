@@ -1,0 +1,20 @@
+== (D) design-lesson demos ==
+  D1 if(C, probeT(u), probeE(v)): ONLY the taken branch's probe activates (C=TOP and C=BOT) -> OK: under lazy-pass, if IS a two-way gate (it fails to guard only under the eager denotation, cf. the paper's Remark rem:total-rep)
+  D1b if(TOP, X, Omega) = if(BOT, Omega, X) = X (lazy), while the eager semantics diverges -> OK
+  D1c rev through the paper's if (no sel): all 127 strings of length <= 6 reversed exactly -> OK
+  D2 naive gate F(X) = [Omega(X)/a]if(isne X, a, a): F(eps) = timeout (diverges; intended base was the constant a) -> OK (witness shown)
+  D3 ungated F(X) = cat(F(tail X), head X): lazy = timeout, eager = diverge (both diverge); the gated version is rev (round 2) -> OK
+== (E) eager-divergent programs, lazy-terminating ==
+  E1 [Omega(X)/b]X on X='a': lazy = ('val', 'a'), eager = ('diverge',) -> OK
+  E2 sel(TOP, X, Omega(X)) on X='ab': lazy = ('val', 'ab'), eager = ('diverge',) -> OK
+== (T5) EXP(X) = X^{2^{|X|}}  (unreachable in L, Section 4) ==
+  EXP on all 31 strings of length <= 4 (|X|=4 gives |output| = 64): exact -> OK
+== (T9) tower growth: a TOTAL definition with tower output ==
+  REPL (single-leftmost replacement) vs Python on 240 cases: OK
+  AMP1, AMP2 (gated while loops) vs the paper's restart() on 80 random strings (len <= 7): OK
+  BLOCK vs the amplifier formula b^m a^K -> b^(m+j) a^(2^(j+1)-2+K%2) on 24 inputs (m<=2, K<=8): OK
+  TWR on all 15 strings of length <= 3: TWR(S) = a^K with K = 4, 6, 14, 254 by |S| -> OK
+  (K_{n+1} = 2^(K_n/2 + 1) - 2; K_4 = 2^128 - 2, beyond any feasible run but forced by the verified formula)
+
+ROUND4 RESULT: D(demos)=PASS E(eager-vs-lazy)=PASS T5(EXP)=PASS T9(tower)=PASS fails=0
+EXIT=0

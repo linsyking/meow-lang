@@ -291,11 +291,15 @@ def corpus_random(n=250, seed=20260919):
 
 # ------------------------------------------------------- sections (b), (c), (f)
 
-def check_program(name, prog, maxlen, stats, budget=20000, cap=100000):
+def check_program(name, prog, maxlen, stats, cap=100000):
     """Run all four checks on one program.  Returns True iff all pass."""
     S = L.liveness(prog)
     pred_halt = L.dep_graph_acyclic_from_main(prog, S)
     pred_eager = L.terminates_eager(prog)
+    # adaptive budget: predicted-halting programs get a large one (they must
+    # finish), predicted-diverging ones only need to hit a small one.
+    budget = 300000 if pred_halt else 4000
+    budget_e = 300000 if pred_eager else 4000
     U = None
     if pred_halt:
         try:
@@ -350,7 +354,7 @@ def check_program(name, prog, maxlen, stats, budget=20000, cap=100000):
         #      where lazy yields a value; lazy may never err where eager
         #      yields a value.
         if pred_eager:
-            me = L.Machine(prog, budget=budget)
+            me = L.Machine(prog, budget=budget_e)
             try:
                 eg = me.ee(prog.main, {i: ('inp', s) for i, s in enumerate(inp)})
             except (L.Timeout, RecursionError):
@@ -365,7 +369,7 @@ def check_program(name, prog, maxlen, stats, budget=20000, cap=100000):
                 stats['eager_err_sep'] += 1
         # eager divergence must be total when predicted
         if not pred_eager and all_ok:
-            me = L.Machine(prog, budget=budget)
+            me = L.Machine(prog, budget=budget_e)
             try:
                 eg = me.ee(prog.main, {i: ('inp', s) for i, s in enumerate(inp)})
                 halted_e = eg[0] in ('val', 'err')

@@ -1,0 +1,91 @@
+Exhaustive separation search: 2-function total <= 7, 1-function total <= 6
+  1-function programs of size 1: 0 scanned, 0 separations (lemma: 0)
+  1-function programs of size 2: 1 scanned, 0 separations (lemma: 0)
+  1-function programs of size 3: 0 scanned, 0 separations (lemma: 0)
+  1-function programs of size 4: 19 scanned, 0 separations (lemma: 0)
+  1-function programs of size 5: 56 scanned, 0 separations (lemma: 0)
+  1-function programs of size 6: 546 scanned, 0 separations (lemma: 0)
+  2-function programs of size 1: 0 scanned, 0 strong, 0 weak separations
+  2-function programs of size 2: 0 scanned, 0 strong, 0 weak separations
+  2-function programs of size 3: 31 scanned, 0 strong, 0 weak separations
+  2-function programs of size 4: 55 scanned, 4 strong, 0 weak separations
+  2-function programs of size 5: 1346 scanned, 34 strong, 0 weak separations
+  2-function programs of size 6: 6533 scanned, 144 strong, 0 weak separations
+  2-function programs of size 7: 60136 scanned, 2441 strong, 64 weak separations
+
+counts: {('1fn', 1): (0, 0), ('1fn', 2): (1, 0), ('1fn', 3): (0, 0), ('1fn', 4): (19, 0), ('1fn', 5): (56, 0), ('1fn', 6): (546, 0), ('2fn', 1): (0, 0, 0), ('2fn', 2): (0, 0, 0), ('2fn', 3): (31, 0, 0), ('2fn', 4): (55, 4, 0), ('2fn', 5): (1346, 34, 0), ('2fn', 6): (6533, 144, 0), ('2fn', 7): (60136, 2441, 64)}
+
+SMALLEST STRONG (eager diverges): total size 4, 4 programs
+  F() = F()
+  G(A) = ''
+  main = G(F())
+   size 4
+   S* = []  E' = ''  lazy-value: True  eager-value: False  eager kinds: {'diverge'}
+  F() = F()
+  G(A) = 'a'
+  main = G(F())
+   size 4
+   S* = []  E' = 'a'  lazy-value: True  eager-value: False  eager kinds: {'diverge'}
+  F() = G(F())
+  G(A) = ''
+  main = F()
+   size 4
+   S* = []  E' = ''  lazy-value: True  eager-value: False  eager kinds: {'diverge'}
+  F() = G(F())
+  G(A) = 'a'
+  main = F()
+   size 4
+   S* = []  E' = 'a'  lazy-value: True  eager-value: False  eager kinds: {'diverge'}
+
+SMALLEST WEAK (eager errs on a dead argument): total size 7, 50 programs
+  F() = F()
+  G(A) = ''
+  main = G([''/'']'')
+   size 7
+   S* = []  E' = ''  lazy-value: True  eager-value: False  eager kinds: {'err'}
+  F() = F()
+  G(A) = ''
+  main = G([''/'']'a')
+   size 7
+   S* = []  E' = ''  lazy-value: True  eager-value: False  eager kinds: {'err'}
+  F() = F()
+  G(A) = ''
+  main = G(['a'/'']'')
+   size 7
+   S* = []  E' = ''  lazy-value: True  eager-value: False  eager kinds: {'err'}
+  F() = F()
+  G(A) = ''
+  main = G(['a'/'']'a')
+   size 7
+   S* = []  E' = ''  lazy-value: True  eager-value: False  eager kinds: {'err'}
+  F() = F()
+  G(A) = 'a'
+  main = G([''/'']'')
+   size 7
+   S* = []  E' = 'a'  lazy-value: True  eager-value: False  eager kinds: {'err'}
+  F() = F()
+  G(A) = 'a'
+  main = G([''/'']'a')
+   size 7
+   S* = []  E' = 'a'  lazy-value: True  eager-value: False  eager kinds: {'err'}
+  F() = F()
+  G(A) = 'a'
+  main = G(['a'/'']'')
+   size 7
+   S* = []  E' = 'a'  lazy-value: True  eager-value: False  eager kinds: {'err'}
+  F() = F()
+  G(A) = 'a'
+  main = G(['a'/'']'a')
+   size 7
+   S* = []  E' = 'a'  lazy-value: True  eager-value: False  eager kinds: {'err'}
+  F() = G([''/'']'')
+  G(A) = ''
+  main = F()
+   size 7
+   S* = []  E' = ''  lazy-value: True  eager-value: False  eager kinds: {'err'}
+  F() = G([''/'']'')
+  G(A) = 'a'
+  main = F()
+   size 7
+   S* = []  E' = 'a'  lazy-value: True  eager-value: False  eager kinds: {'err'}
+  ... and 40 more of the same size

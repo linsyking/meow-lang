@@ -33,7 +33,7 @@
 \maketitle
 
 \begin{abstract}
-Search-and-replace is a primitive every programmer knows; this note takes it seriously as a model of computation. We study the single operation $[A/B]S$ -- replace, in one left-to-right pass over $S$, every occurrence of $B$ by $A$, taking the leftmost match first and never rescanning inserted text -- over a finite alphabet. A chain of elementary lemmas turns this one operation into a complete toolkit: escaping and unescaping, concatenation, head and tail, equality, selection, and simultaneous multiple substitution are each exactly a short composition of substitutions, for arbitrary strings. We then formalize ``built from substitution'' as a small expression calculus and measure its power: every reachable function is computable in polynomial time, with degree bounded by its expression, while quadratic growth is reachable and exponential growth is not. Finally we locate the primitive's design choices by varying them one at a time -- once-only, positional, right-to-left, rescanning, and Markov-style iteration -- obtaining concrete separations, collapses, and a classification of the divergent small rules. Every computational claim is verified by exhaustive enumeration over the finite domains stated where it occurs.
+Search-and-replace is a primitive every programmer knows; this note takes it seriously as a model of computation. We study the single operation $[A/B]S$ -- replace, in one left-to-right pass over $S$, every occurrence of $B$ by $A$, taking the leftmost match first and never rescanning inserted text -- over a finite alphabet. A chain of elementary lemmas turns this one operation into a complete toolkit: escaping and unescaping, concatenation, head and tail, equality, selection, and simultaneous multiple substitution are each exactly a short composition of substitutions, for arbitrary strings. We then formalize ``built from substitution'' as a small expression calculus and measure its power: every reachable function is computable in polynomial time, with degree bounded by its expression, while quadratic growth is reachable and exponential growth is not. Finally we locate the primitive's design choices by varying them one at a time -- once-only, positional, right-to-left, rescanning, and Markov-style iteration -- obtaining concrete separations, collapses, and a classification of the divergent small rules. Allowing recursive definitions -- the \texttt{meow} language's own feature -- and varying only the runtime then separates sharply: eager and lazy-argument evaluation leave the reachable class unchanged, while evaluating a pass's replacement only when its pattern occurs -- the operator's own non-strictness -- makes the calculus universal, and a coinductive reading on infinite strings reaches beyond every finite-state emitter. Every computational claim is verified by exhaustive enumeration over the finite domains stated where it occurs.
 
 \keywords{string substitution \and string rewriting \and finite alphabets \and rewriting calculus}
 \end{abstract}
@@ -64,13 +64,15 @@ Three design choices are built into $[A/B]$: the scan goes left to right and tak
 
 \paragraph{The variants (Section~\ref{sec:variants}).} We vary the design choices one at a time -- single-occurrence substitution, positional substitution, right-to-left scanning, rescanning of inserted text, and Markov-style iteration to a fixed point -- and measure the damage: which variants can simulate which, what survives of the toolkit, and how the growth rates separate. Among other things, the once-only primitive provably cannot simulate a full pass; rescan-based substitution agrees with the safe primitive exactly on a decidable local condition; and Markov iteration reaches arbitrary towers of exponentials while the bounded pipeline stays polynomial. A census of all binary rules with $|A|, |B| \le 4$ classifies every divergent one.
 
-Everything finite in this note -- every identity, counterexample, and census -- was verified by exhaustive enumeration over the domains stated in situ, by scripts accompanying the paper; the proofs are otherwise pen-and-paper.
+\paragraph{Recursive definitions (Section~\ref{sec:recursion}).} The \texttt{meow} language recurses; the calculus can too, with named definitions and call nodes, mutual recursion included. What that buys depends only on the runtime. Under eager evaluation and under lazy arguments, nothing: every recursive definition either inlines to a plain expression or never returns, and the reachable class is unchanged. Under lazy \emph{passes} -- the replacement of a pass being evaluated only when its pattern occurs, which is the operator's own non-strictness -- everything: guarded recursion through pattern gates computes exactly the partial computable functions, reversal and the exponential function become total recursions, and totality of a definition is undecidable. A coinductive reading on infinite strings replaces termination by productivity and outgrows every finite-state emitter.
+
+Everything finite in this note -- every identity, counterexample, census, and run of the recursive machines -- was verified by exhaustive enumeration over the domains stated in situ, by scripts accompanying the paper; the proofs are otherwise pen-and-paper.
 
 \subsection{Related Work}
 
 \paragraph{String rewriting.} The classical theory of semi-Thue systems makes the opposite trade-off to ours: rules are fixed strings, and the emphasis is on the \emph{relation} they generate -- the word problem, confluence, termination \cite{thue14,book93}. Our primitive meets that theory at exactly one point: the restart variant of Section~\ref{sec:variants} is the leftmost-strategy normalization of the single rule $B \to A$ (Definition~\ref{def:markov}) -- a one-rule semi-Thue system under a deterministic strategy. There our termination question (Theorem~\ref{thm:termination}) becomes the celebrated one-rule termination problem: undecidable already for systems with three rules \cite{matiyasevich05}, open for one, and decidable for substantial special classes -- left-hand sides of the shape $a^*b^*$ \cite{senizergues96}, rules with an inhibitor \cite{mcnaughton01}, grid rules \cite{geser02}, rules with one pair of overlaps \cite{geser03}, single-threaded derivations \cite{moczydlowski05}, the counter family $0^p1^q \to 1^r0^s$ \cite{zantema00} -- with Geser's habilitation thesis as the survey \cite{geser01}. These classes decide termination under \emph{all} strategies; none decides the leftmost-strategy question our variant asks, and we know of no reduction between the two problems in either direction. On the census domain of Theorem~\ref{thm:termination} the two notions coincide -- every rule that diverges under some strategy already diverges under leftmost -- so the hard case of the variant is the classical open problem with a strategy restriction, and the classical decision methods apply only as sufficient conditions.
 
-\paragraph{What is not covered.} The rest of this note is not a chapter of semi-Thue theory, in either direction, for three structural reasons. First, patterns are \emph{variable}: a pass like $[X_1/\sigma]$ instantiates its pattern from the input at run time, which no fixed rule set does. Constant patterns keep every pass inside the finite-state world of rational transductions \cite{berstel79,elgot65}; the variable ones are what the constructions of Section~\ref{sec:toolkit} -- concatenation, equality, multiple substitution -- rely on. Second, composition is \emph{bounded}: an expression is a finite pipeline applied once, not a relation iterated to normal form; totality is structural (Theorem~\ref{thm:totality}) and every reachable function is polynomial-time (Theorem~\ref{thm:fp}), whereas rewriting iterated to a normal form is Turing-complete \cite{post47,markov54}. Third, the semantics is a \emph{single sweep}: the pass never re-enters inserted text, so $[\,a/aa\,]$ is a total function while the rewriting rule $a \to aa$ diverges under every strategy. Consequently the open problems of this note -- the exact characterization of the reachable class, the two hinges of Section~\ref{sec:variants} (once-reachability and reversal), the growth dichotomy for total restart rules -- have no classical counterpart to inherit an answer from; and conversely, the questions semi-Thue theory does ask -- confluence, word problems, monadic systems \cite{book93} -- have no meaning for a deterministic single pass.
+\paragraph{What is not covered.} The rest of this note is not a chapter of semi-Thue theory, in either direction, for three structural reasons. First, patterns are \emph{variable}: a pass like $[X_1/\sigma]$ instantiates its pattern from the input at run time, which no fixed rule set does. Constant patterns keep every pass inside the finite-state world of rational transductions \cite{berstel79,elgot65}; the variable ones are what the constructions of Section~\ref{sec:toolkit} -- concatenation, equality, multiple substitution -- rely on. Second, composition is \emph{bounded}: an expression is a finite pipeline applied once, not a relation iterated to normal form; totality is structural (Theorem~\ref{thm:totality}) and every reachable function is polynomial-time (Theorem~\ref{thm:fp}), whereas rewriting iterated to a normal form is Turing-complete \cite{post47,markov54}. Third, the semantics is a \emph{single sweep}: the pass never re-enters inserted text, so $[\,a/aa\,]$ is a total function while the rewriting rule $a \to aa$ diverges under every strategy. Consequently the open problems of this note -- the exact characterization of the reachable class, the two hinges of Section~\ref{sec:variants} (once-reachability and reversal), the growth dichotomy for total restart rules -- have no classical counterpart to inherit an answer from; and conversely, the questions semi-Thue theory does ask -- confluence, word problems, monadic systems \cite{book93} -- have no meaning for a deterministic single pass. Section~\ref{sec:recursion} sharpens the second reason from a trade-off into a border: recursion added to the calculus is inert under every call-by-value runtime, and reaches Turing completeness exactly when the operator's own non-strictness -- the replacement of a pass, evaluated only when the pattern occurs -- is admitted as the recursion's guard.
 
 \paragraph{Codes, transductions, stringology.} The constant-pattern fragment of the calculus sits inside the classical theory of sequential transductions \cite{berstel79,elgot65}: each pass is a left-to-right finite-state replacement, which is the content of Theorem~\ref{thm:subsequential}. The encoder round trip is the decoding of a prefix code -- the comma code of Section~\ref{sec:toolkit} is a uniform one -- in the sense of the theory of codes \cite{berstel85,lothaire97}. The linear-time bound on a single pass underlying Theorem~\ref{thm:fp} is classical pattern matching \cite{knuth77,aho75}, and the periodicity facts used in Sections~\ref{sec:toolkit} and~\ref{sec:variants} are those of the combinatorics of words \cite{fine65,lothaire97}.
 
@@ -693,15 +695,15 @@ Section~2 built, one by one, a repertoire of functions -- concatenation, head an
     \begin{align}
         \llbracket E[F_1/X_1, \dots, F_n/X_n] \rrbracket(\vec T) \;=\; \llbracket E \rrbracket\big(\llbracket F_1 \rrbracket(\vec T), \dots, \llbracket F_n \rrbracket(\vec T)\big),
     \end{align}
-    both sides being undefined together.
+    whenever the right-hand side is defined. If moreover $X_i$ occurs in $E$ while $\llbracket F_i \rrbracket(\vec T)$ is undefined, then the left-hand side is undefined as well; in particular, if every $X_i$ occurs in $E$, the two sides are undefined together and the equation holds as an identity of partial functions.
 \end{lemma}
 
 \begin{proof}
-    Induction on $E$. For $X_i$, $W$, and $E_1E_2$ this is immediate. For $[\,R/P\,]\,E$, substitution into the three sub-expressions commutes with the operation by construction, and the undefinedness conditions match:
+    Induction on $E$, proving the equation and the strictness clause together. The equation, for defined right-hand sides, is immediate for $X_i$ and $W$. For strictness: a variable occurs in $E_1E_2$ or in $[\,R/P\,]\,E$ only by occurring in one of the immediate sub-expressions, and both constructors are strict in all their parts (Definition~\ref{def:den}), so the induction hypothesis propagates undefinedness; $W$ contains no variables. For $[\,R/P\,]\,E$ the equation follows because substitution into the three sub-expressions commutes with the operation by construction, and the undefinedness conditions match:
     \begin{align*}
         \llbracket P[F_i/X_i] \rrbracket(\vec T) \;=\; \llbracket P \rrbracket\big(\llbracket F_1 \rrbracket(\vec T), \dots\big)
     \end{align*}
-    is $\epsilon$ exactly when the right-hand side's pattern is.
+    is $\epsilon$ exactly when the right-hand side's pattern is. The occurrence condition is necessary: for $E = W$ with some $\llbracket F_i \rrbracket(\vec T)$ undefined, the left-hand side is the defined value $W$ while the right-hand side is not.
 \end{proof}
 
 \begin{corollary}
@@ -713,7 +715,7 @@ Section~2 built, one by one, a repertoire of functions -- concatenation, head an
 \end{corollary}
 
 \begin{proof}
-    Take $E_g[E_{h_1}/X_1, \dots, E_{h_n}/X_n]$ and apply Lemma~\ref{lem:beta}.
+    Take $E_g[E_{h_1}/X_1, \dots, E_{h_n}/X_n]$: by Lemma~\ref{lem:beta} its denotation agrees with the composite wherever the composite is defined, and it may be defined at points where some $h_i$ is not -- namely when $E_g$ does not contain the corresponding variable. The composite is thus the restriction of this denotation to the subdomain on which every $h_i$ is defined, reachable by the restriction clause of Definition~\ref{def:reachable}. (An exact witness, defined precisely where the composite is, exists: wrap $E_g$ in the identity passes $[\,E_{h_i}\sigma/E_{h_i}\sigma\,]$, one per unused $X_i$; each forces its discarded argument without changing the value, by Identity Substitution.)
 \end{proof}
 
 \begin{definition}
@@ -765,7 +767,7 @@ Section~2 built, one by one, a repertoire of functions -- concatenation, head an
 \end{proof}
 
 \begin{remark}
-    Theorem~\ref{thm:core} is the precise content of the slogan after Theorem~\ref{thm:cat}: ``we can now directly write $XY$ in the expression.'' It is also exactly the architecture of the \texttt{meow} language: a macro body is an expression, macro expansion is expression substitution, and Lemma~\ref{lem:beta} proves expansion semantics-preserving.
+    Theorem~\ref{thm:core} is the precise content of the slogan after Theorem~\ref{thm:cat}: ``we can now directly write $XY$ in the expression.'' It is also exactly the architecture of the \texttt{meow} language: a macro body is an expression, macro expansion is expression substitution, and Lemma~\ref{lem:beta} proves expansion value-preserving -- and definedness-preserving whenever the body uses all its parameters; the gap is exactly macro laziness, an ignored argument never being evaluated.
 \end{remark}
 
 \begin{proposition}
@@ -856,7 +858,7 @@ How strong is the substitution calculus? This section gives a pipeline normal fo
     So the calculus sits strictly inside the computable functions -- and strictly inside polynomial time in a growth-rate sense. The contrast with \emph{Markov algorithms} \cite{markov54} (rewriting applied until no rule matches) is instructive: unbounded iteration of substitution lifts the system to Turing completeness -- the word problem for semi-Thue systems is undecidable \cite{post47} -- while any bounded pipeline of passes stays polynomial. Where exactly the bounded-pipeline class sits is open:
     \begin{enumerate}
         \item Give an exact characterization of the reachable functions. With constant patterns, each pass is close to a rational transduction \cite{berstel79,elgot65}; variable patterns (as in $\mathtt{rep}_n$'s renamings) take the class beyond that. Is there a known matching class in the landscape of formal language theory \cite{rozenberg97}?
-        \item Is string reversal, $S \mapsto \mathrm{reverse}(S)$, reachable?
+        \item Is string reversal, $S \mapsto \mathrm{reverse}(S)$, reachable? (Under recursive definitions with lazy passes it is a three-line recursion -- Section~\ref{sec:recursion}; the question is whether the bounded calculus can.)
         \item Is equivalence of two expressions ($\llbracket E \rrbracket = \llbracket E' \rrbracket$ as partial functions) decidable?
         \item Which functions are reachable over \emph{every} alphabet with $|\Sigma| \geq 2$? Does a larger alphabet ever add power (both the $\mathtt{enc}$- and $\mathtt{enc}^2$-constructions must enumerate $\Sigma$)?
     \end{enumerate}
@@ -1373,7 +1375,7 @@ Both inclusions for the right-to-left calculus hold if $\mathrm{rev}$ is reachab
 The web hangs on two ropes, and both are reachability questions about the baseline itself:
 \begin{enumerate}
     \item \emph{Is the once-primitive $L$-reachable?} By Theorem~\ref{thm:pos-hinge} this decides $\mathrm{POS} \sqsubseteq L$, and with it the whole once-family's relation to $L$. Proposition~\ref{prop:unary-once} rules out the easy invariants, and every bounded search fails.
-    \item \emph{Is reversal $L$-reachable?} This decides whether $L = \mathrm{R}$ (Theorem~\ref{thm:conjugation}), and by the mirror symmetry of the once-calculi it is also the hinge between once-left and once-right.
+    \item \emph{Is reversal $L$-reachable?} This decides whether $L = \mathrm{R}$ (Theorem~\ref{thm:conjugation}), and by the mirror symmetry of the once-calculi it is also the hinge between once-left and once-right. (Section~\ref{sec:recursion} settles the recursive version: reversal is computable there by a three-line guarded recursion, so the question is now sharp -- the bounded calculus, or nothing.)
 \end{enumerate}
 Beyond the two hinges:
 \begin{enumerate} \setcounter{enumi}{2}
@@ -1388,11 +1390,216 @@ Beyond the two hinges:
     \emph{Methodology.} The computational statements in this section were verified by exhaustive enumeration over the finite domains stated where they occur: all strings up to the given lengths over the stated alphabets, all patterns and replacements up to the given lengths, both choices of the encoding characters where they matter. The negative claims rest on breadth-first search in function space over bounded expression depths, with every candidate found re-verified on strictly larger domains before being believed -- a necessary discipline, since short-domain artifacts are real: three halvings $[\,a/aa\,]$ collapse exactly the $a$-runs of length at most $8$ and fail at length $9$, and an iterated positional node computes $\mathtt{dec}$ exactly on the even lengths and fails on the odd ones. Every enumeration and search reported here is reproducible from the stated domains in at most hours on a single core.
 \end{remark}
 
+\section{Recursive Definitions}
+\label{sec:recursion}
+
+The \texttt{meow} language recurses: a macro body may call macros, itself included, and the calls may be mutual. This section adds exactly that to the calculus and asks what it buys. The primitive stays raw -- the pass of Definition~\ref{def:subst} over the toolkit of Section~\ref{sec:toolkit}, itself substitution-expressible, with no new constructs -- and everything that varies is the \emph{runtime}: when a sub-expression's value is demanded. Four runtimes span the space between \emph{nothing new} and \emph{everything}, and the pivot turns out to be a clause of Definition~\ref{def:subst} that has been there all along.
+
+\begin{definition}
+    (\emph{Recursive programs})
+    \label{def:recprog}
+    A \emph{program} is a finite list of distinct names $f_1, \dots, f_k$, the $j$-th with arity $m_j$ and body $B_j$ built as in Definition~\ref{def:exp} from $f_j$'s parameters and the constants, extended by one node: the call $f_{j'}(E_1, \dots, E_{m_{j'}})$. Its \emph{call graph} has the edge $j \to j'$ when $B_j$ mentions $f_{j'}$; the program is \emph{recursive} when the graph has a directed cycle, and $C$ is the set of indices that can reach one.
+\end{definition}
+
+Four runtimes, in order of increasing laziness:
+\begin{enumerate}
+    \item \emph{Eager.} Call by value: the denotation is the least fixpoint of $\Phi(\rho)_j \triangleq \llbracket B_j \rrbracket_\rho$ (call nodes read through $\rho$), over tuples of partial functions ordered by graph inclusion.
+    \item \emph{Lazy arguments.} Call by need: arguments are thunks, forced on demand; every constructor of Definition~\ref{def:den} remains strict in all its parts.
+    \item \emph{Lazy passes.} Call by need, plus the one non-strictness the operator itself already possesses, made official: in $[\,R/P\,]\,E$ the pattern and the scrutinee are forced, but $R$ only if $P$ occurs in the value of $E$ -- justified by the operator equation $[\,A/B\,]S = S$ when $B \not\subset S$, \emph{regardless of $A$} (Definition~\ref{def:subst}).
+    \item \emph{Streams.} Values are finite or infinite strings, and the pass is the causal process of Theorem~\ref{thm:subsequential}; termination gives way to productivity (Section~\ref{sec:rec-streams}).
+\end{enumerate}
+
+\subsection{Eager and Lazy Arguments: Recursion Is Inert}
+
+\begin{theorem}
+    (\emph{Eager inertness})
+    \label{thm:eager}
+    Over any finite alphabet: if $j \in C$ then $\llbracket f_j \rrbracket$ is undefined on every input, whatever the bodies contain, and no run of $f_j$ ever halts with a value (an error, or an infinite descent; both modes occur). If $j \notin C$ then no run of $f_j$ ever diverges -- every input ends in a value or an error -- and $\llbracket f_j \rrbracket = \llbracket E_j \rrbracket$ for a plain expression $E_j \in \mathrm{Exp}_{m_j}$, the strict inlining of the acyclic calls. The eager recursive calculus denotes exactly the partial functions of $L$.
+\end{theorem}
+
+\begin{proof}
+    Every constructor of Definition~\ref{def:den} is strict in all its sub-values, so undefinedness at any evaluated position propagates to the root. If $j \in C$, some call node of $B_j$ reaches a definition of $C$, and a Kleene induction gives $\varphi^n_j = \bot$ for every $n$: the callee's approximant is everywhere $\bot$, and strictness carries $\bot$ from the node through the body -- for every choice of bodies and every input. (The denotational and operational readings agree throughout; the Err/Div split is evaluation-order-dependent, the Val/never-Val split is not.) If $j \notin C$, the region of the call graph below $j$ is a DAG of depth $D(j)$, and an induction on call-depth shows that no evaluation with fuel $\geq D(j)$ is ever cut short: no input diverges. Were some input to diverge, the tree of body entries would be infinite and finitely branching, so K\"onig's lemma would give an infinite branch -- an infinite walk in the finite call graph, which revisits a node, a cycle reachable from $j$. The inlining: unfold the DAG in topological order, each call node replaced by the callee's body with the arguments substituted. Lemma~\ref{lem:beta}'s occurrence clause is what makes the substitution delicate -- plain $\beta$-inlining is call-by-name flavored, while the eager call is strict in \emph{all} arguments, the dead ones included -- so each discarded argument is forced through the identity passes of Corollary~\ref{cor:closure}'s proof before it is dropped. Conversely $L$ is contained: the one-definition program with body $E$. (Verified: three independent evaluators -- a memoized Kleene chain, fuel-capped operational runs, and evaluation of the syntactic inlining -- agree on all hand-written and $450$ random programs: $31{,}995$ checks, no disagreement.)
+\end{proof}
+
+Two consequences deserve the record. Since every eager denotation is an $L$ denotation, the whole theory of Sections~\ref{sec:calculus}--\ref{sec:limits} applies verbatim -- safety, pipeline normal form, the polynomial-time bound; and safety can be read off the program directly ($j \notin C$, safe bodies). And the failure modes are now separated by a graph property: membership in $C$ is reachability, decidable in linear time -- a definition in $C$ is incapacitated \emph{by the recursion itself}, on every input and for every body, while outside $C$ undefinedness is the inlining's own, data-dependent. (The inlining can be exponentially larger than the program: expressiveness is unaffected, but the naive interpreter need not run in the polynomial time of the function it computes; memoization restores it.)
+
+\begin{theorem}
+    (\emph{Lazy-argument inertness})
+    \label{thm:lazyargs}
+    Under lazy arguments, a thunk is forced exactly when its parameter is \emph{live}: liveness is the least fixpoint $S^*$ of the operator $(f,i) \in F(S)$ iff $X_i$ occurs in $B_f$ at an $S$-evaluated position -- a position reached from the root by descending through all constructor children and through exactly the argument slots with $(g,\cdot) \in S$. Least, not greatest: for $f(X) = g(X)$, $g(Y) = f(Y)$ nothing is ever forced -- each body is a single call whose argument is never demanded -- while the greatest fixpoint would force both. $S^*$ is syntactic, computable in polynomial time. Termination is input-independent, all-or-nothing: the run of a definition halts on every input or on none, according to whether the \emph{live dependency graph} has a cycle reachable from an evaluated position of the main body. When it does not, the live unfolding is finite and $\llbracket f_j \rrbracket = \llbracket E'_j \rrbracket$ for the plain expression obtained by pruning the dead calls and inlining the live ones. The lazy-argument recursive calculus denotes exactly the partial functions of $L$.
+\end{theorem}
+
+\begin{proof}
+    In raw $L$ every occurrence of a variable forces its whole value -- patterns, replacements, scrutinees, concatenands all need complete strings -- so ``evaluated at all'' coincides with ``evaluated unconditionally'', and liveness closes under occurrence through live call slots: a parameter passed into a never-evaluated argument slot is never forced, iteratively to any depth; that is $F$ iterated from $\emptyset$, which stabilizes within $\sum_j m_j$ rounds. A call at a live position receives the same argument values whatever the input, so the live unfolding is a syntax-determined tree, finite exactly when the live dependency graph is acyclic below the root. Pruning the never-forced subtrees and inlining the rest preserves the denotation by Lemma~\ref{lem:beta} on defined values, and preserves undefinedness too: the pruned positions are exactly the never-evaluated ones, so no data-dependent undefinedness hides in them. (Verified: a $253$-program corpus, $13{,}141$ halting runs, exact agreement with the pruned unfolding in all of them; forcing confined to the live positions, also on the divergent runs.)
+\end{proof}
+
+Operationally the two runtimes are far apart; denotationally they coincide, and the gap is exactly the one Lemma~\ref{lem:beta} leaves open:
+
+\begin{example}
+    (\emph{Separation})
+    \label{ex:separation}
+    $F(X) = G(X, F(\mathtt{tail}\,X))$ with $G(A,B) = A$: the recursive call sits in a dead argument, so lazily $F$ is the identity while eagerly it never returns. No single definition separates the two runtimes (provably); the smallest separators have four nodes, and the smallest \emph{weak} separation -- disagreement on some input only -- needs no recursion at all. (Exhaustive search over all $68{,}101$ two-definition programs of size $\leq 7$ and all $622$ one-definition ones.)
+\end{example}
+
+\subsection{Lazy Passes: Universality}
+\label{sec:rec-lazy}
+
+Widening the operator's own non-strictness changes everything. On call-free programs the lazy-pass machine is conservative:
+
+\begin{proposition}
+    (\emph{Conservativity})
+    \label{prop:lpcons}
+    On programs without calls, the lazy-pass machine computes the eager denotation wherever that is defined, and is strictly more defined only through discarded replacements. (Verified: $9{,}000$ random call-free expressions -- of the $3{,}525$ on which the eager denotation is undefined, the machine was undefined on $3{,}200$ and strictly more defined on $325$, every one of them through a discarded replacement; on the $5{,}475$ defined ones, exact agreement; no mismatch.)
+\end{proposition}
+
+The strictness that makes recursion inert is the strictness of the \emph{scrutinee}: a pass $[\,R/P\,]\,E$ needs $P$ and $E$, but needs $R$ only when it fires. Under lazy passes that is the whole story, and recursion through the replacement slot becomes conditional -- a gate. A gate that is sound both ways takes care:
+
+\begin{definition}
+    (\emph{Two-way gate})
+    \label{def:gate}
+    Let $b \neq x$ in $\Sigma$ and $\top, \bot$ be as in Selection, and fix the constants $\mathbf{p} = bbx$ and $\mathbf{q} = xbb$ (both contain $bb$; neither occurs in the other). In the variables $X_1, X_2, X_3$,
+    \begin{align}
+        \mathtt{sel}(C, u, v) \;\triangleq\; \mathtt{dec}^2_{x}\big([\mathtt{enc}^2_{x}(X_3)/\mathbf{q}]\,[\mathtt{enc}^2_{x}(X_2)/\mathbf{p}]\;\mathtt{if}(X_1, \mathbf{p}, \mathbf{q})\big).
+    \end{align}
+\end{definition}
+
+\begin{theorem}
+    (\emph{Gate})
+    \label{thm:gate}
+    For $C \in \{\top, \bot\}$ and any $u, v$: $\mathtt{sel}(\top, u, v) = u$ and $\mathtt{sel}(\bot, u, v) = v$, the taken branch's value verbatim; the machine forces the condition and exactly the taken branch, once.
+\end{theorem}
+
+\begin{proof}
+    By Selection, $\mathtt{if}(X_1, \mathbf{p}, \mathbf{q})$ is $\mathbf{p}$ or $\mathbf{q}$ as $X_1$ is $\top$ or $\bot$. If $C = \top$: the pass $[\mathtt{enc}^2(X_2)/\mathbf{p}]$ sees its pattern as its scrutinee, so it fires -- forcing $X_2$ -- and replaces the whole text by $\mathtt{enc}^2(u)$; the outer pass has pattern $\mathbf{q} = xbb \ni bb$, and $\mathtt{enc}^2$-images contain no $bb$ (Comma Code Lemma), so it is inert and $X_3$ is never forced. If $C = \bot$, symmetrically: $\mathbf{p} = bbx$ does not occur in $\mathbf{q} = xbb$, the $\mathbf{p}$-pass is inert, and the $\mathbf{q}$-pass fires and forces $X_3$. Either way $\mathtt{dec}^2_x \circ \mathtt{enc}^2_x = \mathrm{id}$ (Comma Code Lemma (i)) returns the branch verbatim. (Verified with forcing probes in the branch slots.)
+\end{proof}
+
+\begin{remark}
+    (\emph{The Selection was already a gate})
+    \label{rem:ifgate}
+    Section~\ref{sec:toolkit}'s construction places the branches only in \emph{replacement} slots: in $\mathtt{if}(C,X,Y)$, both $X$ and $Y$ travel inside the replacements $[\mathtt{enc}(X)/\top]$ and $[\mathtt{enc}(Y)/bb]$. Under lazy passes, $\mathtt{if}$ is therefore itself a two-way gate, and no new machinery is needed. Writing $\mathtt{isne}(S) \triangleq \mathtt{if}(\mathtt{eq}(S,\epsilon), \bot, \top)$ for the emptiness test,
+    \begin{align}
+        \mathtt{rev}(X) \;=\; \mathtt{if}\big(\mathtt{isne}\,X,\;\mathtt{cat}(\mathtt{rev}(\mathtt{tail}\,X), \mathtt{head}\,X),\;\epsilon\big)
+    \end{align}
+    reverses every string (all $127$ of length $\leq 6$). This is also the minimal repair of the eager calculus's one visible totality defect: the guard that Remark~\ref{rem:total-rep} must work around -- an $\mathtt{if}$ on $\mathtt{eq}(X_i, \epsilon)$ whose dead branch holds the round -- becomes sound as written, the round being a discarded replacement when the gate is closed.
+\end{remark}
+
+\begin{example}
+    (\emph{A naive gate is unsound})
+    \label{ex:naivegate}
+    The definition
+    \begin{align*}
+        F(X) \;\triangleq\; [\,F(\mathtt{tail}\,X)/a\,]\;\mathtt{if}(\mathtt{isne}\,X, a, a)
+    \end{align*}
+    \emph{looks} guarded -- the recursive call is a replacement, demanded only when the pattern $a$ occurs -- but the closed-gate value $a$ contains the gate pattern itself, and the pass fires inside the base value: $F(\epsilon)$ forces $F(\epsilon)$, and the intended base case is a loop. The two-way gate is immune by construction: the gate values are the constants $\mathbf{p}$ and $\mathbf{q}$, and the branch values travel as $\mathtt{enc}^2$-images, which no pattern of the construction can meet.
+\end{example}
+
+\begin{theorem}
+    (\emph{Universality})
+    \label{thm:universal}
+    The lazy-pass recursive calculus over any alphabet with $|\Sigma| \geq 2$ computes exactly the partial computable functions $(\Sigma^*)^n \rightharpoonup \Sigma^*$. Self-recursion suffices; mutual recursion is definable from it.
+\end{theorem}
+
+\begin{proof}
+    Soundness is effectivity: each machine rule is primitive recursive in its data, so every denotation is partial computable. For completeness, work over a two-letter subalphabet $\{\mathtt{a}, \mathtt{b}\}$ (a fixed two-letter prefix code -- constant passes both ways, as in Section~\ref{sec:toolkit} -- reduces the general case to it). Code strings into $a$-tallies by Horner with a sentinel bit, $V(\epsilon) = a$, $V(cT) = a^{2V(T) + \mathrm{idx}(c)}$: injective, and computed by a structural recursion with $\mathtt{cat}$ and $\mathtt{head}$. Its inverse $\mathrm{DIGITS}$ recurses structurally as well, reading the parity with a flip and halving with the raw-$L$ pipeline $[\,a/b\,][\,\epsilon/a\,][\,b/aa\,]$ -- the mirror of the once-calculus's $H$ (Section~\ref{sec:variants}) -- so no new primitive is involved anywhere (verified: $\mathrm{DIGITS}(V(X)) = X$ on all $63$ strings of length $\leq 5$). By Minsky's theorem \cite{minsky67} there is a two-counter machine with $V(X) \mapsto V(f(X))$, and counter machines compile into guarded definitions: a configuration is the string $b^i\,a^{x+1}\,b\,a^{y+1}\,b$, each instruction is a bounded pattern scan with $\mathtt{eq}$-tests on the instruction counter, and the driver
+    \begin{align}
+        \mathrm{RUN}(c) \;=\; \mathtt{sel}\big(\mathtt{eq}(\mathtt{PC}(c), \epsilon),\; \mathtt{out}(c),\; \mathrm{RUN}(\mathtt{step}(c))\big)
+    \end{align}
+    is the pattern-gated while loop -- the recursive call is forced exactly while the machine has not halted. Then $f = \mathrm{DIGITS} \circ \mathrm{RUN} \circ V$. Executed end to end: a $\mu$-search for integer square roots ($15$ squares exact, $5$ non-squares valueless), a compiled doubling machine on $n \leq 5$, a compiled adder on $20$ configurations. Mutual recursion from self-recursion: one definition over tagged pairs, the projections plain passes (verified on the even/odd pair over tallies, both readings). (Also verified: agreement of the small-step machine with a big-step demand semantics on $400$ random recursive programs.)
+\end{proof}
+
+\begin{corollary}
+    (\emph{The two barriers dissolve})
+    \label{cor:barriers}
+    \begin{enumerate}
+        \item \emph{Reversal is computable} -- the second hinge of Section~\ref{sec:variants}, open for $L$ itself, dissolves one level up: Remark~\ref{rem:ifgate}'s three-line recursion. The hinge question for $L$ -- whether reversal is reachable by a \emph{bounded pipeline} -- is what remains.
+        \item $X \mapsto X^{2^{|X|}}$, unreachable in $L$ by Lemma~\ref{lem:length}, is the total structural recursion
+        \begin{align}
+            A(S, W) \;=\; \mathtt{sel}\big(\mathtt{isne}\,S,\; A(\mathtt{tail}\,S, \mathtt{cat}(W,W)),\; W\big)
+        \end{align}
+        with $\mathrm{EXP}(X) = A(X, X)$ (verified on all $31$ strings of length $\leq 4$: $|X| = 4$ gives output length $64$). The degree machinery of Section~\ref{sec:limits} is a statement about pipelines (Proposition~\ref{prop:pipeline}); recursion is not a pipeline.
+        \item \emph{Totality does not tame it.} The two restart nodes of Corollary~\ref{cor:towers}'s tower, rebuilt as gated while loops -- the once-primitive itself now a structural recursion -- and iterated down the input by $\mathtt{tail}$, give a total $\mathrm{TWR}(S) = a^{K_{|S|}}$ with $K_0 = 4$ and $K_{n+1} = 2^{K_n/2+1}-2$: verified $4, 6, 14, 254$ on all fifteen strings of length $\leq 3$, $K_4 = 2^{128}-2$ forced by the recursion, and the gated restarts agree with the restart process of Theorem~\ref{thm:amplifier} on $80$ random strings. Tower growth -- Corollary~\ref{cor:towers} for Markov -- is thus available already \emph{inside the total recursive programs}, and the polynomial bound fails for total definitions, not merely divergent ones.
+        \item \emph{Totality of a definition is undecidable} (a two-counter machine halts on its initial configuration iff the compiled definition is total; Theorem~\ref{thm:universal}).
+    \end{enumerate}
+\end{corollary}
+
+\subsection{Streams: Productivity}
+\label{sec:rec-streams}
+
+For the coinductive reading, take the fragment $F_1$ -- one unary definition, constants, concatenation, constant-pattern passes -- and let values be finite or infinite strings, the pass running as the causal process of Theorem~\ref{thm:subsequential} (its state: the longest suffix of the text consumed so far that is a proper prefix of the pattern). A definition denotes the \emph{least} fixpoint over partial strings; the machine's verdicts are \textsc{live} (unboundedly many characters emitted), \textsc{term} (a complete finite output) and \textsc{stall} (blocked without completing). Causality has a price: on an open input no process can decide that no more output is coming, so finite completion and infinite extension are incomparable outcomes.
+
+\begin{proposition}
+    (\emph{Adequacy and conservativity})
+    \label{prop:streamadeq}
+    The causal machine and the least-fixpoint denotation agree on all three verdicts (a $21$-case zoo, infinite inputs included; $300$ random call-free fragment expressions agree with the paper's operator composed). On finite inputs with constant patterns, the stream semantics refines the flat lazy-pass semantics of Section~\ref{sec:rec-lazy}: \textsc{term} and completed-\textsc{live} agree, and the flat undefinedness splits into \textsc{stall} versus \textsc{live} ($146$ curated and $120$ random programs, no mismatch).
+\end{proposition}
+
+The central question is \emph{guardedness}: when is the junction-guarded cascade $v = [\,R/P\,](W \cdot v)$, the pass straddling the junction between the emitted $W$ and the recursive stream, productive? The answer is semantic through and through. Call $e(W)$ the \emph{pre-pull emission}: what the pass on $W$ emits from consuming $W$ alone, before first demanding the recursive value.
+
+\begin{theorem}
+    (\emph{Guardedness is semantic})
+    \label{thm:guardedness}
+    \begin{enumerate}
+        \item (Deadlock) $e(W) = \epsilon$ implies \textsc{stall} with empty output: every level's emission is caused by a deeper one, and none ever starts.
+        \item (Growth) $e(W) \neq \epsilon$ with $|R| \geq |P|$ and $|W| \geq |P|$ implies \textsc{live}: each level emits at least as much as it consumes.
+        \item (Relay) $e(W) \neq \epsilon$ with $|P| = 1$ implies \textsc{live}: a single-character pattern never buffers.
+        \item (Freshness) $e(W) \neq \epsilon$ with a character of $e(W)$ outside the alphabet of $P$ implies \textsc{live} (verified $560/560$; the flow argument is only sketched).
+    \end{enumerate}
+    And no simpler proxy survives: $e(W) \neq \epsilon$ with $R \neq \epsilon$ does not imply \textsc{live} -- deletion passes eat the junction buffer ($[\,\epsilon/ab\,](X \cdot f(X))$ on $X = aab$ stalls after emitting $a$), and $|R| < |P|$ admits geometric decay, the cascade contracting by $|R|/|P|$ per level ($76$ stall configurations in that region) -- while a fresh character in $R$ \emph{alone} does not either ($4$ counterexamples: the fresh character never fires, freshness must be in the emission). (Grid: $1{,}890$ configurations, $|W|, |P| \leq 3$, $|R| \leq 2$, over two- and three-letter alphabets: no violation of any of the four conditions.)
+\end{theorem}
+
+\begin{remark}
+    (\emph{Least versus productive})
+    \label{rem:leastfix}
+    The cascade equation $v = [\,R/P\,](W \cdot v)$ can have \emph{productive} solutions while the least fixpoint is partial: for $W = \mathtt{bab}$, $P = \mathtt{bab}$, $R = \mathtt{b}$, the value $b^{\omega}$ is a fixpoint -- so are $ab^{\omega}$, $bab^{\omega}$, \dots -- but the least is the partial single character $b$, and the machine stalls after emitting it. The semantics selects the least, so guardedness must guarantee productivity \emph{of the least} fixpoint -- strictly harder than the existence of a productive one.
+\end{remark}
+
+\begin{theorem}
+    (\emph{Beyond finite state})
+    \label{thm:beyondfinite}
+    One recursive definition outsprints the entire finite-state world of Theorem~\ref{thm:subsequential}: on input $a$,
+    \begin{align}
+        f(X) \;=\; \mathtt{cat}\big(X,\; b,\; f(\mathtt{cat}(X, X))\big)
+    \end{align}
+    emits $a\,b\,aa\,b\,aaaa\,b\,a^8\,b \cdots$, and no constant-pattern pipeline computes that stream: on a finite input a pipeline halts, and read coinductively on an ultimately periodic input it is a deterministic finite-state process, which revisiting a state cycles forever -- while the $a$-runs here double without bound. (The counter $f(X) = \mathtt{cat}(X, b, f(\mathtt{cat}(X, a)))$ gives the same conclusion with merely growing runs: $1, 2, 3, \dots$)
+\end{theorem}
+
+\begin{proof}
+    The $n$-th call sees $X = a^{2^n}$ and emits $a^{2^n} b$, by induction, each level forcing only the next; the run lengths $2^n$ have no eventual period. (Verified \textsc{live}, prefixes matching the closed form beyond $40$ characters, cross-checked against the least-fixpoint evaluator.)
+\end{proof}
+
+Two further phenomena delimit the fragment. Recursion in the \emph{replacement} slot itself -- $f(X) = [\,f(X)/a\,]\,X$ -- obeys a trichotomy: if $a$ does not occur in the input, the value is the scrutinee, the replacement never forced (exactly the flat gate of Section~\ref{sec:rec-lazy}); if $a$ is the first character, deadlock, the forced replacement being the value being defined, which is partial and truncates everything after it; otherwise \textsc{live}, with the periodic value $s^{\omega}$ where $s$ is the $a$-free prefix before the first match. And with \emph{variable} patterns the pass never over-forces: it demands at most $\ell + 1$ characters of the pattern's value, $\ell$ the length of the longest prefix occurring as a factor of the scrutinee -- so an infinite pattern never completes a match, and the pass degenerates to streaming through mismatches, identity or absorption according to whether the scrutinee's tails keep extending the pattern's prefixes.
+
+\subsection{The Landscape}
+
+\begin{center}
+\footnotesize
+\begin{tabular}{l|l}
+    runtime & denotes \\
+    \hline
+    eager & $L$ exactly -- recursion inert \\
+    lazy arguments & $L$ exactly -- inert, operationally separated \\
+    lazy passes & the partial computable functions \\
+    streams ($F_1$ fragment) & strictly beyond finite-state emitters; characterization open
+\end{tabular}
+\end{center}
+
+The four rows share one primitive; the distance between the second and the third is a single evaluation rule. What remains open:
+\begin{enumerate}
+    \item \emph{The borderline.} The replacement slot is the one non-strictness universality needs: eager and lazy arguments give nothing, it gives everything. Is there an intermediate discipline -- a graded forcing of the replacement, say -- with strictly intermediate power?
+    \item \emph{The stream boundary.} In the region $e(W) \neq \epsilon$, $|R| < |P|$, $\mathrm{alphabet}(R) \subseteq \mathrm{alphabet}(P)$, both \textsc{live} and \textsc{stall} occur and no complete invariant is known; and whether the fragment can enumerate every computable $\omega$-word is open (a unary counter suggests it can).
+    \item \emph{Structural recursion only.} The schemes of Corollary~\ref{cor:barriers}(ii)--(iii) are structural -- each call on $\mathtt{tail}\,S$ -- and it is the $\mu$-gates that carry the universality. Restricting to structural recursion plausibly yields a string analogue of a subrecursive hierarchy; unexplored.
+    \item \emph{Gates per variant.} The once-calculus's Selection splices its branches into the \emph{scrutinee} (Theorem~\ref{thm:once-toolkit}(v)), so it is not a gate under lazy passes; whether the once-primitive admits any two-way gate -- whether once-recursion is inert or universal -- is open, the recursive sibling of Section~\ref{sec:variants}'s first hinge.
+\end{enumerate}
+
+\begin{remark}
+    \emph{Methodology.} The four runtimes were each implemented and cross-checked against independent evaluators -- a memoized Kleene chain, a fuel-capped operational runner, a big-step demand semantics, and the least-fixpoint evaluator -- and every number above was produced by a fresh re-run of the accompanying scripts; the grids and searches are exhaustive over the domains stated in situ.
+\end{remark}
+
 \section{Conclusion}
 
-This note took search-and-replace seriously as a model of computation, and found a small theory with classical echoes. The single pass $[A/B]$ -- leftmost-first, all occurrences, no re-entry into inserted text -- supports a complete toolkit: escaping, concatenation, head and tail, equality, selection, and simultaneous multiple substitution are each an explicit composition of passes with a correctness proof, over any alphabet with at least two characters. The calculus built on the primitive is structurally well-behaved: a syntactic safety condition implies totality, concatenation is eliminable, and every reachable function is computable in polynomial time, with the degree read off the expression -- while quadratic growth is reachable and exponential growth is not. Varying the three design choices one at a time separated the once-primitive from full passes, tied the right-to-left fragment to the reachability of reversal, collapsed the toolkit under rescanning, and let Markov iteration outgrow every polynomial -- at the price of re-entering the classical one-rule termination problem, where the census found the leftmost strategy to cost nothing.
+This note took search-and-replace seriously as a model of computation, and found a small theory with classical echoes. The single pass $[A/B]$ -- leftmost-first, all occurrences, no re-entry into inserted text -- supports a complete toolkit: escaping, concatenation, head and tail, equality, selection, and simultaneous multiple substitution are each an explicit composition of passes with a correctness proof, over any alphabet with at least two characters. The calculus built on the primitive is structurally well-behaved: a syntactic safety condition implies totality, concatenation is eliminable, and every reachable function is computable in polynomial time, with the degree read off the expression -- while quadratic growth is reachable and exponential growth is not. Varying the three design choices one at a time separated the once-primitive from full passes, tied the right-to-left fragment to the reachability of reversal, collapsed the toolkit under rescanning, and let Markov iteration outgrow every polynomial -- at the price of re-entering the classical one-rule termination problem, where the census found the leftmost strategy to cost nothing. Letting definitions recurse, finally, split the runtimes rather than the primitive: eager and lazy-argument evaluation buy nothing -- every recursive definition either inlines to a plain expression or never returns -- while the operator's one non-strictness, the replacement of a pass evaluated only when the pattern occurs, carries the calculus to universality, and the coinductive reading on infinite strings beyond every finite-state emitter.
 
-Two questions about the baseline itself carry the structure of the whole landscape: whether the once-primitive is $L$-reachable, and whether reversal is. Around them, the exact characterization of each variant's reachable class, the growth dichotomy for total restart rules, and the strategy question of Theorem~\ref{thm:termination}(v) remain open. Everything finite in this note was verified by machine on the domains stated in situ; the two hinges are where the theory now asks to be settled by hand.
+Two questions about the baseline itself carry the structure of the whole landscape: whether the once-primitive is $L$-reachable, and whether reversal is. Around them, the exact characterization of each variant's reachable class, the growth dichotomy for total restart rules, the strategy question of Theorem~\ref{thm:termination}(v), and the guardedness boundary for stream definitions remain open. Everything finite in this note was verified by machine on the domains stated in situ; the two hinges are where the theory now asks to be settled by hand.
 
 \bibliographystyle{splncs04}
 \bibliography{references}

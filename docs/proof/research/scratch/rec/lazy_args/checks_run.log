@@ -1,0 +1,112 @@
+========================================================================
+SECTION (a): dead-argument examples -- lazy halts, eager does not
+========================================================================
+
+--- deadarg_tail (conjecture 4 example) ( size 24 )
+  F(A) = G(A, F(['a'/'ba'][''/'aa'][''/'aab'][''/'aaba']('aa' ['ba'/'a']A)))
+  G(A, B) = A
+  main = F(X)
+  S* = [('F', 0), ('G', 0)]
+  terminates_lazy (graph): True  terminates_eager (graph): False
+  live unfolding E' = X   (5 unfolding nodes)
+  lazy == plain-L(E') on all inputs of length<=4, eager diverge everywhere: OK
+
+--- deadarg_id ( size 7 )
+  F(A) = G(A, F(A))
+  G(A, B) = A
+  main = F(X)
+  S* = [('F', 0), ('G', 0)]
+  terminates_lazy (graph): True  terminates_eager (graph): False
+  live unfolding E' = X   (5 unfolding nodes)
+  lazy == plain-L(E') on all inputs of length<=4, eager diverge everywhere: OK
+
+--- deadarg_const ( size 6 )
+  F(A) = G(F(A))
+  G(A) = 'a'
+  main = F(X)
+  S* = []
+  terminates_lazy (graph): True  terminates_eager (graph): False
+  live unfolding E' = 'a'   (3 unfolding nodes)
+  lazy == plain-L(E') on all inputs of length<=4, eager diverge everywhere: OK
+
+--- deadarg_zero ( size 4 )
+  F() = G(F())
+  G(A) = 'a'
+  main = F()
+  S* = []
+  terminates_lazy (graph): True  terminates_eager (graph): False
+  live unfolding E' = 'a'   (3 unfolding nodes)
+  lazy == plain-L(E') on all inputs of length<=4, eager diverge everywhere: OK
+
+--- deadarg_mirror ( size 7 )
+  F(A) = G(F(A), A)
+  G(A, B) = B
+  main = F(X)
+  S* = [('F', 0), ('G', 1)]
+  terminates_lazy (graph): True  terminates_eager (graph): False
+  live unfolding E' = X   (5 unfolding nodes)
+  lazy == plain-L(E') on all inputs of length<=4, eager diverge everywhere: OK
+
+--- deadarg_mutual ( size 9 )
+  F(A) = H(A)
+  H(A) = G(A, F(A))
+  G(A, B) = A
+  main = F(X)
+  S* = [('F', 0), ('G', 0), ('H', 0)]
+  terminates_lazy (graph): True  terminates_eager (graph): False
+  live unfolding E' = X   (7 unfolding nodes)
+  lazy == plain-L(E') on all inputs of length<=4, eager diverge everywhere: OK
+
+--- deadarg_eagererr ( size 9 )
+  F(A) = G(A, ['a'/'']A)
+  G(A, B) = A
+  main = F(X)
+  S* = [('F', 0), ('G', 0)]
+  terminates_lazy (graph): True  terminates_eager (graph): True
+  live unfolding E' = X   (5 unfolding nodes)
+  lazy == plain-L(E') on all inputs of length<=4, eager err everywhere: OK
+
+SECTION (a): OK
+
+========================================================================
+SECTION (d): liveness through chains
+========================================================================
+
+--- dead-through-two-call-levels
+  F(A) = G(A, H(F(['a'/'ba'][''/'aa'][''/'aab'][''/'aaba']('aa' ['ba'/'a']A)), A))
+  G(A, B) = A
+  H(A, B) = A
+  main = F(X)
+  S* = [('F', 0), ('G', 0), ('H', 0)]
+  (note: (H,1) and (H,2) are live *in H*, but the only call to H
+   sits in G's dead argument 2, so neither is ever forced)
+  live unfolding E' = X
+  lazy == E' on all inputs, eager diverges: OK
+
+--- fixpoint deadness through two definitions
+  P(A) = Q(M(A))
+  Q(A) = A
+  M(A) = K(A)
+  K(A) = 'a'
+  main = P(X)
+  S* = [('Q', 0)]  (expect exactly {(Q,0)}; (P,0),(M,0),(K,0) dead)
+  live unfolding E' = 'a'
+  lazy == E' == eager == 'a' on all inputs (P,Q,M,K all agree; only the deadness chain matters here): OK
+
+SECTION (d): OK
+
+========================================================================
+SECTIONS (b),(c),(f): input-independence, plain-L agreement,
+eager/lazy agreement -- curated + random corpus
+========================================================================
+
+  corpus: 253 programs, 13141 halting runs
+  lazy-halting programs: 171  (of which eager-halting: 169, lazy-only (separations): 2)
+  lazy-diverging programs: 82  unfolding cap hits: 0
+  eager-err/lazy-value separations on inputs: 16
+  passed: 253   FAILED: 0
+SECTIONS (b),(c),(f): OK
+
+========================================================================
+ALL CHECKS PASSED
+========================================================================

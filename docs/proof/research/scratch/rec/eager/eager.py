@@ -39,7 +39,29 @@ import sys
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(_HERE, '..', '..', 'paper_variants'))
-from verify_variants import subst  # noqa: E402  ([A/B]C, paper Definition 1)
+from verify_variants import subst as _raw_subst  # noqa: E402  ([A/B]C)
+
+# Guard against value-length explosion in randomized programs (a body like
+# cat(cat(X,X),cat(X,X)) squares its string each Kleene level).  Purely a
+# testing device: raises so the caller can skip that program.
+MAXLEN = 4000
+
+
+class SizeEx(Exception):
+    pass
+
+
+def subst(A, B, C):
+    """[A/B]C, paper Definition def:subst, with a testing length guard."""
+    if len(A) > MAXLEN or len(B) > MAXLEN or len(C) > MAXLEN:
+        raise SizeEx()
+    return _raw_subst(A, B, C)
+
+
+def _catguard(a, b):
+    if len(a) + len(b) > MAXLEN:
+        raise SizeEx()
+    return a + b
 
 
 # --------------------------------------------------------------- expressions
@@ -180,7 +202,7 @@ def phi_eval(P, j, inp, n, memo):
     if key in memo:
         return memo[key]
     memo[key] = None                            # (recursion descends in n)
-    v = phi_ev(P, P.body[j], inp, n, memo)
+    v = phi_ev(P, P.body[j], inp, n - 1, memo)  # phi^n = ⟦B_j⟧_{phi^{n-1}}
     memo[key] = v
     return v
 
@@ -195,7 +217,7 @@ def phi_ev(P, E, T, n, memo):
     if t == 'cat':
         a = phi_ev(P, E[1], T, n, memo)
         b = phi_ev(P, E[2], T, n, memo)
-        return None if (a is None or b is None) else a + b
+        return None if (a is None or b is None) else _catguard(a, b)
     if t == 'sub':
         r = phi_ev(P, E[1], T, n, memo)
         p = phi_ev(P, E[2], T, n, memo)
@@ -269,7 +291,7 @@ def op_ev(P, E, T, fuel, count=None):
     if t == 'cat':
         a = op_ev(P, E[1], T, fuel, count)
         b = op_ev(P, E[2], T, fuel, count)
-        return a + b
+        return _catguard(a, b)
     if t == 'sub':
         r = op_ev(P, E[1], T, fuel, count)
         p = op_ev(P, E[2], T, fuel, count)
@@ -295,10 +317,51 @@ def omega(arity):
     return ('sub', ('con', 'a'), ('con', ''), ('con', 'c'))
 
 
+def _uses_var(E, i):
+    return i in vars_of(E)
+
+
+SIGMA = 'a'          # any character of Sigma
+
+
+def seq_expr(F, G):
+    """seq(F, G) = [F.sigma / F.sigma] G  (one sub node, any alphabet).
+
+    Forces F (twice: as R and as P, both strict positions), then returns G:
+    by the paper's Identity Substitution theorem, [A/A]S = S whenever
+    A <> eps, and A = F.sigma is never empty (it ends in the character
+    sigma).  If F is undefined, the R position is undefined and so is the
+    whole node.  This is the strict-sequence combinator of L."""
+    R = ('cat', F, C(SIGMA))
+    P = ('cat', F, C(SIGMA))
+    return ('sub', R, P, G)
+
+
+def force_unused(U, Fs):
+    """Eager (call-by-value) call elimination for one call node.
+
+    Plain substitution U[F_1/X_1, ..., F_q/X_q] (Lemma beta) evaluates F_i
+    only when X_i OCCURS in U -- a call-by-name behavior.  The eager call
+    node is strict in ALL its arguments, so every F_i whose variable is
+    unused by U must still be forced: wrap with seq(F_i, .).  U is assumed
+    call-free; when U is Omega the call is bottom regardless of the
+    arguments and Omega is returned unchanged."""
+    t = U[0]
+    if t == 'sub' and U[2] == ('con', ''):      # U is Omega
+        return U
+    E = subst_expr(U, Fs)
+    for i, F in enumerate(Fs):
+        if not _uses_var(U, i):
+            E = seq_expr(F, E)
+    return E
+
+
 def unfold_def(P, j, n):
     """unfold_n(f_j) in Exp_{m_j} (call-free), with unfold_0(f_j) = Omega:
        unfold_{n+1}(f_j) = Unfold_{n+1}(B_j), where a call node
-       f_l(E_1..E_q) is replaced by unfold_n(f_l)[Unfold_{n+1}(E_i)/X_i]."""
+       f_l(E_1..E_q) is replaced by force_unused(unfold_n(f_l),
+       [Unfold_{n+1}(E_1), ..., Unfold_{n+1}(E_q)]) -- the plain
+       substitution unfolded one level, with the dead arguments forced."""
     if n == 0:
         return omega(P.ar[j])
     return unfold_ev(P, P.body[j], n)
@@ -315,8 +378,8 @@ def unfold_ev(P, E, n):
                 unfold_ev(P, E[3], n))
     if t == 'cal':
         j, es = E[1], E[2]
-        return subst_expr(unfold_def(P, j, n - 1),
-                          [unfold_ev(P, e, n) for e in es])
+        return force_unused(unfold_def(P, j, n - 1),
+                             [unfold_ev(P, e, n) for e in es])
     raise ValueError(t)
 
 
@@ -343,7 +406,7 @@ def inline_ev(P, E, done):
                 inline_ev(P, E[3], done))
     if t == 'cal':
         j, es = E[1], E[2]
-        return subst_expr(done[j], [inline_ev(P, e, done) for e in es])
+        return force_unused(done[j], [inline_ev(P, e, done) for e in es])
     raise ValueError(t)
 
 
@@ -357,7 +420,7 @@ def evL(E, T):
     if t == 'cat':
         a = evL(E[1], T)
         b = evL(E[2], T)
-        return None if (a is None or b is None) else a + b
+        return None if (a is None or b is None) else _catguard(a, b)
     if t == 'sub':
         assert not calls_in(E), "evL on call-free expression"
         r = evL(E[1], T)
