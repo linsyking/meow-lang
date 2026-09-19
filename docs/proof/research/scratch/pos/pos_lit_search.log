@@ -1,0 +1,11 @@
+  [pos_lit<=3 (|s|<=5)] depth 1: states 93
+  [pos_lit<=3 (|s|<=5)] depth 2: states 7718
+  [pos_lit<=3 (|s|<=5)] depth 3: states 586952
+  [pos_lit<=3 (|s|<=5)] NOT FOUND (depth<=3): head
+  [pos_lit<=3 (|s|<=5)] NOT FOUND (depth<=3): L(a,b)
+  [pos_lit<=3 (|s|<=5)] NOT FOUND (depth<=3): once_l(a->X)
+  [pos_lit<=3 (|s|<=5)] NOT FOUND (depth<=3): repOcc(1,a->X)
+  [pos_lit<=3 (|s|<=5)] NOT FOUND (depth<=3): truncate2
+  [pos_lit<=3 (|s|<=5)] NOT FOUND (depth<=3): droplast
+  [pos_lit<=3 (|s|<=5)] NOT FOUND (depth<=3): reverse
+  [pos_lit<=3 (|s|<=5)] FOUND: tail at (2, 'repOcc(0,a->)')

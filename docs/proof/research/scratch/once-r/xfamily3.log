@@ -1,0 +1,11 @@
+=== once-r pipelines (depth<=3, forms=R:12,P:11) ===
+  depth 1: 78 distinct functions (0s)
+    FOUND  delete-rightmost-b: [/b]
+    FOUND  identity: [/Xa]
+  depth 2: 6190 distinct functions (1s)
+    FOUND  delete-rightmost-b: [/Xa] [/b]
+    FOUND  identity: [aa/a] [/a]
+  depth 3: 578923 distinct functions (65s)
+    FOUND  delete-rightmost-b: [aa/a] [/b] [/a]
+    FOUND  identity: [aa/a] [/Xb] [/a]
+  ABSENT: delete-leftmost-b, head, tail, lastchar, droplast, replace-all-b->a, delete-all-b, reverse, swap-a-b

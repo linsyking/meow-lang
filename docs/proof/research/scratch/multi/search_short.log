@@ -1,0 +1,18 @@
+=== T_union (one-pass first-rule, expressibility open) ===
+  [union d<=3,P<=3] depth 1: 289 distinct signatures (0s)
+  [union d<=3,P<=3] depth 2: 63676 distinct signatures  [sha  [union d<=3,P<=3] depth 3: 11990766 distinct signatures (635s)
+  [union d<=3,P<=3] exhaustive: no pipeline with <= 3 passes, |P|<=3 (over ab), |R|<=2 (over ab12) computes it (11990766 signatures searched).
+  [union d<=2,P<=4] depth 1: 625 distinct signatures (0s)
+  [union d<=2,P<=4] depth 2: 263477 distinct signatures (13s)
+  [union d<=2,P<=4] exhaustive: no pipeline with <= 2 passes, |P|<=4 (over ab), |R|<=2 (over ab12) computes it (263477 signatures searched).
+  [union rand] rand: 200000 trials (1s)
+  [union rand] rand: 400000 trials (3s)
+  [union rand] randomized: no pipeline found in 500000 trials of depth<=7, |P|,|R|<=3.
+ures (3s)
+  [union d<=3,P<=3] depth 3: 11990766 distinct signatures (638s)
+  [union d<=3,P<=3] exhaustive: no pipeline with <= 3 passes, |P|<=3 (over ab), |R|<=2 (over ab12) computes it (11990766 signatures searched).
+  [union d<=2,P<=4] depth 1: 625 distinct signatures (0s)
+  [union d<=2,P<=4] depth 2: 263477 distinct signatures (13s)
+  [union d<=2,P<=4] exhaustive: no pipeline with <= 2 passes, |P|<=4 (over ab), |R|<=2 (over ab12) computes it (263477 signatures searched).
+  [union rand] rand: 200000 trials (1s)
+  [union rand] randomized: no pipeline found in 300000 trials of depth<=6, |P|,|R|<=3.

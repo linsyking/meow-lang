@@ -1,0 +1,13 @@
+=== once-r: constant-only pipelines, depth<=5, R:7 P:6, |DOM|=127 ===
+  depth 1: 37 distinct functions (0s)
+    FOUND  delete-rightmost-b: [/b]
+    FOUND  identity: [a/a]
+  depth 2: 1238 distinct functions (0s)
+    FOUND  delete-rightmost-b: [a/a] [/b]
+    FOUND  identity: [aa/a] [/a]
+  depth 3: 39327 distinct functions (2s)
+    FOUND  delete-rightmost-b: [aa/a] [/b] [/a]
+    FOUND  identity: [aa/a] [a/a] [/a]
+  depth 4: 1192366 distinct functions (68s)
+    FOUND  delete-rightmost-b: [aa/a] [a/a] [/b] [/a]
+    FOUND  identity: [aa/a] [aa/a] [/a] [/a]

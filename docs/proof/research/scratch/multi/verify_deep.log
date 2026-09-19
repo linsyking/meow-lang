@@ -1,0 +1,11 @@
+randomized (n<=6, |X|<=5, |S|<=40, |Sigma|<=5): 3000 trials, 0 failures
+marker-shaped rounds (n=6, extra=''): OK over 255 strings
+marker-shaped rounds (n=6, extra='b'): OK over 255 strings
+marker-shaped rounds (n=6, extra='ab'): OK over 255 strings
+marker-shaped rounds (n=6, extra='bb'): OK over 255 strings
+ternary with (b,x)=(a,b): 147 pattern-set families, all strings len<=6: OK
+ternary with (b,x)=(a,c): 147 pattern-set families, all strings len<=6: OK
+ternary with (b,x)=(b,a): 147 pattern-set families, all strings len<=6: OK
+ternary with (b,x)=(b,c): 147 pattern-set families, all strings len<=6: OK
+ternary with (b,x)=(c,a): 147 pattern-set families, all strings len<=6: OK
+ternary with (b,x)=(c,b): 147 pattern-set families, all strings len<=6: OK

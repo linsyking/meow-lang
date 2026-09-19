@@ -1,0 +1,176 @@
+# Replace Primitives: Expressive Power — Research Overview
+
+Synthesis of the seven per-variant studies (Phase 2). Each variant was studied by an
+independent research agent that read `../main.tex`, defined its variant in the paper's
+style, verified claims computationally by brute force, and wrote a report:
+
+| ID | Primitive | Report |
+|----|-----------|--------|
+| `L` | baseline: leftmost-first, non-overlapping, no-restart replace-all (paper Def. 1) | `../main.tex` |
+| `r2l` | mirror: rightmost-first replace-all | [r2l.md](r2l.md) |
+| `once-l` | replace leftmost occurrence only | [once-l.md](once-l.md) |
+| `once-r` | replace rightmost occurrence only | [once-r.md](once-r.md) |
+| `restart` | single-rule Markov: replace leftmost, rescan from 0, until fixpoint | [restart.md](restart.md) |
+| `rescan` | single left-to-right pass that re-enters inserted text | [rescan.md](rescan.md) |
+| `multi` | unrestricted simultaneous multi-pattern replace (freezing) | [multi.md](multi.md) |
+| `pos` | positional: `setAt(i,c)`, `repOcc(k,B,A)` | [pos.md](pos.md) |
+
+**Status policy.** All claims below carry the status assigned in the source report:
+PROVEN (agent-written proof), COMPUTATIONAL (exhaustive on a stated finite domain),
+CONJECTURE (evidence only), REFUTED (counterexample). Agent proofs have not been
+independently re-verified except where noted. Scripts live under `scratch/<id>/`.
+Notation `X ⊴ Y`: every function reachable in calculus X is reachable in calculus Y.
+
+## 1. Headline results
+
+1. **`multi ≡ L` (PROVEN, both directions; core versions too).** The paper's freezing
+   multi-replace with *unrestricted* patterns is reachable in the baseline via the
+   **comma code** (escape every character as `x·c`: all code words length 2,
+   phase-locked) running the same rename/repair/instantiate/decode architecture.
+   The paper's hypothesis (H) — patterns single-char or not ending in `x` — is an
+   artifact of its escaping scheme, not an intrinsic boundary. The paper's own
+   shadowing counterexample instance *is* computable by an explicit 10-pass
+   (minimizable to 8) constant pipeline. *(multi.md §4)*
+2. **Escape hypothesis (H2) is droppable (PROVEN).** The paper's Remark (escape-hyp)
+   asked whether `x ∉ V` can be dropped; answer: yes, the round trip needs only (H1)
+   (fixed point enumerated first). Verified on 133 escaping functions. *(multi.md)*
+3. **`restart` breaks the paper's complexity theorems (PROVEN).** A single restart
+   node `[baa/ab]ᵐ` computes binary Horner evaluation: output `2^{n-1}+n-1` in
+   `2^{n-1}−1` steps; `2t−1` nodes give towers of any height. The paper's Length
+   Bound and poly-time soundness are REFUTED for this calculus. Termination is
+   total ⟺ `B ⊄ A` when `|A| ≤ |B|` (`A ≠ B`); in general it embeds the open
+   one-rule semi-Thue termination problem. *(restart.md)*
+4. **`rescan`'s divergence is exactly the paper's non-restart clause (PROVED).**
+   `[A/B]ᵘ` is total ⟺ `B ⊄ A`, and `[A/B]ᵘ = [A/B]` iff additionally no nonempty
+   suffix of A is a proper prefix of B. The whole Section-2 toolkit collapses under
+   ᵘ (enc diverges; a no-escape lemma: every total constant-pattern ᵘ-pipeline is
+   non-injective), while the total fragment keeps the Length Bound and poly-time.
+   *(rescan.md)*
+5. **`r2l` is L's mirror, and their relation *is* the reversal problem (PROVEN).**
+   Rev Duality `[A/B]ᴿC = rev([revA/revB](revC))` lifts to a Conjugation Theorem:
+   `rev ∈ L ⟺ rev ∈ r2l`, and if rev is reachable in either, the calculi are
+   **equal**. Unconditionally the constant-pattern cores are incomparable
+   (left- vs right-subsequential); the unbordered-pattern fragments are equal;
+   the whole Section-2 toolkit and concatenation elimination work verbatim under
+   r2l. But the paper's `rep_n` construction is NOT direction-robust — under r2l
+   it fails even with (H); fixes: mirrored construction ("Xᵢ doesn't *begin* with
+   x") or the stronger "Xᵢ ends outside {b,x}" (both PROVEN). *(r2l.md)*
+
+## 2. The two hinge problems
+
+The inclusion web hangs on two ropes; together they decide everything.
+
+- **Hinge 1: `once_l ∈ L`?** (replace-leftmost-occurrence in the baseline)
+  Decides `ONCE ⊴ L` and `pos ⊴ L` (PROVEN equivalence, pos.md Theorem H).
+  `setAt(i,c) ∈ L` is PROVEN (explicit construction); `repOcc(k,B,A)` =
+  `2k+1` once-nodes with a fresh marker (PROVEN). All searches negative
+  (L-lit ≤ 4, L-macro ≤ 3, ~75M randomized pipelines; unary case IS expressible —
+  floor-halving needles — so no easy invariant separates).
+- **Hinge 2: `rev ∈ L`?** (the paper's open problem 2)
+  `rev ∈ L ⟺ rev ∈ r2l ⟺ rev ∈ once-l ⟺ rev ∈ once-r` (PROVEN).
+  Decides `r2l = L`; `L ⊴ once-r ⟺ R2L ⊴ once-l` (PROVEN). If both hinges
+  resolve positively, once-l, once-r, r2l and pos all collapse into L.
+
+## 3. The expressibility landscape (vs baseline L)
+
+| Variant | V ⊴ L | L ⊴ V | Growth / time |
+|---|---|---|---|
+| `multi` | **PROVEN** (comma code) — hence **M ≡ L** | **PROVEN** (single round) | = L: poly, `X^{\|X\|}` yes, `X^{2^{\|X\|}}` no |
+| `r2l` | OPEN ⟺ `rev ∈ L` | OPEN ⟺ `rev ∈ L` (equality if rev) | = L (mirrored bound) |
+| `restart` | **REFUTED** (amplifier ∉ L; also partial) | **REFUTED** (core-const: `[aa/a]` ∉ V by no-injective-node); full: conj. against | unbounded (towers); poly-time REFUTED |
+| `once-l` | OPEN (conj. **no**) | **REFUTED** (Fresh-Character Lemma) | linear growth, near-linear time |
+| `once-r` | OPEN (conj. **no**) | **REFUTED** (Occurrence Bound) | linear growth + occurrence bound |
+| `pos` | OPEN ⟺ `once_l ∈ L` | **REFUTED** (single-site alphabet bound + linear growth) | output ≤ linear — cannot write quadratic strings |
+| `rescan` | OPEN (conj. no; candidate witness: a-flood `[a/ab]ᵘ`) | OPEN (conj. no; toolkit collapses, no-escape lemma) | total fragment: poly-time (Length Bound verbatim); `Safe ⇒ total` REFUTED |
+
+Reading: **`multi` = L exactly; `restart` is the only variant *above* L (in growth);
+`once-l`, `once-r`, `pos` sit *below* L in different, mostly incomparable ways;
+`r2l` is L's mirror image; `rescan`'s total fragment looks incomparable.**
+
+## 4. Toolkit survival
+
+Which of the paper's constructions can be rebuilt with the variant as the only primitive:
+
+| | enc/dec | cat | head/tail | eq | if | concat-elim |
+|---|---|---|---|---|---|---|
+| `r2l` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ (mirrored) |
+| `once-l` | **✗ (proven: Fresh-Character / Max-Run)** | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `once-r` | ✗ single-char round-trip ✓ | ✓ **optimal zipper** `[Y/a]₁ᴿ[X/b]₁ᴿ(ba)`, size 7 | head/tail: conj. ✗ | conj. ✗ | conj. ✗ | ✓ (zipper) |
+| `restart` | ✗ (diverges) — black-box enc/dec recover the rest | ✓ (given enc/dec) | ✓ (given enc/dec) | ✓ | ✓ (redesigned) | open (IC conjecture) |
+| `rescan` | ✗ (diverges; no-escape lemma) | conj. ✗ | ✗ | ✗ | ✗ | conj. ✗ |
+| `pos` | ✗ (alphabet bound) | conj. ✗ (core) | tail ✓ (2 nodes); head w/ concat | conj. ✗ | — | n/a |
+
+Notable asymmetry: `once-l` rebuilds head/tail/eq/if (left-anchoring matches the
+paper's own leftmost-scan design), while `once-r` conjecturally cannot (its anchors
+are on the right). `restart` with enc/dec as black boxes recovers cat/eq/head/tail
+and needs (H) plus a new condition `X_i ∉ {b,x}` for rep_n (0 failures / 520,898
+instances).
+
+## 5. Erratum in the paper (confirmed independently by 6 of 7 agents)
+
+**Independent Substitution Lemma is false as stated**: it needs `B ≠ ε`
+(empty replacement merges neighbors and creates new occurrences).
+Counterexamples: `A="aa", B=ε, C="b", S="aba"` — `[ε/b]"aba" = "aa" ∋ "aa"` but
+`"aa" ⊄ "aba"`; also `A="bc", S="abZcd"` (multi.md). The lemma is never
+referenced later in the paper (only the `\label` at main.tex:148), so the fix is
+to add the hypothesis to the statement — no downstream proofs are affected.
+
+**FIXED (2026-09-19):** hypothesis `B ≠ ε` added to the lemma statement in
+`main.tex`, together with a necessity remark and a proof clarification (the
+inserted nonempty, character-disjoint `B` is what blocks straddling
+occurrences). Also fixed: three stale `#eval` comment lines in
+`lean/Subst.lean` (`[a/a]aa = aa`, not `= a`; the repRef/repC pair gives
+`[c, a]`, not `[c, a, a]`), confirmed against a full recompile — outputs now
+match the comments.
+
+## 6. Paper open questions — status after this research
+
+| Paper's open question | Status |
+|---|---|
+| Exact characterization of sound pattern families for rep_n (Remark rep-hyp) | **Resolved**: no restriction needed — comma code gives multi ≡ L; the paper's *construction* genuinely needs (H) (2,937/9,604 n=2 families disagree without it) |
+| Can (H2) (`x ∉ V`) be dropped from the escape round trip? (Remark escape-hyp) | **Resolved**: yes, PROVEN (only (H1) needed) |
+| Is string reversal reachable? | Still open — but now the proven hinge of the whole direction web (`rev ∈ L ⟺ rev ∈ r2l ⟺ rev ∈ once-l ⟺ rev ∈ once-r`); partial: `lastchar, droplast ∈ R2L` PROVEN |
+| Alphabet-sensitivity | Partial: pos shows a strict unary dichotomy (`[a^j/a] ∈ pos` iff `|Σ| = 1`); once-l's unary case is expressible |
+| Poly-time characterization | Refined: restart is the first variant breaking it (towers); all other variants' total fragments stay poly-time |
+
+New open problems introduced by this research, roughly by value:
+
+1. `once_l ∈ L` — decides the once-family and pos relations to L (the shared hinge).
+2. `rev ∈ L` — decides r2l = L and bridges the once web.
+3. **IC conjecture** (restart): no total, injective, growing core restart-expression exists even with variable patterns — the hinge for restart's entire toolkit; constant-pattern case PROVEN.
+4. Is one-pass multi-replace (first-rule or leftmost-longest position-priority) expressible in L? Freezing (round-priority) is; one-pass variants are pairwise distinct from it and from each other; all searches negative.
+5. Is the a-flood `[a/ab]ᵘ` L-expressible? (candidate separator for rescan vs L)
+6. `cat ∈ rescan-core`, `eq ∈ pos`, `head ∈ once-r` — blocked conjectures.
+
+## 7. Promotion candidates (into the paper / Lean)
+
+Priority-ordered, with suggested target:
+
+1. **Fix the Independent Substitution lemma** (add `B ≠ ε`) — verified erratum,
+   no downstream impact.
+2. **Comma-code construction** — strengthens the Multiple Substitution theorem by
+   removing hypothesis (H); also lets `repC_correct` in `lean/Subst.lean` be stated
+   and proven in full generality (replacing the current `sorry`'s (H) hypothesis).
+   **VERIFIED (2026-09-19)**: structural proof audited clause-by-clause, and an
+   independent reimplementation (from the report's spec only, anchored to the
+   Lean `#eval` outputs) agreed with the freezing semantics on **1,254,505
+   evaluations, 0 failures** — see
+   [verification-comma-code.md](verification-comma-code.md). Ready to promote.
+3. **A "direction" remark/section**: r2l results — direction-robustness of the
+   toolkit, mirrored rep_n hypothesis, escape direction-lock, and the
+   Conjugation Theorem tying r2l = L to reversal.
+4. **A "weaker primitives" section**: once/pos lower bounds (Fresh-Character,
+   Occurrence Bound, single-site alphabet bound, linear growth) — the
+   below-the-baseline zoo.
+5. **An "unbounded iteration" section**: restart amplifier, no-injective-node
+   theorem, termination classification + semi-Thue connection — the
+   above-the-baseline result, making the paper's Turing-completeness remark precise.
+6. **Update the open-problems list** with §6 above.
+
+**Verification status**: (1) comma-code construction — verified (proof audit +
+independent reimplementation, see
+[verification-comma-code.md](verification-comma-code.md)); (2) the Independent
+Substitution erratum — verified and **fixed** in `main.tex` (+ the stale Lean
+`#eval` comments). Still awaiting independent verification: Fresh-Character
+Lemma / `L ⊴ ONCE` refutation (once-l.md Thm 4.5), restart amplifier +
+no-injective-node theorem (restart.md Thms 4.2, 5.1).

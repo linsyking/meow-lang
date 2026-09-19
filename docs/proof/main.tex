@@ -141,7 +141,7 @@ There are several possible implementation of $\mathtt{replace}(B, A)$. We now as
 
 \begin{lemma}
     (\emph{Independent Substitution})
-    If $A \cap B = \varnothing, A \cap C = \varnothing, C \neq \epsilon$, then
+    If $B \neq \epsilon, A \cap B = \varnothing, A \cap C = \varnothing, C \neq \epsilon$, then
     \begin{align}
         A\subset [B/C]S \Leftrightarrow A \subset S
     \end{align}
@@ -159,8 +159,12 @@ There are several possible implementation of $\mathtt{replace}(B, A)$. We now as
 
     Consider whether $C \subset S$. If $C \not\subset S$, then $[B/C]S = S$, we are done. If $C \subset S$, let $S = XCY$ where $C\not\subset X$.
 
-    Then we have $[B/C](XCY) = XB([B/C]Y)$. Since $A \cap B = \varnothing$, we have $A \subset X \lor A \subset [B/C]Y$. By IH on $Y$, we have $A \subset X \lor A \subset Y$. In either case $A\subset XCY$ Thus $A \subset S$.
+    Then we have $[B/C](XCY) = XB([B/C]Y)$. Since $B \neq \epsilon$ and $A \cap B = \varnothing$, no occurrence of $A$ straddles the inserted $B$, so $A \subset X \lor A \subset [B/C]Y$. By IH on $Y$, we have $A \subset X \lor A \subset Y$. In either case $A\subset XCY$ Thus $A \subset S$.
 \end{proof}
+
+\begin{remark}
+    The hypothesis $B \neq \epsilon$ is necessary: when $B = \epsilon$ the substitution deletes $C$, and deletion can \emph{create} occurrences of $A$ by merging its neighbors. Take $A = \mathtt{aa}$, $C = \mathtt{b}$, $S = \mathtt{aba}$: $[\epsilon/\mathtt{b}]\mathtt{aba} = \mathtt{aa}$, so $A \subset [B/C]S$, yet $A \not\subset S$. (The $\Leftarrow$ direction holds also for $B = \epsilon$.)
+\end{remark}
 
 \begin{lemma}
     (\emph{Tail Elimitation})

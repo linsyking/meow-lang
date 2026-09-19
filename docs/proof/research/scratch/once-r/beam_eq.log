@@ -1,0 +1,6 @@
+  round 0: pool 9, best 240/256
+  round 1: pool 729, best 240/256
+  round 2: pool 20000, best 240/256
+  round 3: pool 20000, best 240/256
+  round 4: pool 20000, best 240/256
+eq best: 'b' 240

@@ -1,0 +1,75 @@
+[L unary core size<=7] 98824 exprs, 54664 total, FOUND:
+    FOUND  identity: ['X0', "[X0/'a']'a'"] (1171 exprs)
+    absent delete-rightmost-b
+    absent delete-leftmost-b
+    absent head
+    absent tail
+    absent lastchar
+    absent droplast
+    FOUND  replace-all-b->a: ["['a'/'b']X0", "[X0/'b']['a'/'b']X0"] (167 exprs)
+    FOUND  delete-all-b: ["[''/'b']X0", "[X0/'b'][''/'b']X0"] (171 exprs)
+    absent swap-a-b
+[L unary with-concat size<=7] 140872 exprs, 92360 total, FOUND:
+    FOUND  identity: ['X0', "(X0 '')"] (1519 exprs)
+    absent delete-rightmost-b
+    absent delete-leftmost-b
+    absent head
+    absent tail
+    absent lastchar
+    absent droplast
+    FOUND  replace-all-b->a: ["['a'/'b']X0", "['a'/'b'](X0 '')"] (175 exprs)
+    FOUND  delete-all-b: ["[''/'b']X0", "[''/'b'](X0 '')"] (182 exprs)
+    absent swap-a-b
+[L binary core size<=7] 177885 exprs, 77283 total, FOUND:
+    absent cat
+    absent eq(a/b)
+[R2L unary core size<=7] 98824 exprs, 54664 total, FOUND:
+    FOUND  identity: ['X0', "[X0/'a']'a'"] (1171 exprs)
+    absent delete-rightmost-b
+    absent delete-leftmost-b
+    absent head
+    absent tail
+    absent lastchar
+    absent droplast
+    FOUND  replace-all-b->a: ["['a'/'b']X0", "[X0/'b']['a'/'b']X0"] (167 exprs)
+    FOUND  delete-all-b: ["[''/'b']X0", "[X0/'b'][''/'b']X0"] (171 exprs)
+    absent swap-a-b
+[R2L unary with-concat size<=7] 140872 exprs, 92360 total, FOUND:
+    FOUND  identity: ['X0', "(X0 '')"] (1519 exprs)
+    absent delete-rightmost-b
+    absent delete-leftmost-b
+    absent head
+    absent tail
+    absent lastchar
+    absent droplast
+    FOUND  replace-all-b->a: ["['a'/'b']X0", "['a'/'b'](X0 '')"] (175 exprs)
+    FOUND  delete-all-b: ["[''/'b']X0", "[''/'b'](X0 '')"] (182 exprs)
+    absent swap-a-b
+[R2L binary core size<=7] 177885 exprs, 77283 total, FOUND:
+    absent cat
+    absent eq(a/b)
+[once-l unary core size<=7] 98824 exprs, 54920 total, FOUND:
+    FOUND  identity: ['X0', "[X0/'a']'a'"] (1199 exprs)
+    absent delete-rightmost-b
+    FOUND  delete-leftmost-b: ["[''/'b']X0", "[''/'b'][X0/'a']'a'"] (131 exprs)
+    absent head
+    absent tail
+    absent lastchar
+    absent droplast
+    absent replace-all-b->a
+    absent delete-all-b
+    absent swap-a-b
+[once-l unary with-concat size<=7] 140872 exprs, 92616 total, FOUND:
+    FOUND  identity: ['X0', "(X0 '')"] (1549 exprs)
+    absent delete-rightmost-b
+    FOUND  delete-leftmost-b: ["[''/'b']X0", "[''/'b'](X0 '')"] (138 exprs)
+    absent head
+    absent tail
+    absent lastchar
+    absent droplast
+    absent replace-all-b->a
+    absent delete-all-b
+    absent swap-a-b
+[once-l binary core size<=7] 177885 exprs, 77769 total, FOUND:
+    FOUND  cat: ["[X0/'a'][X1/'b']'ab'", "[X0/'b'][X1/'a']'ba'"] (2 exprs)
+    absent eq(a/b)

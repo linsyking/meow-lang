@@ -1,0 +1,23 @@
+=== L pipelines (depth<=3, forms=R:12,P:11) ===
+  depth 1: 78 distinct functions (0s)
+    FOUND  replace-all-b->a: [a/b]
+    FOUND  delete-all-b: [/b]
+    FOUND  identity: [/Xa]
+  depth 2: 5781 distinct functions (2s)
+    FOUND  replace-all-b->a: [a/b] [/b]
+    FOUND  delete-all-b: [/b] [/b]
+    FOUND  identity: [/Xa] [/Xa]
+  depth 3: 514116 distinct functions (205s)
+    FOUND  replace-all-b->a: [a/b] [/b] [/b]
+    FOUND  delete-all-b: [/b] [/b] [/b]
+    FOUND  identity: [ab/a] [aa/a] [/ab]
+  ABSENT: delete-rightmost-b, delete-leftmost-b, head, tail, lastchar, droplast, reverse, swap-a-b
+=== R2L pipelines (depth<=3, forms=R:12,P:11) ===
+  depth 1: 78 distinct functions (0s)
+    FOUND  replace-all-b->a: [a/b]
+    FOUND  delete-all-b: [/b]
+    FOUND  identity: [/Xa]
+  depth 2: 5781 distinct functions (2s)
+    FOUND  replace-all-b->a: [a/b] [/b]
+    FOUND  delete-all-b: [/b] [/b]
+    FOUND  identity: [/Xa] [/Xa]

@@ -121,7 +121,7 @@ theorem subst_cons_none (A B : List α) (c : α) (C : List α)
 
 #eval subst ['a', 'b'] ['b'] ['b']                -- [a, b]   ([ab/b]b = ab)
 #eval subst ['a', 'b'] ['b'] ['a', 'b']           -- [a, a, b]
-#eval subst ['a'] ['a'] ['a', 'a']                -- [a]      ([a/a]aa = a)
+#eval subst ['a'] ['a'] ['a', 'a']                -- [a, a]   ([a/a]aa = aa)
 #eval subst ['x', 'y'] ['x'] ['y', 'x']           -- [y, x, y] (no restart in inserted text)
 #eval subst ['a', 'a'] ['a', 'b', 'a'] ['a', 'b', 'a']  -- [a, a]
 #eval subst [] ['a'] ['b', 'a', 'a']              -- [b]      (deletion: A = ε)
@@ -1477,8 +1477,8 @@ theorem repC_correct (b x : α) (hxb : x ≠ b) (pairs : List (List α × List �
 
 #eval repRef [(['a'], ['b', 'a'])] ['a', 'b', 'a']                     -- [b, a, b, b, a]
 #eval repC 'a' 'c' [(['a'], ['b', 'a'])] ['a', 'b', 'a']               -- [b, a, b, b, a]
-#eval repRef [(['a', 'b'], ['c']), (['b', 'a'], ['a', 'a'])] ['a', 'b', 'a']  -- [c, a, a]
-#eval repC 'a' 'c' [(['a', 'b'], ['c']), (['b', 'a'], ['a', 'a'])] ['a', 'b', 'a']  -- [c, a, a]
+#eval repRef [(['a', 'b'], ['c']), (['b', 'a'], ['a', 'a'])] ['a', 'b', 'a']  -- [c, a]
+#eval repC 'a' 'c' [(['a', 'b'], ['c']), (['b', 'a'], ['a', 'a'])] ['a', 'b', 'a']  -- [c, a]
 
 -- The hypothesis (H) is essential — the paper's shadowing example:
 -- `X₁ = "ab"` and `X₂ = "bbb"` both end with `x = 'b'`.
