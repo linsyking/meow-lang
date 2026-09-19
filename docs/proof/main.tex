@@ -210,7 +210,7 @@ There are several possible implementation of $\mathtt{replace}(B, A)$. We now as
 \end{lemma}
 
 \begin{remark}
-    Both added hypotheses are necessary:
+    Both hypotheses are necessary:
     \begin{itemize}
         \item If $Y$ is bordered, the lemma fails: take $X=\mathtt{ba}\subset Y=\mathtt{aba}$ (the border $\mathtt{a}$) and $Z=\mathtt{baabba}$. The greedy scan finds $\mathtt{ba}$ at positions $0$ and $4$, so $[Y/X]Z = \mathtt{aba}\cdot\mathtt{ab}\cdot\mathtt{aba} = \mathtt{abaababa}$; now $[X/Y]$ finds $\mathtt{aba}$ at positions $0$ and $3$, yielding $\mathtt{bababa} \neq Z$. The failure is a \emph{spurious} $\mathtt{aba}$ straddling the junction of two inserted copies -- exactly what unborderedness rules out in case (ii) of the proof.
         \item If $X \not\subset Y$ it fails even for unbordered $Y$: take $X=\mathtt{a}$, $Y=\mathtt{bb}$, $Z=\mathtt{aba}$: $[Y/X]Z = \mathtt{bbbbb}$, and $[X/Y](\mathtt{bbbbb}) = \mathtt{aab} \neq Z$.
@@ -344,12 +344,8 @@ We will need the \texttt{cat} macro extensively:
 \end{theorem}
 
 \begin{remark}
-    \label{rem:cat-old}
-    The construction is delicate in two ways.
-
-    \emph{First}, a natural-looking choice of markers such as $xx, bb$ is \emph{wrong}: with the definition $\mathtt{dec}([\mathtt{enc}(Y)/bb][\mathtt{enc}(X)/xx](xxbb))$, take $\Sigma = \{b, x\}$, $X = \mathtt{b}$, $Y = \mathtt{x}$. Then $[\mathtt{enc}(X)/xx](xxbb) = \mathtt{xb}\,\mathtt{bb} = \mathtt{xbbb}$, and the second substitution $[\mathtt{enc}(Y)/bb]$ finds a spurious $bb$ \emph{at the junction} -- the final $b$ of $\mathtt{enc}(X) = \mathtt{xb}$ followed by the first $b$ of the marker -- so it yields $\mathtt{xxb}$, and the result is $\mathtt{dec}(\mathtt{xxb}) = \mathtt{xb} \neq \mathtt{bx} = XY$. The failure mode is a \emph{junction}: $\mathtt{enc}(X)$ may end with $b$, and the following marker begins with $b$, creating an occurrence of the marker pattern that straddles the boundary. The markers $xb^k$ with $k \ge 2$ are immune: they contain $bb$, hence never occur inside any $\mathtt{enc}$-image (Theorem (ii) above), and they begin with $x$, hence never straddle a junction adjacent to an $\mathtt{enc}$-image (that would need two $b$'s at the end of the image).
-
-    \emph{Second}, the order of the two substitutions matters: $xb^2 \subset xb^3$, so if $[E_Y/xb^3]$ did not run first, the pattern $xb^2$ would also match inside the surviving $xb^3$ marker.
+    \label{rem:cat-markers}
+    The markers $xb^k$ with $k \ge 2$ are chosen so that every occurrence of a marker in the intermediate strings is a whole marker. A marker contains $bb$, and an $\mathtt{enc}$-image contains none (Theorem (ii) above), so a marker never occurs inside an image; and a marker begins with $x$, so an occurrence straddling the junction between an image and a marker would need its $b$'s to come from the image's end -- two $b$'s, which the image does not contain. The order of the two substitutions matters as well: $xb^2 \subset xb^3$, so the pattern $xb^2$ would also match inside a surviving $xb^3$ marker if $[\mathtt{enc}(Y)/xb^3]$ did not run first.
 \end{remark}
 
 \begin{proof}
@@ -357,7 +353,7 @@ We will need the \texttt{cat} macro extensively:
 
     \emph{Step 1} ($[E_Y/xb^3]$, applied first): in $xb^2xb^3$ the pattern $xb^3$ occurs exactly once, at position $3$. An occurrence starting at position $0$ would read $xb^2x \neq xb^3$; none starts at positions $1$ or $2$, since $xb^3$ begins with $x$. The substitution yields $xb^2\,E_Y$.
 
-    \emph{Step 2} ($[E_X/xb^2]$): in $xb^2\,E_Y$ the leftmost occurrence of $xb^2$ is at position $0$. There is no other occurrence: none starts at positions $1$ or $2$ (the pattern begins with $x$), none lies inside $E_Y$ ($xb^2$ contains $bb$, $E_Y$ does not), and none straddles the junction (the same argument as in Remark~\ref{rem:cat-old}: it would need two $b$'s at the end of $E_Y$, impossible). The substitution yields $E_X\,E_Y$.
+    \emph{Step 2} ($[E_X/xb^2]$): in $xb^2\,E_Y$ the leftmost occurrence of $xb^2$ is at position $0$. There is no other occurrence: none starts at positions $1$ or $2$ (the pattern begins with $x$), none lies inside $E_Y$ ($xb^2$ contains $bb$, $E_Y$ does not), and none straddles the junction (the same argument as in Remark~\ref{rem:cat-markers}: it would need two $b$'s at the end of $E_Y$, impossible). The substitution yields $E_X\,E_Y$.
 
     \emph{Step 3}: $E_XE_Y = \mathtt{enc}(X)\mathtt{enc}(Y) = \mathtt{enc}(XY)$ by (iii), and $\mathtt{dec}(\mathtt{enc}(XY)) = XY$ by (i).
 \end{proof}
@@ -409,7 +405,7 @@ It is possible to extract the first character of one string.
 
 \begin{remark}
     \label{rem:order}
-    This is the first theorem where the right-to-left composition convention is load-bearing: in $\mathtt{tail}$, the substitution $[\epsilon/\sigma_1\sigma_1\sigma_2\sigma_1]$ \emph{must} run before $[\epsilon/\sigma_1\sigma_1\sigma_2]$ (for $a = \sigma_1$, the text begins $\sigma_1\sigma_1\sigma_2\sigma_1\cdots$, where both patterns match at position $0$, and only the longer deletion is correct). Reading the composition left-to-right would compute something else.
+    The right-to-left composition convention is essential here: in $\mathtt{tail}$, the substitution $[\epsilon/\sigma_1\sigma_1\sigma_2\sigma_1]$ \emph{must} run before $[\epsilon/\sigma_1\sigma_1\sigma_2]$ (for $a = \sigma_1$, the text begins $\sigma_1\sigma_1\sigma_2\sigma_1\cdots$, where both patterns match at position $0$, and only the longer deletion is correct). Reading the composition left-to-right would compute something else.
 \end{remark}
 
 \begin{proof}
@@ -448,7 +444,7 @@ We can also define the equality.
 \end{definition}
 
 \begin{remark}
-    The border marker must again be of the form $xb^k$, $k \ge 2$: with the earlier choice $bb$ (i.e.\ $\mathtt{benc} = bb\,\mathtt{enc}(X)\,bb$, $\mathtt{bdec} = [\epsilon/bb]$), an $X$ ending in $b$ produces a spurious $bb$ at the second junction, and $\mathtt{bdec}(\mathtt{benc}(X)) = \mathtt{enc}(X)$ fails. The $xb^2$ borders have no occurrence inside $\mathtt{enc}$-images (they contain $bb$) and do not straddle junctions (they begin with $x$, while a junction before a border is preceded by an image that cannot end in $b$ twice).
+    The border marker is again of the form $xb^k$, $k \ge 2$: it contains $bb$, so it never occurs inside an $\mathtt{enc}$-image, and it begins with $x$, so an occurrence straddling a junction adjacent to an image would need the image to end in $bb$, which it never does.
 \end{remark}
 
 \begin{lemma}
@@ -520,13 +516,13 @@ We can define a \texttt{if} selector:
 \begin{remark}
     Both the hypothesis and the order are essential.
     \begin{itemize}
-        \item \emph{$\top \neq b$ is needed}: if $\top = b$, take $C = \bot$, any $X \neq \epsilon$: then $[bb/\bot](\bot) = bb$ and $[\mathtt{enc}(X)/\top](bb) = [\mathtt{enc}(X)/b](bb)$ replaces \emph{both} characters, corrupting the marker for the final substitution. (Empirically this case fails on roughly half of all inputs.)
+        \item \emph{$\top \neq b$ is needed}: if $\top = b$, take $C = \bot$, any $X \neq \epsilon$: then $[bb/\bot](\bot) = bb$ and $[\mathtt{enc}(X)/\top](bb) = [\mathtt{enc}(X)/b](bb)$ replaces \emph{both} characters, corrupting the marker for the final substitution.
         \item \emph{The order is load-bearing}: swapping the inner two substitutions to $[bb/\bot][\mathtt{enc}(X)/\top]$ breaks the $C = \top$ case as soon as $X$ contains $\bot$: $[\mathtt{enc}(X)/\top](\top) = \mathtt{enc}(X)$ is then followed by $[bb/\bot]$, which fires inside $\mathtt{enc}(X)$.
     \end{itemize}
     This is the same phenomenon as Remark~\ref{rem:order}: each substitution in the pipeline assumes the invariants established by the ones to its right.
 \end{remark}
 
-Next, we can do the multiple substitution. We first fix its intended semantics -- note that simply iterating $[Y_1/X_1], [Y_2/X_2], \dots$ is \emph{not} the right notion, since inserted text would be rescanned by later passes. The right notion freezes matches instead:
+Next, we can do the multiple substitution. Its semantics requires some care: iterating $[Y_1/X_1], [Y_2/X_2], \dots$ sequentially would let later passes rescan inserted text, so the intended semantics \emph{freezes} matches instead:
 
 \begin{definition}
     (\emph{Multiple Substitution, Semantics})
@@ -583,12 +579,7 @@ Next, we can do the multiple substitution. We first fix its intended semantics -
 
 \begin{remark}
     \label{rem:rep-hyp}
-    The hypothesis ``$|X_i| = 1$ or $X_i$ does not end with $x$'' is essential, and the earlier draft's hypotheses ``$X_i \not\subset X_j$ for $i \neq j$'' are \emph{neither necessary nor sufficient}:
-    \begin{itemize}
-        \item \emph{Not sufficient}: take $b = \sigma_1$, $x = \sigma_2$, $S = \sigma_1\sigma_2\sigma_1\sigma_1\sigma_2$, $X_1 = \sigma_1\sigma_2$, $Y_1 = \sigma_2\sigma_2\sigma_2\sigma_1$, $X_2 = \sigma_2\sigma_2\sigma_2$, $Y_2 = \sigma_1\sigma_1$. Then $X_1 \not\subset X_2 \not\subset X_1$, but the construction returns $\sigma_2\sigma_2\sigma_2\sigma_1\sigma_1\sigma_1\sigma_2$ instead of $\sigma_2\sigma_2\sigma_2\sigma_1\sigma_1\sigma_2\sigma_2\sigma_2\sigma_1$. The failure is a \emph{shadowing}: a spurious match of $\mathtt{enc}(X_1)$ ending at an escape $x$ precedes and overlaps a genuine match, so the genuine one is never scanned (the scan does not restart inside inserted text).
-        \item \emph{Not necessary}: pairs violating $X_i \not\subset X_j$ routinely compute correctly -- e.g.\ patterns $X_1 = \mathtt{c} \subset X_2 = \mathtt{cd}$ satisfy the hypothesis of Theorem~\ref{lem:multiple substitution} (take $b = \mathtt{d}$, $x = \mathtt{c}$), and the construction is sound on every $S$.
-    \end{itemize}
-    The exact characterization of the pattern families for which the construction is sound is open; the condition above is a convenient sufficient one.
+    The hypothesis ``$|X_i| = 1$ or $X_i$ does not end with $x$'' is essential: if some $X_i$ with $|X_i| \ge 2$ ends with $x$, the construction can go wrong. Take $b = \sigma_1$, $x = \sigma_2$, $S = \sigma_1\sigma_2\sigma_1\sigma_1\sigma_2$, $X_1 = \sigma_1\sigma_2$, $Y_1 = \sigma_2\sigma_2\sigma_2\sigma_1$, $X_2 = \sigma_2\sigma_2\sigma_2$, $Y_2 = \sigma_1\sigma_1$: the construction returns $\sigma_2\sigma_2\sigma_2\sigma_1\sigma_1\sigma_1\sigma_2$ instead of $\sigma_2\sigma_2\sigma_2\sigma_1\sigma_1\sigma_2\sigma_2\sigma_2\sigma_1$. The failure is a \emph{shadowing}: a spurious match of $\mathtt{enc}(X_1)$ ending at an escape $x$ precedes and overlaps a genuine match, so the genuine one is never scanned (the scan does not restart inside inserted text). Nesting among the patterns, on the other hand, is permitted: the theorem applies for instance to $X_1 = \mathtt{c} \subset X_2 = \mathtt{cd}$ (take $b = \mathtt{d}$, $x = \mathtt{c}$). The exact characterization of the pattern families for which the construction is sound is open; the condition above is a convenient sufficient one.
 \end{remark}
 
 \begin{remark}
@@ -661,7 +652,7 @@ Now to formally define the escaping function, we need to introduce the concept o
     \label{rem:escape-hyp}
     \begin{itemize}
         \item Hypothesis~\ref{H1} is essential -- the round trip fails when the fixed point is not enumerated first. Take $\Sigma = \{p, q, r\}$, $b = p$, $x = q$, $U = \{q, p\}$ enumerated $(u_1, u_2) = (q, p)$ with $f(q) = r$, $f(p) = p$ (the fixed point is $u_2 = u_k$, not $u_1$), and $S = \mathtt{pr}$. Then $\mathtt{escape}_f(S) = \mathtt{ppr}$, but $\mathtt{unescape}_f(\mathtt{ppr}) = \mathtt{pq} \neq \mathtt{pr}$: round 1 of $\mathtt{unescape}$ has pattern $u_kf(u_1) = \mathtt{pr}$, which matches at positions $1$--$2$ -- the \emph{second character} of the $\mathtt{pp}$-pair followed by the untouched $r$ -- freezing the wrong region; the self-pair $\mathtt{pp}$ is only round 2's pattern, and position 1 is frozen by then. The role of (H1) is to make the self-pair $u_ku_k$ the \emph{first} round of $\mathtt{unescape}$: by Step 2 its second character is the only $u_1$ that does not begin a pair, and round 1's greedy leftmost consumption eats the self-pairs before any straddling pattern gets scanned.
-        \item Hypothesis~\ref{H2} ($x \notin V$) is used only to satisfy Theorem~\ref{lem:multiple substitution}. Empirically the round trip still holds when some $f(u_i) = x$ (verified by exhaustive random testing over $10^5$ cases), but we do not have a proof; the class of spurious matches excluded by that theorem's hypothesis appears never to shadow in this specific construction. We leave the sharper statement open.
+        \item Hypothesis~\ref{H2} ($x \notin V$) is used only to satisfy Theorem~\ref{lem:multiple substitution}. Whether it can be dropped from this round trip -- in particular, whether the round trip still holds when some $f(u_i) = x$ -- is open.
     \end{itemize}
 \end{remark}
 

@@ -1,0 +1,6 @@
+name = "subst"
+version = "0.1.0"
+defaultTargets = ["Subst"]
+
+[[lean_lib]]
+name = "Subst"
