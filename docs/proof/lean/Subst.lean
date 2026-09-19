@@ -2075,6 +2075,7 @@ theorem itext_nil_or_x (b x : α) : ∀ ns : List (NFItem α),
       | mark i => exact Or.inr ⟨_, rfl⟩
       | dmg W i j => exact Or.inr ⟨_, rfl⟩
 
+omit [DecidableEq α] in
 /-- An `enc2`-image contains no `bb` (every `b` is data, followed by the
 next block's comma). -/
 theorem no_bb_enc2 (x b : α) (hxb : x ≠ b) : ∀ W : List α, ¬ Occ [b, b] (enc2 x W) := by
@@ -2106,7 +2107,10 @@ theorem no_bb_enc2 (x b : α) (hxb : x ≠ b) : ∀ W : List α, ¬ Occ [b, b] (
         obtain ⟨r, hr⟩ := replicate_suffix b 2 p₁ p₂ (by show p₁ ++ p₂ = [b, b]; rw [hp]) h2
         have hst : enc2 x W' = p₂ ++ v := h3
         rcases enc2_nil_or_x x W' with hnil | ⟨T, hcons⟩
-        · rw [hnil] at hst; exact nomatch hst
+        · rw [hnil] at hst
+          cases p₂ with
+          | nil => exact absurd rfl h2
+          | cons d p' => exact nomatch hst
         · rw [hr, hcons] at hst
           injection hst with hbx _
           exact hxb hbx
@@ -2121,6 +2125,406 @@ theorem marker_occ_bb {x b : α} {n : Nat} (l : List α) (hn : 2 ≤ n)
   have hsplit : marker x b (m + 2) = ([x] ++ [b, b]) ++ List.replicate m b := rfl
   rw [hsplit] at h
   exact occ_mid h
+
+/-! ### The block lemmas of the phase-locking argument
+
+  The code of every character is the 2-block `x·c`, so a normal text (a
+  concatenation of `enc2`-fragments and markers) reads as a sequence of
+  2-blocks.  The three facts below classify every match of a code
+  `enc2 X` in such a text: it either starts at a block boundary
+  (aligned), or it is *shadowed* (an aligned match starts one position
+  earlier and fires first), or it is a *spurious* aligned match that eats
+  the head of a following marker -- exactly the case the repair pass
+  undoes. -/
+
+theorem matchHere_cons_self (c : α) (B C : List α) :
+    matchHere (c :: B) (c :: C) = matchHere B C := by
+  simp [matchHere]
+
+/-- Inversion for a `matchHere` at a cons-cons position. -/
+theorem matchHere_cons_inv {c d : α} {B C D : List α}
+    (h : matchHere (c :: B) (d :: C) = some D) : c = d ∧ matchHere B C = some D := by
+  by_cases hcd : c = d
+  · subst hcd
+    rw [matchHere_cons_self] at h
+    exact ⟨rfl, h⟩
+  · rw [matchHere_ne c B d C hcd] at h
+    exact absurd h (by simp)
+
+/-- β-shadowing: if the code `enc2 X` matches starting at a *data*
+position -- at the head `w` of the remaining fragment text
+`w :: enc2 W' ++ T` -- then it also matches starting one position
+earlier, at the fragment's comma.  So once the scan has rejected the
+comma position it also rejects the data position, and the scan advances
+block by block through a fragment; a misaligned match never fires.
+Requires the continuation `T` after the fragment to be empty or
+marker-headed (`x b …`), which the round invariant maintains. -/
+theorem beta_shadow (x b : α) (hxb : x ≠ b) : ∀ (X : List α) (w : α) (W' T : List α),
+    (T = [] ∨ ∃ T₂, T = x :: b :: T₂) → ∀ D : List α,
+    matchHere (enc2 x X) (w :: enc2 x W' ++ T) = some D →
+    ∃ D', matchHere (enc2 x X) (x :: w :: enc2 x W' ++ T) = some D' := by
+  intro X
+  induction X with
+  | nil =>
+      intro w W' T _ D _
+      exact ⟨x :: w :: enc2 x W' ++ T, rfl⟩
+  | cons c X' ih =>
+      intro w W' T hT D h
+      rw [enc2_head] at h ⊢
+      obtain ⟨hw, h2⟩ := matchHere_cons_inv h
+      subst hw
+      cases W' with
+      | nil =>
+          -- the fragment is exhausted; the misaligned match reads `T`
+          show ∃ D', matchHere (x :: c :: enc2 x X') (x :: x :: T) = some D'
+          have h2' : matchHere (c :: enc2 x X') T = some D := h2
+          cases T with
+          | nil => simp [matchHere] at h2'
+          | cons d T' =>
+              obtain ⟨hd, h3⟩ := matchHere_cons_inv h2'
+              rcases hT with hT | ⟨T₂, hT⟩
+              · exact absurd hT (by simp)
+              · injection hT with hdx hT₂
+                rw [hdx] at hd
+                rw [hdx, hT₂, hd]
+                rw [hT₂] at h3
+                cases X' with
+                | nil => exact ⟨x :: b :: T₂, by simp [matchHere, enc2_nil]⟩
+                | cons e X'' =>
+                    rw [enc2_head] at h3
+                    obtain ⟨hxe, _⟩ := matchHere_cons_inv h3
+                    exact absurd hxe hxb
+      | cons w₂ W'' =>
+          -- the misaligned match recurses one block into the fragment
+          have h2' : matchHere (c :: enc2 x X') (x :: w₂ :: enc2 x W'' ++ T) = some D := h2
+          obtain ⟨hc, h3⟩ := matchHere_cons_inv h2'
+          obtain ⟨D₂, hD₂⟩ := ih w₂ W'' T hT D h3
+          refine ⟨D₂, ?_⟩
+          show matchHere (x :: c :: enc2 x X') (x :: x :: x :: w₂ :: (enc2 x W'' ++ T))
+              = some D₂
+          rw [hc, matchHere_cons_self, matchHere_cons_self]
+          exact hD₂
+
+/-- L2 (aligned classification): a match of the code `enc2 X` starting at
+a block boundary of the fragment text `enc2 W ++ T` is either *genuine*
+-- it ends inside the fragment, consuming whole blocks (`W = X ++ W₂`)
+-- or *spurious* (γ): it consumes the whole fragment plus the head `x b`
+of the following marker, which is only possible when `X = W ++ [b]`.
+The continuation `T` must be empty or marker-headed with two `b`'s
+(every marker `x b^{j+1}` has `j ≥ 1`). -/
+theorem aligned_class (x b : α) (hxb : x ≠ b) : ∀ (W X : List α) (T D : List α),
+    (T = [] ∨ ∃ T₃, T = x :: b :: b :: T₃) →
+    matchHere (enc2 x X) (enc2 x W ++ T) = some D →
+    (∃ W₂, W = X ++ W₂ ∧ D = enc2 x W₂ ++ T) ∨
+      (∃ T₃, T = x :: b :: b :: T₃ ∧ X = W ++ [b] ∧ D = b :: T₃) := by
+  intro W
+  induction W with
+  | nil =>
+      intro X T D hT h
+      have h' : matchHere (enc2 x X) T = some D := h
+      cases X with
+      | nil =>
+          refine Or.inl ⟨[], rfl, ?_⟩
+          have h5 : some T = some D := h'
+          injection h5 with hD
+          exact hD.symm
+      | cons c X' =>
+          rw [enc2_head] at h'
+          cases T with
+          | nil => simp [matchHere] at h'
+          | cons d T' =>
+              obtain ⟨_, h2⟩ := matchHere_cons_inv h'
+              rcases hT with hT | ⟨T₃, hT⟩
+              · exact absurd hT (by simp)
+              · injection hT with hdx hT'
+                rw [hdx, hT']
+                rw [hT'] at h2
+                obtain ⟨hc, h3⟩ := matchHere_cons_inv h2
+                rw [hc]
+                cases X' with
+                | nil =>
+                    refine Or.inr ⟨T₃, rfl, rfl, ?_⟩
+                    have h4 : some (b :: T₃) = some D := h3
+                    injection h4 with hD
+                    exact hD.symm
+                | cons e X'' =>
+                    rw [enc2_head] at h3
+                    obtain ⟨hxe, _⟩ := matchHere_cons_inv h3
+                    exact absurd hxe hxb
+  | cons w W' ih =>
+      intro X T D hT h
+      cases X with
+      | nil =>
+          refine Or.inl ⟨w :: W', rfl, ?_⟩
+          have h5 : some (enc2 x (w :: W') ++ T) = some D := h
+          injection h5 with hD
+          exact hD.symm
+      | cons c X' =>
+          have ha : matchHere (x :: c :: enc2 x X') (x :: w :: (enc2 x W' ++ T))
+              = some D := h
+          obtain ⟨_, hb⟩ := matchHere_cons_inv ha
+          obtain ⟨hcw, h1⟩ := matchHere_cons_inv hb
+          rcases ih X' T D hT h1 with ⟨W₂, hW', hD⟩ | ⟨T₃, hT3, hX', hD⟩
+          · refine Or.inl ⟨W₂, ?_, hD⟩
+            rw [← hcw, hW']
+            rfl
+          · refine Or.inr ⟨T₃, hT3, ?_, hD⟩
+            rw [hX', ← hcw]
+            rfl
+
+/-- L1 (aligned fire): a genuine occurrence of `X` at the head of a
+fragment fires: the code `enc2 X` matches and the scan resumes exactly
+at `enc2 W₂ ++ T`. -/
+theorem aligned_fire (x : α) (X W₂ T : List α) :
+    matchHere (enc2 x X) (enc2 x (X ++ W₂) ++ T) = some (enc2 x W₂ ++ T) := by
+  rw [enc2_append, List.append_assoc]
+  exact matchHere_prefix _ _
+
+/-- LM2: the code of the single character `b` matches the head of any
+marker `x b^{j+1}`, eating exactly the marker's first two characters. -/
+theorem mark_fire (x b : α) (j : Nat) (T : List α) :
+    matchHere (enc2 x [b]) (marker x b (j + 1) ++ T) = some (List.replicate j b ++ T) := by
+  show matchHere [x, b] (x :: b :: (List.replicate j b ++ T))
+      = some (List.replicate j b ++ T)
+  rw [matchHere_cons_self, matchHere_cons_self]
+  rfl
+
+/-- LM1: no code `enc2 X` with `X` neither empty nor the single
+character `b` matches at a marker's head (`x b b …`). -/
+theorem mark_none (x b : α) (hxb : x ≠ b) (X R : List α) (hX : X ≠ []) (hXb : X ≠ [b]) :
+    matchHere (enc2 x X) (x :: b :: b :: R) = none := by
+  cases X with
+  | nil => exact absurd rfl hX
+  | cons c X' =>
+      show matchHere (x :: c :: enc2 x X') (x :: b :: b :: R) = none
+      rw [matchHere_cons_self]
+      by_cases hcb : c = b
+      · rw [hcb, matchHere_cons_self]
+        cases X' with
+        | nil => exact absurd (by rw [hcb]) hXb
+        | cons e X'' =>
+            rw [enc2_head, matchHere_ne x _ b _ hxb]
+      · rw [matchHere_ne c _ b _ hcb]
+
+/-- The contrapositive of `beta_shadow`: when the aligned position has
+been rejected, the following data position is rejected too, so the scan
+skips a whole block of the fragment. -/
+theorem beta_skip (x b : α) (hxb : x ≠ b) (X : List α) (w : α) (W' T : List α)
+    (hT : T = [] ∨ ∃ T₂, T = x :: b :: T₂)
+    (hA : matchHere (enc2 x X) (enc2 x (w :: W') ++ T) = none) :
+    matchHere (enc2 x X) (w :: (enc2 x W' ++ T)) = none := by
+  cases hM : matchHere (enc2 x X) (w :: (enc2 x W' ++ T)) with
+  | none => rfl
+  | some D =>
+      obtain ⟨D', hD'⟩ := beta_shadow x b hxb X w W' T hT D hM
+      have hD2 : matchHere (enc2 x X) (enc2 x (w :: W') ++ T) = some D' := hD'
+      rw [hD2] at hA
+      exact absurd hA (by simp)
+
+omit [DecidableEq α] in
+/-- Prepend the block `x·w` to an item list, merging into a leading
+fragment. -/
+def shiftItem (w : α) : List (NFItem α) → List (NFItem α)
+  | NFItem.frag W :: ns => NFItem.frag (w :: W) :: ns
+  | ns => NFItem.frag [w] :: ns
+
+omit [DecidableEq α] in
+/-- Prepend the fragment `A` to an item list, merging into a leading
+fragment; an empty `A` prepends nothing. -/
+def pushFrag (A : List α) : List (NFItem α) → List (NFItem α)
+  | NFItem.frag W :: ns => NFItem.frag (A ++ W) :: ns
+  | ns => if A = [] then ns else NFItem.frag A :: ns
+
+omit [DecidableEq α] in
+/-- Canonical item lists (the round invariant between rounds): every
+fragment is nonempty and followed by a marker (or ends the list), every
+marker has index `≥ 1`, and there are no damaged markers. -/
+def Canon : List (NFItem α) → Prop
+  | [] => True
+  | NFItem.mark j :: ns => 1 ≤ j ∧ Canon ns
+  | NFItem.dmg _ _ _ :: _ => False
+  | NFItem.frag _ :: NFItem.frag _ :: _ => False
+  | NFItem.frag _ :: NFItem.dmg _ _ _ :: _ => False
+  | NFItem.frag W :: NFItem.mark j :: ns => W ≠ [] ∧ 1 ≤ j ∧ Canon ns
+  | NFItem.frag W :: [] => W ≠ []
+
+omit [DecidableEq α] in
+/-- The shape of a rename round's output: fragments are nonempty and
+never adjacent, markers have index `≥ 1` and `≤ i`, and damaged markers
+belong to round `i` with at least one leftover `b`. -/
+def Rounded (i : Nat) : List (NFItem α) → Prop
+  | [] => True
+  | NFItem.mark j :: ns => 1 ≤ j ∧ j ≤ i ∧ Rounded i ns
+  | NFItem.dmg _ i' j :: ns => i' = i ∧ 1 ≤ j ∧ Rounded i ns
+  | NFItem.frag _ :: NFItem.frag _ :: _ => False
+  | NFItem.frag _ :: NFItem.dmg _ _ _ :: _ => False
+  | NFItem.frag W :: NFItem.mark j :: ns => W ≠ [] ∧ 1 ≤ j ∧ Rounded i ns
+  | NFItem.frag W :: [] => W ≠ []
+
+/-- The rename scan through the fragment `W`, which is followed by the
+marker `mark j`; the result covers exactly the fragment and the marker.
+Round `i`, pattern `X` (nonempty; the `[]` case is a degenerate
+pass-through). -/
+def fragGo (b x : α) (i : Nat) : List α → List α → Nat → List (NFItem α)
+  | [], W, _ => [NFItem.frag W, NFItem.mark 1]
+  | c :: X', w :: W', j =>
+      if (w :: W').take (c :: X').length = c :: X' then
+        NFItem.mark i :: fragGo b x i (c :: X') ((w :: W').drop (c :: X').length) j
+      else if (c :: X') = (w :: W') ++ [b] then [NFItem.dmg (w :: W') i j]
+      else shiftItem w (fragGo b x i (c :: X') W' j)
+  | c :: X', [], j =>
+      if (c :: X') = [b] then [NFItem.dmg [] i j] else [NFItem.mark j]
+termination_by _ W _ => W.length
+decreasing_by
+  · have h1 : 1 ≤ (c :: X').length := by simp
+    have h2 : ((w :: W').drop (c :: X').length).length = (w :: W').length - (c :: X').length :=
+      List.length_drop
+    have h3 : 1 ≤ (w :: W').length := by simp
+    omega
+  · simp only [List.length_cons]
+    omega
+
+/-- The rename scan through the final fragment `W`, which is followed by
+nothing. -/
+def fragEnd (b x : α) (i : Nat) : List α → List α → List (NFItem α)
+  | [], W => [NFItem.frag W]
+  | c :: X', w :: W' =>
+      if (w :: W').take (c :: X').length = c :: X' then
+        NFItem.mark i :: fragEnd b x i (c :: X') ((w :: W').drop (c :: X').length)
+      else shiftItem w (fragEnd b x i (c :: X') W')
+  | _ :: _, [] => []
+termination_by _ W => W.length
+decreasing_by
+  · have h1 : 1 ≤ (c :: X').length := by simp
+    have h2 : ((w :: W').drop (c :: X').length).length = (w :: W').length - (c :: X').length :=
+      List.length_drop
+    have h3 : 1 ≤ (w :: W').length := by simp
+    omega
+  · simp only [List.length_cons]
+    omega
+
+/-- Round `i` of the rename: replace every match of the code `enc2 X` by
+the marker `x b^{i+1}`, marking the damage a spurious match does to a
+following marker. -/
+def renameNF (b x : α) (i : Nat) (X : List α) : List (NFItem α) → List (NFItem α)
+  | [] => []
+  | NFItem.mark j :: ns =>
+      if X = [b] then NFItem.dmg [] i j :: renameNF b x i X ns
+      else NFItem.mark j :: renameNF b x i X ns
+  | NFItem.frag W :: NFItem.mark j :: ns =>
+      fragGo b x i X W j ++ renameNF b x i X ns
+  | NFItem.frag W :: ns =>
+      fragEnd b x i X W ++ renameNF b x i X ns
+  | NFItem.dmg A i' j :: ns => NFItem.dmg A i' j :: renameNF b x i X ns
+
+/-- The repair pass of round `i` (pattern `X`): each damaged marker is
+restored to the fragment it ate followed by the eaten marker. -/
+def repairNF (b x : α) (i : Nat) (X : List α) : List (NFItem α) → List (NFItem α)
+  | [] => []
+  | NFItem.mark j :: ns => NFItem.mark j :: repairNF b x i X ns
+  | NFItem.dmg A _ j :: ns => pushFrag A (NFItem.mark j :: repairNF b x i X ns)
+  | NFItem.frag W :: NFItem.dmg A _ j :: ns =>
+      NFItem.frag (W ++ A) :: NFItem.mark j :: repairNF b x i X ns
+  | NFItem.frag W :: ns => NFItem.frag W :: repairNF b x i X ns
+
+/-- The instantiation pass `k`: each marker `mark k` becomes the
+fragment `Y`. -/
+def instNF (b x : α) (k : Nat) (Y : List α) : List (NFItem α) → List (NFItem α)
+  | [] => []
+  | NFItem.frag W :: ns => NFItem.frag W :: instNF b x k Y ns
+  | NFItem.mark j :: ns =>
+      if j = k then pushFrag Y (instNF b x k Y ns)
+      else NFItem.mark j :: instNF b x k Y ns
+  | NFItem.dmg A i' j :: ns => NFItem.dmg A i' j :: instNF b x k Y ns
+
+theorem matchHere_app_left : ∀ (P Q R R' : List α),
+    matchHere Q R = some R' → matchHere (P ++ Q) (P ++ R) = some R' := by
+  intro P
+  induction P with
+  | nil => intro Q R R' h; exact h
+  | cons a P' ih =>
+      intro Q R R' h
+      show matchHere (a :: (P' ++ Q)) (a :: (P' ++ R)) = some R'
+      rw [matchHere_cons_self]
+      exact ih Q R R' h
+
+/-- The γ-fire: when `X = W ++ [b]` and the continuation after the
+fragment is marker-headed, the spurious match consumes the fragment and
+the marker's head `x b`. -/
+theorem gamma_fire (x b : α) (W T₃ : List α) :
+    matchHere (enc2 x (W ++ [b])) (enc2 x W ++ (x :: b :: b :: T₃)) = some (b :: T₃) := by
+  have h1 : enc2 x (W ++ [b]) = enc2 x W ++ [x, b] := by
+    rw [enc2_append]; rfl
+  have h2 : matchHere [x, b] (x :: b :: b :: T₃) = some (b :: T₃) := by
+    rw [matchHere_cons_self, matchHere_cons_self]
+    rfl
+  rw [h1]
+  exact matchHere_app_left (enc2 x W) [x, b] (x :: b :: b :: T₃) (b :: T₃) h2
+
+omit [DecidableEq α] in
+theorem take_append_self : ∀ (X W : List α), (X ++ W).take X.length = X := by
+  intro X
+  induction X with
+  | nil => intro W; rfl
+  | cons c X' ih =>
+      intro W
+      show (c :: (X' ++ W)).take (X'.length + 1) = c :: X'
+      rw [List.take_succ_cons, ih W]
+
+omit [DecidableEq α] in
+theorem drop_append_self : ∀ (X W : List α), (X ++ W).drop X.length = W := by
+  intro X
+  induction X with
+  | nil => intro W; rfl
+  | cons c X' ih =>
+      intro W
+      show (c :: (X' ++ W)).drop (X'.length + 1) = W
+      rw [List.drop_succ_cons, ih W]
+
+omit [DecidableEq α] in
+theorem itext_append (b x : α) : ∀ (ns₁ ns₂ : List (NFItem α)),
+    itext b x (ns₁ ++ ns₂) = itext b x ns₁ ++ itext b x ns₂ := by
+  intro ns₁
+  induction ns₁ with
+  | nil => intro ns₂; rfl
+  | cons n ns ih =>
+      intro ns₂
+      cases n with
+      | frag W => simp only [itext, List.cons_append, ih, List.append_assoc]
+      | mark i => simp only [itext, List.cons_append, ih, List.append_assoc]
+      | dmg W i j => simp only [itext, List.cons_append, ih, List.append_assoc]
+
+omit [DecidableEq α] in
+theorem itext_shift (b x : α) (w : α) (ns : List (NFItem α)) :
+    itext b x (shiftItem w ns) = x :: w :: itext b x ns := by
+  cases ns with
+  | nil => simp [itext, shiftItem, enc2_head, enc2_nil]
+  | cons n ns' =>
+      cases n with
+      | frag W => simp [itext, shiftItem, enc2_head, List.cons_append]
+      | mark i => simp [itext, shiftItem, enc2_head, enc2_nil, List.cons_append]
+      | dmg W i j => simp [itext, shiftItem, enc2_head, enc2_nil, List.cons_append]
+
+omit [DecidableEq α] in
+theorem itext_push (b x : α) (A : List α) (ns : List (NFItem α)) :
+    itext b x (pushFrag A ns) = enc2 x A ++ itext b x ns := by
+  cases ns with
+  | nil =>
+      by_cases hA : A = []
+      · subst hA; simp [pushFrag, itext, enc2_nil]
+      · simp [pushFrag, itext, hA]
+  | cons n ns' =>
+      cases n with
+      | frag W =>
+          simp only [pushFrag, itext, enc2_append, List.append_assoc]
+      | mark i =>
+          by_cases hA : A = []
+          · subst hA; simp [pushFrag, itext, enc2_nil]
+          · simp [pushFrag, itext, hA]
+      | dmg W i j =>
+          by_cases hA : A = []
+          · subst hA; simp [pushFrag, itext, enc2_nil]
+          · simp [pushFrag, itext, hA]
 
 /-! ### The construction over `enc2` directly
 

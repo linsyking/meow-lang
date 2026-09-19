@@ -275,3 +275,53 @@ Template, rigor audit and front-matter rewrite of `main.tex`:
   variant (above): 317,855 evaluations over |Σ| = 2 and 3 (rule sets n ≤ 3
   with ≥ 1 empty pattern, patterns ≤ 1, inputs ≤ 4), 0 failures against the
   skip-empty-patterns semantics.
+
+## 9. Citations, Related Work, Conclusion (2026-09-19, evening)
+
+- **Structure added**: `\subsection{Related Work}` closing the Introduction
+  (4 run-in paragraphs: string rewriting / what is not covered / codes &
+  transductions & stringology / growth of one-rule systems), a short
+  `\section{Conclusion}`, and a 24-entry `references.bib` built with
+  `splncs04`. Paper now 40 pages, 0 overfulls, 0 undefined refs, all 24
+  entries cited.
+- **Every entry verified online** before inclusion (DBLP blocked; used
+  Springer meta tags, NASA NTRS, zbMATH, Cornell Nuprl bib, publisher pages).
+  Notable exact data: Geser one-pair-of-overlaps = RTA 2003, LNCS 2706,
+  pp. 410–423 (Springer's own recommended citation; the "p. 439" floating
+  around search engines is wrong); Moczydłowski–Geser = RTA 2005, LNCS
+  3467, pp. 338–352 (Nuprl bib GM05); Matiyasevich–Sénizergues = TCS
+  330(1):145–169, 2005 (3-rule undecidability); McNaughton inhibitor = JAR
+  26(4):409–431, 2001; Sénizergues RTA-96 = LNCS 1103, pp. 302–316.
+- **FABRICATED REFERENCE AVOIDED**: the recent arXiv survey 2608.19397
+  cites "Geser, Hofbauer, Waldmann, *The Termination Problem for One-Rule
+  Leftmost String Rewriting is Decidable*, J. Symbolic Computation 38(5):
+  1387–1411, 2004, DOI 10.1016/j.jsc.2004.06.002". The DOI resolves to an
+  unrelated paper; no index (Springer, zbMATH, search engines, Waldmann's
+  own one-rule bibliography) knows the title; GHW's real joint work is
+  match-boundedness. Do NOT cite it; the claim "one-rule leftmost
+  termination is decidable" rests on it and must be treated as
+  unverified. Our open problem 5 (leftmost decidability) stays open as
+  written.
+- **New computation** (`$CLAUDE_JOB_DIR/tmp/leftmost_vs_general.py`): on
+  all 930 binary rules |A|,|B| ≤ 4, rules diverging under the leftmost
+  strategy = rules admitting ANY infinite derivation (closure computation,
+  inputs ≤ 7; finite acyclic closure is an exact termination certificate
+  by König's lemma). Also confirms (i)/(ii) hold unrestrictedly. This
+  went into thm:termination's proof: "on this domain the strategy
+  restriction costs nothing". The (i)–(iv) proofs were noted
+  strategy-independent in the proof text (the weight argument is
+  position-free), so the classical classification for |A| ≤ |B| falls out.
+- **thm:termination(v) reworded**: the old "the problem embeds the
+  one-rule semi-Thue termination problem" is now the precise "this is the
+  termination problem for the single rule B→A under the leftmost strategy;
+  its unrestricted-strategy form is a long-standing open problem,
+  undecidable already for systems with three rules" + citations.
+- **Other citation points**: borders/periodicity → Lothaire, Fine–Wilf;
+  comma code = uniform prefix code → Berstel–Perrin (note: enc = [xb/b] is
+  NOT a prefix code — x is a prefix of xb — only the length-2 comma code
+  is; cite codes only there); thm:fp & thm:subsequential → KMP, Aho–Corasick,
+  Berstel, Elgot–Mezei; §4 remark → Markov, Post, Book–Otto; cor:towers →
+  both tower nodes are rules of the Zantema–Geser family 0^p1^q→1^r0^s
+  (ab→baa and aa→ab both fit after renaming); §5.6 items 5–6 → the
+  decidable-class cluster + Kurth's census tradition + Kobayashi et al.
+  derivational complexity.
