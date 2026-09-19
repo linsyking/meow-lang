@@ -633,14 +633,10 @@ Now to formally define the escaping function, we need to introduce the concept o
 \begin{theorem}
     (\emph{Character Escaping})
 
-    Suppose $f: U\rightarrow V, U=\{u_1,\cdots,u_n\}, f(u_k)=u_k$, and let $b, x \in \Sigma$ with $b\neq x$ be the characters of the substitution construction. Assume:
-    \begin{enumerate}[(H1)]
-        \item \label{H1} the enumeration is chosen such that $u_1 = u_k$ (the fixed point comes \emph{first}); since $U$ is a set, this is a convention, not a restriction.
-    \end{enumerate}
-    We define:
+    Suppose $f: U\rightarrow V, U=\{u_1,\cdots,u_n\}$, has a fixed point; without loss of generality $f(u_1) = u_1$ (the enumeration of the set $U$ is chosen so that the fixed point comes \emph{first}). Let $b, x \in \Sigma$ with $b\neq x$ be the characters of the substitution construction. We define:
     \begin{align}
-        \mathtt{escape}_f(S)   & \triangleq \mathtt{rep}_n(S,u_1,u_kf(u_1),\cdots, u_n,u_kf(u_n))  \\
-        \mathtt{unescape}_f(S) & \triangleq \mathtt{rep}_n(S,u_kf(u_1),u_1,\cdots, u_kf(u_n), u_n)
+        \mathtt{escape}_f(S)   & \triangleq \mathtt{rep}_n(S,u_1,u_1f(u_1),\cdots, u_n,u_1f(u_n))  \\
+        \mathtt{unescape}_f(S) & \triangleq \mathtt{rep}_n(S,u_1f(u_1),u_1,\cdots, u_1f(u_n), u_n)
     \end{align}
     Then, for any string $S$,
     \begin{align}
@@ -653,30 +649,18 @@ Now to formally define the escaping function, we need to introduce the concept o
 
     \emph{Step 1: what $\mathtt{escape}$ does.} Its patterns $u_1, \dots, u_n$ are distinct single characters, so each character of $S$ lying in $U$ is frozen, in its own round, and every other character is untouched. Hence
     \begin{align}
-        \mathtt{escape}_f(S) \;=\; S\text{ with every } u_i \text{ replaced by } u_k f(u_i),
+        \mathtt{escape}_f(S) \;=\; S\text{ with every } u_i \text{ replaced by } u_1 f(u_i),
     \end{align}
-    simultaneously. Call each block $u_k f(u_i)$ a \emph{pair}; note $u_1 = u_k$, and the pair of $u_1$ is $u_1u_1$.
+    simultaneously. Call each block $u_1f(u_i)$ a \emph{pair}; the pair of $u_1$ is $u_1u_1$.
 
-    \emph{Step 2: every $u_1$ of $\mathtt{escape}_f(S)$ begins a pair, except the second character of a $u_1u_1$-pair.} The characters of $\mathtt{escape}_f(S)$ are either untouched characters (none of which is in $U$, in particular none is $u_1$), pair-heads $u_k = u_1$, or second characters $f(u_i)$. A second character equals $u_1$ iff $f(u_i) = u_1 = f(u_1)$, i.e.\ $i = 1$ by injectivity: only the $u_1u_1$-pair's second character.
+    \emph{Step 2: every $u_1$ of $\mathtt{escape}_f(S)$ begins a pair, except the second character of a $u_1u_1$-pair.} The characters of $\mathtt{escape}_f(S)$ are either untouched characters (none of which is in $U$, in particular none is $u_1$), pair-heads $u_1$, or second characters $f(u_i)$. A second character equals $u_1$ iff $f(u_i) = u_1 = f(u_1)$, i.e.\ $i = 1$ by injectivity: only the $u_1u_1$-pair's second character.
 
-    \emph{Step 3: $\mathtt{unescape}$ inverts.} Its first-round pattern is $u_kf(u_k) = u_1u_1$. By Step 2, occurrences of $u_1u_1$ start at pair-heads: a pair-head $u_1$ followed by $f(u_i) = u_1$ -- exactly the $u_1u_1$-pairs -- or the second character of a $u_1u_1$-pair followed by the next pair's head. The greedy leftmost scan takes the former first, and resuming after it destroys the latter (a chain $u_1u_1u_1u_1\cdots$ of consecutive $u_1u_1$-pairs is consumed pairwise). So round 1 freezes exactly the $u_1u_1$-pairs.
+    \emph{Step 3: $\mathtt{unescape}$ inverts.} Its first-round pattern is $u_1f(u_1) = u_1u_1$. By Step 2, occurrences of $u_1u_1$ start at pair-heads: a pair-head $u_1$ followed by $f(u_i) = u_1$ -- exactly the $u_1u_1$-pairs -- or the second character of a $u_1u_1$-pair followed by the next pair's head. The greedy leftmost scan takes the former first, and resuming after it destroys the latter (a chain $u_1u_1u_1u_1\cdots$ of consecutive $u_1u_1$-pairs is consumed pairwise). So round 1 freezes exactly the $u_1u_1$-pairs.
 
-    Round $i \geq 2$ has pattern $u_k f(u_i) = u_1f(u_i)$. In the unfrozen text, an occurrence must start at a pair-head $u_1$ (the only unfrozen $u_1$'s, by Step 2), followed by $f(u_j)$ with $f(u_j) = f(u_i)$, i.e.\ $j = i$ by injectivity: exactly the $i$-pairs. Occurrences straddling pair boundaries or frozen regions are inadmissible.
+    Round $i \geq 2$ has pattern $u_1 f(u_i)$. In the unfrozen text, an occurrence must start at a pair-head $u_1$ (the only unfrozen $u_1$'s, by Step 2), followed by $f(u_j)$ with $f(u_j) = f(u_i)$, i.e.\ $j = i$ by injectivity: exactly the $i$-pairs. Occurrences straddling pair boundaries or frozen regions are inadmissible.
 
-    Finally, replacing every frozen pair $u_kf(u_i)$ by $u_i$ and leaving untouched characters alone reconstructs $S$ exactly.
+    Finally, replacing every frozen pair $u_1f(u_i)$ by $u_i$ and leaving untouched characters alone reconstructs $S$ exactly.
 \end{proof}
-
-\begin{remark}
-    \label{rem:escape-hyp}
-    \begin{itemize}
-        \item Hypothesis~\ref{H1} is essential -- the round trip fails when the fixed point is not enumerated first. Take $\Sigma = \{p, q, r\}$, $b = p$, $x = q$, $U = \{q, p\}$ enumerated $(u_1, u_2) = (q, p)$ with $f(q) = r$, $f(p) = p$ (the fixed point is $u_2 = u_k$, not $u_1$), and $S = \mathtt{pr}$. Then $\mathtt{escape}_f(S) = \mathtt{ppr}$, but $\mathtt{unescape}_f(\mathtt{ppr}) = \mathtt{pq} \neq \mathtt{pr}$: round 1 of $\mathtt{unescape}$ has pattern $u_kf(u_1) = \mathtt{pr}$, which matches at positions $1$--$2$ -- the \emph{second character} of the $\mathtt{pp}$-pair followed by the untouched $r$ -- freezing the wrong region; the self-pair $\mathtt{pp}$ is only round 2's pattern, and position 1 is frozen by then. The role of (H1) is to make the self-pair $u_ku_k$ the \emph{first} round of $\mathtt{unescape}$: by Step 2 its second character is the only $u_1$ that does not begin a pair, and round 1's greedy leftmost consumption eats the self-pairs before any straddling pattern gets scanned.
-        \item An earlier version of this theorem carried a second hypothesis, $x \notin V$, needed so that the patterns $u_k f(u_i)$ would satisfy the restriction the original enc-based construction of Remark~\ref{rem:comma} imposed on patterns; the comma code makes it unnecessary, and nothing in the semantic proof above refers to the contents of $V$.
-    \end{itemize}
-\end{remark}
-
-% \begin{proof}
-%     By \ref{lem:double substitution}.
-% \end{proof}
 
 \section{The Substitution Calculus}
 

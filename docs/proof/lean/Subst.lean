@@ -16,14 +16,14 @@
   everything over `σ`; roadmap in its docstring).  For the comma code the
   *code layer* is proven: `enc2Pass_eq` (the pass composition computes the
   block map) and `dec2Pass_enc2` (the decode round trip); the
-  phase-locking staging argument is the remaining work.  `repC` -- the
-  paper's original enc-based variant, now only a remark in the paper -- is
-  kept as a demo of the shadowing failure; under its (H) condition it
-  should equal `repRef`, but that statement is not proven here.  (Theorem
-  (escaping) is `repC2` on special pair sets; not formalized.)  Also proven
-  along the way: the Double Substitution Lemma, cat, benc/bdec border
-  coding, eq, ite, head, and tail (the last two need `X ⊆ Σ`, as the paper
-  assumes `Σ = {σ₁..σ_N}` throughout).
+  phase-locking staging argument is the remaining work.  `repC` is an
+  enc-based variant of the construction, which computes `repRef` only under
+  the condition that every `X_i` is a single character or does not end in
+  `x` (a statement not proven here); it is kept as a demo of the shadowing
+  failure.  (Theorem (escaping) is `repC2` on special pair sets; not
+  formalized.)  Also proven along the way: the Double Substitution Lemma,
+  cat, benc/bdec border coding, eq, ite, head, and tail (the last two need
+  `X ⊆ Σ`, as the paper assumes `Σ = {σ₁..σ_N}` throughout).
 
   Build: `lake build`.  Quick iteration: `lake env lean Subst.lean`.
 -/
@@ -1469,11 +1469,10 @@ def instantiate (b x : α) : Nat → List (List α × List α) → List α → L
   | i, (_, Yi) :: ps, T =>
       instantiate b x (i - 1) ps (subst (enc b x Yi) (marker x b (i + 1)) T)
 
-/-- The enc-based construction -- the paper's original variant of multiple
-substitution (now only a remark there: it computes the freezing semantics
-only under the condition that every `X_i` is a single character or does
-not end in `x`, a statement not proven in this file).  Kept for the
-shadowing demo below. -/
+/-- An enc-based variant of the multiple-substitution construction, which
+computes the freezing semantics only under the condition that every `X_i`
+is a single character or does not end in `x` (a statement not proven in
+this file).  Kept for the shadowing demo below. -/
 def repC (b x : α) (pairs : List (List α × List α)) (S : List α) : List α :=
   dec b x (instantiate b x pairs.length pairs.reverse
     (renameRepair b x 1 pairs (enc b x S)))
@@ -1483,15 +1482,15 @@ def repC (b x : α) (pairs : List (List α × List α)) (S : List α) : List α 
 #eval repRef [(['a', 'b'], ['c']), (['b', 'a'], ['a', 'a'])] ['a', 'b', 'a']  -- [c, a]
 #eval repC 'a' 'c' [(['a', 'b'], ['c']), (['b', 'a'], ['a', 'a'])] ['a', 'b', 'a']  -- [c, a]
 
--- The hypothesis (H) is essential — the paper's shadowing example:
--- `X₁ = "ab"` and `X₂ = "bbb"` both end with `x = 'b'`.
+-- The single-char / no-trailing-`x` condition is essential — the
+-- shadowing example: `X₁ = "ab"` and `X₂ = "bbb"` both end with `x = 'b'`.
 #eval repC 'a' 'b' [("ab".toList, "bbba".toList), ("bbb".toList, "aa".toList)] "abaab".toList
 #eval repRef [("ab".toList, "bbba".toList), ("bbb".toList, "aa".toList)] "abaab".toList
 -- the two disagree: a spurious match of enc(X₁) shadows a genuine one
 
--- Regression sweep: repC against the freezing semantics on (H)-respecting
--- patterns (b = 'a', x = 'c'; every pattern is a single char or avoids a
--- trailing 'c'), all string shapes over {a, b, c}.
+-- Regression sweep: repC against the freezing semantics on the patterns it
+-- is meant to handle (b = 'a', x = 'c'; every pattern is a single char or
+-- avoids a trailing 'c'), all string shapes over {a, b, c}.
 #eval Id.run do
   let mut allOk := true
   let strs : List (List Char) :=
@@ -1536,6 +1535,7 @@ theorem enc2_append (x : α) (S T : List α) :
     enc2 x (S ++ T) = enc2 x S ++ enc2 x T := by
   simp [enc2, List.map_append, List.flatten_append]
 
+omit [DecidableEq α] in
 theorem enc2_injective (x : α) : ∀ S T : List α, enc2 x S = enc2 x T → S = T := by
   intro S
   induction S with
@@ -1671,7 +1671,7 @@ theorem enc2Go_units (x : α) : ∀ (σ l S : List α), σ.Pairwise (· ≠ ·) 
       · simp only [enc2Go]
         rw [ite_eq_left hcx,
           ih l S hnd.2 (fun d hd e he => hdis d hd e (List.mem_cons_of_mem _ he)),
-          hcx, List.reverse_cons, List.append_assoc]
+          hcx, List.reverse_cons]
         have hmap : S.map (encUnit x (σ'.reverse ++ l))
             = S.map (encUnit x (σ'.reverse ++ [x] ++ l)) := by
           refine List.map_congr_left fun d _ => ?_
@@ -1829,7 +1829,7 @@ theorem dec2Passes_units (x : α) : ∀ (σ l Z : List α), σ.Pairwise (· ≠ 
       · simp only [dec2Passes]
         rw [ite_eq_left hcx,
           ih l Z hnd.2 hlx (fun d hd e he => hdis d hd e (List.mem_cons_of_mem _ he)),
-          hcx, List.reverse_cons, List.append_assoc]
+          hcx, List.reverse_cons]
         have hmap : Z.map (decUnit x (σ'.reverse ++ l))
             = Z.map (decUnit x (σ'.reverse ++ [x] ++ l)) := by
           refine List.map_congr_left fun d _ => ?_
@@ -1925,9 +1925,8 @@ def repC2 (b x : α) (σ : List α) (pairs : List (List α × List α)) (S : Lis
 
 /-- Theorem (Multiple Substitution): the comma-code construction
 computes the freezing semantics for ARBITRARY nonempty patterns -- no
-hypothesis (H).  The patterns, replacements, and `S` must be over `σ` (the
-paper works over a fixed finite alphabet throughout).  This subsumes the
-paper's original Theorem (rep_n), whose construction genuinely needs (H).
+restriction on the patterns.  The patterns, replacements, and `S` must be
+over `σ` (the paper works over a fixed finite alphabet throughout).
 
 The proof is the phase-locking argument: in a normal text (a concatenation
 of `enc2`-fragments and markers) every misaligned occurrence of `enc2(X_i)`
@@ -1948,15 +1947,15 @@ theorem repC2_correct (b x : α) (hxb : x ≠ b) (σ : List α) (hnd : σ.Pairwi
 #eval repC2 'a' 'c' ['a', 'b', 'c'] [(['a'], ['b', 'a'])] ['a', 'b', 'a']  -- [b, a, b, b, a]
 #eval repC2 'a' 'c' ['a', 'b', 'c'] [(['a', 'b'], ['c']), (['b', 'a'], ['a', 'a'])] ['a', 'b', 'a']  -- [c, a]
 
--- The paper's shadowing instance, where `repC` (the enc-based construction)
--- fails: `X₁ = "ab"` and `X₂ = "bbb"` both end with `x = 'b'` -- hypothesis
--- (H) violated -- yet the comma code computes the freezing semantics.
+-- The shadowing instance of the remark: `X₁ = "ab"` and `X₂ = "bbb"` both
+-- end with `x = 'b'`, which the enc-based variant `repC` cannot handle --
+-- yet the comma code computes the freezing semantics.
 #eval repC2 'a' 'b' ['a', 'b'] [("ab".toList, "bbba".toList), ("bbb".toList, "aa".toList)] "abaab".toList
 #eval repRef [("ab".toList, "bbba".toList), ("bbb".toList, "aa".toList)] "abaab".toList
 -- [b, b, b, a, a, b, b, b, a] both times (`repC` returns [b, b, b, a, a, a, b])
 
--- Regression sweep: repC2 against the freezing semantics, now with
--- (H)-violating patterns included (b = 'a', x = 'c'; `ac` and `cc` end with
+-- Regression sweep: repC2 against the freezing semantics, including
+-- patterns that end in `x` (b = 'a', x = 'c'; `ac` and `cc` end with
 -- `x = 'c'`); all strings, patterns, and replacements over σ = {a, b, c}.
 -- (The full domain -- all strings ≤ 8 over σ -- was verified against the
 -- independent Python model: 984,100 evaluations, 0 failures.)
