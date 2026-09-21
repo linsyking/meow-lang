@@ -511,3 +511,94 @@ FINAL LANDSCAPE: eager = L (inert); lazy args = L (inert, operationally
 separated); lazy passes = partial computable (universal); streams =
 beyond every finite-state emitter (characterization open). The whole
 distance rides on one clause: [A/B]S = S when B not< S, regardless of A.
+
+## 15. Prior-art stage COMPLETE — novelty confirmed (2026-09-21)
+
+Agent: research/scratch/priorart/REPORT.md (4 rounds, 38 verification
+entries). All citations below independently re-verified by the
+coordinator (WebFetch/curl/search) before entering the paper.
+
+VERDICT: Theorem 6.4 (lazy-pass recursion = exactly the partial computable
+functions, over the single never-rescanning fixed-string pass) is NOT
+proved or stated anywhere findable. Inertness (Thms 6.1-6.2) is new —
+nothing similar exists anywhere. Closest relatives:
+- Markov normal algorithms: exact characterization but iterate-to-NF
+  (already cited, markov54).
+- Rust macro_rules!: genuine tag-system proof with halt-equivalence
+  (TLBORM, community book) — but token trees, rescan, no laziness rule,
+  no inertness.
+- Wehar's informal note: Sub(u,v,x) single sweep + assignment + universal
+  program => TC — the nearest statement in spirit; already uses the
+  occurrence-inertness equation as its if. Cited (wehar).
+- /// esolang: repeated substitution on own text; TC via Johansen's BCT
+  interpreter (2009). Cited (slashes, Swett 2006).
+- C preprocessor: NO proof exists, only demonstrations (BF interpreter).
+  Blue paint ("unavailable" bit) blocks self-reference; Fultz deferred
+  expansion = the unformalized cousin of our lazy-pass clause; Mazières
+  2021: "the real limit is how much time and memory we have for cpp, not
+  the fact that cpp isn't turing complete". Cited (mazieres21).
+- C++ templates (Veldhuizen 1995, proof sketch, "absence of formal
+  semantics makes rigorous proof unlikely"). Cited (veldhuizen95tc).
+- Huet-Levy 1979 (INRIA RR 359): our lazy-pass rule = a neededness
+  criterion, never before instantiated for string substitution.
+  Cited (huetlevy79).
+- sed: TC via labels/branches, not s alone (Blaess turing.sed via
+  Krumins). Cited (krumins-sed).
+- Streams: Endrullis-Grabmayer-Hendriks-Isihara-Klop, "Productivity of
+  Stream Definitions", TCS 411(4-5):765-782, 2010 — close prior art for
+  §6.3 not previously cited. Cited (endrullis10).
+- Alur-Cerny FSTTCS 2010 SSTs — the finite-state boundary our recursion
+  escapes. Cited (alur10).
+
+PAPER EDITS (coordinator): new Related Work paragraph "Substitution-based
+programming" (11 new bib entries, all coordinator-verified online:
+kernighan77m4, knuth84, veldhuizen95tc, tlborm, mazieres21, krumins-sed,
+slashes, wehar, huetlevy79, alur10, endrullis10); SST sentence appended to
+the transductions paragraph; productivity-analogue sentence appended to
+§6.3's opening. Build: 50 pages, 0 overfull, 0 undefined. Bib 25 -> 36.
+Not cited (unverifiable/incomplete): fischer68 (dropped, out of scope),
+garrido06, sijtsma89, coquand94, Finch blue-paint post, Retina TC proof.
+Collision check: "meow" collides only at name level (esolangs has five
+unrelated Meow languages); nothing substitution-based.
+
+## 16. last/init IN L + L+R and design-space stages launched (2026-09-21, later)
+
+USER QUESTION: is last(X) reachable in plain L? ANSWER: YES — proved and
+machine-verified by the coordinator on the spot (no agent needed):
+- Construction (now Proposition prop:last, end of §2): T = enc²_x(X)·bb.
+  The anchor bb never occurs in an enc²-image (Comma Code (ii)), so for
+  each σ the CONSTANT pattern P_σ = xσbb occurs only at the junction, iff
+  last(X)=σ. Occurrence of a constant is testable (eq of [c/P]T vs T);
+  deleting the matching P_σ + dec² = init (drop last char). So
+  last, init, rotate-right (cat(last,init)) ∈ L, all total. (Also
+  swap-first-last = cat(last, tail(init), head) ∈ L.)
+- Verified: research/scratch/… verify_last.py (in job tmp): 511 strings
+  over {a,b} len ≤ 8, 1533 evaluations, 0 fails.
+- CONSEQUENCE FOR THE REV HINGE: reading/editing the right end is NOT
+  the obstruction — bounded anchored surgery is in L. Any rev ∉ L
+  invariant must hold for last (output[0] = w[n-1]!) and init. Paper: prop
+  added at end of §2; §4 open-problem-2 and §5.6 hinge-2 pointers now say
+  "the question is whether the bounded calculus can REORDER, not read".
+  Build 50pp, 0 overfull. The rev agent was messaged with the finding
+  (positive controls for invariant testing + anchor trick as synthesis
+  seed).
+
+TWO NEW STAGES LAUNCHED (user request):
+- L+R agent (research/scratch/lr/): the union calculus, L-passes and
+  R-passes mixed, no recursion. Key texture: R-fns = rev∘f∘rev exactly;
+  rev ∈ L ⟹ L+R = L; L+R ⊋ L ⟹ rev ∉ L; a mixed rev witness ⟹ (rev ∈ L
+  or L+R ⊋ L) — either way new. Questions: mixed rev witness hunt (CEGIS
+  over mixed pipelines), collapse-vs-strictness, commutation/normal forms
+  for mixed pipelines (r2l-agree = unbordered case), what R is natively
+  good at beyond L, place in the web.
+- Systems/design-space agent (research/scratch/systems/): everything
+  beyond one-at-a-time §5 and §6 recursion, EXCLUDING L+R and the
+  is-rev-in-L problem. Candidates: pairwise variant combinations
+  (once+restart, rescan+once, positional+restart...), new axes (anchored
+  passes [A/^B],[A/B$] — connected to the anchor trick; k-th occurrence
+  [A/B]_k (k=1 is once); wildcard patterns; native multi-pattern passes),
+  inward fragments of L (delete-only, single-char patterns,
+  length-preserving), the flat lazy-pass calculus (no recursion, §6
+  conservativity ⟹ L + more-definedness — characterize it). Standard
+  battery per system; final design-space map + which deserve a paper
+  section.

@@ -1,0 +1,64 @@
+phase 0: subst == str.replace on 20000 random triples: 0 disagreements
+phase 1: 28 patterns, 29 replacements survive (total on |w|<=8)
+  pass space: 806
+  BFS level 1: behaviors 448 (0s)
+  BFS level 2: behaviors 210317 (2s)
+phase 2: rev behavior reachable at depth<=2: False
+  best depth<=2 score: exact=18, lcp=61, mism=23
+  best pipeline (run order): [('b', 'headX'), ('iXa', 'swapflX')]
+  gen 0: new best (14, 47, -39) pipeline=[('iXa', 'swapflX'), ('aXi', 'decX'), ('Xa', 'ba'), ('arotr', 'X')]
+  gen 1: new best (15, 56, -56) pipeline=[('aba', 'enc2X'), ('aab', 'b'), ('iXa', 'swapflX')]
+  gen 2: new best (16, 55, -36) pipeline=[('Xb', 'b'), ('bab', 'lastX'), ('iXa', 'swapflX'), ('bbX', 'headX'), ('rot1a', 'encX'), ('bab', 'tail2X')]
+  gen 3: new best (17, 56, -31) pipeline=[('aX', 'Xb'), ('iXa', 'swapflX'), ('bX', 'XaX'), ('enc2aa', 'headX')]
+  gen 7: new best (18, 56, -30) pipeline=[('iXa', 'swapflX'), ('arotr', 'X')]
+  gen 15: new best (18, 58, -29) pipeline=[('iXa', 'swapflX'), ('enc2aa', 'abX'), ('bba', 'tailX'), ('aX', 'halveX'), ('aX', 'bX'), ('aenc', 'aa')]
+  gen 21: new best (18, 59, -29) pipeline=[('bbX', 'a'), ('iXa', 'swapflX'), ('Xa', 'Xb'), ('enc2aa', 'abX'), ('bba', 'tailX'), ('aX', 'halveX'), ('aX', 'bX'), ('aenc', 'aa')]
+  gen 23: new best (19, 59, -28) pipeline=[('aXi', 'rot1X'), ('iXa', 'swapflX'), ('enc2aa', 'abX'), ('bba', 'tailX'), ('arotr', 'X')]
+  gen 38: new best (20, 62, -26) pipeline=[('iXa', 'swapflX'), ('baa', 'initX'), ('enc2aa', 'abX'), ('bba', 'tailX'), ('arotr', 'X')]
+  gen 214: new best (20, 66, -25) pipeline=[('iXa', 'swapflX'), ('arotr', 'X'), ('iXa', 'swapflX'), ('aba', 'swapflX'), ('arot1', 'rotr1X'), ('bba', 'tailX'), ('baa', 'initX')]
+  gen 291: new best (20, 66, -24) pipeline=[('aab', 'tailX'), ('iXa', 'swapflX'), ('arotr', 'X'), ('iXa', 'swapflX'), ('aba', 'swapflX'), ('arot1', 'rotr1X'), ('bba', 'tailX'), ('baa', 'initX')]
+  gen 312: new best (20, 68, -23) pipeline=[('arotr', 'ab'), ('aba', 'initX'), ('Xbb', 'headX'), ('arot1', 'rotr1X'), ('Xa', 'XX'), ('iXa', 'swapflX'), ('arotr', 'X'), ('aba', 'swapflX'), ('arot1', 'rotr1X'), ('bba', 'tailX'), ('baa', 'initX')]
+  gen 332: new best (20, 68, -22) pipeline=[('arotr', 'ab'), ('aba', 'initX'), ('arot1', 'rotr1X'), ('aba', 'swapflX'), ('iXa', 'swapflX'), ('arot1', 'rotr1X'), ('bba', 'tailX'), ('baa', 'initX')]
+  gen 395: new best (21, 67, -19) pipeline=[('arotr', 'ab'), ('aba', 'initX'), ('b', 'headX'), ('aba', 'swapflX'), ('iXa', 'swapflX'), ('arot1', 'rotr1X'), ('bba', 'tailX')]
+  gen 396: new best (21, 68, -21) pipeline=[('aba', 'initX'), ('arot1', 'rotr1X'), ('aba', 'swapflX'), ('iXa', 'swapflX'), ('aenc', 'encX'), ('arot1', 'rotr1X'), ('bba', 'tailX'), ('bX', 'rotr1X'), ('rot1a', 'halveX'), ('bba', 'tailX'), ('baa', 'initX')]
+phase 3: 400 generations, best fitness (21, 68, -21) (11s)
+  best pipeline: [('aba', 'initX'), ('arot1', 'rotr1X'), ('aba', 'swapflX'), ('iXa', 'swapflX'), ('aenc', 'encX'), ('arot1', 'rotr1X'), ('bba', 'tailX'), ('bX', 'rotr1X'), ('rot1a', 'halveX'), ('bba', 'tailX'), ('baa', 'initX')]
+phase 4: best pipeline exact on 37/511 strings |w|<=8
+    w='ab' got='ab' want='ba'
+    w='aab' got='aab' want='baa'
+    w='aba' got='ab' want='aba'
+    w='abb' got='abb' want='bba'
+    w='aaab' got='aaab' want='baaa'
+    w='aaba' got='aaab' want='abaa'
+    w='aabb' got='aabb' want='bbaa'
+    w='abbb' got='abbb' want='bbba'
+    w='babb' got='babb' want='bbab'
+    w='bbaa' got='abab' want='aabb'
+    w='aaaab' got='aaaab' want='baaaa'
+    w='aaaba' got='aaaaab' want='abaaa'
+    w='aaabb' got='aaabb' want='bbaaa'
+    w='aabaa' got='aaaaaba' want='aabaa'
+    w='aabab' got='aabaaabab' want='babaa'
+    w='aabba' got='aaaabba' want='abbaa'
+    w='aabbb' got='aabbb' want='bbbaa'
+    w='abaaa' got='aaaabaa' want='aaaba'
+    w='abaab' got='babaabab' want='baaba'
+    w='ababa' got='aaabababa' want='ababa'
+    w='ababb' got='babbabbbbb' want='bbaba'
+    w='abbaa' got='ababbaaa' want='aabba'
+    w='abbab' got='abbabbb' want='babba'
+    w='abbba' got='abbbbba' want='abbba'
+    w='abbbb' got='abbbb' want='bbbba'
+    w='baaab' got='baaaab' want='baaab'
+    w='baaba' got='baabaaabab' want='abaab'
+    w='baabb' got='baabbb' want='bbaab'
+    w='babaa' got='ababaababa' want='aabab'
+    w='babab' got='bbbbb' want='babab'
+    w='babba' got='aabbb' want='abbab'
+    w='babbb' got='babbb' want='bbbab'
+    w='bbaaa' got='abbaab' want='aaabb'
+    w='bbaab' got='bbaabab' want='baabb'
+    w='bbaba' got='abababb' want='ababb'
+    w='bbabb' got='babbbb' want='bbabb'
+    w='bbbaa' got='abbbbaab' want='aabbb'
+    w='bbbab' got='bbbabbb' want='babbb'
