@@ -1,0 +1,48 @@
+L + lim -- Round 1 verification
+
+== (0) infrastructure cross-checks ==
+  subst == str.replace on 107310 triples (|A|<=3 incl eps, |B|<=3, |w|<=8): OK
+  evaluator L-node == direct orbit on 2040 runs (8 rules, |w|<=7): OK
+  [2.0s]
+== (1) fixed-point-set lemma: fp([A/B]) = B-free strings ==
+  930 rules x 255 inputs = 475230 checks, OK: [A/B]w==w iff B-free (A!=B); [A/A]=identity
+  [0.2s]
+== (2) lim([A/B]) vs restart [A/B]^m, census domain ==
+  agreement: 779692 converging + 117058 diverging pairs; 14738 A=B pairs (lim=total identity, restart=div)
+  MISMATCHES: 3306 value pairs across 166 rules; verdict: 290 pairs (restart div, lim converges) across 2 rules, 0 reverse (expected 0)
+  verdict-mismatch rules: ['[baab/aba]', '[abba/bab]']
+  bordered-B among value-mismatch rules: 166/166; among verdict rules: 2/2; among all 930 rules: 496 (bordered B is necessary for a mismatch so far: CONFIRMED)
+  census cross-check vs paper: 166 rules diverge under restart on inputs <= 9 (paper text says 170; the paper's own verify_extra.py and this census say 166), of these 4 with B not-in A: ['[aabb/ba]', '[abba/bab]', '[baab/aba]', '[bbaa/ab]']
+  [107.6s]
+== (2b) agreement class: A,B nonempty, disjoint alphabets ==
+  32736 pairs (rules with disjoint nonempty A,B x inputs <= 9): pass = restart = lim, orbit stabilizes after the single firing sweep: OK
+  [0.0s]
+== (3) re-verification on strictly larger domains ==
+  [aabb/ba] on <= 10 + 150 random 12..16: {'bothdiv': 2086, 'rdiv-lval': 0, 'bothval-agree': 111, 'bothval-differ': 0, 'reverse': 0}; of 0 lim-wins witnesses, a 15-input subsample at restart cap 50000: 0 still divergent, 0 slow-converging
+  [abba/bab] on <= 10 + 150 random 12..16: {'bothdiv': 642, 'rdiv-lval': 361, 'bothval-agree': 1194, 'bothval-differ': 0, 'reverse': 0}; of 361 lim-wins witnesses, a 15-input subsample at restart cap 50000: 15 still divergent, 0 slow-converging
+  [baab/aba] on <= 10 + 150 random 12..16: {'bothdiv': 651, 'rdiv-lval': 360, 'bothval-agree': 1186, 'bothval-differ': 0, 'reverse': 0}; of 360 lim-wins witnesses, a 15-input subsample at restart cap 50000: 15 still divergent, 0 slow-converging
+  [bbaa/ab] on <= 10 + 150 random 12..16: {'bothdiv': 2086, 'rdiv-lval': 0, 'bothval-agree': 111, 'bothval-differ': 0, 'reverse': 0}; of 0 lim-wins witnesses, a 15-input subsample at restart cap 50000: 0 still divergent, 0 slow-converging
+  930 rules x 100 random inputs 12..16: reverse verdict mismatches 0 (expected 0); value mismatches 961 (the non-confluence persists at length)
+  all |A|<=|B| rules, 1269140 pairs on all inputs <= 10: verdicts always agree (both converge); value mismatches 3990 across 178 rules (non-confluence)
+  unbordered-B stress: 5030 rules (|A|,|B| <= 6, B unbordered, B not-in A) x 100 random inputs 8..14 = 503000 pairs at cap 6000 -> 17 raw mismatches; classified at restart cap 60000: {'apparent-verdict->still-div': 0, 'apparent-verdict->slow-agree': 17, 'apparent-verdict->slow-differ': 0, 'value-mismatch': 0}
+    e.g. [bbba/ab] 'aabbbbaaaaaabb': verdict
+    e.g. [bbba/ab] 'abaaaaaababb': verdict
+    e.g. [bbba/ab] 'abaaaaaabbbbbb': verdict
+    e.g. [baaaa/ab] 'ababaabbbbabaa': verdict
+    e.g. [baaaa/ab] 'babbaabbbaabab': verdict
+  [943.8s]
+== (4) tower growth through lim (cor:towers) ==
+  lim([baa/ab])(S) = b^#b a^v(S): all binary S <= 9 + 40 random 10..12: OK
+  lim([ab/aa]): b^m a^K -> b^m (ab)^(K/2) a^(K%2), m<=3, K<=12: OK
+  tower t=1: lim([baa/ab])(ab^(n-1)) length = 2^(n-1)+n-1, n<=6: OK
+  tower t=2 (block): grid m<=3, K<=12 + ab^(n-1) n<=5 = tower height 2 in the input length; lim == closed form == restart: OK
+  tower t=3 (5 lim-nodes) on ab^(n-1), n<=4: output lengths [1, 5, 21, 65556]; lim == closed form == restart: OK
+  [4.8s]
+== (5) demos: nesting, branching iterands, growth ==
+  nested lim(lim([eps/ba])): all |w|<=8: OK
+  branching iterand if(contains(x,bb), x, xb) under lim: all |w|<=6 -> first bb-suffix: OK
+  growth lim([X1X1/X1])('a'): orbit lengths [1, 2, 4, 8, 16, 32, 64, 128, 256, 512] -> diverges, OK
+    verdict on 'a': div (expected div)
+
+R1 RESULT: 65788 checks, 0 failures
+EXIT=0

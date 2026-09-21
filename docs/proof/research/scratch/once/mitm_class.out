@@ -1,0 +1,49 @@
+B: class C_2 (63 strings), paper vocab
+ B1: depth <= 4
+  building g-side levels <= 2 ...
+    level 1: +72 (cum 73), 0s
+    level 2: +4433 (cum 4506), 0s
+  building f-side levels <= 2 ...
+    level 1: +72 (cum 73), 0s
+    level 2: +4433 (cum 4506), 0s
+  |S_g| = 4506, |S_f| = 4506
+  distinct probe images |U| = 520
+  probe filter done in 0s; 1422 f's with >=1 probe hit
+  full checks: 14322, witnesses: 0
+ B2: depth <= 5
+  building g-side levels <= 3 ...
+    level 1: +72 (cum 73), 0s
+    level 2: +4433 (cum 4506), 0s
+    level 3: +288050 (cum 292556), 6s
+  building f-side levels <= 2 ...
+    level 1: +72 (cum 73), 0s
+    level 2: +4433 (cum 4506), 0s
+  |S_g| = 292556, |S_f| = 4506
+  distinct probe images |U| = 5693
+  probe filter done in 1s; 1430 f's with >=1 probe hit
+  full checks: 501018, witnesses: 0
+B: class C_3 (98 strings), paper vocab
+ B1: depth <= 4
+  building g-side levels <= 2 ...
+    level 1: +72 (cum 73), 0s
+    level 2: +4527 (cum 4600), 0s
+  building f-side levels <= 2 ...
+    level 1: +72 (cum 73), 0s
+    level 2: +4527 (cum 4600), 0s
+  |S_g| = 4600, |S_f| = 4600
+  distinct probe images |U| = 520
+  probe filter done in 0s; 1509 f's with >=1 probe hit
+  full checks: 16598, witnesses: 0
+ B2: depth <= 5
+  building g-side levels <= 3 ...
+    level 1: +72 (cum 73), 0s
+    level 2: +4527 (cum 4600), 0s
+    level 3: +314040 (cum 318640), 9s
+  building f-side levels <= 2 ...
+    level 1: +72 (cum 73), 0s
+    level 2: +4527 (cum 4600), 0s
+  |S_g| = 318640, |S_f| = 4600
+  distinct probe images |U| = 5693
+  probe filter done in 1s; 1517 f's with >=1 probe hit
+  full checks: 623561, witnesses: 0
+total 79s

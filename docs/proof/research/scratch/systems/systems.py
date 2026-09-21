@@ -156,18 +156,23 @@ def restart(A, B, C, cap=100000):
 
 
 def rankm(k, A, B, C, cap=100000):
-    """RANK-k MARKOV (NEW): iterate repOcc(k,B,A,.) until it stops changing
-    the string (for k=0 that is exactly B-freeness = restart, paper 5.5; for
-    k>=1 the fixpoint keeps up to k leading occurrences of B).  None = diverged."""
+    """RANK-k MARKOV (NEW): iterate "replace the (k+1)-th greedy occurrence
+    of B by A" while the pass FIRES, i.e. while >= k+1 greedy occurrences
+    exist; the value is the first INERT state; None = never inert (diverged).
+    Corrected in R3: the R1 reading "iterate until the string stops changing"
+    was WRONG for A = B (a firing that changes nothing loops forever -- it
+    never becomes inert; the paper's Markov agrees: A = B diverges).  For
+    k=0 the inertness criterion is exactly B-freeness, so rankm(0) == restart
+    (paper 5.5) VERBATIM, including the A = B divergence."""
     if not B:
         raise ValueError
     s, steps = C, 0
     while True:
-        if B not in s:
-            return s                       # B-free: certainly stable
-        t = repOcc(k, B, A, s)
-        if t == s:
-            return s                       # no k-th occurrence: stable
+        O = occ(s, B)
+        if len(O) <= k:
+            return s                    # inert: no (k+1)-th occurrence
+        i = O[k]
+        t = s[:i] + A + s[i + len(B):]
         steps += 1
         if steps > cap:
             return None

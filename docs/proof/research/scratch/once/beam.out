@@ -1,0 +1,14 @@
+beam: 2032 passes (140 const incl. length-4 offset-1 family, 182 atomic variable, 1710 composite-gap [s1.f.s2]), domain 127 strings <= 6
+  seed: 327 states (depth 1)
+  depth 1 scan: best distance 50
+  depth 2: new best d=44: [('C', ('ba', 'a')), ('V', ('H', 'Hb'))]
+  depth 2: new best d=29: [('C', ('ba', 'a')), ('G', ('.init.b', '.init.'))]
+  depth 2: 4800 states, best d=29, 53s
+  depth 3: new best d=28: [('C', ('bab', 'ab')), ('G', ('b.tail.', '.tail.')), ('G', ('.init.b', '.init.'))]
+  depth 3: new best d=24: [('C', ('baa', 'aa')), ('C', ('bab', 'ab')), ('G', ('.init.b', '.init.'))]
+  depth 3: 4800 states, best d=24, 127s
+  depth 4: new best d=19: [('C', ('baa', 'aa')), ('C', ('bab', 'ab')), ('G', ('.init.b', '.init.')), ('G', ('b.tail.', '.tail.'))]
+  depth 4: 4800 states, best d=19, 127s
+  depth 5: 4800 states, best d=19, 126s
+  depth 6: 4800 states, best d=19, 127s
+  depth 7: 4800 states, best d=19, 127s

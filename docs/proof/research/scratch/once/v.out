@@ -1,0 +1,6 @@
+=== Part v: vocabulary escalation ===
+v1: binary patterns<=3 repls<=3 (210 passes), depth 3, 254 strings <=6
+  del1b: ABSENT at depth 3 [behaviors 5029445]
+v2: quaternary patterns<=2 repls<=2 (420 passes), depth 3, 254 strings <=6
+  del1b: ABSENT at depth 3 [behaviors 1885117]
+v3: ternary patterns<=3 repls<=2 (507 passes), depth 3

@@ -13,7 +13,9 @@ import sys
 sys.path.insert(0, '/home/cc/projects/meow-lang/docs/proof/research/scratch/paper_variants')
 from verify_variants import strings_upto, repC_comma_restart, rep_ref, restart
 
-CAP = 2000
+CAP = 1000000  # must exceed the slow terminators: the aaab/abbb families take
+# up to 3,280 leftmost steps on inputs <= 9 (misclassified as divergent at any
+# cap <= 3,280; the original CAP=2000 made `extra == FOUR` fail with 8 rules)
 
 print("=== (a) restart-comma unconditional n=1: fail <=> X1 = b and b in S ===")
 evals = fails = bad = 0

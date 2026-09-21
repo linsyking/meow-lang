@@ -1,0 +1,19 @@
+=== Part nm: near-miss census ===
+  nm level 1: 72 new, cum 73
+  nm level 2: 4552 new, cum 4625
+  nm level 3: 320140 new, cum 324765
+nm: distance-to-del1b histogram over 324764 depth<=3 behaviors (254 strings): min=50, #d<=5: 0
+    counts d=0..8: [0, 0, 0, 0, 0, 0, 0, 0, 0]
+  miss d=50 depth=1 pipeline=[('ba', 'a')]
+      fails on 50/127: e.g. ['b', 'ab', 'bb', 'aab', 'abb', 'bbb', 'aaab', 'aabb']
+  miss d=50 depth=3 pipeline=[('a', 'aa'), ('ba', ''), ('aa', 'a')]
+      fails on 50/127: e.g. ['b', 'ab', 'bb', 'aab', 'abb', 'bbb', 'aaab', 'aabb']
+  miss d=50 depth=3 pipeline=[('ba', 'c'), ('cc', ''), ('c', 'a')]
+      fails on 50/127: e.g. ['b', 'ab', 'bb', 'aab', 'abb', 'bbb', 'aaab', 'aabb']
+  miss d=50 depth=3 pipeline=[('ba', 'c'), ('cc', 'a'), ('c', 'a')]
+      fails on 50/127: e.g. ['b', 'ab', 'bb', 'aab', 'abb', 'bbb', 'aaab', 'aabb']
+  miss d=50 depth=3 pipeline=[('ba', 'c'), ('cc', 'b'), ('c', 'a')]
+      fails on 50/127: e.g. ['b', 'ab', 'bb', 'aab', 'abb', 'bbb', 'aaab', 'aabb']
+  miss d=50 depth=3 pipeline=[('ba', 'c'), ('cc', 'ab'), ('c', 'a')]
+      fails on 50/127: e.g. ['b', 'ab', 'bb', 'aab', 'abb', 'bbb', 'aaab', 'aabb']
+total time 84.7s

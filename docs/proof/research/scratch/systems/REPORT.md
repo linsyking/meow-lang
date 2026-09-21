@@ -31,7 +31,10 @@ rescan / restart / rep_ref reference implementations).
   rounds): the single-site invariants transfer to ALL k-th-occurrence and
   anchored calculi, and three of the six pairwise combinations collapse
   trivially.
-* R2: deep dive 1 — ANCHORED.
+* R2 (done, Sec. 7): deep dive 1 — ANCHORED.  Verdict: COLLAPSE into L,
+  strictly and unconditionally (first variant with a proven placement);
+  eq discovered with an alphabet-sensitive boundary; measure lemma found
+  (unifies the four once-invariants for the whole single-site family).
 * R3: deep dive 2+3 — the k-th-occurrence family and rank-k Markov.
 * R4: deep dive 4 — flat lazy-pass calculus.
 * R5: native multi-pattern one-sweep + survey of the rest + final map +
@@ -121,7 +124,7 @@ candidate this study must classify; **COLLAPSES** = one-line reduction
 | 4 | once + restart, expression level (whole once-pipeline to fixpoint) | B=once × C=restart × E | **COLLAPSES to KNOWN: multi-rule Markov / semi-Thue** | iterating a k-pass pipeline to its joint fixpoint = leftmost-strategy normalization of a k-rule system; classically Turing-complete for enough rules (post47, markov54). No new phenomenon; record only. |
 | 5 | once + positional (= constant-k repOcc, no setAt) — the family **L_k** | B=k-th | **NEW-? (deep dive 2)** | single-splice invariants all hold (Sec. 4.1) ⇒ L ⊄ L_k as for ONCE; fine structure L_j vs L_k open; thm:pos-hinge(ii) simulates repOcc(k) with onces ONLY under alphabet-disjointness, so variable-pattern k=2 vs ONCE is sharp. |
 | 6 | positional + restart — **rank-k Markov** | B=k-th × C=restart | **NEW-? (deep dive 3)** | iterate repOcc(k,B,A,·) to its fixpoint. k=0 = Markov. Termination/growth censuses comparable to the paper's 170-rule census; the amplifier's Horner invariant BREAKS at k ≥ 1. |
-| 7 | **anchored** calculus ([A/^B], [A/B$]) | B=anchored | **NEW-? (deep dive 1)** | boundary-only splices; single-site invariants hold; cat/tail/init/head/last appear reachable (Sec. 4.2); rev conjecturally NOT anchored; relation to ONCE and L_k sharp. |
+| 7 | **anchored** calculus ([A/^B], [A/B$]) | B=anchored | **SETTLED (R2, Sec. 7): COLLAPSE into L — strictly, provably** | ANCHORED ⊆ L by explicit comma-code translation (guard lemma machine-verified); L ⊄ ANCHORED by the measure lemma; toolkit survives (cat, head, tail, init, last, doubling, rest, isne, eq: clean for \|Σ\|≥3, two-valued-false for binary); rev/`if` open. |
 | 8 | anchored + once ([A/^B] + [A/B]₁ mixed) | B=anchored × B=once | NEW-?, survey after deep dive 1 | does anchoring give once-power cheaply, or vice versa? |
 | 9 | anchored + k-th | B=anchored × B=k-th | NEW-?, survey | "replace the last occurrence of B" — anchors make rightmost addressing expressible in a LEFT-to-right scan; worth one paragraph. |
 | 10 | **wildcard patterns** ([A/B′], B′ has don't-care characters) | D=pattern language | NEW-?, survey-grade | does [A/X1*], [A/**] collapse to L (Σ-fold expansion for trailing wildcards; comma-code parity for [A/**])? quick battery. |
@@ -290,3 +293,284 @@ external cited so far; anything added later gets checked online first).
   analysis of dom(f_lazy); verdict.
 * R5 = deep dive 5 if budget allows + survey rows + FINAL MAP + the 1–2
   recommendations for paper sections.
+
+---
+
+## 7. Round 2 (deep dive 1): the ANCHORED calculus — verdict: COLLAPSE INTO L, with a toolkit that survives
+
+Working definitions and all numbers: `verify_r2.py` (this round) + the
+spot-checks of Sec. 7.3 run inline (recorded below).  Everything below marked
+**[V]** was executed; domains stated inline.
+
+### 7.1 Definition
+
+For $B \neq \epsilon$ or $B = \epsilon$ alike (see the flag below):
+
+$$[A/\hat{B}]\,E \;=\; \begin{cases} A\cdot E[|B|{:}] & B \sqsubset E\\ E & \text{else}\end{cases}
+\qquad [A/B\$]\,E \;=\; \begin{cases} E[:|E|{-}|B|]\cdot A & B \sqsupset E\\ E & \text{else}\end{cases}$$
+
+The calculus $\mathrm{ANC}$ = the paper's expression grammar with the node
+$[R/P]\,E$ replaced by these two anchored nodes (both sides available; the
+$-only and $-only fragments are rev-conjugate, Theorem thm:conjugation
+applies verbatim).
+
+**SEMANTIC CHOICE, flagged prominently (coordinator's request):** the empty
+pattern is **defined** when anchored — $[\,A/\hat{\epsilon}\,]E = A\,E$ and
+$[\,A/\epsilon\$\,]E = E\,A$ — because the anchored occurrence of $\epsilon$
+is unique (position 0 / the end), unlike "all occurrences of $\epsilon$"
+which is what makes the baseline $[A/\epsilon]$ ill-posed.  This choice is
+load-bearing: it gives prepend/append for free, it makes the guard of the
+L-simulation total (Sec. 7.4), and it is what lets `head`/`isne` handle the
+$\epsilon$ edge cases without scaffolds.  A paper section would need to state
+it as the definition's edge clause.
+
+### 7.2 Toolkit — what survives (all constructions machine-verified)
+
+* **tail / init.**  The naive products $\prod_{\sigma}[\epsilon/\hat{\sigma}]$
+  and $\prod_\sigma [\epsilon/\sigma\$]$ are **wrong** — caught by the machine
+  check, not by my hand derivation: the factors interfere ($[\epsilon/\hat
+  a][\epsilon/\hat b]$ deletes TWO characters on `ba`; each order is killed
+  by one input).  The correct construction is the once-toolkit's Doubled
+  Marker lemma (paper lem:doubled) transplanted onto the scaffold $XXX$:
+  $XX\sigma$ is a prefix of $XXX$ iff $\sigma = X[0]$, $\sigma XX$ a suffix
+  iff $\sigma = X[-1]$, and after a factor fires the others are inert BY
+  LENGTH.  So
+  $$\mathtt{tail}(X) = \prod_\sigma [\epsilon/\widehat{XX\sigma}](XXX),
+  \qquad \mathtt{init}(X) = \prod_\sigma [\epsilon/(\sigma XX)\$](XXX).$$
+  **[V]** all 511 strings $\le 8$ over $|\Sigma|=2$, exact.
+* **cat** $= [\,X/\hat a\,][\,Y/b\$\,](ab)$ — same shape as the once-toolkit's
+  cat.  **head** $= [\epsilon/\mathtt{tail}(X)\$]\,X$ (the tail of $X$ is
+  always a suffix of $X$).  **last** $= [\epsilon/\widehat{\mathtt{init}(X)}]\,X$
+  (the init is always a prefix).  **doubling** $=[\,XX/\hat X\,]X$ — ONE pass.
+  **rest**$(X,Y) = [\epsilon/\widehat{Y d}][\,Yd/\hat Y\,]X = X[|Y|:]$ if
+  $Y \sqsubset X$, else $X$.  **[V]** cat/rest on all $63{\times}63$ pairs
+  $\le 5$; unary items in the 511-string sweep.
+* **isne**$(X) = [\epsilon/\mathtt{tail}(X)\$]([\top/\hat a][\top/\hat b]X)$:
+  the head-passes mark a nonempty input $\top\cdot X[1:]$, whose suffix is
+  exactly $\mathtt{tail}(X)$.  **[V]** exact on all 511 strings $\le 8$.
+* **eq — the round's surprise.**  With $T = \mathtt{rest}(X,Y)\cdot\mathtt{rest}(Y,X)$
+  (so $T = \epsilon \Leftrightarrow X = Y$, an easy case analysis):
+  $$W = [\top/\hat T\,](a),\quad V = [\epsilon/(\top a)\$](W),\quad
+    f = [\top/\hat V\,](b).$$
+  Over $|\Sigma| = 2$: $f = \mathtt{ba}$ if $X = Y$, a single character
+  otherwise — **equality with a two-valued false branch**.  **[V]** 1,245
+  exhaustive pairs (all $|X|,|Y| \le 4$) + 3,000 random pairs $\le 7$.
+  Over $|\Sigma| \ge 3$ the false branch collapses to a clean boolean
+  $[\,c/\widehat{cb}\,][\,a/\hat b\,]f \in \{\top,\bot\}$.  **[V]** 16,427
+  exhaustive pairs, all $|X|,|Y| \le 4$ over $\{a,b,c\}$.  The binary
+  obstruction is structural in this family: every variant makes both false
+  values *prefixes* of the true value, and with two letters there is no
+  third character to break the collision.  **Clean binary eq: open**
+  (absent from every searched space, Sec. 7.5).  `if` is likewise open
+  (the conditional splice $[A/\widehat{\top d}](C\,d)$ — fires iff the
+  computed condition equals $\top$ — is the seed; over $|\Sigma|\ge 4$ a
+  two-scaffold construction is sketched but NOT verified: do not claim).
+
+### 7.3 The web: strict containment in L, unconditionally
+
+**Theorem (ANCHORED $\sqsubseteq$ L).**  Every anchored expression is an
+L-expression.  Translation: with the comma code ($\mathtt{enc}^2_x$, code
+words $xc$, images $aa$-free) and ONE marker per side
+($m_0 = xb^2$, $m_1 = xb^3$, both containing $bb$):
+
+$$[\,A/\hat B\,]E \;\mapsto\; \mathtt{dec}^2\big([\epsilon/m_0]\,
+  [\,m_0\,\mathtt{enc}^2(A)/\,m_0\,\mathtt{enc}^2(B)\,]\,(m_0\,\mathtt{enc}^2(E))\big)$$
+
+and mirrored for $\$$.  **Guard lemma:** $m_0\,\mathtt{enc}^2(B)$ occurs in
+$m_0\,\mathtt{enc}^2(S)$ *iff* $B \sqsubset S$; $\mathtt{enc}^2(B)\,m_1$
+occurs in $\mathtt{enc}^2(S)\,m_1$ iff $B \sqsupset S$.  (The guard needs
+ONE marker, not two: with markers at both ends the pattern straddles the
+$m_0 m_1$ junction when the code is short — a real bug the machine check
+caught at $S = \epsilon$, $B = a$: $m_1$ begins with the valid code block
+$xa$.  One marker kills all straddling: the pattern must contain $m_i$,
+which occurs exactly once.)  **[V]** guard lemma 3,810 biconditional checks
+($|S| \le 6$, $|B| \le 3$); node-level simulation 28,350/28,350 exact
+(all $|A|,|B| \le 3$, $|S| \le 5$, both sides); full translation of 400
+random anchored ASTs (depth $\le 3$) 1,200/1,200 exact, cross-checked with
+the independent evaluator of `rec/lazy_pass/core.py`.
+
+**This is prop:last's technique, promoted from a trick to a theorem.**  The
+proposition plants a fresh anchor ($bb$) at the right end and tests constant
+patterns containing it; the translation plants the comma-code marker and
+tests *variable* patterns containing it.  The echo the coordinator asked
+about is exact: the anchor does precisely the work of the marker, and the
+price of the promotion is the code (escape, test, unescape) — which is why
+$\mathrm{ANC}$ keeps $\mathtt{last}$/$\mathtt{init}$ natively in one pass
+but pays a full encoding round trip for everything else.
+
+### 7.4 The measure lemma (a single generalization of the four once-invariants)
+
+**Lemma (CORRECTED after coordinator review — the one-sided split of the
+R2 draft was refuted).**  Let $\mu$ be nonnegative with (i) $\mu(xy) \le
+\mu(x) + \mu(y) + k_\mu$ and the TWO-SIDED split (ii) $\mu(y) \le
+\mu(xy) + \mu(x)$ and (ii') $\mu(x) \le \mu(xy) + \mu(y)$.  Then for
+every anchored expression $E$:
+$$\mu\big(\llbracket E \rrbracket(\vec S)\big) \;\le\;
+  \textstyle\sum_{\text{leaves of } R,P,E \text{ subtrees}} \mu(\text{leaf value})
+  \;+\; k_\mu\cdot\#\text{nodes}(E).$$
+For suffix-monotone $\mu$ (substrings never exceed: $\#c$, length, max run,
+occurrence counts) the pattern subtree can be dropped.
+*Why two-sided:* the $\hat{}$-node keeps a SUFFIX of the scrutinee (bounded
+by (ii)), the $\$$-node keeps a PREFIX (bounded by (ii')); neither split
+implies the other.  **Counterexample to the one-sided version (coordinator's,
+machine-confirmed in R3):** $\mu(w) = 1$ if $w$ ends with $a$ else $0$
+satisfies (i) with $k_\mu = 0$ and (ii), but violates (ii') ($\mu(a) = 1
+\not\le \mu(ab) + \mu(b) = 0$), and the single node
+$[\epsilon/b\$](ab)$ — which fires — has $\mu(\text{output}) = 1$ against
+a leaf budget of $0$.  All 8 measures tested in R2 satisfy (ii')
+(equality for counts and length, embedding-monotonicity for max run and
+occurrence counts, the triangle inequality for $|\mathrm{bal}|$), so the
+360,000 R2 checks remain valid verbatim under the corrected statement.
+The ONCE/$L_k$ node keeps a prefix AND a suffix of the scrutinee, so the
+same two-sided hypothesis is what the classical four invariants need —
+in R3 the family version is stated with it.  The four
+once-invariants of thm:once-invariants are the instances $\#c$, max run,
+$|\Psi|$, length; the lemma adds e.g. occurrence counts of any fixed word.
+**[V]** 192,000 uniform + 168,000 tight checks over 3,000 random anchored
+expressions (depth $\le 3$) $\times$ 8 input pairs $\times$ 8 measures
+($\#a$, $\#b$, len, maxrun, $|\mathrm{bal}|$, $\#occ(ab)$, $\#occ(aab)$,
+$\#occ(ba)$): ALL HOLD.  **The same lemma holds verbatim for ONCE and every
+$L_k$** (one splice per pass, same node computation) — this is the uniform
+separation for the whole single-site family, and it is R3's starting point.
+
+**Corollary (placement).**  None of $[a/b]$, $\mathtt{enc}$, $\mathtt{dec}$,
+$[xx/x]$, $S\mapsto\sigma^{|S|}$, $X \mapsto X^{|X|}$, $\mathtt{escape}_f$ is
+anchored-reachable (the paper's cor:once-sep transfers verbatim); together
+with Sec. 7.3, $\mathrm{ANC} \sqsubset L$ **strictly and unconditionally**
+— the first §5-family variant with a *proven* placement relative to L
+(once/positional/right-to-left all hinge on open problems).
+
+### 7.5 Searches (re-runnable: `verify_r2.py` part E)
+
+* Anchored const-pattern space (patterns, replacements of length $\le 2$ incl.
+  $\epsilon$, both sides), depth $\le 3$: **279,521** distinct functions on
+  the 62 test strings ($\le 5$ over $|\Sigma|=2$).  ABSENT: `isne`, `rev`,
+  once-$[a/b]_1$, $\sigma^{|S|}$, is-$\epsilon$.  Depth $\le 4$ with the
+  reduced vocabulary $\{\epsilon,a,b,ab,ba\}$: **688,499** functions; same
+  targets ABSENT.
+* Anchored variable-pattern space (vocabulary $\{X, Xa, Xb, aX, bX, a, b,
+  \epsilon\}$ in pattern and replacement), depth $\le 2$: **1,298** functions;
+  same targets ABSENT (consistent: the real constructions are deeper — `isne`
+  needs the $XXX$ scaffold inside its *pattern*).
+* Once const-pattern space, depth $\le 3$: **38,959** functions; the anchored
+  conditional $[a/\hat{ab}]$ ABSENT, $[a/b]_1$ FOUND at depth 1 (sanity).
+  Note: $[a/\hat{ab}]$ IS once-expressible by the once-toolkit
+  ($\mathtt{if}(\mathtt{eq}(\mathtt{prefix}_2 S, ab), \ldots)$ — all parts
+  once-reachable), just not shallowly; the const-pattern once search only
+  rules out shallow pipelines.  **Derived (not machine-verified): every
+  CONSTANT-pattern anchored pass is once-expressible**; the open question
+  is the variable-pattern prefix/suffix test (it needs variable-length
+  prefix extraction — the once-calculus's own open hinge flavor).
+* **rev: absent everywhere searched.**  The one-chunk normal form
+  (output = $F(X)\cdot X[i{:}j]\cdot G(X)$, pieces = input chunks /
+  prefixes-suffixes of sub-expression values / constant fragments, count
+  bounded by the variable-leaf count) is the proposed obstruction; formal
+  statement deferred to R5 (the piece-level induction needs the
+  "which chunks are computable" analysis sketched in R1 Sec. 4.2).
+
+### 7.6 Round-2 verdict for the map (row 7)
+
+**ANCHORED = COLLAPSE (into L): a proper, provably strict, toolkit-rich
+fragment.**  New knowledge produced: (1) the first unconditional strict
+placement of any §5-family variant inside L; (2) the anchor-as-marker
+theorem that IS prop:last generalized; (3) the measure lemma unifying the
+four once-invariants for the whole single-site family; (4) eq-in-ANC with
+the binary/ternary split (a new alphabet-sensitive boundary *within* a
+variant, echoing §5.2's unary dichotomy); (5) two machine-caught
+near-misses worth recording in the paper's methodology voice: the
+interfering $\Sigma$-products and the two-marker guard.  Rows 8–9
+(anchored mixes) stay for R5: the conditional-splice seed suggests
+anchored+once may exceed both, but nothing verified yet.
+
+---
+
+## 8. Round 3 (deep dives 2+3): the k-th-occurrence family and rank-k Markov
+
+All numbers: `verify_r3.py` (parts A–D), re-runnable.  The corrected
+two-sided measure lemma (Sec. 7.4) is this round's part A and the shared
+tool for the whole single-site family.
+
+### 8.1 The two-sided measure lemma, machine-confirmed (part A)
+
+* **Hypotheses checked** over all 127×127 string pairs (|x|, |y| ≤ 6 over
+  binary): all 8 measures satisfy (i) μ(xy) ≤ μ(x)+μ(y)+k and the two-sided
+  split (ii) μ(y) ≤ μ(xy)+μ(x), (ii') μ(x) ≤ μ(xy)+μ(y); the coordinator's
+  counterexample measure *ends-with-a* satisfies (i), (ii) and **violates
+  (ii') exactly at (a, b)** — and the negative control reproduces the bound
+  violation on the single node [ε/b$](ab) (μ(out) = 1, leaf budget 0).
+  One-sided split ⇒ no lemma; two-sided ⇒ lemma.
+* **Family corpus:** 2,500 random expressions over the MIXED single-site
+  node types (anchored ^/$, once, repOcc 0/1/2), depth ≤ 3, 8 input pairs
+  each: general two-sided lemma **135,136 checks, 0 violations** (budget =
+  R,P,E leaves + 2·k_μ per splicing node — once/L_k nodes have two
+  junctions, anchored one); the four classical invariants (with the
+  explicit recursions of thm:once-invariants, incl. the β-multiplicity for
+  max run, which DOUBLES the variable contribution at every node): **0
+  violations**.  (An earlier draft of the check with coefficient 1 for max
+  run had 7 violations — the multiplicity is necessary; the paper's own β_i
+  exists for exactly this reason.)
+* **Asymmetry recorded:** ε-patterns are *undefined* for once/L_k (the
+  greedy occurrence list of ε is ill-posed) but *defined* for anchored (the
+  anchored occurrence of ε is unique).  3,108 undefined evaluations were
+  skipped in the corpus accordingly.
+
+**Consequence:** the paper's cor:once-sep transfers to every L_k: none of
+replace-all, enc, dec, [xx/x], σ^|S|, X^|X|, escape_f is L_k-reachable.
+The single-site family (once, every L_k, anchored, and their rev-mirrors)
+is uniformly separated from L by one lemma.
+
+### 8.2 The L_k ladder (part B) — an incomparability mosaic, not a hierarchy
+
+Constant-pattern spaces (repOcc(k−1, pat, rep), patterns ≤ 2 chars,
+replacements incl. ε), depth ≤ 3, 62 test strings ≤ 5 over binary:
+
+| space | functions | [a/b]_1 | [a/b]_2 | [a/b]_3 | [aa/b]_2 | rev | σ^|S| | isne |
+|-------|-----------|---------|---------|---------|----------|-----|-------|------|
+| L_1 (= once) | 38,959 | **Y** | . | . | . | . | . | . |
+| L_2 | 28,090 | . | **Y** | . | **Y** | . | . | . |
+| L_3 | 2,307 | . | . | **Y** | . | . | . | . |
+
+The membership matrix at this depth: **each [A/B]_j lives in its own L_j
+and in no other L_k** — no simulation between constant-pattern L_j and L_k
+(j ≠ k) exists at depth ≤ 3.  So the constant-k fragments are pairwise
+incomparable (at bounded depth), not nested: the addressing axis does not
+collapse inward.  rev/σ^|S|/isne absent everywhere (consistent with the
+measure lemma).  Note the spaces SHRINK with k (38,959 → 28,090 → 2,307):
+higher-rank passes fire less often, so the k-th-occurrence fragments get
+poorer, not richer — addressing power does not buy breadth.
+
+### 8.3 k=2 vs ONCE (part C) — the sharp question, both sides probed
+
+* **The disjoint-marker route re-verified** (thm:pos-hinge(ii)):
+  repOcc(k,B,A) = [M/B]₁^k[A/B]₁[B/M]₁^k with M a constant disjoint from
+  B's alphabet: **18,522 exact agreements** (B over {a,b}^≤3, |A| ≤ 2,
+  |S| ≤ 5, k ≤ 2, M = c over ternary).  So over |Σ| ≥ 3, k-th-occurrence is
+  once-simulable whenever B misses a letter.
+* **Over binary (no fresh marker exists):** the functions [a/b]_2, [a/ab]_2,
+  [aa/b]_2 are **ABSENT** from (i) the once constant-pattern space of depth
+  ≤ 4 — **969,321** distinct functions on the 31 test strings ≤ 4 (sanity:
+  [a/b]_1 found at depth 1) — and (ii) the once variable-pattern space
+  (vocabulary X, Xa, Xb, aX, bX, a, b) of depth ≤ 3 — **3,773** functions.
+  Together with the ladder of 8.2 this is strong evidence that the
+  constant-k calculi are a genuinely NEW sub-family: they are separated
+  from ONCE at the node level over the binary alphabet (bounded evidence;
+  no proof — the once-toolkit's eq/if might still simulate repOcc(k,B,A)
+  for constant B via conditionals, the way it does for constant anchored
+  passes).
+* **Sharp statement for the paper:** over |Σ| ≥ 2, is [A/B]_2 (variable
+  patterns) once-reachable?  The marking simulation needs an alphabet-
+  disjoint marker, which cannot exist for variable B over |Σ| = 2; every
+  bounded search fails; the once-toolkit route (condition on "≥ 2
+  occurrences, remember the first") needs variable-length prefix
+  extraction, the same open hinge flavor as once ∈ L.
+
+### 8.4 Rank-k Markov (part D) — D numbers pending (census running)
+
+* **Semantics correction (machine-caught by the D1 identity check):** the
+  R1 reading "iterate until the string stops changing" is WRONG for A = B:
+  a firing that changes nothing never becomes INERT, and the process
+  diverges (the paper's own Markov agrees: A = B diverges, thm:termination
+  (iii)).  Correct fixpoint: iterate while the pass FIRES (≥ k+1 greedy
+  occurrences); k = 0 then coincides with restart VERBATIM, A = B
+  included.  `systems.py` rankm and `verify_r3.py` run_rank both
+  corrected.

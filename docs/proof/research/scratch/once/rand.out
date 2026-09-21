@@ -1,0 +1,5 @@
+=== Part rand: randomized deep ===
+rand: 1895658 pipelines of 3-8 passes (vocab abc<=2 + ab<=3), best full-domain distance 93 on 508 strings <=7
+     best pipeline: [('baa', 'aa'), ('bab', 'ab'), ('ca', 'cb')]
+     distance histogram (0..10): [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+total time 300.0s

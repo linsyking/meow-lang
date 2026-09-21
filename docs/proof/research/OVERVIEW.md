@@ -602,3 +602,76 @@ TWO NEW STAGES LAUNCHED (user request):
   conservativity ⟹ L + more-definedness — characterize it). Standard
   battery per system; final design-space map + which deserve a paper
   section.
+
+TWO MORE STAGES LAUNCHED (user request, same day):
+- lim agent (research/scratch/lim/): the user's lim operator — iterate a
+  unary L-expression E from the input until the orbit reaches an exact
+  fixed point E(w) = w, undefined otherwise; no recursion; nested lim
+  nodes allowed. Distinct from the paper's restart variant (which
+  iterates a single pass and stops at the first B-free string): lim(pass)
+  = restart exactly (fixed points of a pass = B-free strings), so lim
+  strictly generalizes the restart row, and the iterand can BRANCH
+  (if/eq inside) — that is the new power source. Seeded conjecture:
+  L+lim = partial computable via a FLAT-L 2CM step (fixed instruction
+  template with the current instruction marker-wrapped, marker-delimited
+  counters, constant-pattern dispatch/increment/decrement/zero-test; halt
+  config = unique fixed point). Also: iteration hierarchy (where does
+  universality kick in), convergence/totality undecidability, ω-limit
+  reading as a second-stage extension (connects to §6.3 streams).
+- ONCE agent (research/scratch/once/): hinge 1 — is the once-primitive
+  L-reachable? Probe: "delete the leftmost b" ([eps/b]_1) in L. Seeded
+  routes: shadowing as first-occurrence selector (leftmost-first greedy
+  freezing shadows overlapping later occurrences — a built-in leftmost
+  selector), mark-then-discriminate with rep_n rounds (leftmost-ness is
+  locally checkable: no mark to the left), escalate the paper's failed
+  searches, and the invariant hunt under the known constraints (not
+  unary-domain, not subsequentiality — delete-leftmost-b is itself
+  left-subsequential, not growth, not piece-count). Coordination: systems
+  agent owns L_k (k>=2) ladder; rev agent owns hinge 2; no known
+  implication between the two hinges.
+
+ALSO (coordinator, this day): Corollary Inclusion Symmetry (cor:incl-symmetry
+in main.tex): R ⊑ L iff L ⊑ R — the two inclusion questions are one, by
+mirror algebra on thm:conjugation (R-class = m-image of L-class; mirroring
+an inclusion flips it). Landscape note updated: the right-to-left row's two
+open cells are one question. Build clean, 51 pages. R2 of the systems agent
+verified by me (battery reproduces; measure lemma statement gap caught and
+fixed: needs the MIRRORED split condition too — counterexample mu =
+ends-with-a; all machine checks remain valid since the 8 tested measures
+satisfy both directions; placement corollary survives).
+
+L+R ARC COMPLETE AND INTEGRATED (four rounds, all verified by coordinator):
+- R1: Collapse Criterion (L+R = L iff R<=L iff rho in L; rho = the R-pass as a
+  3-ary function); minimal scan-direction witness (d,c^2,c^3) unique up to
+  renaming; prop:r2l-agree sharpened to biconditional (agree iff unbordered).
+- R2: Disjoint Commutation Lemma (alphabet-disjoint passes commute, every
+  clause necessary; deletion-merging counterexample acb); one-alternation
+  normal form refuted (156 tables need >=2 alternations; 4 sibling survivors
+  robust against all two-block searches); thm:core transfers.
+- R3: all witness hunts negative (rho: 1,841,923 tables + 300K randomized;
+  [A/aa]^R: 592,447 + 1,574,748 + 74,525; rev in L+R: exhaustive + 400K +
+  genetic 400x400 to depth 11 plateauing at the palindrome points 13/31);
+  residue-routing obstruction analysis (R leaves run residues at run fronts,
+  L computes them only at run ends); scope honest: pipeline templates only,
+  DAG/junction-pattern expressions remain unexcluded.
+- R4: COMPLETE two-block impossibility over the 4 cross-letter halvings
+  (closures saturate: pure 15 tables, composites 69, the 4 siblings outside
+  at ANY depth; 4 of 64 three-pass words are not two-blocks); Orientation
+  Lemma (produced-block/residue order flips between directions); growth
+  transfers; five invariant operationalizations all falsified output-shaped
+  (the strongest, first-difference offset, falls only to input-computed
+  patterns = the rep escape hatch) => the separation must be
+  dependence-structural; bookkeeping reconciled (S1 = 156 passes).
+- Paper: new section 5.6 "Both Directions at Once" (thm:union-collapse,
+  lem:disjoint-comm, prop:no-2block, lem:orientation, conj:union with the
+  fourfold evidence paragraph); prop:r2l-agree upgraded to the biconditional
+  + rem:minwitness; landscape union row (three open cells in the r2l and
+  union rows are ONE question); abstract/intro/conclusion clauses. 53 pages,
+  0 errors, 0 overfull, no undefined refs. Files: research/scratch/lr/
+  (REPORT.md sections 3,5,8,10-12; lrcore.py; verify_r1/r2/r4.py;
+  search_r3.py; pilot_collapse.py).
+- Standing cross-agent thread: the shared obstruction (junction-local
+  bounded left-context / right-to-left flow of unbounded info) is confirmed
+  from both the once side (tie obstruction, P = takeWhile) and the L+R side
+  (residue routing, v5 boundary through computed needles); rev agent's
+  conjectures A/B/C are reordering-specific (predicted NOT to separate P).

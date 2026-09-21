@@ -1,0 +1,4 @@
+=== red2: second-b-anchored needle (oracle) ===
+red2: [V.b/b.V.b] (V oracle) + 1b/0b guards on all 129 strings <=8 with <=2 b's: 0 failures
+     collateral on >=3-b strings (<=7): 54 failures of 163 -- the needle over-deletes at later V-spaced pairs, as predicted
+total 0s

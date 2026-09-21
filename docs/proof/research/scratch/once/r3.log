@@ -1,0 +1,20 @@
+=== mech: mechanism documentation ===
+mech: stage table on X = aa b aa b a (n0=2,n1=2,t=1):
+    X            aabaaba
+    1 [a->aa]    aaaabaaaabaa
+    2 [b->ab]    aaaaabaaaaabaa
+    3 [ba->b]    aaaaabaaaaba
+    4 [aa->ab]   abababababba
+    5 [ab->a]    aaaaaba
+    rep1b(X)  = aaaaaba   del1b(X) = aaaaba
+mech: gap parities after stage 3 (gap 0 the unique ODD pre-b gap; the trailing gap is 2n_t-1, odd but harmless -- it is never before a b, so its residue pairs with nothing and the halving nets identity there):
+    n=(0,0,0): T3='abb' gaps=[1, 0, 0] expected=[1, 0, 0] OK
+    n=(1,0,2): T3='aaabbaaa' gaps=[3, 0, 3] expected=[3, 0, 3] OK
+    n=(0,3,1): T3='abaaaaaaba' gaps=[1, 6, 1] expected=[1, 6, 1] OK
+    n=(2,2,2): T3='aaaaabaaaabaaa' gaps=[5, 4, 3] expected=[5, 4, 3] OK
+    n=(5,1,0): T3='aaaaaaaaaaabaab' gaps=[11, 2, 0] expected=[11, 2, 0] OK
+    n=(3,0,0): T3='aaaaaaabb' gaps=[7, 0, 0] expected=[7, 0, 0] OK
+    n=(0,0,3): T3='abbaaaaa' gaps=[1, 0, 5] expected=[1, 0, 5] OK
+    n=(4,3,2): T3='aaaaaaaaabaaaaaabaaa' gaps=[9, 6, 3] expected=[9, 6, 3] OK
+mech: parity account verified on the 8 sampled gap vectors: True
+total 0s

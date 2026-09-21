@@ -1,0 +1,125 @@
+--- E0: W closed forms ---
+    W fixes all 19 alternating strings of length <= 9
+    W(b^n) matches the derived closed form for n <= 65
+    [E0] ALL GREEN
+--- E1: direction-independence and orientation lemmas ---
+    E1a: single-letter patterns: L = R on all 2047 strings x 2 patterns x 7 repls = 28658 checks
+    E1b: cross-letter power passes: L = produced-then-residue, R = residue-then-produced = rev(L), bare and sentineled, l <= 12, p in {2,3}, q in {1,2}
+    [E1] ALL GREEN
+--- E2: COMPLETE two-block impossibility (saturated closures) ---
+    [U_min/N=5/S_L] saturated: 11 tables (0s)
+    [U_min/N=5/S_R] saturated: 11 tables (0s)
+    [U_min/N=5/LR] saturated: 39 tables (0s) (L-closure of S_R: f pure-L o g pure-R)
+    [U_min/N=5/RL] saturated: 39 tables (0s) (R-closure of S_L: f pure-R o g pure-L)
+    [U_min/N=5] COMPLETE; survivors in LR/RL: {'W_LRL': (False, False), 'W_RLR': (False, False), 'W_bLRL': (False, False), 'W_bRLR': (False, False)}; 1-alt plants present: True
+    [U_min/N=6/S_L] saturated: 13 tables (0s)
+    [U_min/N=6/S_R] saturated: 13 tables (0s)
+    [U_min/N=6/LR] saturated: 53 tables (0s) (L-closure of S_R: f pure-L o g pure-R)
+    [U_min/N=6/RL] saturated: 53 tables (0s) (R-closure of S_L: f pure-R o g pure-L)
+    [U_min/N=6] COMPLETE; survivors in LR/RL: {'W_LRL': (False, False), 'W_RLR': (False, False), 'W_bLRL': (False, False), 'W_bRLR': (False, False)}; 1-alt plants present: True
+    [U_min/N=7/S_L] saturated: 15 tables (0s)
+    [U_min/N=7/S_R] saturated: 15 tables (0s)
+    [U_min/N=7/LR] saturated: 69 tables (0s) (L-closure of S_R: f pure-L o g pure-R)
+    [U_min/N=7/RL] saturated: 69 tables (0s) (R-closure of S_L: f pure-R o g pure-L)
+    [U_min/N=7] COMPLETE; survivors in LR/RL: {'W_LRL': (False, False), 'W_RLR': (False, False), 'W_bLRL': (False, False), 'W_bRLR': (False, False)}; 1-alt plants present: True
+    [U_min/N=7] depth-3 census: 4/64 mixed words are not two-blocks at any block length:
+        (('a', 'bb', 'L'), ('b', 'aa', 'R'), ('a', 'bb', 'L'))
+        (('a', 'bb', 'R'), ('b', 'aa', 'L'), ('a', 'bb', 'R'))
+        (('b', 'aa', 'L'), ('a', 'bb', 'R'), ('b', 'aa', 'L'))
+        (('b', 'aa', 'R'), ('a', 'bb', 'L'), ('b', 'aa', 'R'))
+    [U2/N=5/S_L] CAP HIT at 493115 tables (0s) -- INCOMPLETE
+    [U2/N=5/S_R] CAP HIT at 493115 tables (0s) -- INCOMPLETE
+    [U2/N=5] pure closures too big -- universe at its limit here
+    [U36/N=5/S_L] CAP HIT at 701020 tables (0s) -- INCOMPLETE
+    [U36/N=5/S_R] CAP HIT at 701020 tables (0s) -- INCOMPLETE
+    [U36/N=5] pure closures too big -- universe at its limit here
+    [E2] ALL GREEN
+--- E3: v3 R2L-event scan (suffix-comparable + erosion >= 3) ---
+    162 probe pairs (single-run +1 extensions, all runs), |x| <= 5
+    [single L-pass [/a]] R2L events: 0, max erosion 0
+    [single L-pass [a/a]] R2L events: 0, max erosion 0
+    [single L-pass [b/a]] R2L events: 0, max erosion 0
+    [single L-pass [aa/a]] R2L events: 0, max erosion 0
+    [single L-pass [ab/a]] R2L events: 0, max erosion 0
+    [single L-pass [ba/a]] R2L events: 0, max erosion 0
+    [single L-pass [bb/a]] R2L events: 0, max erosion 0
+    [single L-pass [/b]] R2L events: 0, max erosion 0
+    [single L-pass [a/b]] R2L events: 0, max erosion 0
+    [single L-pass [b/b]] R2L events: 0, max erosion 0
+    [single L-pass [aa/b]] R2L events: 0, max erosion 0
+    [single L-pass [ab/b]] R2L events: 0, max erosion 0
+    [single L-pass [ba/b]] R2L events: 0, max erosion 0
+    [single L-pass [bb/b]] R2L events: 0, max erosion 0
+    [single L-pass [/aa]] R2L events: 0, max erosion 0
+    [single L-pass [a/aa]] R2L events: 0, max erosion 0
+    [single L-pass [b/aa]] R2L events: 0, max erosion 0
+    [single L-pass [aa/aa]] R2L events: 0, max erosion 0
+    [single L-pass [ab/aa]] R2L events: 0, max erosion 0
+    [single L-pass [ba/aa]] R2L events: 0, max erosion 0
+    [single L-pass [bb/aa]] R2L events: 0, max erosion 0
+    [single L-pass [/ab]] R2L events: 1, max erosion 3; e.g. 'ababa'->'a' vs 'ababba'->'ba' (erosion 3)
+    [single L-pass [a/ab]] R2L events: 0, max erosion 0
+    [single L-pass [b/ab]] R2L events: 0, max erosion 0
+    [single L-pass [aa/ab]] R2L events: 0, max erosion 0
+    [single L-pass [ab/ab]] R2L events: 0, max erosion 0
+    [single L-pass [ba/ab]] R2L events: 0, max erosion 0
+    [single L-pass [bb/ab]] R2L events: 0, max erosion 0
+    [single L-pass [/ba]] R2L events: 1, max erosion 3; e.g. 'babab'->'b' vs 'babaab'->'ab' (erosion 3)
+    [single L-pass [a/ba]] R2L events: 0, max erosion 0
+    [single L-pass [b/ba]] R2L events: 0, max erosion 0
+    [single L-pass [aa/ba]] R2L events: 0, max erosion 0
+    [single L-pass [ab/ba]] R2L events: 0, max erosion 0
+    [single L-pass [ba/ba]] R2L events: 0, max erosion 0
+    [single L-pass [bb/ba]] R2L events: 0, max erosion 0
+    [single L-pass [/bb]] R2L events: 0, max erosion 0
+    [single L-pass [a/bb]] R2L events: 0, max erosion 0
+    [single L-pass [b/bb]] R2L events: 0, max erosion 0
+    [single L-pass [aa/bb]] R2L events: 0, max erosion 0
+    [single L-pass [ab/bb]] R2L events: 0, max erosion 0
+    [single L-pass [ba/bb]] R2L events: 0, max erosion 0
+    [single L-pass [bb/bb]] R2L events: 0, max erosion 0
+    worst single L-pass erosion: 3 (pass ('', 'ab'))
+    [R-pass [b/aa]^R] R2L events: 0, max erosion 0
+    [R-pass [a/bb]^R] R2L events: 0, max erosion 0
+    [E3/U2/S_L] CAP HIT at 711844 tables (0s) -- INCOMPLETE
+    [E3/U2/S_R] CAP HIT at 711844 tables (0s) -- INCOMPLETE
+    [E3] U2 closures too big at N=6; skipping
+    [E3/U_min/S_L] saturated: 13 tables (0s)
+    [E3/U_min/S_R] saturated: 13 tables (0s)
+    [E3/U_min/pure-L closure] 13 tables: 8 with an R2L event, max erosion 3; e.g. 'ba' vs 'a' (erosion 3)
+    [E3/U_min/pure-R closure] 13 tables: 10 with an R2L event, max erosion 4; e.g. 'baa' vs 'aa' (erosion 4)
+    [E3/U_min/LR] saturated: 53 tables (0s)
+    [E3/U_min/two-block LR] 53 tables: 44 with an R2L event, max erosion 4; e.g. 'abb' vs 'bb' (erosion 4)
+    [E3/U_min/RL] saturated: 53 tables (0s)
+    [E3/U_min/two-block RL] 53 tables: 46 with an R2L event, max erosion 4; e.g. 'abb' vs 'bb' (erosion 4)
+    [W_LRL] R2L events: 3, max erosion 4; e.g. 'baab'->'ab' vs 'baabb'->'bab' (erosion 3)
+    [E3b] 44 toolkit slices:
+    [E3b] toolkit slices with R2L events: 0/44
+    [E3c] random L-exprs: 75/4000 expressions with an R2L event; first: 'aaab' vs 'aaabb' -> 'bb' vs 'aabb' (erosion 3)
+    [E3c] random mixed exprs: 26/1500 expressions with an R2L event; first: 'baba' vs 'babaa' -> '' vs 'a' (erosion 3)
+    [E3d] rho-slices (constant A, B):
+    [[b/aa]^R] R2L events: 0, max erosion 0
+    [[a/bb]^R] R2L events: 0, max erosion 0
+    [[ba/aa]^R] R2L events: 0, max erosion 0
+    [[ab/bb]^R] R2L events: 0, max erosion 0
+    [v5] first-difference offset (rel = d / max(|y|,|y'|); LOW = right-to-left routing):
+    [v5] identity: min rel 0.75, mean 0.88 (60 probes)
+    [v5] [a/bb] L: min rel 0.67, mean 0.85 (60 probes)
+    [v5] [a/bb]^R: min rel 0.14, mean 0.61 (60 probes)
+    [v5] [b/aa] L: min rel 0.50, mean 0.84 (60 probes)
+    [v5] [b/aa]^R: min rel 0.00, mean 0.56 (60 probes)
+    [v5] [eps/a] L: min rel 0.67, mean 0.85 (30 probes)
+    [v5] enc: min rel 0.75, mean 0.89 (60 probes)
+    [v5] dec: min rel 0.75, mean 0.87 (60 probes)
+    [v5] tail: min rel 0.67, mean 0.86 (60 probes)
+    [v5] init: min rel 0.67, mean 0.86 (60 probes)
+    [v5] rot: min rel 0.75, mean 0.88 (60 probes)
+    [v5] last: all probes absorbed
+    [v5] W_LRL: min rel 0.00, mean 0.43 (60 probes)
+    [v5] random L-exprs (n=9): min-rel range [0.00, 0.75]
+    [v5] random mixed exprs (n=10): min-rel range [0.00, 0.80]
+    [v5] low-rel L-expression (rel 0.00): ('S', ('S', ('K', ''), ('K', 'baa'), ('K', '')), ('S', ('K', 'bab'), ('K', 'aba'), ('V', 0)), ('C', ('S', ('K', ''), ('K', 'aa'), ('V', 0)), ('S', ('K', 'abb'), ('V', 0), ('V', 0))))
+--- E4: growth bound transfer to mixed pipelines ---
+    20000 random mixed pipelines (depth <= 5) on strings <= 12: |f(x)| <= |x| * prod(max(1, |A_i|/|B_i|)) holds
+    [E4] ALL GREEN
+total 5s; ALL GREEN

@@ -1,0 +1,22 @@
+D3' growth census (rank-0-total, |A|,|B|<=3, caps 50000)
+   growth subdomain: 162 rules |A|,|B|<=3, B not-in A (paper: 162); rank-0 divergent overall: 166 @ low caps, 166 @ adequate caps (census_par)
+   rank 0: linear 146, superlinear 12, exponential 4, div-at-rank 0; cap-recheck needed: []
+      exponential: [('aab', 'ba'), ('abb', 'ba'), ('baa', 'ab'), ('bba', 'ab')]
+      superlinear (12): [('aa', 'b'), ('bb', 'a'), ('aaa', 'b'), ('aaa', 'ab'), ('aaa', 'ba'), ('aab', 'bb'), ('aba', 'aa'), ('bab', 'bb'), ('bba', 'aa'), ('bbb', 'a'), ('bbb', 'ab'), ('bbb', 'ba')]
+   rank 1: linear 146, superlinear 12, exponential 4, div-at-rank 0; cap-recheck needed: []
+      exponential: [('aab', 'ba'), ('abb', 'ba'), ('baa', 'ab'), ('bba', 'ab')]
+      superlinear (12): [('aa', 'b'), ('bb', 'a'), ('aaa', 'b'), ('aaa', 'ab'), ('aaa', 'ba'), ('aab', 'bb'), ('aba', 'aa'), ('bab', 'bb'), ('bba', 'aa'), ('bbb', 'a'), ('bbb', 'ab'), ('bbb', 'ba')]
+D4' amplifier family at rank 1 on FIRING inputs, caps 200k/2M:
+   [baa/ab] on (B)^m m=1..8: rank1 lens [2, 5, 10, 19, 36, 69, 134, 263]; rank0 lens [3, 8, 17, 34, 67, 132, 261, 518]
+   [aab/ba] on (B)^m m=1..8: rank1 lens [2, 5, 10, 19, 36, 69, 134, 263]; rank0 lens [3, 8, 17, 34, 67, 132, 261, 518]
+   [abb/ba] on (B)^m m=1..8: rank1 lens [2, 5, 10, 19, 36, 69, 134, 263]; rank0 lens [3, 8, 17, 34, 67, 132, 261, 518]
+   [bba/ab] on (B)^m m=1..8: rank1 lens [2, 5, 10, 19, 36, 69, 134, 263]; rank0 lens [3, 8, 17, 34, 67, 132, 261, 518]
+D5 rank-2 cures: artifact or real?
+   [aaaa/aaaa] rank2 on longer inputs: fails on 'aaaaaaaaaaaaaaaaaaaaaaaa' (len 24) at caps 20k/200k
+   [abab/abab] rank2 on longer inputs: fails on 'abababababababababababab' (len 24) at caps 20k/200k
+   [abba/bab] rank2 on longer inputs: fails on 'abbaababbaababbaababbaab' (len 24) at caps 20k/200k
+   [baab/aba] rank2 on longer inputs: fails on 'baababbaababbaababbaabab' (len 24) at caps 20k/200k
+D6 rank-1 'creates nothing' robustness sample: 200 random rank-0-total rules, 8 random inputs of length 10-24 each, caps 10k/100k; flagged candidates re-checked at 10x.
+   flagged at 10k/100k: 0
+   still failing at 10x caps (100k/1M): 0 []
+verify_r3c done

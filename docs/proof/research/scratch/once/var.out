@@ -1,0 +1,21 @@
+=== Part var: variable-pattern search ===
+var: 210 variable passes (patterns from ['a', 'b', 'X', 'Xa', 'Xb', 'aX', 'bX', 'H', 'Hb', 'len', 'enc', 'tail', 'init', 'aXb'], replacements from ['eps', 'a', 'b', 'X', 'Xa', 'Xb', 'aX', 'bX', 'H', 'Hb', 'len', 'enc', 'tail', 'init', 'aXb']), patterns computed from original input
+  var level 1: +42 new (cum 43)
+  var level 2: +2790 new (cum 2833)
+  var level 3: +229366 new (cum 232199)
+  del1b: ABSENT at depth 3
+  var-miss d=50 pipeline=[('Xa', 'a'), ('eps', 'bX'), ('a', 'Xa')]
+      fails on 50/127: ['b', 'bb', 'aab', 'bbb', 'aaab', 'aabb', 'abab', 'baba']
+  var-miss d=58 pipeline=[('Xa', 'a'), ('X', 'bX'), ('a', 'Xa')]
+      fails on 58/127: ['b', 'ab', 'bb', 'aab', 'abb', 'bbb', 'aaab', 'aaba']
+  var-miss d=67 pipeline=[('bX', 'b'), ('b', 'Xb'), ('eps', 'bX')]
+      fails on 67/127: ['b', 'bb', 'aba', 'bbb', 'abab', 'baba', 'babb', 'bbab']
+  var-miss d=68 pipeline=[('Xa', 'a'), ('a', 'aX'), ('eps', 'bX')]
+      fails on 68/127: ['b', 'bb', 'bab', 'bbb', 'aaba', 'abaa', 'abab', 'baba']
+  var-rand new best d=120: [('enc', 'aX'), ('a', 'Xb'), ('a', 'Xa'), ('Hb', 'Xa')]
+  var-rand new best d=99: [('len', 'bX'), ('b', 'b'), ('eps', 'b'), ('enc', 'bX'), ('init', 'aX'), ('aX', 'aXb')]
+  var-rand new best d=92: [('Hb', 'Xb'), ('bX', 'b'), ('a', 'aX'), ('Xb', 'Xb'), ('eps', 'bX')]
+  var-rand new best d=79: [('aX', 'b'), ('b', 'Xa'), ('eps', 'aX'), ('H', 'bX')]
+  var-rand new best d=52: [('Xa', 'a'), ('eps', 'bX'), ('a', 'Xa'), ('init', 'Hb'), ('Hb', 'aX'), ('enc', 'aX'), ('a', 'a')]
+var-rand: 816911 pipelines of 4-7 passes in 240s, best distance 52
+total time 363.7s

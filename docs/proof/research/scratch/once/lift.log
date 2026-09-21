@@ -1,0 +1,24 @@
+mitm3: c-spliced domain: 384 strings (binary <=5 with one c at each position)
+  vocabulary: 156 passes (patterns/repls <= 2 over abc)
+  building g-side (first 2 passes) ...
+    level 1: +132 (cum 133), 0s
+    level 2: +13255 (cum 13388), 1s
+  building f-side (last 2 passes) ...
+    level 1: +132 (cum 133), 0s
+    level 2: +13255 (cum 13388), 1s
+  |S_g|=13388 |S_f|=13388
+  probe images |U|=1291
+  probe filter: 3421 f-candidates, 0s
+  full checks 4: no witness for rep1b@c-spliced at depth <= 4
+  building g-side (first 3 passes) ...
+    level 1: +132 (cum 133), 0s
+    level 2: +13255 (cum 13388), 1s
+    level 3: +1230110 (cum 1243498), 103s
+  building f-side (last 2 passes) ...
+    level 1: +132 (cum 133), 0s
+    level 2: +13255 (cum 13388), 1s
+  |S_g|=1243498 |S_f|=13388
+  probe images |U|=17168
+  probe filter: 4444 f-candidates, 4s
+  full checks 925: no witness for rep1b@c-spliced at depth <= 5
+total 129s

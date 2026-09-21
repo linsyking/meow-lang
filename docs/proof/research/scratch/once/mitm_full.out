@@ -1,0 +1,25 @@
+A: full domain (127 binary strings <=6), paper vocab (156 passes)
+ A1: depth <= 4 (2+2 MITM)
+  building g-side levels <= 2 ...
+    level 1: +72 (cum 73), 0s
+    level 2: +4552 (cum 4625), 0s
+  building f-side levels <= 2 ...
+    level 1: +72 (cum 73), 0s
+    level 2: +4552 (cum 4625), 0s
+  |S_g| = 4625, |S_f| = 4625
+  distinct probe images |U| = 520
+  probe filter done in 0s; 1534 f's with >=1 probe hit
+  full checks: 17291, witnesses: 0
+ A2: depth <= 5 (3+2 MITM)
+  building g-side levels <= 3 ...
+    level 1: +72 (cum 73), 0s
+    level 2: +4552 (cum 4625), 0s
+    level 3: +320140 (cum 324765), 11s
+  building f-side levels <= 2 ...
+    level 1: +72 (cum 73), 0s
+    level 2: +4552 (cum 4625), 0s
+  |S_g| = 324765, |S_f| = 4625
+  distinct probe images |U| = 5693
+  probe filter done in 1s; 1542 f's with >=1 probe hit
+  full checks: 660164, witnesses: 0
+total 67s
