@@ -1,0 +1,39 @@
+c: abc->xy ell=6 map={'a': 'xxyxyy', 'b': 'xxyyxy', 'c': 'xxyyyy'}
+d: xy->abc ell=4 map={'x': 'aabb', 'y': 'aacb'}
+OK   T0 rep expression = freezing semantics (300 random, n<=3): 300 cases
+expression space: depth<=1, constants<=2 over abc: 2954 expressions
+T1 Dir-1 (all 2954 depth<=1 exprs, |S|<=4, 121 inputs): 357434 evaluations, 0 mismatches, 23912 undefined (matching)
+OK   T1 Direction 1 transfer, full pass: 357434 cases
+T1b Dir-1 (1200 random depth<=3 exprs, |S|<=3, 40 inputs): 48000 evaluations, 0 mismatches
+OK   T1b Direction 1, random deeper: 48000 cases
+T2 Dir-1 under once: 118160 evaluations, 0 mismatches
+OK   T2 once transfer: 118160 cases
+T2 Dir-1 under R: 118160 evaluations, 0 mismatches
+OK   T2 R transfer: 118160 cases
+T3 unary->binary (all 258 depth<=1 unary exprs, a^0..a^24): 6450 evaluations, 0 mismatches, 936 undefined
+OK   T3 unary source transfer: 6450 cases
+T3b unary->binary (800 random depth<=3, a^0..a^14): 12000 evaluations, 0 mismatches
+OK   T3b unary source, random deeper: 12000 cases
+h = d o c codewords: {'a': 'aabbaabbaacbaabbaacbaacb', 'b': 'aabbaabbaacbaacbaabbaacb', 'c': 'aabbaabbaacbaacbaacbaacb'}
+T4a h/H expressions: 40 inputs |S|<=3, 0 failures
+OK   T4a h expression codes, H decodes: 40 cases
+T4 roundtrip space (constants<=1): 155 expressions
+T4 Dir-2 roundtrip (E -> E^c -> H(E'_d(h(.)))): 6200 evaluations, 0 mismatches, 1025 undefined (matching)
+OK   T4 Direction 2 roundtrip: 6200 cases
+T5a q = c o e as expression, H_q its decoder: 31 inputs |T|<=4, 0 failures
+OK   T5a retraction q decodable: 31 cases
+T5b reversal retraction: e = {x:bab, y:cac} (palindromic, comma-free), q = c o e; H_q(D(q(T))) = rev T on 63 inputs |T|<=5, 0 failures
+OK   T5b rev_Gamma = H_q o D o q, D = c o rev o c^-1 (oracle): 63 cases
+T5c pass equivariance under q (L/once/R/kth): 1176 cases, 0 mismatches
+OK   T5c passes equivariant under the retraction coding: 1176 cases
+T6a double over ternary -> native double over binary: 31 inputs, 0 failures
+OK   T6a payoff: doubling is alphabet-uniform: 31 cases
+T6b-0 pass equivariance under e (= d: xy->abc, comma-free, all modes): 1176 cases, 0 mismatches
+OK   T6b-0 passes equivariant under e itself: 1176 cases
+T6b pass node, L mode, full expression H_q(E'(q(X))): 294 evaluations, 0 mismatches
+OK   T6b payoff: pass node alphabet-uniform (L, full expression): 294 cases
+T6b pass node, once/R/kth: H_q([[E']]_m(q(T))) = native pass: 882 evaluations, 0 mismatches
+OK   T6b payoff: pass node alphabet-uniform (once/R/kth, semantic composition): 882 cases
+T7 deg(E^c)=deg(E) and Safe transfer, over the depth<=1 space: 2954 expressions, 0 violations
+OK   T7 degree and safety transfer: 2954 cases
+T7b size blowup of the transfer over the space: max |E^c|/|E| = 1.00, codeword length 6

@@ -939,3 +939,400 @@ Files: `lim_section.tex` (the deliverable), `sanity_lim.tex` (compile
 harness), `verify_r4.py` + `round4.log` (364,693/0), plus R1-R3
 deliverables unchanged.  Re-run: `cd .../scratch/lim && python3
 verify_r4.py` (~110 s); compile: `pdflatex sanity_lim.tex` twice.
+
+---
+
+# R5 — the single-pass ceiling and the ω-limit reading
+
+Assignment: (1) is lim over one constant pass universal?  Expected no
+— find the ceiling.  (2) lim coinductively on ω-strings (§6.3 remark
+candidate).  Verdict up front: **the ceiling question is now a precise,
+data-backed conjecture with a tight witness family — every exponential
+base m ≥ 1 is realized exactly, nothing on the measured domain beats
+the family rate, and the separating witness from universality is the
+tower function; the ω-reading splits into a pointwise/coinductive
+reading and a stepwise reading that provably diverge, with exact
+cascade laws.**
+
+Files: `verify_r5.py`, `round5.log` (ALL GREEN: 1,224 checks, 0
+failures, exit 0, ~90 s), `round5_partial.log` (the earlier run that
+exposed the two cap artifacts, kept for the record), and
+`omega_remark.tex` (the §6.3 remark draft).  Re-run: `cd
+.../scratch/lim && python3 verify_r5.py`.
+
+## R5.1 The structural lemmas (proved + verified)
+
+On all 203,126 convergent orbits of the 930 rules × inputs ≤ 7
+(part A of `verify_r5.py`), with fires of sweep k at input positions
+`fires_in`, emissions at output positions `fires_out`:
+
+- **Freshness (interval form).**  Every occurrence of B in s_{k+1}
+  overlaps the emission span [fo, fo+|A|) of some fire of sweep k
+  (endpoint-touch allowed; for A = ε the span is empty and the test is
+  the touching of the deletion point).  Verbatim survivors cannot
+  contain B — an occurrence entirely inside a surviving block would
+  have fired.  0 failures.
+- **Branching.**  r_{k+1} ≤ (|A|+|B|−1)·r_k.  (The |A||B|·r_k form
+  FAILS exactly at A = ε — deletion rules emit nothing, so "contains
+  an emitted character" degenerates; the honest form counts interval
+  starts: each occurrence start lies within |A|+|B|−1 positions of an
+  emission start.)  0 failures on the whole domain.
+- **Drift.**  Every fire of sweep k+1 starts within |A|+|B| of an
+  emission of sweep k (output coordinates).  0 failures.
+
+These are the anchors any double-exponential attempt must defeat:
+new occurrences can only be born anchored on the previous sweep's
+emissions, and the branching factor per emission is at most
+|A|+|B|−1.
+
+## R5.2 The base-m family — every exponential base, exactly
+
+The four "letter-duplicating" shapes (verified exact on 1,169 grid
+cells, part C(b)):
+
+- S1(m) = [b a^m / ab] on a^i b^j: out = b^j a^{i·m^j},
+  K = i·m^{j−1} + (j−1), R = i(m^j − 1)/(m−1)
+- S2(m) = [b^m a / ab] on a^i b^j: out = b^{j·m^i} a^i,
+  K = j·m^{i−1} + (i−1), R = j(m^i − 1)/(m−1)
+- T1(m) = [a^m b / ba] on b^j a^i: out = a^{i·m^j} b^j (K, R as S1)
+- T2(m) = [a b^m / ba] on b^j a^i: out = a^i b^{j·m^i} (K, R as S2)
+
+The m = 1 degenerate of all four is the insertion sort: out = the
+sorted string, R = i·j (the textbook comparison count), K = i+j−1.
+The amplifier [baa/ab] is S1(2); the four c = 2 champions of the
+census are S1(2), S2(2), T1(2), T2(2); the systems report's "slow
+family" [aaab/ba], [abbb/ba] are T1(3), T2(3) — under the sweep they
+are base-3 amplifiers with K = 3^{n−1}+n−1, NOT slow.  Verified for
+m ∈ {1..5} on S1 and m ∈ {1..4} on the other three shapes, i ≤ 3 (S1/T1)
+resp. i ≤ 14 (S2/T2), predicted-K ≤ 8000 grids.
+
+Reading: these rules compute (i, j) ↦ i·m^j on the nose — the sweep
+Horner-evaluates the two-block input in base m.  Output length
+|i·m^j| + j is single-exponential in |w| and the family attains every
+base, so *no polynomial ceiling and no fixed-base ceiling exists*;
+the only possible ceiling is "single-exponential with rule-dependent
+base."
+
+## R5.3 The census and the ceiling conjecture
+
+Part B, with the cap correction (see R5.5): 144 of 148 growing rules
+(|A| > |B|, B ∉ A, |A| ≤ 4, binary) are total on ALL inputs ≤ 9.  The
+four exceptions are *monotone-growth divergents* — verified divergent
+by strictly increasing length every sweep through a 60,000-sweep
+horizon (no cycles; length +2/+2/+1/+1 per sweep):
+
+- [aabb/ba] on `baa` (a 3-char input!), [bbaa/ab] on `aab`,
+  [abba/bab] on `babb`, [baab/aba] on `aaba`.
+
+So single-rule lim is naturally partial on 3-character inputs.
+
+On the census domain: worst K = 2194 (= 3^7+7, the base-3 quartet),
+worst R = 3280 (= (3^8−1)/2), and — the key statistic — **max fires
+per sweep r_k = 9 over all 203,126+ orbits, longest strictly-growing
+fire run = 4 sweeps.**  Fires never blow up: the exponential output
+of the family comes from ~1–2 fires per sweep sustained for m^{n}
+sweeps (the cascade is *sequential*, not parallel).  The per-rule
+law f, K, R ≤ (α−β+1)^n + n holds everywhere measured (0 failures),
+and the family shows it tight.
+
+Champion argmax (part C(c)): at n = 9 over all 2^9 inputs, the four
+base-2 rules attain f(9) = 264 = 2^8+8 exactly at the two-block Horner
+inputs (a·b^8, a^8·b, b^8·a, b·a^8 as the shape dictates), and the
+base-3 quartet attains f(9) = 6569 = 3^8+8.  The two-block inputs are
+THE growth champions; nothing beats the family rate.
+
+**Ceiling conjecture (the open problem upgraded to a precise
+statement):** for every A, B and every w on which the sweep-orbit
+converges, |lim([A/B])(w)| ≤ (|A|−|B|+1)^{|w|} + |w| — i.e., single-rule
+lim functions are at most single-exponential.  Consequences if true:
+lim over one constant pass is NOT universal (the separating witness
+is the tower function 2↑↑n, computable by a 2-counter machine —
+Minsky 1967, already cited as `minsky67`), since universality needs
+iterated exponentiation.  What is proved this round: the lemmas of
+R5.1 (any counterexample must anchor double-exponential fire growth
+entirely in previous emissions), the tight family of R5.2, and the
+verified ceiling + fire-behavior on the full census domain.  The
+missing step: bound the NUMBER of sweeps K by single-exponential in
+|w| for convergent orbits (the family achieves K = m^{n−1}+n−1, so K
+itself must be allowed to be exponential; the crux is showing fires
+cannot grow geometrically for exponentially many sweeps — the
+measured growth-run cap of 4 consecutive doublings is the empirical
+shadow of this).
+
+Adjacent literature (verified to exist; NOT yet vetted page-by-page —
+do not cite without checking): Kobayashi, Katsura, Shikishima-Tsuji,
+"Termination and derivational complexity of confluent one-rule
+string-rewriting systems," Theor. Comput. Sci. 262 (2001) 337–-? ;
+Kurth's dissertation on termination of single-rule semi-Thue systems;
+Geser–Hofbauer–Waldmann on one-rule systems under single-threaded
+strategies.  Our setting differs in two ways: the sweep is a parallel
+greedy strategy, and we ask for OUTPUT GROWTH under convergence, not
+derivation length under arbitrary strategies.  A bound on all
+derivations would imply ours; the known results I could see are
+restricted (confluent / single-threaded) and do not obviously cover
+the parallel sweep.
+
+## R5.4 The ω-limit reading (item 2) — exact laws
+
+D1 (causality): one pass is causal with lookahead |B| — output[:m−|B|]
+is fixed by input[:m] (300 random pairs, 0 failures); for |A| ≥ |B|
+the k-th window W depends on the initial W + k|B| letters, which is
+what licenses every truncation/slack certificate below.
+
+D2 (amplifier on a·b^ω, the headline): the front (leftmost a) never
+retreats; its dwell at value v is EXACTLY 2^{v−1}+1 sweeps
+(measured [2,3,5,9,17,33,65,129,257,513] for v = 1..10); position j
+is permanently 'b' from sweep k_j = 2^j + j on (measured
+[1,3,6,11,20,37,70,135,264,521] for j = 0..9 — note k_j is the
+finite amplifier's K at length j+2: the ω-orbit re-runs the finite
+cascade at every position).  Fires occur every sweep and grow
+(r_521 = 512, r_1042 = 1031 — the a-army grows ~k²/2; #a = 534,044
+at the horizon), so the stepwise fixpoint test s_{k+1} = s_k never
+fires: the orbit converges pointwise to b^ω — itself a fixed point of
+the pass — without ever being stepwise fixed.  Slack-certified (M
+doubled, identical laws).  The pointwise convergence is not
+uniform in any effective sense: position j costs 2^j + j sweeps.
+
+D3 (does lim commute with ω-extension?): the two showcase rules
+commute — lim(a·b^{n−1}) = b^{n−1}a^{2^{n−1}} (exact string, n ≤ 15)
+and lim((ba)^n) = b^n a^n (n ≤ 40) both converge pointwise to b^ω,
+and the sort's ω-orbit window stabilizes to b^W (s_k = b^{k+1}(ab)^ω,
+window 48, slack-certified).  But [aa/a] on a^ω does NOT commute:
+finite side lim(a^n) = 'a' for every 1 ≤ n ≤ 60; ω side, one pass on
+a^ω fires at 0,2,4,… and outputs a^ω (window-verified at 3 widths × 3
+truncations) — a fixed point, so the coinductive reading gives
+lim = a^ω.  The two readings differ at EVERY position ≥ 1: this is
+exactly the least-fixpoint (approximation) vs greatest-fixpoint
+(coinductive) split of rem:leastfix, in one line.  [ε/ab] on (ab)^ω
+(D5) erases the entire infinite string in ONE sweep (out = ε,
+verified on truncations of 17, 34, 71 pairs) — an ω-orbit can leave
+ω-strings; the process is LIVE forever with finite total output, the
+guardedness edge case of thm:guardedness.
+
+D4 (census): 310 length-preserving rules × 4 periodic shapes
+(a^ω, (ab)^ω, (ba)^ω, (aab)^ω), window 24, 60-sweep horizon:
+1,222 stabilized, 18 churning.
+
+Deliverable draft: `omega_remark.tex` — a §6.3 remark candidate
+("The ω-limit reading") with the three phenomena (cascade law,
+non-commutation witness, one-sweep collapse) keyed to prop:streamadeq,
+thm:guardedness, rem:leastfix, thm:beyondfinite.
+
+## R5.5 Corrections forced by this round's data
+
+- **The K ≤ 4n² law of the R4-era note was a short-domain artifact**
+  (already suspected): amplifier K = 2^{n−2}+n−2 exceeds 4n² at n = 13.
+  All K-laws in this report are the honest exponential forms.
+- **Census cap artifact, round 2:** at capsteps = 2000 the base-3
+  quartet [baaa/ab], [bbba/ab], [aaab/ba], [abbb/ba] is misclassified
+  as non-total on inputs ≤ 9 (their two-block orbits need K = 3^7+7 =
+  2194 sweeps), hiding f(9) = 6569 and the entire base-3 tier.  At
+  capsteps = 6000: 144/148 total, and the four that remain are
+  genuinely divergent (monotone growth, R5.3).  The R4-era claim
+  "140 of 148" undercounts by exactly the cap artifact.
+- **D2's first design was wrong** (kept in round5_partial.log): I
+  expected the amplifier's ω-window to turn b^W within a few sweeps;
+  in fact the front advances one position per 2^{v−1}+1 sweeps and
+  the a-wave RE-VISITS positions (b → a → permanent b).  The correct
+  object is the front dwell law and k_j, measured above.
+- **D3's first design was wrong:** I expected the sort to
+  non-commute; hand-derivation and then machine check show s_k =
+  b^{k+1}(ab)^ω — the sort COMMUTES.  The true non-commutation
+  witness is [aa/a] on a^ω (least vs greatest fixpoint), not the sort.
+
+## R5.6 Notes for integration
+
+- The open problem in ssec:lim can now be sharpened to the ceiling
+  conjecture with the family as the tightness witness: "every base
+  is realized, and everything measured stops at single-exponential;
+  separating from universality is exactly the tower function."  If
+  the coordinator wants it, the four exact family laws slot into
+  prop:limgrowth's neighborhood as a proposition with the 1,169-cell
+  verification note.
+- The ω remark (`omega_remark.tex`) is keyed to §6.3 labels; it states
+  only what D1–D5 verify plus the causal-process framing already in
+  the paper.
+- The four divergence witnesses (3–4 char inputs) strengthen
+  thm:limpartial's story if a one-line "even single rules diverge on
+  3-character inputs" is wanted.
+- Suggested citations IF vetted: Kobayashi–Katsura–Shikishima-Tsuji
+  (TCS 262, 2001) for one-rule termination/complexity; Kurth (diss.)
+  for single-rule semi-Thue termination.  Do not cite unvetted.
+
+## R5.7 If there is an R6
+
+1. The K-bound: prove sweeps of convergent orbits are at most
+   single-exponential in |w| (the last step of the ceiling).  The
+   measured fire-run cap (4 consecutive growths) and the freshness
+   anchors are the tools; the family's sequential cascades are the
+   extremal case to beat.
+2. The mirror S2/T2 laws suggest a letter-exchange symmetry
+   (reverse+swap maps the four shapes onto each other and a^i b^j to
+   a^j b^i) — a two-line lemma that halves the family verification.
+3. ω: the D4 churners (18 of 1,240) deserve a look — are any of them
+   ω-oscillators with a bounded window that never stabilizes?
+
+## R5.8 Round hygiene
+
+- `verify_r5.py` final: 1,224 checks, 0 failures, exit 0, ~90 s
+  (`round5.log`).  The earlier partial run with both cap artifacts and
+  the two wrong D-designs is preserved as `round5_partial.log`.
+- `omega_remark.tex` compiles standalone in the `sanity_lim.tex`
+  harness (streams stubs added: thm:subsequential, prop:streamadeq,
+  thm:guardedness, rem:leastfix, thm:beyondfinite): 0 errors, 0
+  undefined references, 0 overfull boxes.
+- Divergence classification of the 4 non-total rules: monotone-growth
+  witnesses, 60,000-sweep horizon, no state repeats (probe inline in
+  this report, R5.3).
+
+---
+
+# R6 — the sweep-count ceiling: K ≤ c^|w| under convergence
+
+Assignment: bound the sweeps K by a single exponential in |w| for
+convergent one-rule sweep orbits — the missing step of the R5 ceiling
+conjecture.  Deliverable: a proof, or a precise obstruction.
+
+**Verdict: a proved theorem covering the entire exponential tier, a
+second verified mechanism covering most of the slow tier, and a sharp
+12-rule obstruction family where every candidate potential of three
+natural classes fails.  The conjecture stands, now with most of its
+weight proved; the honest negative is the 12 rules.**
+
+Files: `verify_r6.py`, `round6.log` (ALL GREEN: 111 checks, 0
+failures, exit 0, ~45 s).  Re-run: `cd .../scratch/lim && python3
+verify_r6.py`.
+
+## R6.1 The potential theorem (proved)
+
+Letters act on a state read in a fixed direction (L or R) as
+t → mult[x]·t + off[x] (mult ≥ 1, off ≥ 0), inducing v(s) by folding.
+Call (dir, mult, off, c) an **affine potential** for [A/B] if:
+
+- (inv) the word maps of A and B coincide — prod(mult) equal and the
+  off-coefficients equal — equivalently v(xAy) = v(xBy) for ALL
+  contexts (decidable in closed form: the product equation forces
+  mult = (t^|δb|/h, t^|δa|/h); the off equation is linear and its
+  primitive solution is (|db|/g, |da|/g));
+- (cnt) δ = #c(A) − #c(B) ≥ 1;
+- (wgt) off[c] ≥ 1.
+
+**Theorem.**  Every sweep-orbit of a rule admitting an affine
+potential converges, and K ≤ Φ(s₀)/δ with Φ = v − #c; in particular
+K ≤ n·maxoff·maxmultⁿ — single exponential.
+
+Proof.  (inv) is context-free, so each fire preserves v exactly and
+the substitutions of one sweep compose; each fire adds δ to #c, so Φ
+drops by δ·r_k ≥ 1 per firing sweep.  Φ ≥ 0 on every string: v = Σ
+over c-positions of off[c]·(product of mult after) ≥ #c.  Φ(B) =
+Φ(A) + δ ≥ 1 by (inv) and (cnt).  Φ(uv) = A_v·Φ(u) + (A_v−1)·#c(u) +
+Φ(v) ≥ A_v·Φ(u) ≥ Φ(u), so any string containing B has Φ ≥ Φ(B) ≥ 1.
+So the orbit cannot stop firing while B occurs, cannot fire more than
+Φ(s₀)/δ times, and must reach a B-free fixed point.  QED.
+
+The theorem also proves TOTALITY for admitting rules.  The R4
+amplifier potential is the m = 2 instance; the four base-m shapes of
+R5 admit the closed forms (S1: L-fold, a:+1, b:×m, c = a; S2: R-fold,
+a:×m, b:+1, c = b; T1: R-fold, b:×m, a:+1, c = a; T2: L-fold, a:×m,
+b:+1, c = b), with Φ₀ = i·m^j − i EXACT and R = Φ₀/(m−1) EXACTLY on
+the Horner inputs — the potential literally counts the remaining
+fires (machine-checked, all 16 instances, m = 2..5).
+
+## R6.2 The classification (census, |A| ≤ 4, binary, growing, B ∉ A)
+
+- 148 growing rules: 144 convergent on all inputs ≤ 9, 4 divergent
+  (the R5 witnesses: [aabb/ba] on `baa`, [bbaa/ab] on `aab`,
+  [abba/bab] on `babb`, [baab/aba] on `aaba`).
+- **114 of the 144 admit an affine potential** — proved total with
+  K ≤ n·maxoff·maxmultⁿ.  Theorem verified per-orbit (v invariant
+  every sweep, Φ ≥ 0, K·δ ≤ Φ₀, final B-free) on all 114 × all inputs
+  ≤ 7 = 29,070 orbits; positivity, B-containing ⟹ Φ ≥ 1, and
+  Φ₀ ≤ (n+1)·maxoff·maxmultⁿ verified on random strings.
+- **No divergent rule admits a potential** (consistency of the
+  theorem — an admitter would refute it; all four fail the search,
+  as does [ab/a], which diverges by firing forever at position 0).
+- The remaining 30 convergent rules admit no affine potential — and
+  part C shows they are all SLOW: f(n) ≤ 3n−2 or f(9) ≤ 34, K ≤ 14
+  at n = 9 (vs the admitters' exponential tier: K = 2194 at n = 9).
+
+## R6.3 The k-gram potentials (the slow tier's mechanism)
+
+Φ = #g₁ + w·#g₂ over k-grams (k ≤ 3), with per-fire Δ ≤ −1 for every
+boundary context and g₁ a k-gram of B (so B ∈ s ⟹ Φ ≥ 1).  NOTE:
+occurrence counts must be OVERLAPPING ('aaa' holds two 'aa's;
+str.count is non-overlapping — this bug silently zeroed the first
+run).  **18 of the 30** are covered, most by single grams: [aba/aa]
+by Φ = #aa, [abba/aa] by #aa, [abba/aba] by #aba, [abab/abb] by
+#ab + 2·#bb, etc. — giving K ≤ Φ₀ ≤ n^k, polynomial.  Per-orbit
+verified on all their census orbits (inputs ≤ 7).  Caveat: the
+per-site decrease is proved for isolated fires and fires separated
+by ≥ k−1 letters; adjacent-fire junctions are covered by the machine
+verification, not by the lemma as stated.
+
+## R6.4 THE OBSTRUCTION (the honest negative)
+
+**12 convergent rules admit neither an affine nor a k-gram (k ≤ 3)
+potential, nor Φ = the overlapping count of B itself:**
+
+[aaab/baa], [aabb/baa], [aabb/bba], [abab/baa], [abab/bba],
+[abbb/bba], [baaa/aab], [baba/aab], [baba/abb], [bbaa/aab],
+[bbaa/abb], [bbba/abb].
+
+Worked failure, [aaab/baa]: the product equation forces mult(a) = 1,
+then the off equation forces off(a) = 0, killing the only counter
+letter (δa = 1); every k ≤ 3 gram combination has a context with
+Δ ≥ 0 (e.g. #aa grows when the left context ends in a); and
+Φ = ocount(s, `baa`) has the context x = `ba` with Δ = 0.  All 12
+share the signature: β ≥ 2 with both letters in B, δ of one letter
+exactly 1, and their measured K is LINEAR (K ≤ 2n on the census, K(9)
+= 14 worst) — the data is nowhere near threatening the conjecture;
+what fails is every potential class we can write down.  Random larger
+rules (|B| ≤ 3 < |A| ≤ 6): 372 of 400 convergent on ≤ 6, of which 149
+admit no affine potential — the phenomenon is robust, not a
+small-rule artifact.
+
+## R6.5 What is proved, what remains
+
+PROVED: (i) affine-admitting rules: total, K ≤ λⁿ (the entire
+exponential tier: all four base-m shapes, the 114 census rules, all
+16 verified family instances with R = Φ₀/δ exactly); (ii) shrinking
+rules: K ≤ n/(β−α) (79,050 orbits checked); (iii) length-preserving
+convergent orbits: states distinct, K ≤ 2ⁿ (79,050 orbits, zero
+divergences among |A| ≤ |B| rules on inputs ≤ 7); (iv) k-gram rules:
+K ≤ n^k, per-orbit verified (18 census rules).
+
+REMAINS OPEN: the 12-rule obstruction family (convergent, K ≤ 2n
+measured, no potential of the three classes), and the general
+statement for arbitrary (A, B): the conjecture "convergent ⟹
+K ≤ c^{|w|}" is now proved for every rule admitting an affine
+potential — which is every exponential-tier rule we have found — and
+the empirical slack for the rest is enormous (their K is linear).
+The f-ceiling conjecture of R5 is unaffected: output size for the 12
+is f ≤ 34 at n = 9.
+
+## R6.6 Corrections forced by this round
+
+- The off-equation primitive solution has both coordinates positive:
+  (|db|/g, |da|/g) — my first sign convention returned negative
+  offsets and hid 43 admitters (114 found vs 71 in the first run).
+- Φ(final) = 0 is a special property of the family potentials (their
+  off vanishes on the non-counter letter); the theorem only needs
+  Φ ≥ 0 — the first run's orbit check demanded equality and produced
+  spurious failures.
+- PartF's family definitions were garbled (S1 written with m−1
+  instead of m — turning S1(2) into the sort; T1/T2 potentials
+  swapped; S2/T2 i/j orientation).  All caught by the checks
+  themselves.
+- str.count is NON-OVERLAPPING; k-gram potentials need overlapping
+  counts (first run: 0/30 covered; after the fix: 18/30).
+
+## R6.7 If there is an R7
+
+1. The 12: matrix (2×2) interpretations or degree-2 potentials —
+   the invariance condition becomes a semialgebraic problem; or a
+   direct combinatorial argument for the "β ≥ 2, δ = 1" signature.
+2. The general question: is "convergent ⟹ admits an affine potential
+   OR K ≤ poly" a theorem?  The census says 132/144 = affine ∪
+   k-gram; the boundary is exactly the exponential/slow split.
+3. The 149 random convergent non-admitters deserve the k-gram search
+   (only the census 30 ran it).

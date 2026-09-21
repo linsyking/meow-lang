@@ -1,8 +1,8 @@
 %% =====================================================================
-%%  ROUND 5, REVISED IN ROUND 6 -- the proof fragment: phases, overlap
-%%  periodicity, and the mult-1 wall.  Paper-voice draft of what is
-%%  PROVED, what is machine-verified-but-unproved, and exactly what
-%%  remains for "rev is not L-reachable".
+%%  ROUND 5, REVISED IN ROUNDS 6-9 -- the proof fragment: phases,
+%%  overlap periodicity, and the mult-1 wall.  Paper-voice draft of
+%%  what is PROVED, what is machine-verified-but-unproved, and exactly
+%%  what remains for "rev is not L-reachable".
 %%
 %%  ROUND 6 REVISIONS:
 %%   - Fact (no consecutive left-moves): REFUTED at larger sizes
@@ -12,6 +12,19 @@
 %%     two-pass expression -- Conjecture A (LDS <= C(E) mult) REFUTED.
 %%   - Base case restated as a CONJECTURE (the round-5 derivation used
 %%     the refuted fact; the statement has no counterexample).
+%%
+%%  ROUND 9 REVISIONS:
+%%   - Conjecture basecase and the mult-1 theorem (Theorem B): REFUTED
+%%     by the period-3 family E = [eps/tail^4 X].[tail(X)/ab]X on
+%%     w = (bba)^k: LDS = k-1 at mult EXACTLY 1, k = 5..16, every row
+%%     content-cross-checked.  The supply pigeonhole of
+%%     Remark rem:textlevel does NOT generalize (2-char sigma, period
+%%     3: the residue class is exactly the right size).
+%%   - Proposition phasebound SURVIVES as the structure theorem of
+%%     mult-1 outputs; its constant is value-dependent.
+%%   - The atom route is DEAD as a separating program; what remains
+%%     is the influence-crossing side and the descending-bijection
+%%     invariant (new).
 %%
 %%  Machine verification (re-runnable):
 %%    docs/proof/research/scratch/rev/verify_round5_phases.py
@@ -23,6 +36,15 @@
 %%   refutation.)
 %%    docs/proof/research/scratch/rev/verify_round6_mult1_sweep.py
 %%  (mult-1 hunt: no row with mult=1 and LDS>=4.)
+%%    docs/proof/research/scratch/rev/verify_round7_mult1.py
+%%  (Proposition phasebound: 1,157,184 exhaustive + 20,000 random,
+%%   zero violations.)
+%%    docs/proof/research/scratch/rev/verify_round9_supply.py
+%%  (extended hunt: 581,856 pipelines, max LDS at mult 1 = 7 -- the
+%%   refutation; death breakdown; residue check.)
+%%    docs/proof/research/scratch/rev/verify_round9_witness.py
+%%  (the witness family k = 5..16, per-row den cross-check; the
+%%   descending-bijection probe: none with |w| >= 5.)
 %% =====================================================================
 
 \subsection{The Structure of a Shaving Pass}
@@ -171,76 +193,210 @@ like, and why they come with multiplicity $\geq 2$.
     denotation.
 \end{remark}
 
+\begin{remark}
+    (\emph{The Period-3 Family}; machine-verified -- the mult-$1$
+    wall does not exist)
+    \label{rem:period3}
+    For $E = [\,\epsilon/\mathrm{tail}^4 X\,]\,[\,\mathrm{tail}(X)/
+    \mathtt{ab}\,]X$ and $w_k = (\mathtt{bba})^{k}$, the output
+    provenance is
+    \[
+        (0,\; 1,\; n-3,\; n-6,\; n-9,\; \ldots,\; 3,\; n-2,\; n-1),
+        \qquad n = 3k,
+    \]
+    with $\mathrm{LDS} = k - 1$ and multiplicity $1$ \emph{exactly},
+    for $k = 5, \ldots, 16$ (every row cross-checked against the
+    independent denotation).  The mechanism is the modular staircase
+    of the preceding paragraph with the period $\pi = 3$ and a
+    two-character $\sigma = \mathtt{ab}$: the emission offsets descend
+    by $s = 3$, so the staircase is \emph{confined to one residue
+    class} mod $3$ -- the $\mathtt{b}$-positions $0, 3, \ldots, 3k-3$
+    of $w$, of which $w$ supplies exactly $k-1$: one per copy,
+    exactly enough, never revisited.  The interior gap atoms (the
+    same residue class) are consumed by the matches; the text ends on
+    the trailing gap, so no tail is dumped; the leading and trailing
+    gap labels lie outside the staircase's values.  With this the
+    mult-$1$ theorem is \emph{false}: $\mathrm{LDS}$ is unbounded at
+    multiplicity $1$, even for a fixed two-pass expression.  The
+    supply pigeonhole of Remark~\ref{rem:textlevel} does not
+    generalize: for period $2$ and one-character $\sigma$ the
+    relevant residue class of $w$ is too small (that is the
+    pigeonhole); for period $3$ and two-character $\sigma$ it is
+    exactly the right size.
+\end{remark}
+
+%% ------------------------------------------------------------------
+%% ROUND 9 REVISION.  The Conjecture below -- and with it the mult-1
+%% theorem ("Theorem B": mult 1 => LDS <= C(E)) -- is REFUTED by the
+%% period-3 family of Remark rem:period3.  Retained as the record of
+%% what rounds 5-8's evidence suggested, followed by the refutation.
+%% ------------------------------------------------------------------
+
 \begin{conjecture}
-    (\emph{Base Case}; restated -- round 5 proved nothing here)
+    (\emph{Base Case}; restated round 6 -- REFUTED in round 9)
     \label{prop:basecase}
-    For the two-pass fragment $[\,A/\sigma\,]\,[\,\epsilon/B\,]$ with
-    $A = \llbracket R \rrbracket(w)$: at multiplicity $1$,
+    \emph{Round 6 statement}: for the two-pass fragment
+    $[\,A/\sigma\,]\,[\,\epsilon/B\,]$ with $A =
+    \llbracket R \rrbracket(w)$: at multiplicity $1$,
     \[
         \mathrm{LDS}(\mathrm{prov}) \;\leq\; 2 \cdot
         \mathrm{LDS}(\mathrm{prov}_A) + 1 .
     \]
+    \emph{Round 9 refutation} (Remark~\ref{rem:period3}): $E =
+    [\,\epsilon/\mathrm{tail}^4 X\,]\,[\,\mathrm{tail}(X)/
+    \mathtt{ab}\,]X$ on $w = (\mathtt{bba})^{k}$ has
+    $\mathrm{LDS}(\mathrm{prov}_A) = 1$ ($A = \mathrm{tail}(w)$
+    increasing) and $\mathrm{LDS} = k - 1$ at multiplicity $1$
+    \emph{exactly}, for $k = 5, \ldots, 16$ (every row
+    content-cross-checked).  The rounds 5--8 evidence -- $205{,}585$
+    instances, then $355{,}928$, then $581{,}856$ realizable
+    pipelines -- was a domain artifact: the refuting family enters
+    the earlier sweeps only at $k \geq 5$ ($|w| \geq 15$), where its
+    $\mathrm{LDS} = k - 1 \geq 4$ first stands out.
 \end{conjecture}
 
-\noindent The round-5 \emph{derivation} of this bound used the (now
-refuted) Fact~\ref{fact:leftmove} and is withdrawn.  What survives is
-the evidence: $205{,}585$ (pipeline, input) instances over all library
-replacements $R$, all constant $B$ with $|B| \leq 4$, all inputs $|w|
-\leq 7$ plus run-structured inputs: no violation; the maximum observed
-is $3 = 1 + 2$ with $\mathrm{LDS}(\mathrm{prov}_A) = 2$; and the
-round-6 mult-$1$ hunts -- $25$ needle constructions $\times$ $7$
-periodic input families $\times$ $6$ sigmas, plus $\mathrm{init}^d$
-for $d = 2, \ldots, 6$ on the alternating family -- found \emph{no}
-row with multiplicity $1$ and $\mathrm{LDS} \geq 4$.  The structural
-reason to believe it: a long descending chain needs the staircase,
-the staircase wraps or dumps the tail at the end of the text, and both
-wrap and dump duplicate labels.  Formalizing that duplication
-argument is the open problem.
+\begin{proposition}
+    (\emph{Phase Bound at Multiplicity $1$}; proved)
+    \label{prop:phasebound}
+    For the two-pass fragment $[\,A/\sigma\,]\,[\,\epsilon/B\,]$: if the
+    output provenance has multiplicity $1$, then
+    \[
+        \mathrm{LDS}(\mathrm{prov}) \;\leq\;
+        \Bigl(\bigl(1 + |O(A,B)|\bigr)\bigl(1 + |J(A,B)|\bigr) +
+        1\Bigr) \cdot \mathrm{LDS}(\mathrm{prov}_A) \;+\; 1 .
+    \]
+\end{proposition}
+
+\begin{proof}
+    Multiplicity $1$ permits at most one \emph{surviving copy per
+    realized phase}: two surviving copies with the same entry/exit
+    pair $(o,j)$ have identical residuals (Lemma~\ref{lem:phase}); a
+    nonempty residual then shares an offset, hence a label
+    $\mathrm{prov}_A[i]$, with the other copy, forcing multiplicity
+    $\geq 2$.  So the number of surviving copies is at most the number
+    of realized nonempty residual classes, which
+    Lemma~\ref{lem:phase} bounds by $(1+|O|)(1+|J|)+1$.  Each
+    surviving copy contributes at most $\mathrm{LDS}(\mathrm{prov}_A)$
+    to a decreasing chain: within one copy, text order is ascending
+    offsets, so the picks of a chain restricted to that copy are a
+    decreasing subsequence of $\mathrm{prov}_A$.  The gap survivors
+    are the $\sigma$-interiors of $w$; their labels strictly increase
+    in text order, so at most one of them lies on any decreasing chain.
+\end{proof}
+
+\noindent \emph{Verified} (round 7): $1{,}157{,}184$ exhaustive
+pipeline instances ($|A| \leq 4$ with label sequences of LDS $1,2,3$,
+$|B| \leq 3$, $8$ sigmas, $|w| \leq 6$; $591{,}315$ at multiplicity
+$1$) and $20{,}000$ random larger ones: zero violations of both
+claims, via an independently written tagged simulator whose output
+content is cross-checked against the reference denotation.
+
+The proposition's constant is \emph{value-dependent}: $|O|, |J|$ grow
+with the values $A, B$.  The remaining gap to a uniform mult-$1$
+theorem is to show that multiplicity $1$ bounds the number of
+\emph{realized} phases by $C(E)$ alone -- and here the round-7
+finding is that any proof \emph{must} use realizability:
+
+\begin{remark}
+    (\emph{The text-level statement is false; realizability is
+    load-bearing})
+    \label{rem:textlevel}
+    As a statement about texts with free injective labels, the bound
+    $2\,\mathrm{LDS}(\mathrm{prov}_A)+1$ is \emph{false}.  With $A =
+    \mathtt{babababab}$, $B = \mathtt{abababa}$, gaps
+    $\mathtt{a},\mathtt{a},\mathtt{a},\mathtt{a},\mathtt{a}$, the
+    residuals are $\{6\},\{4\},\{2\},\{0,8\}$ and the chain $6 > 4 >
+    2 > 0$ has length $4$; over aligned alternating texts, chains up
+    to length $|A|/2$ (observed: $6$) are realized at multiplicity
+    $1$.  None of these lifts to a pipeline: an alternating $A$ of
+    odd length $n$ needs $(n{+}1)/2$ input positions of one parity,
+    but the $\sigma$-site structure of any $w$ realizing such a text
+    (with $\sigma = \mathtt{b}$, one site per such position) supplies
+    only $(n{-}1)/2$; a nondecreasing $\mathrm{prov}_A$ cannot
+    bridge the gap (adjacent repeats clash parity, non-adjacent
+    repeats force constant stretches).  This supply pigeonhole is a
+    sketch, and it does \emph{not} generalize: the period-$3$ family
+    of Remark~\ref{rem:period3} is the counterexample (the residue
+    class is exactly the right size there).
+\end{remark}
+
+\begin{lemma}
+    (\emph{Border--Period}; classical, machine-verified)
+    \label{lem:borderperiod}
+    If $x$ has $t \geq 2$ borders and minimal period $p$, then
+    $p\,(t-1) \;\leq\; |x| - 1$.
+\end{lemma}
+
+\noindent \emph{Verified} exhaustively over all binary strings $|x|
+\leq 11$.  With Lemma~\ref{lem:phase} this quantifies the periodicity
+half of the mult-$1$ theorem: if $K$ phases are realized, then
+$\max(|O|, |J|) \geq \sqrt{K} - 1$, so $A$ has $\geq \sqrt{K}-1$
+borders at one end and hence a period $\leq (|A|-1)/(\sqrt{K}-2)$
+there.  Few-phases-or-periodic is now a theorem.  The supply half,
+however, is where the program ends: the period-$3$ family of
+Remark~\ref{rem:period3} is periodic at \emph{both} ends, embeds
+into $w$ along a single residue class of exactly the right size, and
+realizes $k-1$ phases at multiplicity $1$ -- the periodicity and
+supply constraints do not combine into a uniform bound.  The direct
+sweeps confirm the escalation in domain: $355{,}928$ realizable
+pipelines (round 8) never exceed $\mathrm{LDS} = 2$ at multiplicity
+$1$; $581{,}856$ over the period-$3$ families with phase variants and
+3-character $\sigma$ (round 9) reach $\mathrm{LDS} = 7$ -- the
+witness of Remark~\ref{rem:period3}, at $|w| = 24$.
 
 \subsection{What This Gives, and What Remains}
 
-Read recursively, Proposition~\ref{prop:basecase} converts the
-reordering question for pipelines into the same question for the
-\emph{values} their replacements denote: disorder is not created by
-shaving, only inherited (up to a factor $2$ and a verbatim atom).  One
-delimitation must be said plainly: this is the \emph{atom route}.  A
-hypothetical reversal witness could instead rebuild its output from
-constant characters selected by content gates (the toolkit's
-$\mathtt{cat}$/$\mathtt{dec}$ do exactly that, and the anchored
-constructions of Remark~\ref{rem:price} have empty atom-provenance);
-such a witness has prov-width $0$ and is invisible to
-Proposition~\ref{prop:basecase}.  Closing it requires the
-influence-crossing side -- the quantitative form of open problem~2 in
-Remark~\ref{rem:price} -- so a complete proof needs \emph{both} routes:
-the atom route bounded here, the constant-gate route by crossings.
-Subject to that, the proof needs exactly three further steps, and the
-round isolates them:
+What survives rounds 5--9 is a \emph{structure theorem}, not a
+complexity bound: at multiplicity $1$, every decreasing chain through
+the output takes at most one atom per realized phase, one per copy,
+and at most one gap atom (Proposition~\ref{prop:phasebound}) -- the
+witness family of Remark~\ref{rem:period3} satisfies it, realizing
+$k-1$ phases and $k-1$ chain links.  What does \emph{not} survive is
+the separation program built on it: Conjecture~A
+($\mathrm{LDS} \leq C(E)\cdot\mathrm{mult}$) fell in round 6
+(Remark~\ref{rem:staircase}); Conjecture~B (mult $1 \Rightarrow$
+$\mathrm{LDS} \leq C(E)$) and the base case
+(Conjecture~\ref{prop:basecase}) fell in round 9
+(Remark~\ref{rem:period3}).  There is no $(\mathrm{mult},
+\mathrm{LDS})$-separating invariant: $\mathcal{L}$ realizes
+multiplicity $1$ with $\mathrm{LDS}$ linear in $|w|$, so reversal's
+profile (mult $1$, $\mathrm{LDS} = n$) is \emph{not} rare in
+$\mathcal{L}$.  The atom route, as a program of bounding
+$\mathrm{LDS}$ by $\mathrm{mult}$ and expression constants, is dead.
+
+Two live directions remain, and both were visible before round 9 --
+the refutation sharpens their standing:
 
 \begin{enumerate}
-    \item \emph{Prove Conjecture~\ref{prop:basecase}} (equivalently,
-    the mult-$1$ case of Conjecture B): at multiplicity $1$ the
-    descending chains are short, because a long chain needs the
-    staircase and the staircase's wrap and end-of-text dump each
-    duplicate a label.  The duplication argument is sketched in the
-    conjecture's remark; it is the one machine-verified link without a
-    written proof.  Note the mult-$1$ hypothesis is now
-    \emph{load-bearing}: the multiplicative form $\mathrm{LDS} \leq
-    C(E) \cdot \mathrm{mult}$ is refuted
-    (Remark~\ref{rem:staircase}).
-    \item \emph{The value recursion at intermediate multiplicity:}
-    bound $\mathrm{LDS}(\llbracket R \rrbracket(w))$ for sub-expressions
-    $R$ \emph{without} a multiplicity-$1$ hypothesis.  Round 6 shows
-    the intermediate regime admits staircases with $\mathrm{LDS} \sim
-    |w|/d$ where $d$ is the needle's length defect, at multiplicity
-    pinned small ($3$--$5$); the recursion must therefore tolerate
-    linear disorder at small multiplicity and rely on the
-    \emph{outer} passes to kill duplicates -- which is where phase
-    diversity (Lemma~\ref{lem:phase}) and periodicity
-    (Lemma~\ref{lem:overlap}) have to be composed.
-    \item \emph{Multi-pass composition:} the mult-$1$ bound must be
-    proved at every stage of a pipeline, where the ``copies'' of stage
-    $\ell + 1$ are the residuals of stage $\ell$ -- nested, already
-    shorn of their uniform ends.
+    \item \emph{The influence-crossing route} (the quantitative form
+    of open problem~2 in Remark~\ref{rem:price}): reversal is
+    length-preserving with $\chi = \binom{n}{2}$ crossings, while
+    every length-preserving pipeline examined so far has
+    $\chi = O(|w|)$.  The length-discard rule -- the caveat that any
+    crossing bound must apply to length-changing witnesses, where
+    $\chi = 0$ vacuously -- remains load-bearing, and the
+    period-$3$ family is itself length-changing ($|w| = 3k$,
+    $|\mathrm{out}| = k+3$), so this route is untouched by the
+    refutation.  A hypothetical constant-gate witness (output rebuilt
+    from constants selected by content) is likewise invisible here;
+    crossings are the only side that sees both.
+    \item \emph{The descending-bijection invariant} (new in round 9):
+    reversal's provenance is a \emph{bijection} (every input position
+    survives exactly once: mult $1$, $|\mathrm{prov}| = |w|$, all
+    labels present) \emph{and} fully descending ($\mathrm{LDS} =
+    |\mathrm{prov}|$).  The two-pass fragment provably cannot be a
+    descending bijection: a copy with $\geq 2$ surviving atoms has
+    ascending labels, so a full descent keeps at most one atom per
+    copy, while a bijection forbids deletion -- the constraints are
+    incompatible.  Machine probe over the round-7 exhaustive domain
+    ($1{,}157{,}184$ instances at the \emph{text} level, a strict
+    superset of realizable pipelines since $\mathrm{prov}_A$ is an
+    arbitrary injective labeling): descending bijections exist only
+    for $|w| \leq 4$ ($110$ essential families, all requiring label
+    patterns that constants do not carry); none with $|w| \geq 5$.
+    The period-$3$ family is far from a bijection
+    ($|\mathrm{prov}| = k+3$ vs $|w| = 3k$: deletion-heavy).  The
+    question is whether deeper pipelines can close the gap.
 \end{enumerate}
 
 The three sibling obstructions stay orthogonal, as

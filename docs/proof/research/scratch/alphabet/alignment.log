@@ -1,0 +1,19 @@
+A1 comma-free: all dictionaries in the family, binary/ternary/quaternary, ell in 3..9: 21 dictionaries, all comma-free
+A1 binary dict sizes ell=3..12: {3: 1, 4: 1, 5: 2, 6: 3, 7: 5, 8: 8, 9: 13, 10: 21, 11: 34, 12: 55}  (Fibonacci-like)
+OK   A1fib size formula |D_ell| = Fib(ell-2) over binary: 10 cases
+coding c: abc -> xy, ell=6, dict=['xxyxyy', 'xxyyxy', 'xxyyyy'], map={'a': 'xxyxyy', 'b': 'xxyyxy', 'c': 'xxyyyy'}
+OK   A2 alignment occ(c(B)) in c(C) = ell*occ(B) (B<=3, C<=5 over abc): 14196 cases
+A3L pass transfer [c(A)/c(B)]c(C)=c([A/B]C): 188760 cases, 0 mismatches
+OK   A3L full-pass transfer: 188760 cases
+A3v variant-pass transfer (once, R, k-th k<=3): 31200 cases, 0 mismatches
+OK   A3v once/R/kth transfer: 31200 cases
+coding d: xy -> abc, ell=4, |dict|=2
+OK   A4 composition: dict(d o c) (over abc, ell=24) comma-free: 3 cases
+OK   A4b junction-straddle recheck on dict(d o c): 9 cases
+A5 paper comma code on pure image text: 3038 pass-transfer cases, 0 mismatches
+OK   A5 comma code transfers on pure image text: 3038 cases
+A5b comma code, once/R/kth semantics: 1890 cases, 24 mismatches
+OK   A5b comma-code mismatches are exactly R-mode (matches thm:r2l-rep): 24 cases
+OK   A6 unary alignment c(a)=ab (j<=8, m<=12): 104 cases
+OK   A6b unary pass transfer (i<=6, j<=6, m<=10): 462 cases
+OK   A6c {w} comma-free iff w primitive (spot: ab, abb yes; abab no): 3 cases

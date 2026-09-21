@@ -33,7 +33,7 @@
 \maketitle
 
 \begin{abstract}
-Search-and-replace is a primitive every programmer knows; this note takes it seriously as a model of computation. We study the single operation $[A/B]S$ -- replace, in one left-to-right pass over $S$, every occurrence of $B$ by $A$, taking the leftmost match first and never rescanning inserted text -- over a finite alphabet. A chain of elementary lemmas turns this one operation into a complete toolkit: escaping and unescaping, concatenation, head and tail, equality, selection, and simultaneous multiple substitution are each exactly a short composition of substitutions, for arbitrary strings. We then formalize ``built from substitution'' as a small expression calculus and measure its power: every reachable function is computable in polynomial time, with degree bounded by its expression, while quadratic growth is reachable and exponential growth is not. Finally we locate the primitive's design choices by varying them one at a time -- once-only, positional, right-to-left, rescanning, and Markov-style iteration -- and then admitting both directions at once, obtaining concrete separations, collapses, a single-function collapse criterion for the union, a classification of the divergent small rules, and, by promoting the iteration from rules to expressions, an exact characterization: one fixed-point node over a flat pipeline computes precisely the partial computable functions. Allowing recursive definitions -- the \texttt{meow} language's own feature -- and varying only the runtime then separates sharply: eager and lazy-argument evaluation leave the reachable class unchanged, while evaluating a pass's replacement only when its pattern occurs -- the operator's own non-strictness -- makes the calculus universal, though without recursion that same non-strictness buys definedness, not power, and a coinductive reading on infinite strings reaches beyond every finite-state emitter. Every computational claim is verified by exhaustive enumeration over the finite domains stated where it occurs.
+Search-and-replace is a primitive every programmer knows; this note takes it seriously as a model of computation. We study the single operation $[A/B]S$ -- replace, in one left-to-right pass over $S$, every occurrence of $B$ by $A$, taking the leftmost match first and never rescanning inserted text -- over a finite alphabet. A chain of elementary lemmas turns this one operation into a complete toolkit: escaping and unescaping, concatenation, head and tail, equality, selection, and simultaneous multiple substitution are each exactly a short composition of substitutions, for arbitrary strings. We then formalize ``built from substitution'' as a small expression calculus and measure its power: every reachable function is computable in polynomial time, with degree bounded by its expression, while quadratic growth is reachable and exponential growth is not. Finally we locate the primitive's design choices by varying them one at a time -- once-only, positional, right-to-left, rescanning, and Markov-style iteration -- and then admitting both directions at once, obtaining concrete separations, collapses, a single-function collapse criterion for the union, a classification of the divergent small rules, and, by promoting the iteration from rules to expressions, an exact characterization: one fixed-point node over a flat pipeline computes precisely the partial computable functions. Allowing recursive definitions -- the \texttt{meow} language's own feature -- and varying only the runtime then separates sharply: eager and lazy-argument evaluation leave the reachable class unchanged, while evaluating a pass's replacement only when its pattern occurs -- the operator's own non-strictness -- makes the calculus universal, though without recursion that same non-strictness buys definedness, not power, and a coinductive reading on infinite strings reaches beyond every finite-state emitter. Finally the alphabet itself is varied: a comma-free coding conjugates the reachable class onto its conjugate over any other alphabet of at least two letters, in both directions, so no larger alphabet adds power up to conjugation, the once and reversal questions are each a single question across alphabets, and the unary edge splits -- reachable from below, structurally blocked from above. Every computational claim is verified by exhaustive enumeration over the finite domains stated where it occurs.
 
 \keywords{string substitution \and string rewriting \and finite alphabets \and rewriting calculus}
 \end{abstract}
@@ -64,7 +64,9 @@ Three design choices are built into $[A/B]$: the scan goes left to right and tak
 
 \paragraph{The variants (Section~\ref{sec:variants}).} We vary the design choices one at a time -- single-occurrence substitution, its $k$-th-occurrence generalization, positional substitution, right-to-left scanning, rescanning of inserted text, and Markov-style iteration to a fixed point -- and measure the damage: which variants can simulate which, what survives of the toolkit, and how the growth rates separate. Among other things, the once-only primitive provably cannot simulate a full pass; the $k$-th-occurrence family between them spreads into a mosaic of pairwise incomparable fragments whose relation to once reduces to marker freshness; rescan-based substitution agrees with the safe primitive exactly on a decidable local condition; Markov iteration reaches arbitrary towers of exponentials while the bounded pipeline stays polynomial; and promoting the iteration from rules to expressions -- iterating a pipeline to its fixed point -- pins the class exactly: one such node over a flat pipeline computes precisely the partial computable functions. The union of both scanning directions collapses onto the baseline exactly when the right pass, as a function of its arguments, is itself reachable -- which every search says it is not. A census of all binary rules with $|A|, |B| \le 4$ classifies every divergent one.
 
-\paragraph{Recursive definitions (Section~\ref{sec:recursion}).} The \texttt{meow} language recurses; the calculus can too, with named definitions and call nodes, mutual recursion included. What that buys depends only on the runtime. Under eager evaluation and under lazy arguments, nothing: every recursive definition either inlines to a plain expression or never returns, and the reachable class is unchanged. Under lazy \emph{passes} -- the replacement of a pass being evaluated only when its pattern occurs, which is the operator's own non-strictness -- everything: guarded recursion through pattern gates computes exactly the partial computable functions, reversal and the exponential function become total recursions, and totality of a definition is undecidable. A coinductive reading on infinite strings replaces termination by productivity and outgrows every finite-state emitter.
+\paragraph{Alphabet invariance (Section~\ref{sec:alphabet}).} The alphabet itself is then varied. A \emph{good coding} -- injective, letter-by-letter, with a comma-free dictionary in the sense of Golomb -- conjugates the calculus between any two alphabets of at least two letters, and the reachable class is invariant under the conjugation in both directions: a function is reachable over the one iff its conjugate is reachable over the other, with node count preserved up to a constant of the alphabet pair. All four scanning primitives are coding-equivariant, so each variant's hinge is a single question across alphabets, and reversal is reachable over one alphabet of at least two letters iff over every -- a single negative answer would settle every alphabet. The unary edge is sharp: reachable from below by coding, and structurally unreachable from above, since no injective homomorphism collapses two letters onto one; the unary class itself is eventually polynomially bounded, with floor-halving absent from the entire space of small expressions.
+
+\paragraph{Recursive definitions (Section~\ref{sec:recursion}).} The \texttt{meow} language recurses; the calculus can too, with named definitions and call nodes, mutual recursion included. What that buys depends only on the runtime. Under eager evaluation and under lazy arguments, nothing: every recursive definition either inlines to a plain expression or never returns, and the reachable class is unchanged. Under lazy \emph{passes} -- the replacement of a pass being evaluated only when its pattern occurs, which is the operator's own non-strictness -- everything: guarded recursion through pattern gates computes exactly the partial computable functions, reversal and the exponential function become total recursions, and totality of a definition is undecidable. A coinductive reading on infinite strings replaces termination by productivity and outgrows every finite-state emitter -- and the same reading of the variants' iteration operator splits it from its finite one: least versus greatest fixpoint in a single rule.
 
 Everything finite in this note -- every identity, counterexample, census, and run of the recursive machines -- was verified by exhaustive enumeration over the domains stated in situ, by scripts accompanying the paper; the proofs are otherwise pen-and-paper.
 
@@ -343,7 +345,23 @@ We will need the \texttt{cat} macro extensively:
     \emph{Step 3}: $E_XE_Y = \mathtt{enc}(X)\mathtt{enc}(Y) = \mathtt{enc}(XY)$ by (iii), and $\mathtt{dec}(\mathtt{enc}(XY)) = XY$ by (i).
 \end{proof}
 
-Concatenation of arbitrary strings is therefore itself a substitution expression; from now on we write $XY$ freely, reading it as an abbreviation of $\mathtt{cat}(X,Y)$. In fact concatenation is eliminable syntax altogether; see Theorem~\ref{thm:core}.
+Concatenation of arbitrary strings is therefore itself a substitution
+expression -- and it is worth being precise about what that does and
+does not mean.  Once the calculus of Section~\ref{sec:calculus} admits
+$E_1E_2$ as a constructor, the function $(X, Y) \mapsto XY$ is
+realized by the term $XY$ itself, trivially; Theorem~\ref{thm:cat} is
+not a reachability claim.  Its content is that a \emph{pure pipeline
+of passes} computes the function: the naive $[\,X/a\,][\,Y/b\,](ab)$
+fails -- the $[\,X/a\,]$ pass replaces the $a$'s of $Y$ as well, and
+no choice of bare markers repairs it, any fixed marker word occurring
+inside some $Y$ -- and the escape is the repair.  That is the content
+the calculus cashes in as the eliminability of the constructor
+(Theorem~\ref{thm:core}: concatenation is conservative sugar) and each
+variant of Section~\ref{sec:variants} must re-earn under its own
+semantics -- the once-calculus with no escape at all, its
+leftmost-only discipline making the naive markers safe
+(Theorem~\ref{thm:once-toolkit}(i)).  From now on we write $XY$
+freely, reading it as an abbreviation of $\mathtt{cat}(X,Y)$.
 
 The primitives can also take strings apart: the first character of a string, and the rest.
 
@@ -872,7 +890,7 @@ How strong is the substitution calculus? This section gives a pipeline normal fo
         \item Give an exact characterization of the reachable functions. With constant patterns, each pass is close to a rational transduction \cite{berstel79,elgot65}; variable patterns (as in $\mathtt{rep}_n$'s renamings) take the class beyond that. Is there a known matching class in the landscape of formal language theory \cite{rozenberg97}?
         \item Is string reversal, $S \mapsto \mathrm{reverse}(S)$, reachable? (The right end is not the obstruction -- $\mathtt{last}$ and $\mathtt{init}$ are reachable, Proposition~\ref{prop:last}; under recursive definitions with lazy passes reversal is a three-line recursion, Section~\ref{sec:recursion}. The question is whether the bounded calculus can \emph{reorder}, not whether it can read.)
         \item Is equivalence of two expressions ($\llbracket E \rrbracket = \llbracket E' \rrbracket$ as partial functions) decidable?
-        \item Which functions are reachable over \emph{every} alphabet with $|\Sigma| \geq 2$? Does a larger alphabet ever add power (both the $\mathtt{enc}$- and $\mathtt{enc}^2$-constructions must enumerate $\Sigma$)?
+        \item Which functions are reachable over \emph{every} alphabet with $|\Sigma| \geq 2$? Does a larger alphabet ever add power (both the $\mathtt{enc}$- and $\mathtt{enc}^2$-constructions must enumerate $\Sigma$)? Section~\ref{sec:alphabet} settles the conjugation-invariant form: up to conjugation by a good coding the reachable class is the same over every alphabet of at least two letters, and no larger alphabet adds power in that sense -- what varies between alphabets is only which \emph{native} functions the conjugates land on.
     \end{enumerate}
 \end{remark}
 
@@ -2000,15 +2018,100 @@ $B \not\subset A$, and Remark~\ref{rem:limstrategies} shows the sweep
 and leftmost versions of that case are genuinely different problems --
 the sweep sibling of Theorem~\ref{thm:termination}(v)'s strategic
 termination problem, whose unrestricted form is the long-standing open
-one-rule termination problem \cite{geser01}. And the hierarchy inside the
+one-rule termination problem \cite{geser01}.  The affine potentials of
+Theorem~\ref{thm:affine} are a decidable sufficient condition for the
+strategic case -- one product equation and one linear equation -- and
+they cover every growing census rule of the exponential tier. And the hierarchy inside the
 operator: one $\mathrm{lim}$ node over a \emph{single constant pass}
 reaches exponential output and Fibonacci orbits
-(Proposition~\ref{prop:limgrowth}, Remark~\ref{rem:fiborbit}) -- whether
-it reaches universality is open; the amplifier of
-Proposition~\ref{prop:limgrowth}(i) sorts and Horner-codes, and every
-fixed point of a one-rule sweep is $B$-free
-(Lemma~\ref{lem:fpsweep}), but no argument is known in either
-direction.
+(Proposition~\ref{prop:limgrowth}, Remark~\ref{rem:fiborbit}) -- and, we
+conjecture, nothing beyond. The exponential is never a fire blowup:
+every occurrence of $B$ in $s_{k+1}$ starts within $|A|{+}|B|{-}1$ of
+the start of some emission of sweep $k$ -- clear of every emission it
+would sit in surviving text and have fired then -- so the fires obey
+$r_{k+1} \le (|A|{+}|B|{-}1)\,r_{k}$, and over the iteration census
+($930$ rules, $203{,}126$ convergent orbits, $0$ failures of the
+freshness, branching, and drift bounds) they never exceed $9$ per
+sweep with no strictly growing run outlasting $4$ sweeps: the output
+is few fires sustained exponentially long. Four rule shapes realize
+\emph{every} exponential base $m$ exactly,
+$\mathrm{lim}([\,ba^{m}/ab\,])(a^{i}b^{j}) = b^{j}a^{\,i\,m^{j}}$ and
+its three siblings, all degenerating at $m = 1$ to insertion sort
+($1{,}169$ grid cells exact), and they make the single-exponential law
+$|\mathrm{lim}([\,A/B\,])(w)| \le (|A|{-}|B|{+}1)^{|w|} + |w|$ on
+convergent orbits tight in its base -- verified on all $148$ growing
+rules over inputs $\leq 9$, and the family attains $m^{n-1}$ on
+length-$n$ inputs, so no smaller base serves. If true it separates the
+one-rule fragment from the universality of Corollary~\ref{cor:limclass}:
+a $\mathrm{lim}$ node over a pipeline computes every partial computable
+function, the tower map of Corollary~\ref{cor:towers} among them,
+which no single-exponential rule can match. And the sweep half of the
+conjecture is no longer missing for the exponential tier: a potential
+argument proves it outright.
+
+\begin{theorem}
+    (\emph{Affine potentials})
+    \label{thm:affine}
+    Fix a direction and let each letter act on a state as
+    $t \mapsto \mathrm{mult}[x]\cdot t + \mathrm{off}[x]$ with
+    $\mathrm{mult}[x] \ge 1$ and $\mathrm{off}[x] \ge 0$, folding a
+    string to $v(s)$, and set $\Phi(s) = v(s) - \#c(s)$.  The data
+    $(\mathrm{mult}, \mathrm{off}, c)$ is an \emph{affine potential} for
+    $[\,A/B\,]$ when
+    \begin{enumerate}[(i)]
+        \item the word maps of $A$ and $B$ coincide: $v(xAy) = v(xBy)$
+        for all contexts $x, y$;
+        \item $\delta \triangleq \#c(A) - \#c(B) \ge 1$;
+        \item $\mathrm{off}[c] \ge 1$.
+    \end{enumerate}
+    Then every sweep-orbit of $\mathrm{lim}([\,A/B\,])$ converges, with
+    sweeps bounded by the initial potential:
+    \begin{align}
+        K \;\le\; \Phi(s_0)/\delta \;\le\; n\cdot\mathrm{maxoff}\cdot
+        \mathrm{maxmult}^{\,n}.
+    \end{align}
+\end{theorem}
+
+\begin{proof}
+    A fire replaces an occurrence $xBy$ by $xAy$, preserving $v$ by (i),
+    and the fires of one sweep apply sequentially at disjoint positions,
+    so $v$ survives the whole sweep; each fire adds $\delta$ to $\#c$, so
+    $\Phi$ drops by $\delta \ge 1$ per fire.  Positivity:
+    $v(s) = \sum_i \mathrm{off}[s_i]\cdot\prod_{j>i}\mathrm{mult}[s_j]
+    \ge \#c(s)$ by (iii).  $\Phi(B) = \Phi(A) + \delta \ge 1$ by (i) and
+    (ii); and writing $M(u) = \prod_{x \in u}\mathrm{mult}[x] \ge 1$,
+    $\Phi(uv) = M(v)\,\Phi(u) + (M(v){-}1)\,\#c(u) + \Phi(v) \ge
+    \Phi(u)$, so any string containing $B$ has $\Phi \ge 1$.  The orbit
+    can therefore neither stop while $B$ occurs -- a sweep finding an
+    occurrence fires at the leftmost one -- nor fire more than
+    $\Phi(s_0)/\delta$ times, and when $B$ is finally absent the orbit is
+    at a fixed point (Lemma~\ref{lem:fpsweep}).
+\end{proof}
+
+The census splits exactly at the tier boundary.  Of the $144$
+convergent growing rules, $114$ admit an affine potential -- every rule
+that reaches the exponential tier -- and the theorem covers them; of the
+$30$ remaining, all slow ($K \le 14$ at $n = 9$, against the admitters'
+$2{,}194$), $18$ fall to counting potentials $\Phi = \#g_1 +
+w\,\#g_2$ over $k$-grams of $B$ ($[\,aba/aa\,]$ by the overlapping
+count of $aa$, giving $K \le n^{k}$), and the last $12$ -- a precisely
+delimited family with $[\,aaab/baa\,]$ representative -- admit
+neither: for $[\,aaab/baa\,]$ the map equality (i) forces
+$\mathrm{mult}[a] = 1$ and then $\mathrm{off}[a] = 0$, killing the only
+letter with $\delta \ge 1$.  Their measured sweeps are linear
+nonetheless ($K \le 2n$, the worst $14$ at $n = 9$) -- the data sits
+nowhere near the conjecture's limit; what fails is the method.  The
+conjecture therefore stands proved up to a polynomial factor on every
+exponential-tier rule, and open exactly on the $12$-rule family --
+where it is expected to be loose -- and on the rules beyond the census.
+(Verified: the existence search is exact, the product equation forcing
+$\mathrm{mult}$ and the offset equation being linear; the theorem
+per-orbit on all $114$ admitting rules over inputs $\le 7$ ($29{,}070$
+orbits: $v$ invariant every sweep, $\Phi \ge 0$, $K\delta \le
+\Phi_0$, the limit $B$-free); no divergent rule admits a potential, a
+consistency check; and on the four base-$m$ shapes the potential counts
+the remaining fires exactly, $\Phi_0 = i\,m^{j} - i$ and $R =
+\Phi_0/(m{-}1)$, all $16$ instances at $m = 2..5$.)
 
 \subsection{Both Directions at Once}
 \label{ssec:union}
@@ -2089,8 +2192,8 @@ The right-to-left row's two ``open'' cells and the union row's one are a single 
 
 The web hangs on two ropes, and both are reachability questions about the baseline itself:
 \begin{enumerate}
-    \item \emph{Is the once-primitive $L$-reachable?} By Theorem~\ref{thm:pos-hinge} this decides $\mathrm{POS} \sqsubseteq L$, and with it the whole once-family's relation to $L$. The probe is affirmative over two letters (Proposition~\ref{prop:del-leftmost}); over $|\Sigma| \geq 3$ the constant needle resists with a precise obstruction, and the computed needle is open over every alphabet. The $k$-th-occurrence family rides on the same hinge wherever a marker letter is spare (Proposition~\ref{prop:kth}(iii)); over the binary alphabet its $k \geq 2$ nodes are absent from every once-space searched.
-    \item \emph{Is reversal $L$-reachable?} This decides whether $L = \mathrm{R}$ (Theorem~\ref{thm:conjugation}), and by the mirror symmetry of the once-calculi it is also the hinge between once-left and once-right. (Section~\ref{sec:recursion} settles the recursive version: reversal is computable there by a three-line guarded recursion; and the bounded calculus can already read and edit its right end, Proposition~\ref{prop:last} -- the question is now sharp: the bounded calculus, or nothing.) The union calculus (Section~\ref{ssec:union}) refines the stakes: $\mathrm{rev} \in L$ is sufficient but not necessary for $L = \mathrm{R}$ -- the exact criterion is $\mathrm{r} \in L$, and every search for it has failed (Conjecture~\ref{conj:union}).
+    \item \emph{Is the once-primitive $L$-reachable?} By Theorem~\ref{thm:pos-hinge} this decides $\mathrm{POS} \sqsubseteq L$, and with it the whole once-family's relation to $L$. The probe is affirmative over two letters (Proposition~\ref{prop:del-leftmost}); over $|\Sigma| \geq 3$ the constant needle resists with a precise obstruction, and the computed needle is open over every alphabet. The $k$-th-occurrence family rides on the same hinge wherever a marker letter is spare (Proposition~\ref{prop:kth}(iii)); over the binary alphabet its $k \geq 2$ nodes are absent from every once-space searched. The hinge itself is one question, not one per alphabet: the once node as a three-argument function is coding-equivariant (Corollary~\ref{cor:uniform}), so an answer over any one alphabet of at least two letters is the answer over all -- the alphabet-sensitivity above is about native conjugates, not the hinge.
+    \item \emph{Is reversal $L$-reachable?} This decides whether $L = \mathrm{R}$ (Theorem~\ref{thm:conjugation}), and by the mirror symmetry of the once-calculi it is also the hinge between once-left and once-right. (Section~\ref{sec:recursion} settles the recursive version: reversal is computable there by a three-line guarded recursion; and the bounded calculus can already read and edit its right end, Proposition~\ref{prop:last} -- the question is now sharp: the bounded calculus, or nothing.) The union calculus (Section~\ref{ssec:union}) refines the stakes: $\mathrm{rev} \in L$ is sufficient but not necessary for $L = \mathrm{R}$ -- the exact criterion is $\mathrm{r} \in L$, and every search for it has failed (Conjecture~\ref{conj:union}). Section~\ref{sec:alphabet} makes the question alphabet-uniform: $\mathrm{rev} \in L$ over one alphabet of at least two letters iff over every (Theorem~\ref{thm:rev-uniform}) -- as with the once hinge, a single negative answer, proved over any one alphabet, would settle all.
 \end{enumerate}
 
 \begin{remark}
@@ -2142,6 +2245,194 @@ Beyond the two hinges:
     \emph{Methodology.} The computational statements in this section were verified by exhaustive enumeration over the finite domains stated where they occur: all strings up to the given lengths over the stated alphabets, all patterns and replacements up to the given lengths, both choices of the encoding characters where they matter. The negative claims rest on breadth-first search in function space over bounded expression depths, with every candidate found re-verified on strictly larger domains before being believed -- a necessary discipline, since short-domain artifacts are real: three halvings $[\,a/aa\,]$ collapse exactly the $a$-runs of length at most $8$ and fail at length $9$, and an iterated positional node computes $\mathtt{dec}$ exactly on the even lengths and fails on the odd ones. Every enumeration and search reported here is reproducible from the stated domains in at most hours on a single core.
 \end{remark}
 
+\section{Alphabet Invariance}
+\label{sec:alphabet}
+
+Every construction so far has fixed its alphabet, and two letters always sufficed. This section addresses the fourth open problem of Section~\ref{sec:limits} head on: \emph{which functions are reachable over every alphabet with $|\Sigma| \geq 2$, and does a larger alphabet ever add power?} Write $f \in L_\Sigma$ for: $f$ is reachable by an expression over $\Sigma$ -- the landscape's notation. Up to a canonical conjugation, the class does not depend on the alphabet at all: for any two alphabets of at least two letters and any \emph{good coding} between them, $f \in L_\Sigma$ iff its conjugate $f^c \in L_\Gamma$. The boundary of the invariance is exactly $|\Sigma| = 1$: the conjugation exists one way and cannot exist the other, for a structural reason. As corollaries, the two hinges of the landscape are each a single question rather than one per alphabet: the once node and the right pass are coding-equivariant, and reversal over one alphabet of at least two letters is reachable iff over every.
+
+\subsection{Comma-Free Codings}
+
+\begin{definition}
+    (\emph{Good Codings})
+    \label{def:code}
+    A \emph{coding} is an injective monoid homomorphism $c : \Sigma^* \rightarrow \Gamma^*$ with $D_c \triangleq c(\Sigma)$ of uniform length $\ell \geq 1$ (a \emph{dictionary}); write $c(S)$ for the letter-by-letter extension. The coding is \emph{good} if $D_c$ is \emph{comma-free} (Golomb's condition \cite{golomb58}; the theory of codes treats it under synchronizing codes \cite{berstel85,lothaire97}): no $w \in D_c$ occurs in $u \cdot v$ at any of the junction-straddling positions $1, \dots, \ell-1$ ($u, v \in D_c$).
+\end{definition}
+
+Comma-freeness is the Golomb analogue of the Comma Code Lemma for $\mathtt{enc}^2_{b,x}$ (blocks $xc$): it is exactly the self-synchronization that makes a coding usable inside a scanning calculus. Without it the conjugacy class of a function depends on the coding, and the notion degenerates: a free assignment with $\ell(SS) = \ell(S)^2$, say, makes $X \mapsto XX$ conjugate to the unary squaring map. The good codings are the ones on which the conjugation is canonical.
+
+\begin{lemma}
+    (\emph{Existence: the Double-$a$ Family})
+    \label{lem:dict}
+    Let $\Gamma$ have two distinct letters $a \ne b$ and $\ell \geq 3$. Then
+    \begin{align}
+        D_\ell \;\triangleq\; \{\, a\,a\,m\,b \;:\; m \in \Gamma^{\ell-3},\ aa \not\le m,\ m[0] \ne a \,\}
+    \end{align}
+    is comma-free, of uniform length $\ell$; over the binary alphabet $|D_\ell| = \mathrm{Fib}(\ell-2)$ (Fibonacci numbers, $\mathrm{Fib}(1) = \mathrm{Fib}(2) = 1$). So good codings exist between any two alphabets with at least two letters, in both directions.
+\end{lemma}
+
+\begin{proof}
+    Every codeword starts with $aa$, contains $aa$ only at position $0$ (the interior $m$ avoids $aa$ and, for $\ell > 3$, does not start with $a$), and ends with $b$. In $u \cdot v$ the factor $aa$ therefore occurs only at $0$ and $\ell$ (the junction reads $b \cdot a$), and any occurrence of a codeword, starting as it does with $aa$, starts at $0$ or $\ell$ -- aligned. The count: $m$ is $b$ followed by an $aa$-free word of length $\ell-4$, counted by $\mathrm{Fib}(\ell-2)$. (Verified: comma-freeness of all $21$ dictionaries in the family, binary/ternary/quaternary, $\ell = 3..9$; sizes at $\ell = 3..12$ match $\mathrm{Fib}(\ell-2)$.)
+\end{proof}
+
+\begin{lemma}
+    (\emph{Self-Synchronization})
+    \label{lem:selfsync}
+    Let $c$ be good and $B \ne \epsilon$. The occurrences of $c(B)$ in $c(C)$ are exactly $\{\, \ell \cdot s \;:\; s$ an occurrence of $B$ in $C \,\}$; in particular every occurrence of a codeword inside a codeword-sequence starts at a multiple of $\ell$.
+\end{lemma}
+
+\begin{proof}
+    Uniform lengths first: an occurrence of $w \in D_c$ (length $\ell$) lying wholly inside a single codeword (length $\ell$) of the surrounding sequence starts at offset $0$. Otherwise the occurrence straddles at least one junction $j\ell$ with $p < j\ell < p + \ell$, and its restrictions to the two flanking codewords exhibit $w$ in their product at the junction-straddling position $p - (j{-}1)\ell \in [1, \ell-1]$ -- against comma-freeness. For the block $c(B)$: its first codeword $c(B[0]) \in D_c$ occurs at a multiple of $\ell$ by the first part, the block then covers whole codewords of $c(C)$, and these spell $B$; the converse is immediate. (Verified: all $B \in \{a,b,c\}^{\le 3} \setminus \{\epsilon\}$, $C \in \{a,b,c\}^{\le 5}$ -- $14{,}196$ cases, zero exceptions.)
+\end{proof}
+
+\begin{lemma}
+    (\emph{Pass Transfer})
+    \label{lem:pass-transfer}
+    Let $c$ be good. For all $A, C \in \Sigma^*$ and $B \in \Sigma^* \setminus \{\epsilon\}$,
+    \begin{align}
+        [\,c(A)/c(B)\,]\; c(C) \;=\; c\big([\,A/B\,]C\big),
+    \end{align}
+    and the same identity holds for the once, rightmost, and $k$-th occurrence primitives (Definitions~\ref{def:once} and~\ref{def:r2l}, Proposition~\ref{prop:kth}): the greedy occurrence lists correspond order-isomorphically under $s \mapsto \ell s$.
+\end{lemma}
+
+\begin{proof}
+    Induction along the scan. By Self-Synchronization the occurrence lists correspond, and the correspondence preserves order and disjointness (positions scale by $\ell$), so leftmost, $k$-th and rightmost all transfer; it is direction-free, so the right-to-left variant transfers too. For the full pass, write $C = X B Y$ with $|X|$ minimal: the first occurrence of $c(B)$ in $c(X)\,c(B)\,c(Y)$ is the aligned one at $\ell|X|$ (any earlier one would be an aligned occurrence inside $c(X)$, i.e.\ an occurrence of $B$ in $X$), the scan resumes at $\ell(|X|{+}|B|)$ -- aligned again, at the start of $c(Y)$ -- and the inserted $c(A)$ is never re-entered, matching the never-rescan clause of Definition~\ref{def:subst}. Both sides now split as $c([A/B]X) \cdot c(A) \cdot c([A/B]Y)$ with $|X|, |Y| < |C|$. (Verified: $A, C \in \{a,b,c\}^{\le 3}$, $B \in \{a,b,c\}^{1..3}$ -- $188{,}760$ leftmost cases; once, rightmost and $k$-th ($k \le 3$) on the smaller box -- $31{,}200$ cases; zero mismatches.)
+\end{proof}
+
+\subsection{The Transfer Theorem}
+
+\begin{definition}
+    (\emph{Conjugate})
+    \label{def:conjugate}
+    For $f$ an $n$-ary partial function on $\Sigma^*$ and $c : \Sigma \rightarrow \Gamma^\ell$ a good coding, the \emph{conjugate} $f^c : c(\Sigma^*)^n \rightharpoonup c(\Sigma^*)$ is $c \circ f \circ c^{-1}$ -- a partial function in the sense of the restriction clause of Definition~\ref{def:reachable}.
+\end{definition}
+
+\begin{theorem}
+    (\emph{Direction 1})
+    \label{thm:transfer-forward}
+    Let $E \in \mathrm{Exp}_n$ over $\Sigma$ and $c$ good. Define $E^c$ by: constants $W \mapsto c(W)$, variables and both constructors unchanged. Then
+    \begin{align}
+        \llbracket E^c \rrbracket\big(c(\vec S)\big) \;=\; c\big(\llbracket E \rrbracket(\vec S)\big)
+    \end{align}
+    whenever the right-hand side is defined, and the two sides are undefined together (the pattern is $\epsilon$ on one side iff on the other). Moreover $|E^c| = |E|$ (node count; constant symbols grow $\ell$-fold in word length), $\deg(E^c) = \deg(E)$, and $\mathrm{Safe}(E) \Rightarrow \mathrm{Safe}(E^c)$. Finally, if $\llbracket E \rrbracket$ is total, a \emph{total} $\Gamma$-expression agreeing with $E^c$ on $c(\Sigma^*)^n$ exists: replace, simultaneously, every pattern sub-expression $P^c$ of $E^c$ by $\gamma(P^c)$, where $\gamma(X) \triangleq \mathtt{if}(\mathtt{eq}(X, \epsilon), b, X)$ for a fixed letter $b \in \Gamma$.
+\end{theorem}
+
+\begin{proof}
+    Induction on $E$. Variables and constants are immediate; concatenation commutes with $c$ because $c$ is a homomorphism. For the pass node the patterns and replacements are the $c$-images of the sub-values, and Pass Transfer applies at every value of the sub-expressions; the definedness clause is the $\epsilon$-condition, and $c(B) = \epsilon$ iff $B = \epsilon$. Safety and degree are structural ($c(W)$ is a nonempty constant iff $W$ is, so $\mathrm{Anch}$ transfers; $\deg$ sums over the scrutinee and replacement of a pass, and each slot's transfer preserves it by induction, constants having degree $0$ on both sides). For the total extension: on inputs from $c(\Sigma^*)^n$ every sub-value of $E^c$ is itself a $c$-image (apply the equation to each sub-expression), and every pattern sub-value is nonempty -- a total $\llbracket E \rrbracket$ forces nonempty pattern values on \emph{every} input, by strictness -- so $\gamma$ acts as the identity exactly on those, and the wrapped expression computes $E^c$'s values on the image; and a $\gamma$-output is never empty while every other node type is total, so the wrapped expression is total everywhere. The guard sits on the pattern, as in the total variant of $\mathrm{rep}_n$ (Section~\ref{sec:toolkit}). (Verified: all $2{,}954$ depth-$\le 1$ expressions over $\{a,b,c\}$ with constants $\le 2$, on all $121$ inputs of length $\le 4$ -- $357{,}434$ evaluations, $0$ mismatches, $23{,}912$ undefined on both sides; $48{,}000$ further evaluations of random depth-$\le 3$ expressions; the same under once and rightmost semantics, $118{,}160$ evaluations each; degree and safety over the full space, $2{,}954$ expressions, $0$ violations; node count equal in every case.)
+\end{proof}
+
+\begin{lemma}
+    (\emph{Composition})
+    \label{lem:compose}
+    If $c : \Sigma \rightarrow \Gamma^{\ell_c}$ and $d : \Gamma \rightarrow \Sigma^{\ell_d}$ are good, then $d \circ c$ is good: $\{d(w) : w \in D_c\}$ is comma-free over $\Sigma$, of uniform length $\ell_c\ell_d$.
+\end{lemma}
+
+\begin{proof}
+    An occurrence of $d(w)$ inside a sequence of $d$-images of $D_c$-codewords begins with $d(w[0]) \in D_d$, which by Self-Synchronization over $D_d$ starts on the $D_d$-grid; the whole block $d(w)$ then covers $D_d$-codewords spelling $d(w[0]) \cdots d(w[\ell_c{-}1])$, so by injectivity of $d$ the word $w$ occurs among the pre-image codewords, and if the block did not start on the outer ($\ell_c\ell_d$-) grid, $w$ would occur in a product of two $D_c$-codewords at a junction-straddling position -- against the comma-freeness of $D_c$. (Verified: $\{d(c(\sigma))\}$ for $c : \{a,b,c\} \rightarrow \{x,y\}^6$ and $d : \{x,y\} \rightarrow \{a,b,c\}^4$, length-$24$ dictionary, comma-free.)
+\end{proof}
+
+\begin{lemma}
+    (\emph{Retraction})
+    \label{lem:retract}
+    Let $h = d \circ c : \Sigma \rightarrow \Sigma^{\ell_c\ell_d}$ with $c, d$ good. Then $h$ is good, and both $h$ and a decoder $H_h$ with $H_h \circ h = \mathrm{id}$ are \emph{total} $L$-reachable: $h$ is $\mathrm{rep}_{|\Sigma|}$ with the single characters as patterns and the $h$-codewords as replacements, $H_h$ the same with the roles exchanged -- $\mathrm{rep}_n$ places no restriction on its patterns (Theorem~\ref{lem:multiple substitution}).
+\end{lemma}
+
+\begin{proof}
+    Comma-freeness is Lemma~\ref{lem:compose}; on an $h$-image the codeword occurrences are aligned (Self-Synchronization), so the freezing semantics of $\mathrm{rep}_n$ tiles the text exactly, replacing each $h(\sigma)$ by $\sigma$. Both $\mathrm{rep}_n$ have constant, nonempty patterns, hence are total. (Verified: the $h$- and $H_h$-expressions against their intended semantics on all $40$ inputs of length $\le 3$ over $\{a,b,c\}$; and as part of the roundtrip below.)
+\end{proof}
+
+\begin{theorem}
+    (\emph{Transfer})
+    \label{thm:transfer}
+    For all finite $\Sigma, \Gamma$ with $|\Sigma|, |\Gamma| \geq 2$, every good coding $c$, and every partial function $f$ on $\Sigma^*$:
+    \begin{align}
+        f \in L_\Sigma \;\iff\; f^c \in L_\Gamma,
+    \end{align}
+    and when $f$ is total the $\Gamma$-witness of the forward direction may be taken total (Theorem~\ref{thm:transfer-forward}). The $\Sigma$-witness of the backward direction is
+    \begin{align}
+        H_h\big(E'_d(h(X_1), \dots, h(X_n))\big),
+    \end{align}
+    where $E'$ is the given $\Gamma$-witness of $f^c$, $E'_d = (E')^d$, $d$ is any good coding $\Gamma \rightarrow \Sigma^{\ell_d}$, and $h = d \circ c$; its node count is $|E'|$ plus a constant depending only on the two alphabets.
+\end{theorem}
+
+\begin{proof}
+    Direction 1 is Theorem~\ref{thm:transfer-forward}. For Direction 2 let $E'$ over $\Gamma$ witness $f^c$. Every $h(X_i) = d(c(X_i))$ lies in $\mathrm{image}(d)$, where $E'_d$ computes $d$ of the $E'$-value (Direction 1, for the coding $d$); so
+    \begin{align*}
+        \llbracket E'_d \rrbracket\big(h(\vec X)\big)
+        \;=\; d\big(\llbracket E' \rrbracket(c(\vec X))\big)
+        \;=\; d\big(c(f(\vec X))\big) \;=\; h\big(f(\vec X)\big),
+    \end{align*}
+    and $H_h$ returns $f(\vec X)$ by the Retraction lemma. Definedness tracks $f$'s: $h$ and $H_h$ are total, and $E'_d$ is defined at the $h$-images exactly when $E'$ is at the $c(\vec X)$ -- strictness carries $E'$'s undefinedness through the total wrappers unchanged. The node-count claim follows from Theorem~\ref{thm:transfer-forward} and the constant patterns of the two $\mathrm{rep}_n$. (Verified: the full roundtrip $E_0 \mapsto E' = E_0^c \mapsto E_{\mathrm{final}}$ on all $155$ depth-$\le 1$ expressions with constants $\le 1$, on all $40$ inputs of length $\le 3$ -- $6{,}200$ evaluations, $0$ mismatches, $1{,}025$ undefined on both sides; $\deg E_{\mathrm{final}} = \deg E_0$ in all $155$ cases, node overhead $528$ for the $(3,2)$-alphabet pair.)
+\end{proof}
+
+\begin{corollary}
+    (\emph{Alphabet-Uniform Questions})
+    \label{cor:uniform}
+    The right pass $\mathrm{r}$ (the collapse criterion of Theorem~\ref{thm:union-collapse}), the once node $[\,X_1/X_2\,]_1 X_3$ read as a three-argument function, and every $k$-th-occurrence node are \emph{coding-equivariant} -- each commutes with every good coding, by Lemma~\ref{lem:pass-transfer} -- so each of these reachability questions is a single question, not one per alphabet: the answer over one alphabet with at least two letters is the answer over every. The same holds for $\mathrm{rev}$ by Theorem~\ref{thm:rev-uniform} below. Consequently every negative search of Sections~\ref{sec:calculus}--\ref{sec:variants} run over one alphabet excludes the conjugate over \emph{every} alphabet of at least two letters, and Conjecture~\ref{conj:union}, if true over one alphabet, is true over every.
+\end{corollary}
+
+\begin{proof}
+    Equivariance plus Theorem~\ref{thm:transfer}: if $F$ commutes with the good coding $e$, then a $\Sigma$-witness for $F$ conjugates along $c$ to a $\Gamma$-function which, composed with the retraction $q = c \circ e$, computes the native $F$ over $\Gamma$ -- the identical construction as in Theorem~\ref{thm:rev-uniform}, with the equivariance of Lemma~\ref{lem:pass-transfer} in place of the palindrome clause. Concretely, for $e : \Gamma \rightarrow \Sigma^k$ good and $q = c \circ e$:
+    \begin{align*}
+        \llbracket E^c \rrbracket\big(q(\vec T)\big) \;=\; c\big(\llbracket E \rrbracket(e(\vec T))\big) \;=\; c\big(F(e(\vec T))\big) \;=\; c\big(e(F(\vec T))\big) \;=\; q\big(F(\vec T)\big),
+    \end{align*}
+    and $H_q$ returns $F(\vec T)$. (Verified end to end: the pass node over $\{a,b,c\}$ transferred to $\{x,y\}$ and retracted -- a full binary expression in the leftmost calculus, $294$ evaluations, $0$ mismatches; once, rightmost and second occurrence as semantic compositions, $882$ evaluations, $0$ mismatches; equivariance of all four passes under the two retraction codings, $2{,}352$ cases, $0$ mismatches; the doubling function as a further end-to-end witness, $31$ inputs.)
+\end{proof}
+
+\subsection{Reversal}
+
+Reversal is the one equivariance that codings do not enjoy for free: a letter-by-letter reversal reverses \emph{each codeword individually}, so $c(\mathrm{rev}\,S) = \mathrm{rev}(c(S))$ holds iff every codeword is a palindrome -- a false claim in an earlier draft of this section, caught by the verification battery ($60$ failures on $31$ inputs). The naive ``rev on the code image'' is not the reversal of the image; the repair is to retract along a coding whose outer half is palindromic.
+
+\begin{lemma}
+    (\emph{Palindromic Dictionaries})
+    \label{lem:palindrome}
+    \begin{enumerate}[(i)]
+        \item $c(\mathrm{rev}\,S) = \mathrm{rev}(c(S))$ for all $S$ iff every codeword of $c$ is a palindrome; then $e(\mathrm{rev}\,T) = \mathrm{rev}(e(T))$ for every such $e$.
+        \item (\emph{Middle-marker family.}) For $\mu \in \Sigma$ and $m \geq 1$, $\{\, \alpha\,\mu\,\mathrm{rev}(\alpha) : \alpha \in (\Sigma \setminus \mu)^m \,\}$ is comma-free and palindromic, of size $(|\Sigma|-1)^m$ -- unbounded for $|\Sigma| \geq 3$.
+        \item Over the binary alphabet the family degenerates (size 1), but size-3 palindromic comma-free dictionaries exist: $\{\mathtt{aabaa}, \mathtt{ababa}, \mathtt{abbba}\}$ and $\{\mathtt{aabaa}, \mathtt{babab}, \mathtt{bbabb}\}$.
+    \end{enumerate}
+\end{lemma}
+
+\begin{proof}
+    (i) is immediate on one-letter words. (ii) $\mu$ occurs in each codeword only at the exact middle, and in $u \cdot v$ only at the two middles; an occurrence of a codeword has its $\mu$ at $p + m$, hence $p \in \{0, 2m+1\}$ -- aligned. (iii) by inspection. (Verified: (ii) $20$ dictionaries, ternary and quaternary, $m \le 5$, all comma-free with the stated sizes; (iii) both dictionaries comma-free; exact maxima of palindromic comma-free sets over binary, by branch and bound: $1, 1, 3, 2, 7, 14$ at $\ell = 3, 4, 5, 6, 7, 9$ -- data, not a formula.)
+\end{proof}
+
+\begin{theorem}
+    (\emph{Reversal Uniformity})
+    \label{thm:rev-uniform}
+    $\mathrm{rev} \in L$ over one alphabet with at least two letters iff over every: given a witness $E$ over $\Sigma$, a good $c : \Sigma \rightarrow \Gamma^\ell$, and a good \emph{palindromic} $e : \Gamma \rightarrow \Sigma^k$ (Lemma~\ref{lem:palindrome}), $q \triangleq c \circ e$ gives
+    \begin{align}
+        \mathrm{rev}_\Gamma \;=\; H_q \circ \llbracket E^c \rrbracket \circ q .
+    \end{align}
+\end{theorem}
+
+\begin{proof}
+    $q(T) = c(e(T))$, so $\llbracket E^c \rrbracket(q(T)) = c(\mathrm{rev}\, e(T))$ by Direction 1; the palindrome clause gives $\mathrm{rev}\, e(T) = e(\mathrm{rev}\, T)$, hence $\llbracket E^c \rrbracket(q(T)) = c(e(\mathrm{rev}\,T)) = q(\mathrm{rev}\,T)$, and $H_q$ returns $\mathrm{rev}\,T$. The needed dictionaries exist for every pair of alphabets: from a source of at least three letters use the middle-marker family for $e$; from a binary source, first move to a ternary alphabet along the size-3 binary dictionary of Lemma~\ref{lem:palindrome}(iii) -- a coding of three letters needs three codewords, and three exist -- and then proceed as before; $c$ itself is never required to be palindromic (Lemma~\ref{lem:dict} suffices), and $D_q = \{c(e(\gamma))\}$ is comma-free by Lemma~\ref{lem:compose}. (Verified: $e = \{\mathtt{x} \mapsto \mathtt{bab}, \mathtt{y} \mapsto \mathtt{cac}\}$ over $\Sigma = \{\mathtt{a},\mathtt{b},\mathtt{c}\}$, $c$ the length-6 double-$a$ coding to $\{\mathtt{x},\mathtt{y}\}$; $q$ and $H_q$ as \emph{expressions}, with the oracle $D = c \circ \mathrm{rev} \circ c^{-1}$ standing in for $\llbracket E^c \rrbracket$ ($\mathrm{rev}$-reachability being the hypothesis): $H_q(D(q(T))) = \mathrm{rev}\,T$ on all $63$ inputs of length $\le 5$, zero failures.)
+\end{proof}
+
+\begin{remark}
+    (\emph{No Contradiction with the Native Results})
+    \label{rem:native}
+    Theorem~\ref{thm:transfer} conjugates; Propositions~\ref{prop:del-leftmost} and~\ref{prop:kth} speak of \emph{native} functions, and the two live in different conjugacy classes. The binary witness $W$ of the leftmost deletion transfers to a ternary alphabet as the \emph{block-level} function $[\,\epsilon/c(b)\,]_1$ on the image of $c$ -- it deletes an $\ell$-block, not a character, and is not the native ternary $[\,\epsilon/\gamma\,]_1$; the negative ternary searches could not have seen the transferred witness in any case, its depth after transfer and retraction being far beyond the exhaustive depth-3 and randomized $4$--$7$-pass spaces. Nor is the $\ell = 1$ coding a loop-hole: an injective character map is (trivially) good, and conjugating the binary once-deletion along it yields the native ternary function \emph{restricted to a two-letter sub-alphabet} -- reachable as a partial function, exactly the anchored-domain face of the phenomenon, and consistent with the resistance being about general position over three letters. Finally, the once-calculus -- and the rightmost and $k$-th-occurrence calculi -- have transfer theorems of their own: Lemma~\ref{lem:pass-transfer} is scan-direction- and multiplicity-agnostic, the first coded occurrence being the coding of the first native one. The marker-freshness obstruction of Proposition~\ref{prop:kth}(iii) is a statement about native simulation within one alphabet and is untouched.
+\end{remark}
+
+\subsection{The Unary Edge}
+
+Section~\ref{sec:variants} tracks the unary case wherever it differs; the transfer theorem now locates its boundary exactly.
+
+\begin{proposition}
+    (\emph{The Boundary $|\Sigma| = 1$})
+    \label{prop:unary-edge}
+    \begin{enumerate}[(i)]
+        \item $c(\mathtt{a}) = \mathtt{ab}$ is good ($\{w\}$ is comma-free iff $w$ is primitive), and every unary-reachable function is the restriction of a binary-reachable one.
+        \item There is no injective monoid homomorphism $\{\mathtt{a}, \mathtt{b}\}^* \rightarrow \{\mathtt{a}\}^*$: any $h$ has $h(\mathtt{ab}) = h(\mathtt{a})h(\mathtt{b}) = h(\mathtt{b})h(\mathtt{a}) = h(\mathtt{ba})$ while $\mathtt{ab} \ne \mathtt{ba}$. So no coding-conjugation crosses the $|\Sigma| = 1$ boundary from above, and the hypothesis $|\Sigma|, |\Gamma| \geq 2$ of Theorem~\ref{thm:transfer} cannot be dropped on that side.
+        \item Every unary $L$-expression computes a length map in the closure of $\{n \mapsto n,\ n \mapsto k\}$ under pointwise sum (concatenation) and $(g,r,p) \mapsto \big(n \mapsto r(n) \lfloor g(n)/p(n) \rfloor + g(n) \bmod p(n)\big)$ (the pass; the constant case is $n \mapsto i\lfloor n/j \rfloor + n \bmod j$, and $[\,X_1/a\,]X_1$ squares). Every such map is eventually polynomially bounded, so $n \mapsto 2^n$ is unreachable at any size -- the unary face of Theorem~\ref{thm:fp}'s growth bound. The floor-halving $n \mapsto \lfloor n/2 \rfloor$ -- the needle $H$ of Proposition~\ref{prop:unary-once} -- is absent from every unary expression of size $\le 7$ ($36{,}978$ expressions, $2{,}091$ distinct length maps on $n \le 24$, plus $3{,}000$ random ones of depth $\le 4$): every single unary pass leaks its residue $n \bmod j$, and subtraction is not among the closures.
+    \end{enumerate}
+\end{proposition}
+
+\begin{proof}
+    (i) is Direction 1 for the coding $c$ (verified: all $258$ depth-$\le 1$ unary expressions on $a^0..a^{24}$, $6{,}450$ evaluations, $0$ mismatches, plus $12{,}000$ deeper-random; alignment and the pass law, $566$ cases). (ii) is the displayed computation. (iii): the pass law is the greedy scan of a unary string (verified: $20$ $(i,j)$ pairs); the growth bound is an induction -- a pass outputs at most $|R| \cdot \lfloor |E|/|P| \rfloor \cdot |P| + |E| \le |R||E| + |E|$ characters; the halving search is exhaustive at size $\le 7$ ($\lceil n/2 \rceil$ and $n \bmod 2$ are present at size 4, $n^4$ at size 10 via $[\,[X/a]X / a\,]([X/a]X)$, verified). Of the total binary length profiles $n \mapsto |\llbracket E \rrbracket(a^n)|$ with $n \le 12$ arising from the depth-$\le 1$ binary space and $2{,}000$ random depth-$\le 3$ expressions ($480$ in the reference run; an independent resampling agrees), exactly two are realized by no size-$\le 7$ unary expression nor any constant shift of one -- bounded-search evidence for the strictness of (i)'s converse.
+\end{proof}
+
 \section{Recursive Definitions}
 \label{sec:recursion}
 
@@ -2160,6 +2451,76 @@ Four runtimes, in order of increasing laziness:
     \item \emph{Lazy passes.} Call by need, plus the one non-strictness the operator itself already possesses, made official: in $[\,R/P\,]\,E$ the pattern and the scrutinee are forced, but $R$ only if $P$ occurs in the value of $E$ -- justified by the operator equation $[\,A/B\,]S = S$ when $B \not\subset S$, \emph{regardless of $A$} (Definition~\ref{def:subst}).
     \item \emph{Streams.} Values are finite or infinite strings, and the pass is the causal process of Theorem~\ref{thm:subsequential}; termination gives way to productivity (Section~\ref{sec:rec-streams}).
 \end{enumerate}
+
+\begin{definition}
+    (\emph{The runtimes as dynamics})
+    \label{def:dynamics}
+    The first three runtimes are structural dynamics: rewrite relations on
+    closed expressions, the strings being the values.  Write $B_j[X_i := E_i]$
+    for the simultaneous substitution of Lemma~\ref{lem:beta}.  The axiom
+    schemes, all closed under the runtime's evaluation contexts:
+    \begin{mathpar}
+        (\mathrm{cat})\;\; \frac{}{W_1\,W_2 \;\to\; W_1W_2}
+        \and
+        (\mathrm{fire})\;\; \frac{W_P \neq \epsilon \quad W_P \subseteq W_S}
+        {[\,W_A/W_P\,]\,W_S \;\to\; [\,W_A/W_P\,](W_S)}
+        \and
+        (\mathrm{inert}_{=})\;\; \frac{W_P \neq \epsilon \quad W_P \not\subset W_S}
+        {[\,W_A/W_P\,]\,W_S \;\to\; W_S}
+        \and
+        (\mathrm{inert}_{\epsilon})\;\; \frac{W_P \neq \epsilon \quad W_P \not\subset W_S}
+        {[\,R/W_P\,]\,W_S \;\to\; W_S}
+        \and
+        (\mathrm{call}_{v})\;\; \frac{}{f_j(W_1, \dots, W_{m_j}) \;\to\; B_j[X_i := W_i]}
+        \and
+        (\mathrm{call}_{n})\;\; \frac{}{f_j(E_1, \dots, E_{m_j}) \;\to\; B_j[X_i := E_i]}
+    \end{mathpar}
+    Concatenation and firing are shared; $\mathrm{inert}_{=}$ (all three
+    slots values -- the pass strict in every part) and $\mathrm{call}_{v}$
+    (call by value) are the \emph{eager} rules; $\mathrm{inert}_{=}$ and
+    $\mathrm{call}_{n}$ the \emph{lazy-argument} rules;
+    $\mathrm{inert}_{\epsilon}$ -- the replacement an arbitrary,
+    discarded expression, which is the operator equation
+    $[\,A/B\,]S = S$ of Definition~\ref{def:subst} made operational --
+    and $\mathrm{call}_{n}$ the \emph{lazy-pass} rules.  The evaluation
+    contexts are the whole difference.  \emph{Eager}: the hole may sit in
+    any child of a concatenation, in any slot of a pass, in any argument
+    of a call.  \emph{Lazy arguments}: any child of a concatenation and
+    any slot of a pass -- a call's arguments are not contexts, they
+    travel as thunks.  \emph{Lazy passes}: any child of a concatenation,
+    the pattern or scrutinee slot of a pass, and the replacement slot
+    only under the \emph{guard} that the other two slots are values and
+    the pattern occurs in the scrutinee's value.  A run halting at a
+    string denotes it; a closed non-value admitting no step is
+    \emph{stuck} (an empty pattern, or a forced stuck sub-expression);
+    otherwise it diverges.  The runtime's partial function is defined
+    exactly on the halting runs.
+\end{definition}
+
+\begin{remark}
+    \label{rem:dynamics}
+    The dynamics are the three runtimes of the list, made precise: the
+    eager relation computes the least-fixpoint denotation of
+    Theorem~\ref{thm:eager}, the lazy-argument relation the liveness
+    characterization of Theorem~\ref{thm:lazyargs} (the call is by name;
+    the runtime's shared thunks force each live argument at most once,
+    and by the liveness characterization the forced positions -- hence
+    the values and the defined inputs -- are the same), and the
+    lazy-pass relation is the machine of Proposition~\ref{prop:lpcons}.
+    The rules fix \emph{what} is forced, not the order: the value and
+    the defined inputs are order-independent in all three runtimes, while
+    the split of the undefined runs into stuck and divergent is not
+    (Theorem~\ref{thm:eager} records this for eager).  The replacement
+    slot's guard is a neededness criterion in the sense of Huet and
+    L\'evy \cite{huetlevy79}: the replacement of $[\,R/P\,]\,E$ is needed
+    exactly when $P$ occurs.  (Verified: the nine canonical programs --
+    the gate $[\,g(X)/b\,]X$ open and closed, the dead-argument
+    separator of Theorem~\ref{thm:lazyargs} under all three runtimes,
+    the mutual ping-pong, the empty pattern, the constant-scrutinee fire
+    -- machine-run against hand-computed outcomes by an implementation of
+    these rules, all correct; the implementation, with the rules as its
+    only specification, is \texttt{research/scratch/rec/dynamics.cpp}.)
+\end{remark}
 
 \subsection{Eager and Lazy Arguments: Recursion Is Inert}
 
@@ -2359,6 +2720,38 @@ The central question is \emph{guardedness}: when is the junction-guarded cascade
 
 Two further phenomena delimit the fragment. Recursion in the \emph{replacement} slot itself -- $f(X) = [\,f(X)/a\,]\,X$ -- obeys a trichotomy: if $a$ does not occur in the input, the value is the scrutinee, the replacement never forced (exactly the flat gate of Section~\ref{sec:rec-lazy}); if $a$ is the first character, deadlock, the forced replacement being the value being defined, which is partial and truncates everything after it; otherwise \textsc{live}, with the periodic value $s^{\omega}$ where $s$ is the $a$-free prefix before the first match. And with \emph{variable} patterns the pass never over-forces: it demands at most $\ell + 1$ characters of the pattern's value, $\ell$ the length of the longest prefix occurring as a factor of the scrutinee -- so an infinite pattern never completes a match, and the pass degenerates to streaming through mismatches, identity or absorption according to whether the scrutinee's tails keep extending the pattern's prefixes.
 
+\begin{remark}
+    (\emph{The $\omega$-limit reading})
+    \label{rem:omega}
+    Definition~\ref{def:lim} iterates a pass, and a pass is a causal
+    process (Theorem~\ref{thm:subsequential}), so the orbit extends
+    verbatim to infinite strings: the fixpoint test $s_{K+1} = s_K$,
+    however, asks for equality of two $\omega$-strings -- it is not a
+    finitely observable event.  The amplifier
+    $\mathrm{lim}([\,baa/ab\,])$ on $a\,b^{\omega}$ shows what replaces
+    it: the front (leftmost $a$) never retreats and spends exactly
+    $2^{v-1}+1$ sweeps at each position $v$, so position $j$ is
+    permanently $b$ from sweep $2^{j}+j$ on -- the orbit converges
+    \emph{pointwise} to $b^{\omega}$, itself a fixed point of the pass,
+    while firing every sweep forever: the stepwise test never fires,
+    and the convergence is not uniform in any effective sense, each
+    position costing exponentially many sweeps
+    (Theorem~\ref{thm:beyondfinite}).  Nor does the stepwise
+    reading agree with the finite one:
+    $\mathrm{lim}([\,a/aa\,])(a^{n}) = a$ for every $n \geq 1$, but one
+    pass over $a^{\omega}$ fires at $0, 2, 4, \dots$ and returns
+    $a^{\omega}$ -- a fixed point, so the coinductive reading of the
+    same node is $a^{\omega}$: least (approximation) versus greatest
+    (coinductive) fixpoint, the split of Remark~\ref{rem:leastfix}
+    compressed into a single rule.  And an $\omega$-orbit can abandon
+    infinite strings entirely: $[\,\epsilon/ab\,]$ erases $(ab)^{\omega}$
+    in \emph{one} sweep -- a process \textsc{live} forever with finite
+    total output, the edge case of Theorem~\ref{thm:guardedness}.
+    (Verified: front dwell and stabilization laws exact for $j < 10$,
+    slack-certified; the two readings machine-checked on all quoted
+    domains.)
+\end{remark}
+
 \subsection{The Landscape}
 
 \begin{center}
@@ -2387,9 +2780,9 @@ The four rows share one primitive; the distance between the second and the third
 
 \section{Conclusion}
 
-This note took search-and-replace seriously as a model of computation, and found a small theory with classical echoes. The single pass $[A/B]$ -- leftmost-first, all occurrences, no re-entry into inserted text -- supports a complete toolkit: escaping, concatenation, head and tail, equality, selection, and simultaneous multiple substitution are each an explicit composition of passes with a correctness proof, over any alphabet with at least two characters. The calculus built on the primitive is structurally well-behaved: a syntactic safety condition implies totality, concatenation is eliminable, and every reachable function is computable in polynomial time, with the degree read off the expression -- while quadratic growth is reachable and exponential growth is not. Varying the three design choices one at a time separated the once-primitive from full passes, spread the $k$-th-occurrence family between them into a mosaic of incomparable fragments, tied the right-to-left fragment to the reachability of reversal, collapsed the toolkit under rescanning, let Markov iteration outgrow every polynomial -- at the price of re-entering the classical one-rule termination problem, where the census found the leftmost strategy to cost nothing -- and closed the variant story with an exact class: iterating an expression to its fixed point, one node over a flat pipeline already computes every partial computable function, and one constant pass under it already grows exponentially while its divergent orbits grow like Fibonacci. Admitting both directions at once reduced the union's collapse to a single three-argument function, the right pass itself -- present in no searched space, and carried by a mechanism, residue routing, that the left-to-right frontier cannot perform. Letting definitions recurse, finally, split the runtimes rather than the primitive: eager and lazy-argument evaluation buy nothing -- every recursive definition either inlines to a plain expression or never returns -- while the operator's one non-strictness, the replacement of a pass evaluated only when the pattern occurs, carries the calculus to universality -- though, without recursion, it buys definedness, not power -- and the coinductive reading on infinite strings beyond every finite-state emitter.
+This note took search-and-replace seriously as a model of computation, and found a small theory with classical echoes. The single pass $[A/B]$ -- leftmost-first, all occurrences, no re-entry into inserted text -- supports a complete toolkit: escaping, concatenation, head and tail, equality, selection, and simultaneous multiple substitution are each an explicit composition of passes with a correctness proof, over any alphabet with at least two characters. The calculus built on the primitive is structurally well-behaved: a syntactic safety condition implies totality, concatenation is eliminable, and every reachable function is computable in polynomial time, with the degree read off the expression -- while quadratic growth is reachable and exponential growth is not. Varying the three design choices one at a time separated the once-primitive from full passes, spread the $k$-th-occurrence family between them into a mosaic of incomparable fragments, tied the right-to-left fragment to the reachability of reversal, collapsed the toolkit under rescanning, let Markov iteration outgrow every polynomial -- at the price of re-entering the classical one-rule termination problem, where the census found the leftmost strategy to cost nothing -- and closed the variant story with an exact class: iterating an expression to its fixed point, one node over a flat pipeline already computes every partial computable function, and one constant pass under it already grows exponentially while its divergent orbits grow like Fibonacci, and, we conjecture, never beyond single-exponential -- proved for the entire exponential tier by affine potentials, each sweep draining a nonnegative potential by a fixed amount, with the base $|A| - |B| + 1$ made exact by four rule shapes. Admitting both directions at once reduced the union's collapse to a single three-argument function, the right pass itself -- present in no searched space, and carried by a mechanism, residue routing, that the left-to-right frontier cannot perform. Varying the alphabet changed none of this up to conjugation: a comma-free coding carries every reachable function to its conjugate over any other alphabet of at least two letters, both ways, transfers all four scanning primitives verbatim, and makes each hinge a single question across alphabets -- while the unary edge splits, reachable from below by coding and structurally blocked from above, its class eventually polynomially bounded. Letting definitions recurse, finally, split the runtimes rather than the primitive: eager and lazy-argument evaluation buy nothing -- every recursive definition either inlines to a plain expression or never returns -- while the operator's one non-strictness, the replacement of a pass evaluated only when the pattern occurs, carries the calculus to universality -- though, without recursion, it buys definedness, not power -- and the coinductive reading on infinite strings beyond every finite-state emitter.  Read on streams, the iteration operator keeps its own two fixpoint readings -- the stepwise limit of finite approximations and the pointwise $\omega$-limit -- provably apart, and a single sweep can erase an $\omega$-word entire.
 
-Two questions about the baseline itself carry the structure of the whole landscape: whether the once-primitive is $L$-reachable, and whether reversal is. The first is affirmative at its probe over two letters (Proposition~\ref{prop:del-leftmost}) and now rests on the computed needle and on alphabets of three or more letters; the second is sharpened by the union's criterion, which asks only whether the right pass as a function is reachable, and every search for which has failed, and priced by the crossing ladder of Remark~\ref{rem:price}. Around them, the exact characterization of each variant's reachable class, the growth dichotomy for total restart rules, the strategy question of Theorem~\ref{thm:termination}(v), and the guardedness boundary for stream definitions remain open. Everything finite in this note was verified by machine on the domains stated in situ; the two hinges are where the theory now asks to be settled by hand.
+Two questions about the baseline itself carry the structure of the whole landscape: whether the once-primitive is $L$-reachable, and whether reversal is. The first is affirmative at its probe over two letters (Proposition~\ref{prop:del-leftmost}) and now rests on the computed needle and on alphabets of three or more letters; the second is sharpened by the union's criterion, which asks only whether the right pass as a function is reachable, and every search for which has failed, and priced by the crossing ladder of Remark~\ref{rem:price}. Both are single questions, not one per alphabet: the once node and the right pass are coding-equivariant, and reversal over one alphabet of at least two letters is reachable iff over every (Section~\ref{sec:alphabet}) -- a negative proof needs only one alphabet. Around them, the exact characterization of each variant's reachable class, the growth dichotomy for total restart rules, the strategy question of Theorem~\ref{thm:termination}(v), and the guardedness boundary for stream definitions remain open. Everything finite in this note was verified by machine on the domains stated in situ; the two hinges are where the theory now asks to be settled by hand.
 
 \bibliographystyle{splncs04}
 \bibliography{references}

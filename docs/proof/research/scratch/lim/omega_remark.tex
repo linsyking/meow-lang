@@ -1,0 +1,39 @@
+% omega_remark.tex -- R5 deliverable: the omega-limit reading of lim,
+% a Section 6.3 remark candidate.  Placement suggestion: directly after
+% rem:leastfix (it is the iteration-operator side of the same split).
+% Every quantitative claim is machine-verified in
+% research/scratch/lim/verify_r5.py, part D (round5.log: 1,224 checks,
+% 0 failures).  Macros/labels assumed from main.tex: def:lim,
+% prop:streamadeq, thm:guardedness, rem:leastfix, thm:beyondfinite.
+
+\begin{remark}
+    (\emph{The $\omega$-limit reading})
+    \label{rem:omega}
+    Definition~\ref{def:lim} iterates a pass, and a pass is a causal
+    process (Theorem~\ref{thm:subsequential}), so the orbit extends
+    verbatim to infinite strings: the fixpoint test $s_{K+1} = s_K$,
+    however, asks for equality of two $\omega$-strings -- it is not a
+    finitely observable event.  The amplifier
+    $\mathrm{lim}([\,baa/ab\,])$ on $a\,b^{\omega}$ shows what replaces
+    it: the front (leftmost $a$) never retreats and spends exactly
+    $2^{v-1}+1$ sweeps at each position $v$, so position $j$ is
+    permanently $b$ from sweep $2^{j}+j$ on -- the orbit converges
+    \emph{pointwise} to $b^{\omega}$, itself a fixed point of the pass,
+    while firing every sweep forever: the stepwise test never fires,
+    and the convergence is not uniform in any effective sense, each
+    position costing exponentially many sweeps
+    (cf.~Theorem~\ref{thm:beyondfinite}).  Nor does the stepwise
+    reading agree with the finite one:
+    $\mathrm{lim}([\,a/aa\,])(a^{n}) = a$ for every $n \geq 1$, but one
+    pass over $a^{\omega}$ fires at $0, 2, 4, \dots$ and returns
+    $a^{\omega}$ -- a fixed point, so the coinductive reading of the
+    same node is $a^{\omega}$: least (approximation) versus greatest
+    (coinductive) fixpoint, the split of Remark~\ref{rem:leastfix}
+    compressed into a single rule.  And an $\omega$-orbit can abandon
+    infinite strings entirely: $[\,\epsilon/ab\,]$ erases $(ab)^{\omega}$
+    in \emph{one} sweep -- a process \textsc{live} forever with finite
+    total output, the edge case of Theorem~\ref{thm:guardedness}.
+    (Verified: front dwell and stabilization laws exact for $j < 10$,
+    slack-certified; the two readings machine-checked on all quoted
+    domains.)
+\end{remark}

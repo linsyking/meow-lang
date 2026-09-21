@@ -625,3 +625,323 @@ verify_round6_mult1_sweep.py -- the mult-1 hunt (cheap needles);
 verify_round6_witness.py -- FINAL WITNESSES: A-refutation extended to
     j=40 (every row content==den), B2 triple standalone, staircase
     provs printed
+
+---
+
+## ROUND 7 -- Theorem A proved; the text-level statement refuted; the pipeline statement hardened
+
+Coordinator's round-6 verification first (for the record): confirmed all
+four batteries; hand-traced the E2 witness end-to-end (T = X a X a X, 17
+chars; deletes at spans 0-2, 4-6, 8-10, 12-14; survivors (3,1,3,3,4);
+initd(2)('babab') = 'bab'; L.den(E2)('babab') = 'aaaab'); corrected the
+staircase's descent to ODD labels ("..., 3, 1" not "..., 2, 1") -- fixed
+in REPORT 6.3 and the fragment.  Cross-hinge scoping note accepted: the
+A-refutation (LDS linear in |w|) does not touch rem:price (chi vs |w|);
+the side probe below closes that question.
+
+### 7.1 THEOREM A (proved; machine-verified)
+
+In the two-pass fragment [A/sigma][eps/B] at output multiplicity 1:
+  (i)   at most one surviving copy per realized (o,j) phase, so
+        #surviving copies <= (1+|O(A,B)|)(1+|J(A,B)|)+1;
+  (ii)  the gap survivors' labels strictly increase in text order, so
+        they contribute <= 1 to any decreasing chain;
+  (iii) each surviving copy contributes <= LDS(prov_A) (within a copy,
+        text order = ascending offsets, chain = descending labels =
+        a decreasing subsequence of prov_A);
+  hence  LDS(prov) <= [(1+|O|)(1+|J|)+1] * LDS(prov_A) + 1.
+Proof of (i): two surviving copies with equal phase keep identical
+offset sets (round-5 Lemma Phase, proved); if nonempty they share an
+offset i, hence both keep an atom labeled prov_A[i], so mult >= 2.
+This is the formal core of the "duplication argument": a surviving copy
+is a PHASE, and phases are counted by the overlap sets.
+
+VERIFIED (verify_round7_mult1.py PART 1, via an independent tagged
+simulator, content cross-checked against L.den every 4009th instance,
+0 mismatches):
+  exhaustive: A<=4 x {LDS(A) in 1,2,3} x B<=3 x 8 sigmas x |w|<=6:
+    1,157,184 instances, 591,315 at mult 1;
+    violations: (i) 0, (ii+iii) 0, base-case conjecture 0.
+  random: A<=8, B<=6, |w|<=10, arbitrary prov_A: 20,000 instances,
+    10,308 at mult 1: violations 0/0/0.
+
+WHAT THEOREM A DOES NOT GIVE: the constant (1+|O|)(1+|J|)+1 depends on
+the VALUES A, B (both grow with w).  The E-uniform statement --
+Theorem B: at mult 1, #surviving copies <= C(E) -- is the remaining
+gap, and it is exactly the round-5 LINE 1 program (rich O/J ⟹
+periodicity ⟹ duplication) now with the correct target: not the chain,
+the NUMBER OF SURVIVING COPIES.
+
+### 7.2 The text-level statement is REFUTED (chains up to 6 at mult 1)
+
+The base-case bound 2*LDS(prov_A)+1 is FALSE as a statement about
+texts (free injective labels).  Deterministic witness (PART 2a):
+  A = babababab, B = abababa, gaps = a,a,a,a,a (4 copies):
+  residuals {6}, {4}, {2}, {0,8}: chain 6 > 4 > 2 > 0 = 4.
+Hunt over aligned alternating texts (m in 5..13, n = m+2, 3..6 copies,
+pre/post in {"", a, aa}):
+  chain histogram {2:33, 3:63, 4:45, 5:27, 6:12};
+  best: m=11, n=13, 6 copies, pre='', post='a':
+  residuals {0,12},{10},{8},{6},{4},{2}: CHAIN 6 (12>10>8>6>4>2).
+So a text can realize a mult-1 staircase of length |A|/2.  THE PIPELINE
+STATEMENT SURVIVES ON REALIZABILITY ALONE.
+
+### 7.3 Why the text-level chains do not lift: the supply pigeonhole
+
+The chain-6 text needs A (13 atoms, 7 b's) as a value of w, where w
+(12 atoms, 6 b's = the sigma-sites, sigma='b') supplies only 6 b-
+positions.  Any prov_A must repeat a b-position; prov_A nondecreasing
+(LDS(A)=1) + A's parity-alternating content forbids adjacent repeats
+(parity clash) and non-adjacent repeats (nondecreasing forces constant
+between), so NO valid prov_A exists: |A| > #b-positions of w kills the
+chain-6 text outright.  The chain-4 text (n=9, 4 sites) dies the same
+way.  THIS is the realizability mechanism the missing Theorem B must
+abstract: the chain's k picks demand k distinct positions in one parity
+class (staircase) or k prov_A-descents (runs); the supply of such
+positions in w, given the sigma-site structure, is what mult-1 caps.
+Sketch only -- not yet a proof for general (A, B, sigma).
+
+### 7.4 The pipeline evidence hardened
+
+PART 2b (variable needles, the round-6 cheap constructions):
+25 needle constructions x 7 periodic families x 6 sigmas x j<=16,
+replacement always X (so LDS(prov_A) = 1, the hardest case for the
+conjecture): at mult 1 the maximum LDS observed is **1** -- not 3, not
+2: every mult-1 instance in the entire swept space is an increasing
+prov.  Together with PART 1 (0 violations of 2*LDS+1 over 1.16M
+exhaustive + 20K random pipelines) the pipeline-level conjecture has
+never been closer to true; the counterexamples all die on
+realizability, and the parity pigeonhole shows how.
+
+### 7.5 Side probe: the staircase does NOT speak to rem:price
+
+E2 = [eps/init^2 X].[X/b]X on w = b(ab)^j, j = 4..10 (PART 3):
+every single flip changes the output length (rows = |w|, discarded =
+|w|: 9/9, 13/13, 17/17, 21/21), so the perfect matching is empty and
+chi = 0 vacuously.  The collapsing function with LDS ~ n/2 is
+invisible to the crossing measure: chi <= c(E)|w| is untouched by it.
+CONJECTURE C CAVEAT (one paragraph, for the paper version): C's
+crossings are computed on length-preserving influence rows; rows whose
+flip changes the output length are discarded, and for any pipeline
+whose passes insert copies ([X/sigma]), every flip changes the site
+count, hence the output length, hence ALL rows are discarded and C
+holds vacuously.  The surviving uses of C are therefore the
+length-preserving pipelines (rev is one: rev preserves length, so C
+bites it with chi = C(n,2)); the discard rule is load-bearing and must
+be stated wherever C is invoked.
+
+### 7.6 Round 8 (priority order)
+
+(1) THEOREM B: at mult 1, #surviving copies <= C(E).  Route: Theorem
+    A(i) reduces it to bounding the number of REALIZED phases at
+    mult 1; realized phases with disjoint residuals force overlap-rich
+    O/J (periodicity), and the supply pigeonhole (7.3) caps what w can
+    feed.  The chain-6 text and the E2 family are the two test cases
+    the proof must kill.
+(2) Convert 7.3's pigeonhole into a lemma: if the copy value A is
+    alternating (more generally: if the realized phases exceed the
+    label supply in any residue class), mult >= 2.
+(3) Then the fragment's Conjecture (base case) follows with the
+    constant 2*LDS(prov_A)+1 for the two-pass fragment, and the atom
+    route closes if the recursion composes.
+
+### 7.7 Script index (round 7)
+
+verify_round7_mult1.py -- PART 1 Theorem A + base-case conjecture
+    (exhaustive + random, tagged simulator, content cross-checks);
+    PART 2a text-level chain hunt (chain-4 witness + histogram to 6);
+    PART 2b pipeline hunt with variable needles (max LDS at mult 1: 1);
+    PART 3 crossings side probe (all rows discarded, chi = 0 vacuous).
+
+---
+
+## ROUND 8 -- Theorem B: the meeting is machine-complete over the hunted habitat
+
+Coordinator's round-7 verification first (for the record): ALL GREEN
+under an independent run; the PART 2a witness hand-traced from first
+principles (T = (babababab.a)^5.babababab, B = abababa, deletion
+spans at 1, 9, 17, 25, 33, 41, 49, spacing 8, residuals {0,8},{6},
+{4},{2},{0,8}, chain 6>4>2>0); the Phase Bound's proof structure
+checked line by line (the mult-1 hypothesis used exactly once).
+
+### 8.1 PART 1 -- the direct adversarial hunt (no counterexample)
+
+E = [eps/P(w)].[R(w)/sigma]X over the CONCRETE injective-R family
+(R in {X, [eps/c]X for 10 constants, init, tail}: all LDS(prov_A)=1,
+the hardest case for the base-case bound 2*1+1=3) x 25 needle
+constructions P (tail^d, init^2, cat-phase shifts) x 4 sigmas x 331
+inputs (all |w|<=7 + 6 periodic families + 60 random |w|<=10):
+  355,928 pipelines evaluated, 70,212 at mult 1:
+  LDS histogram {0: 9,108; 1: 59,785; 2: 1,319}
+  MAX LDS AT MULT 1 = 2.
+The max instance re-verified end-to-end against the reference
+denotation: E = [eps/tail^3 X].[X/ab]X on w = baabaaba:
+prov (0,1,5,2,7), LDS 2, mult 1, content == L.den.  In this entire
+space the bound 3 is never even reached: at mult 1 the number of
+surviving copies never exceeds 2.
+
+### 8.2 PART 2 -- the lift-the-structures hunt (the supply pigeonhole, machine-checked)
+
+Every chain-rich free-text structure (the aligned alternating family
+m in 5..13 plus 60,000 B^inf-structured randoms; n <= 14, m <= 12):
+  60,180 structures; 147 with disjoint-chain >= 3; 48 pairwise-
+  disjoint (the text-level mult-1 candidates, including the length-6
+  chain); FEASIBLE EMBEDDINGS: 0; verified mult-1: 0.
+The feasibility check is the realizability CSP in its most permissive
+form: a NONDECREASING embedding p of A into w (repeats allowed at
+non-surviving offsets -- their labels never reach the output), p
+injective on the surviving offsets, p avoiding the surviving gap
+positions, for one of six sigmas whose greedy site-scan recovers the
+intended copy structure.  ALL 48 die.  The supply pigeonhole is now an
+exhaustive machine-checked infeasibility over the habitat: no
+text-level mult-1 chain lifts to a pipeline.
+
+### 8.3 PART 3 -- the quantified periodicity (border-period lemma)
+
+Exhaustively verified over ALL binary strings |x| <= 11:
+  LEMMA (Border-Period): if x has t >= 2 borders and minimal period p,
+  then p*(t-1) <= |x|-1, i.e. p <= (|x|-1)/(t-1).
+Combined with Lemma Phase (|S| <= (1+|O|)(1+|J|)+1):
+  |S| >= K  =>  max(|O|,|J|) >= sqrt(K)-1
+            =>  A[:o_max] or A[-j_max:] has >= sqrt(K)-1 borders
+            =>  that end of A has period <= (|A|-1)/(sqrt(K)-2).
+THE MEETING, machine form: mult 1 + K realized phases => A is
+|A|/sqrt(K)-periodic at one end (8.3) => the realizing w cannot embed
+A without duplicating labels at the surviving offsets (8.2) => K is
+bounded.  Over the hunted habitat the two ingredients meet; the
+written proof for general (A, B, sigma) is what remains.
+
+### 8.4 Round 9 (priority order)
+
+(1) WRITE THE MEETING as a proof for the two-pass fragment: assume
+    mult 1 and |S| >= K; by 8.3 A has period q <= |A|/sqrt(K) at one
+    end; by periodicity the realized phases repeat every
+    lcm-related cycle in the copy index; the mult-1 disjointness then
+    forces |S| <= 2 + (#boundary irregularities) -- formalize the
+    cycle/disjointness tension.  The two machine facts to lean on:
+    max |S| = 2 at mult 1 (8.1) and 0/48 lifts (8.2).
+(2) If the general proof resists: prove it for periodic-at-one-end A
+    (which 8.3 says is the only case that matters), with the general
+    case as a precise conjecture.
+(3) The value recursion (unchanged from round 7's list).
+
+### 8.5 Script index (round 8)
+
+verify_round8_theoremB.py -- PART 1 direct hunt (355,928 pipelines,
+    max LDS 2 at mult 1, instance verified vs L.den); PART 2
+    lift-the-structures (60,180 structures, 48 candidates, 0
+    feasible); PART 3 border-period lemma (exhaustive |x|<=11).
+
+## 9. Round 9 — THEOREM B REFUTED (the supply half does not close; the cap does not exist)
+
+**Charter.** (1) State the tension precisely (how phases cluster along the periodic
+direction; why mult 1 caps the cluster). (2) The embedding side (CSP infeasibility;
+parity pigeonhole → residue classes mod q). (3) If the general proof resists: prove
+the two covering families, state the general case as a precise conjecture, say so
+plainly.
+
+**Outcome: the general case is not a conjecture — it is FALSE.** The extended hunt
+found a fixed two-pass expression realizing unbounded LDS at mult exactly 1.
+
+### 9.1 The refutation
+
+For every k ≥ 2 (verified k = 5..16, content cross-checked against L.den on EVERY
+row):
+
+    E_k-independent  =  [ε/tail⁴X] · [tail(X)/'ab'] X
+    w_k              =  ('bba')^k
+    prov(w_k)        =  (0, 1, n−3, n−6, n−9, …, 3, n−2, n−1)     n = 3k
+    mult             =  1   (exactly; every label distinct)
+    LDS              =  k − 1   → ∞
+
+k=8 dissection (w = bbabbabbabbabbabbabbabba, n = 24): σ = 'ab' sites at
+2, 5, 8, 11, 14, 17, 20 (k−1 = 7 copies of A = tail(w)); B = tail⁴(w), |B| = 20;
+the greedy [ε/B] scan matches at spacing 23 and emits exactly one 'b' per copy at
+copy-offsets 20, 17, 14, 11, 8, 5, 2 (descending by 3) with labels 21, 18, 15, 12,
+9, 6, 3; the leading gap atoms (labels 0, 1) and trailing gap atoms (labels 22, 23)
+survive; output = 'b¹⁰a'.
+
+### 9.2 The mechanism (why this evades every cap we had)
+
+1. **Residue-class confinement.** The emission offsets descend by s = 3 = the
+   period of w. The staircase lives entirely in the residue class 0 mod 3 —
+   the 'b'-positions of w at 0, 3, 6, … — of which w supplies exactly k−1: one
+   per copy, EXACTLY enough, never revisited. This is the residue-class
+   generalization of the round-7 parity pigeonhole: for the alternating family
+   (period 2, 1-char σ) the residue class was too small (the pigeonhole killed
+   it); with period 3 and 2-char σ = 'ab' the class is exactly the right size.
+2. **Interior gaps consumed.** The single-'b' gaps between copies sit at
+   positions ≡ 0 mod 3 — the SAME residue class — but they are all consumed by
+   the B-matches, so their labels never appear. No F-collision.
+3. **Post-aligned end.** The text ends on the trailing gap 'ba' (labels n−2,
+   n−1); the last emission is a gap atom, not a tail dump of copy atoms.
+4. **Fresh boundary labels.** The leading 'bb' (labels 0, 1) and trailing 'ba'
+   (labels n−2, n−1) lie outside the staircase's values.
+5. **No wrap.** The descent 3k−3 → 3 is a single run; spacing vs unit is tuned
+   so no offset is ever revisited (mult stays 1).
+
+### 9.3 Why rounds 6–8 missed it (domain gap, on record)
+
+- Round 8's w-families: ('bba')^k enters only at k ≤ 2 (|w| ≤ 7 exhaustive) —
+  LDS = k−1 = 1, invisible; the 60 randoms of length ≤ 10 could hit k = 3 at
+  LDS 2 — tied with, not above, the round-8 max.
+- Round 9 added the period-3 families with ALL PHASES and j ≤ 8, plus 3-char
+  σ: k = 8 gives LDS 7 — unmissable.
+- Lesson (again): every negative search is only as good as its domain; the
+  phase-variant sweep (not the pattern list) is what caught it.
+
+### 9.4 The extended hunt (verify_round9_supply.py)
+
+- Inputs: all period-2/3 families (10 patterns × j ≤ 8 + phase variants + all
+  |w| ≤ 7 + 120 random ≤ 12); σ ∈ 8 values (incl. 3-char); R = 12-value injective
+  family; P = 15 best needle constructions.
+- 581,856 pipelines, 221,579 at mult 1; LDS histogram {0: 9635, 1: 210988,
+  2: 941, 3: 11, 4: 1, 5: 1, 6: 1, 7: 1}; MAX = (7, ('tail', 'tail⁴', 'ab',
+  'bbabbabbabbabbabbabbabba')) — the witness.
+- Death-reason breakdown (PART 2): 0 of the random chain-rich structures lift;
+  round 8's 147 all came from the aligned family — consistent (the aligned
+  family is where supply and embedding conspire; the period-3 family is the
+  one place they conspire successfully).
+- Residue check (PART 3): 4,666 of 5,784 chain-rich structures have
+  constant-descent chains — the staircase is the generic shape.
+
+### 9.5 Consequences (honest ledger)
+
+- **Conjecture B (mult 1 ⟹ LDS ≤ C(E)): REFUTED.** The bound cannot exist;
+  LDS is unbounded at mult exactly 1, even for a FIXED two-pass expression.
+- **Base-case conjecture (mult 1 ⟹ LDS ≤ 2·LDS(prov_A)+1): REFUTED.** Here
+  LDS(A) = 1 (A = tail(w) is increasing) yet LDS = k−1 ≥ 4.
+- **Theorem A (Phase Bound, round 7): STILL TRUE.** Every instance above
+  satisfies it; but its constant is value-dependent: |S| ≈ k-1 copies with
+  |O|, |J| ≈ k phases — the bound ((1+|O|)(1+|J|)+1)·LDS(prov_A)+1 grows with
+  w. Theorem A is a true theorem about the STRUCTURE of mult-1 outputs (one
+  surviving copy per realized phase; gap labels increasing), not a complexity
+  bound.
+- **The atom route via the mult-1 invariant is DEAD.** Conjecture A fell
+  (round 6), Conjecture B and the base case fell (round 9). There is no
+  (mult, LDS)-separating invariant: L realizes mult 1 with LDS ~ |w|/3.
+- What could still separate rev: (i) Conjecture C (influence crossings
+  ≤ c(E)·|w|; rev has χ = C(n,2) — length-preserving, so the length-discard
+  rule does not vacate it; note the new family is length-changing, so C is
+  vacuous on it); (ii) a NEW invariant class. Natural candidate identified
+  this round: rev's prov is a descending BIJECTION (mult 1, |prov| = |w|,
+  all labels present, LDS = |prov|). Probe (verify_round9_witness.py PART 2):
+  over the round-7 exhaustive domain — the TEXT level, a strict superset of
+  realizable pipelines, since prov_A is an arbitrary injective labeling —
+  descending bijections exist ONLY for |w| ≤ 4 (318 hits, 110 essential
+  families, all prov_A a leading triple-reversal, e.g. w = 'abb' needing
+  A = 'aaa' with labels 2,1,0 — a constant carrying input labels, which
+  constants do not carry). No |w| ≥ 5 admits one, even with that freedom.
+  The Theorem-B witness is far from a bijection: |prov| = k+3 vs |w| = 3k
+  (deletion-heavy). Sketch of the two-pass obstruction: a copy with ≥ 2
+  surviving atoms has ascending labels, so a full descent keeps ≤ 1 atom per
+  copy; bijection forces all atoms to survive, so no deletion — the two-pass
+  fragment provably cannot be a descending bijection. The question moves to
+  deeper pipelines.
+
+### 9.6 Files
+
+- `verify_round9_supply.py` — the extended hunt (PART 1: the refutation;
+  PART 2: death breakdown; PART 3: residue check).
+- `verify_round9_witness.py` — the witness family k = 5..16 with per-row
+  den_ok, the mechanism dissection, and the descending-bijection probe.

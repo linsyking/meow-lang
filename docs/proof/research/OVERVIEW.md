@@ -1001,3 +1001,448 @@ L+R ARC COMPLETE AND INTEGRATED (four rounds, all verified by coordinator):
 - Round 7 resumed: prove the mult-1 theorem (the duplication argument:
   long chain needs the staircase; the staircase's wrap and the
   end-of-text dump both duplicate labels, forcing mult >= 2).
+
+## Session 6 (continued): rev round 7 verified -- the Phase Bound, the atom route's first theorem
+
+- rev round 7 verified by me: verify_round7_mult1.py = ALL GREEN under
+  my run. PART 1: 1,157,184 exhaustive realizable pipelines (|A|<=4
+  x prov variants of LDS 1-3 x |B|<=3 x 8 sigmas x |w|<=6; 591,315 at
+  mult 1): 0 violations of Theorem A(i) (#surviving copies <= phases),
+  0 of A(ii+iii), 0 of the base-case conjecture; content cross-checked
+  vs L.den; + 20,000 random larger (A<=8, B<=6, |w|<=10): 0/0/0.
+  PART 2a: the text-level witness confirmed -- and I HAND-TRACED it:
+  T = (babababab.a)^5.babababab, B = abababa: the greedy deletion eats
+  spans at 1,9,17,25,33,41,49 (spacing 8), per-copy residuals {0,8},
+  {6}, {4}, {2}, {0,8} -- copies 2-5 give the strictly decreasing
+  chain 6>4>2>0 with distinct labels. The hunt: chains up to 6 (m=11,
+  n=13, 6 copies, residuals {0,12},{10},{8},{6},{4},{2}). PART 2b:
+  realizable pipeline hunt (variable needles): 0 mult-1 rows with
+  LDS>=3, max 1. PART 3: E2's chi = 0 vacuously (all rows
+  length-changing, discarded) -- the crossing measure does not see
+  the staircase; rem:price untouched, as predicted.
+- THE RESULT: PROPOSITION (Phase Bound at mult 1) PROVED: for the
+  two-pass fragment [A/sigma][eps/B], at output multiplicity 1,
+  LDS(prov) <= ((1+|O|)(1+|J|)+1) LDS(prov_A) + 1. Proof structure
+  (I checked each step): mult 1 is used exactly once (two surviving
+  copies of equal phase have identical residuals by round-5's proved
+  Lemma Phase, so a nonempty shared offset forces mult >= 2 -- at most
+  one surviving copy per realized phase); within a copy the picks are
+  a decreasing subsequence of prov_A (text order = ascending offsets);
+  gap survivors' labels strictly increase (<= 1 per chain). The
+  staircase (mult 3) is exactly what the mult-1 hypothesis excludes.
+- THE REFUTATION: the TEXT-level statement (2 LDS(prov_A)+1 for free
+  texts) is FALSE -- deterministic chain-4 witness + chains to 6 in
+  aligned alternating texts, all at mult 1. Realizability is
+  load-bearing: the supply pigeonhole (an alternating A of odd length
+  n needs (n+1)/2 input positions of one parity; any realizing w
+  supplies only (n-1)/2 sigma-sites; a nondecreasing prov_A cannot
+  bridge) -- sketched, machine-consistent, not yet proved. So any
+  correct proof of the uniform bound MUST use realizability.
+- REMAINING GAP: Theorem B -- mult 1 => #realized phases <= C(E)
+  alone (the Phase Bound's constant is value-dependent via |O|,|J|).
+  The two test cases any proof must kill: the length-6 text-level
+  chain and the staircase family. The C-caveat: C's crossings live on
+  length-preserving rows; [X/sigma]-style pipelines discard all rows
+  (flips change output length) so C holds vacuously there; the discard
+  rule is load-bearing wherever C is invoked.
+- Fragment updated honestly: Proposition (Phase Bound, proved) +
+  Remark (text-level refutation, realizability load-bearing) + the
+  corrected staircase "..., 3, 1" + revised next-steps. HOLD CONTINUES
+  (nothing enters the paper until the arc lands or hits a ceiling --
+  the paper has no prov/LDS machinery yet; partial integration would
+  fragment the narrative). Round 8 resumed: Theorem B via periodicity
+  + supply.
+
+## Session 6 (continued): rev round 8 verified -- Theorem B machine-complete over the hunted habitat
+
+- rev round 8 verified by me: verify_round8_theoremB.py = ALL GREEN
+  under my run. PART 1: 355,928 direct pipelines (R in {X, ten
+  constant deletions, init, tail} -- all LDS(prov_A)=1, the hardest
+  case for 2*1+1=3 -- x 25 needles x 4 sigma x 331 inputs), 70,212 at
+  mult 1, LDS histogram {0:9108, 1:59785, 2:1319}: MAX LDS AT MULT 1
+  = 2. The max instance re-verified END-TO-END BY MY OWN HAND-TRACE:
+  E = [eps/tail^3 X][X/ab]X on w='baabaaba': inner [X/ab]w matches at
+  positions 2 and 5, giving T = 'ba'.X.'a'.X.'a' (20 chars, labels
+  [0,1, 0..7, 4, 0..7, 7]); outer deletes tail^3 w='baaba' greedily
+  at spans 2-6, 8-12, 14-18; survivors at T-positions 0,1,7,13,19 ->
+  prov (0,1,5,2,7), mult 1, LDS 2, output 'baaaa'. (My first two
+  hand-traces were wrong -- I misread the inner match positions;
+  the agent's instance is exactly right. Third trace confirmed.)
+  PART 2: 60,180 chain-rich structures, 147 with disjoint-chain >= 3,
+  48 pairwise-disjoint mult-1 candidates, 0 feasible embeddings (the
+  realizability CSP in its most permissive form: nondecreasing
+  embedding of A into w, injective on surviving offsets, avoiding
+  surviving gaps, six sigma options each). PART 3: border-period
+  lemma EXHAUSTIVE over all binary strings <= 11 (worst ratio 2.667,
+  inequality p(t-1) <= |x|-1 holds everywhere) -- and the lemma is a
+  classical Fine-Wilf consequence (all periods d <= n-p of a string
+  with minimal period p are multiples of p), so the write-up can cite
+  lothaire97, which the paper already cites for periodicity steps.
+- THE STATE: the meeting is machine-complete over the hunted habitat.
+  The chain: mult 1 + K realized phases => max(|O|,|J|) >= sqrt(K)-1
+  (Lemma Phase) => A has >= sqrt(K)-1 borders at one end => that end
+  of A has period <= (|A|-1)/(sqrt(K)-2) (Border-Period) -- few
+  phases or periodic is now a THEOREM; and every chain-rich periodic
+  candidate dies on supply (0/48), with the direct sweep never
+  exceeding LDS 2 at mult 1. What remains: the WRITTEN general proof
+  of the supply half for periodic-at-one-end A (the cycle/disjointness
+  tension). Fragment updated with Lemma (Border-Period) + the two
+  machine facts; compiles cleanly.
+- HOLD CONTINUES. Round 9 resumed: formalize the supply half -- the
+  cycle/disjointness tension for periodic A, leaning on the two
+  machine facts (max |S| = 2 at mult 1; 0/48 lifts).
+
+## 2026-09-21: lim agent R5 verified + integrated (paper 69 pages)
+
+- MY BATTERY: verify_r5.py rerun from scratch, ALL GREEN -- 1,224
+  checks, 0 failures. (A) freshness/branching/drift on 203,126
+  convergent orbits of the 930 rules x inputs <= 7: 0 failures.
+  (B) all 148 growing rules (|A|>|B|, B not-in A, |A|<=4) on inputs
+  <= 9, caps 6000 sweeps/2^16 chars: law f,K,R <= (|A|-|B|+1)^n + n
+  per rule holds; max fires/sweep 9; longest strictly-growing fire
+  run 4 sweeps. (C) base-m family S1/S2/T1/T2 x m=1..5: 1,169 grid
+  cells exact; champions at n=9 are the two-block Horner inputs
+  ([baa/ab] f(9)=264=2^8+8, [baaa/ab] f(9)=6569=3^8+8). (D) the
+  omega-reading: amplifier dwell 2^(v-1)+1 and k_j=2^j+j exact
+  (v<=10, slack-certified at M doubled); [aa/a] non-commutation
+  (finite 'a' for all 1<=n<=60 vs coinductive a^omega, window-
+  verified); omega-census 1,222 stabilized / 18 churning; [eps/ab]
+  erases (ab)^omega in one sweep (truncations 17/34/71).
+- HAND CHECKS: S1(3) on 'ab' -> 'baaa' one sweep one fire; the m=2
+  row matches prop:limgrowth's table; K = i*m^(j-1)+j-1 traced on
+  (i,j)=(1,2),(2,1),(3,2); [a/aa] halving (pattern 'aa' is the
+  SECOND argument) a^5 -> a^3 -> a^2 -> a confirmed by hand -- the
+  remark's lim([a/aa])(a^n) = a is the halving cascade, correct.
+  Branching lemma proof checked: an occurrence of B in s_{k+1}
+  clear of every emission lies in surviving text, where sweep k's
+  cursor would have fired on it; one emission admits <= |A|+|B|-1
+  occurrence starts. Honest one-line proof -- stated inline in the
+  paper with the argument as a parenthetical.
+- INTEGRATED INTO PAPER (main.tex, build 69 pages, 0 errors / 0
+  undefined refs / 0 overfull):
+  1. Lim subsection closing UPGRADED: the open "no argument is known
+     in either direction" replaced by the single-exponential
+     conjecture |lim([A/B])(w)| <= (|A|-|B|+1)^{|w|}+|w| on
+     convergent orbits -- with the branching bound + its proof
+     parenthetical, the census numbers (9 rules -> max 9 fires/sweep,
+     growing runs <= 4), the four base-m shapes (1,169 cells,
+     m=1 = insertion sort), tight-in-the-base note (family attains
+     m^{n-1}), the separation consequence vs cor:limclass/cor:towers,
+     and the missing step (the same bound on sweeps; lem:fpsweep's
+     B-free fixed points as where it must bite).
+  2. rem:omega (the agent's omega_remark.tex, verbatim modulo comment
+     header and cf->plain ref) placed at the end of the streams
+     subsection, after the "Two further phenomena" paragraph: pointwise
+     convergence of the amplifier orbit at 2^j+j sweeps per position,
+     [a/aa] least-vs-greatest split compressed into one rule (the
+     rem:leastfix theme), [eps/ab] erasing (ab)^omega as thm:
+     guardedness's edge case.
+  3. Touch-points: conclusion clause on the conjecture (base |A|-|B|+1
+     exact by four shapes); conclusion sentence on the two fixpoint
+     readings; intro recursion-paragraph clause (least vs greatest
+     fixpoint in a single rule).
+- LITERATURE: the flagged items (Kobayashi TCS 262; Geser-Hofbauer-
+  Waldmann match-bounded; Kurth) are ALL already in references.bib
+  (kobayashi01, geser04, kurth90/96) -- no new citations, no new
+  vetting needed. The lim subsection cites kobayashi01/geser01 already.
+- AGENT CORRECTIONS CARRIED: base-3 quartet cap artifact (K=2194 >
+  2000 hid f(9)=6569) -- my rerun with caps 6000/2^16 confirms
+  f(9)=6569=3^8+8; the R4-era "140 of 148" was the agent's sweep
+  census, not the paper's restart census (no paper erratum).
+- NEXT (lim arc): the missing step -- bound sweeps K by single-
+  exponential under convergence -- or close the arc. Decision
+  deferred to the user report; the conjecture is now stated in the
+  paper, so the arc has a precise target.
+
+## 2026-09-21: rev round 9 verified -- THEOREM B REFUTED (the period-3 family)
+
+- MY BATTERY: both scripts rerun from scratch, green, exit 0.
+  verify_round9_witness.py: the family E = [eps/tail^4 X].[tail(X)/ab]X
+  on w = (bba)^k, k = 5..16 -- mult EXACTLY 1, LDS = k-1, len(prov) =
+  k+3, prov = (0,1,n-3,n-6,...,3,n-2,n-1), den_ok (content vs the
+  independent denotation) True on EVERY row. Probe: 1,157,184
+  text-level instances -> 318 descending-bijection hits, 110 essential
+  families, longest |w| = 4. verify_round9_supply.py: 581,856
+  pipelines / 221,579 at mult 1 / LDS hist {0:9635, 1:210988, 2:941,
+  3:11, 4:1, 5:1, 6:1, 7:1} -- the 4..7 singles ARE the period-3
+  family; max (7, ('tail','tail^4','ab',(bba)^8)). Part 2: 0 of
+  80,000 random periodic structures reach even the candidate stage
+  (all die at chain<3 / <3 residuals) -- consistent with round 8's
+  147 all coming from the aligned family. Part 3 residue check:
+  4,666/5,784 constant-descent.
+- MY HAND-TRACE of the k=5 witness, full: w = bbabbabbabbabba; inner
+  [tail(w)/ab] fires at sites 2,5,8,11 -> T = bb.A.b.A.b.A.b.A.ba with
+  A = babbabbabbabba = B.bba, B = tail^4(w) = babbabbabba (11); outer
+  [eps/B] deletes greedily at T 2,14,26,38,50 (spacing |B|+1 = 12,
+  each match straddling a copy boundary), survivors at T 0,1,13,25,
+  37,49,61,62 -> w-labels (0,1,12,9,6,3,13,14) -- the agent's prov
+  EXACTLY; all labels distinct (mult 1), LDS 4 = k-1, output
+  bbbbbbba, |out| = 8 = k+3. Mechanism confirmed: one 'b' survivor per
+  copy at labels descending by 3 (the 0-mod-3 class), pre (0,1) and
+  post (13,14) outside the staircase.
+- COSMETIC (on record, no impact): the report's "matches at spacing
+  23" (k=8) and the script docstring's "spacing |B|+3" are both off by
+  2 -- the verified spacing is |B|+1 (k=5: 11+1 = 12, confirmed by
+  hand). The prov/LDS/mult numbers -- what the scripts actually check
+  -- are exact.
+- CONSEQUENCES (agent's ledger, confirmed by my runs): Conjecture A
+  refuted (R6); Conjecture B / "Theorem B" refuted (R9 -- it was
+  never in the paper, fragment-internal only, so no paper erratum);
+  base-case conjecture (mult 1 => LDS <= 2 LDS(A)+1) refuted (here
+  LDS(A) = 1, LDS = k-1); Theorem A / Phase Bound still TRUE but a
+  structure theorem (one atom per realized phase), its constant
+  value-dependent -- NOT a complexity bound; the (mult, LDS)-separating
+  invariant route is DEAD: L realizes mult 1 with LDS linear in |w|.
+- FRAGMENT state: honestly revised (basecase marked REFUTED with the
+  witness; rem:period3 new; supply pigeonhole marked non-generalizing;
+  "What Remains" rewritten around the two live routes). Compiles clean
+  in a main.tex-preamble host (amsthm + stmaryrd; 5 pages). HOLD
+  CONTINUES.
+- LIVE ROUTES: (1) influence-crossing (Conjecture C) -- untouched:
+  the period-3 family is length-changing (|w|=3k, |out|=k+3), the
+  length-discard rule stays load-bearing; (2) NEW: the descending-
+  bijection invariant -- rev's prov is a descending bijection (mult 1,
+  |prov| = |w|, all labels, LDS = |prov|); the two-pass fragment
+  "provably cannot" (sketch has a gap I see: it presumes copies can't
+  keep 2 descending atoms -- prov_A itself descending is the loophole
+  the text-level probe already closes at |w|<=6 via arbitrary
+  injective labelings, longest hit |w| = 4). Round 10: tighten the
+  impossibility to a real proof + probe depth 3.
+
+## 2026-09-21: user's cat observation -- expository fix at thm:cat (paper rebuilt clean)
+
+- THE USER'S POINT (correct): in the calculus, XY is a term, so the
+  function (X,Y) -> XY is realized trivially by the expression XY;
+  thm:cat is not needed for REACHABILITY, and the paper never said
+  so explicitly -- a reader naturally reads the construction as
+  ceremony.
+- THE CONSTRUCTION IS LOAD-BEARING (three ways, now stated in the
+  paper at the close of thm:cat): (1) thm:core's eliminator is
+  (E1E2)-deg = cat-deg[E1-deg/X1, E2-deg/X2] -- the cat construction
+  IS the eliminability of the concatenation constructor (conservative
+  sugar; pure pipelines suffice); (2) the naive [X/a][Y/b](ab) fails
+  under replace-all ([X/a] corrupts every a of Y; no bare marker
+  choice helps, any fixed marker word occurring in some Y) -- the
+  escape is the repair, and the escape engine carries rep_n/eq/if;
+  (3) each variant re-earns cat under its own semantics -- the
+  once-calculus's [X/a]_1[Y/b]_1(ab) needs no escape at all
+  (leftmost-only fires at the marker, never inside Y), a sharp probe
+  of what replace-all costs.
+- EDIT: the paragraph after thm:cat's proof ("Concatenation of
+  arbitrary strings is therefore itself a substitution expression...")
+  now says the trivial term realization explicitly, names thm:cat's
+  content as core-expressibility, records the naive failure + why no
+  bare marker repairs it, and points to thm:core and
+  thm:once-toolkit(i). Abstract unchanged (its cat display is the
+  primitive-power emblem, not a reachability claim). Build: 69 pages,
+  0 errors / 0 undefined refs / 0 overfull.
+
+## 2026-09-21: lim agent R6 verified + integrated -- THE SWEEP BOUND IS A THEOREM FOR THE EXPONENTIAL TIER; lim arc CLOSED (paper 70 pages)
+
+- MY BATTERY: verify_r6.py rerun from scratch, ALL GREEN -- 111
+  checks, 0 failures, exit 0. (A) 148 growing rules: 144 convergent /
+  4 divergent; 114 with an affine potential; 0 divergent rules admit
+  a potential (theorem consistency). (B) per-orbit theorem
+  verification on all 114 x inputs <= 7 = 29,070 orbits (v invariant
+  every sweep, Phi >= 0, K*delta <= Phi_0, limit B-free) + random
+  positivity/Phi_0-bound checks. (C) the 30 non-admitters' (f,K,R)
+  tables -- all slow, worst K(9) = 14, f(9) = 34. (D) 372/400
+  random larger rules convergent, 149 without potentials --
+  phenomenon robust beyond census. (E) shrinking K <= n/(beta-alpha);
+  length-preserving K <= 2^n (states distinct). (F) all 16 base-m
+  family instances: Phi_0 = i*m^j - i EXACT, R = Phi_0/(m-1) EXACT.
+  (G) k-gram potentials: 18 of 30 covered (K <= n^k), the 12-rule
+  obstruction list exact.
+- HAND CHECKS: (1) the amplifier [baa/ab] as the m=2 instance --
+  L-fold a:+1, b:x2: v(baa) = v(ab) = 2 (inv), delta = 1, Phi_0 =
+  i*2^j - i, R = Phi_0/(m-1) = i(2^j - 1) = the paper's prop:limgrowth
+  fire count EXACTLY -- the potential counts remaining fires; (2)
+  k-gram: [aba/aa] by overlapping #aa, 'aaa' -> 'abaa' Delta = 2->1,
+  'aaaa' -> 'abaaba' 3->1; (3) the obstruction's hardest
+  representative [aaab/baa] BY HAND: map equality forces
+  mult(a)^3*mult(b) = mult(a)^2*mult(b) => mult(a) = 1, then
+  3*off(a) + off(b) = 2*off(a) + off(b) => off(a) = 0, killing the
+  only delta >= 1 letter. Proof of the theorem checked line by line:
+  (inv) is per-fire and composes over the sweep; Phi >= 0 by the
+  off-weighted sum; Phi(B) = Phi(A) + delta; Phi(uv) = M(v)Phi(u) +
+  (M(v)-1)#c(u) + Phi(v) >= Phi(u); leftmost occurrence fires while B
+  occurs; K <= Phi(s_0)/delta; lem:fpsweep closes.
+- AGENT CORRECTIONS (all machine-caught, none touch the paper):
+  off-equation primitive solution sign (71 -> 114 admitters);
+  str.count non-overlapping (0/30 -> 18/30 after overlapping fix);
+  partF family definitions garbled in the script (the PAPER's family
+  statement came from my R5 battery, unaffected); Phi(final) = 0 is
+  family-special not theorem-general.
+- INTEGRATED (main.tex, 70 pages, 0/0/0): thm:affine (Affine
+  Potentials) + proof placed at the end of the lim subsection after
+  the conjecture paragraph (now "the sweep half is no longer missing
+  for the exponential tier"); the classification paragraph (114/18/12
+  split, the [aaab/baa] forcing argument, measured K <= 2n, the
+  conjecture's new status: proved up to a polynomial factor on every
+  exponential-tier rule, open on the 12-rule family where it is
+  expected loose); the termination-passage clause (affine potentials
+  as a decidable sufficient condition for the strategic case);
+  conclusion clause upgraded ("proved for the entire exponential
+  tier by affine potentials, each sweep draining a nonnegative
+  potential by a fixed amount").
+- ARC DECISION: CLOSED. The charter was proof-or-obstruction and R6
+  delivered both: the theorem for the affine class (the entire
+  exponential tier, where the conjecture's tightness and its
+  separation consequence live) and the precise 12-rule obstruction
+  where the potential method fails but the measured sweeps are
+  linear. The subsection is complete (def:lim, limtotal, strategies,
+  2CM, occurrence, partial, contain, limclass, limundec, limgrowth,
+  fiborbit, now affine). A future round could chase the 12-rule
+  family for the exact-form conjecture, but the data says the bound
+  is loose there -- low value; reopen only if the user asks.
+
+## 2026-09-21: dynamics rules for the three runtimes -- user request, integrated (paper 71 pages)
+
+- USER REQUEST: define the eager and two lazy evaluation modes formally
+  with dynamics rules. DONE: def:dynamics (Definition 6.2, p. 58) +
+  rem:dynamics in sec:recursion, right after the four-runtimes list.
+- THE RULES: values are strings; shared axioms (cat), (fire); eager/
+  lazy-args rules (inert_=, strict -- all slots values) with
+  (call_v) by value for eager / (call_n) by name for lazy args; lazy-
+  pass rules (inert_eps -- R an arbitrary DISCARDED expression, the
+  operator equation made operational) + (call_n). The three context
+  grammars are the whole difference: eager = hole anywhere (cat
+  children, pass slots, call arguments); lazy args = cat children and
+  pass slots only (thunks); lazy passes = cat children, pattern/
+  scrutinee slots, and the replacement slot ONLY under the guard
+  (other slots values + pattern occurs -- Huet-Levy neededness, cited).
+  Outcomes: halting value / stuck / divergent; defined exactly on
+  halting.
+- rem:dynamics records the agreement: eager relation = thm:eager's
+  least-fixpoint denotation; lazy-args = thm:lazyargs' liveness
+  (by-name vs shared thunks force the same live positions); lazy-pass
+  = prop:lpcons' machine. Order-independence of value/definedness on
+  record; stuck-vs-divergent split order-dependent (thm:eager).
+- VERIFICATION (scoped per the user's scale directive -- no large
+  search; definitional addition): dynamics.cpp (C++ per the user's
+  rule; batch tool implementing the rules as its only specification)
+  run on the NINE canonical programs with hand-computed outcomes --
+  gate [g(X)/b]X open (val) and closed (stuck), dead-argument
+  separator under all three runtimes (eager und by growth, la/lp val),
+  mutual ping-pong (und), empty pattern (stuck), constant-scrutinee
+  fire (val), plus the basic cat/call cases -- 9/9 correct, sub-
+  second. A full random cross-check against the three reference
+  evaluators was started and ABORTED at the user's direction (by-name
+  blowup cases defeat small work caps; a definitional addition does
+  not need it -- the reference machines already agree with the prose
+  semantics these rules formalize, per the existing record). The tool
+  stays in research/scratch/rec/ with the driver.
+- NEW STANDING RULES (saved to memory, relayed to both agents): C/C++
+  for CPU-heavy tests (never Python); no verification job longer than
+  1 minute; ask first whether a task needs code at all.
+
+## Alphabet invariance: round 1 VERIFIED + INTEGRATED (2026-09-21)
+
+Agent: research/scratch/alphabet/ (the user's question: is the reachable
+class invariant under alphabet size? intuition: reduce any size to 2).
+
+VERDICT: the agent's result is correct and is now in the paper. My own
+verification, all runs within the 1-minute rule, C++ for everything
+compute-bound:
+
+- verify_hot.cpp REBUILT FROM SOURCE by me and run: ALL OK, 13.3 s --
+  HA1/HA2/HA3L/HA3v (dictionary family + Fib sizes, alignment 14,196,
+  pass transfer 188,760 + 31,200 for once/R/kth), HT1 x3 (Direction 1
+  at the expression level: 357,434 L-mode + 118,160 once + 118,160 R,
+  0 mismatches, definedness matching), HU1 (exhaustive unary size<=7,
+  36,978 expressions; targets: id/2n/n^2/n+1/ceil/parity FOUND,
+  floor(n/2)/max(n-1,0)/n^4/2^n NOT FOUND; n^4 witness at size 10
+  exact), HU3, HP (middle-marker family + binary palindromic maxima
+  1,1,3,2,7,14). Every deterministic count matches the agent's Python
+  logs exactly.
+- Python glue batteries re-run by me from copies in the job tmp dir
+  (heavy T1/T2 stubbed in my copy -- covered bit-exactly by the C++):
+  verify_palindromes.py ALL OK 28.8 s (P1-P4); verify_transfer_light.py
+  ALL OK 1.3 s (T0, T1b live at 48,000/0, T3/T3b unary->binary 6,450 +
+  12,000, T4a/T4 roundtrip 6,200/0 with 1,025 undefined matching,
+  T5a/T5b reversal retraction 63/0, T5c 1,176, T6a/T6b-0/T6b payoff
+  31 + 1,176 + 294 + 882, T7/T7b deg/safe/node-count); verify_alignment.py
+  ALL OK 6.7 s (A1-A6 incl. the full A3L 188,760; A5b's 24 R-mode
+  mismatches are the paper-comma-code's known non-Golomb behavior,
+  consistent with thm:r2l-rep -- the battery discriminates);
+  verify_unary.py ALL OK 3.2 s (U1a/U1b/U1b'/U2/U3). Total ~53 s.
+- HAND-CHECKS (mine): alignment lemma (straddle => comma-free
+  violation) sound; pass-transfer induction along the scan sound
+  (greedy fires exactly at ell*occ, resume aligned, never rescan);
+  double-a family ('aa' only at 0 and ell in u.v, Fib count -- spot
+  checked ell=6 = 3 codewords, minimal for ternary); middle-marker
+  comma-freeness (mu only at exact middles); BOTH binary size-3
+  dictionaries comma-free verified by full enumeration of the 9 pairs
+  x 4 offsets by hand; composition lemma; retraction by rep (freezing
+  protects inserted codewords); Direction-2 composite equation
+  traced; reversal route (palindromic e gives rev(e(T)) = e(rev T);
+  q = c.e always lands on image points => composite total); unary
+  obstruction h(ab) = h(ba) airtight; unary pass law
+  [a^i/a^j]a^m = a^{i*floor(m/j) + m mod j}.
+- ERRORS CAUGHT IN THE AGENT'S transfer.tex (fixed at integration):
+  (a) the gamma-wrapper for totalizing the Direction-1 witness was
+  stated as a single top-level wrap -- correct only as a SIMULTANEOUS
+  wrap of every pattern sub-expression (fixed; the reversal theorem
+  does not need it: q(T) is always an image point, so the composite
+  is total anyway); (b) "Gamma-witness of Direction 2" -> Sigma-
+  witness; (c) E' in the Direction-2 construction is the GIVEN
+  Gamma-witness of f^c, not E^c (a roundtrip-specific leftover that
+  had leaked into the theorem statement); (d) the section's open
+  problem is the fourth of sec:limits, not sec:calculus.
+
+INTEGRATED into main.tex as Section "Alphabet Invariance"
+(sec:alphabet), between the variants and recursion sections: def:code
+(good codings, Golomb comma-free, cites golomb58 -- NEW bib entry,
+verified online: Golomb-Gordon-Welch, Canadian J. Math. 10 (1958)
+202-209, doi 10.4153/CJM-1958-023), lem:dict (double-a family, Fib
+sizes), lem:selfsync, lem:pass-transfer (all four semantics), def:conjugate,
+thm:transfer-forward (Direction 1 + node/deg/safe invariants + the
+corrected totalization clause), lem:compose, lem:retract, thm:transfer
+(both directions, with the corrected witness description), cor:uniform
+(alphabet-uniform questions: r, the once node, every k-th node, rev;
+negative answers transfer across alphabets), lem:palindrome, thm:rev-uniform
+(rev in L over one alphabet iff over every; binary sources via the
+size-3 dictionary -> ternary -> middle-marker), rem:native (no
+contradiction with prop:del-leftmost/prop:kth: conjugate vs native
+conjugacy classes, the ell=1 sub-alphabet subtlety), prop:unary-edge
+(the |Sigma|=1 boundary: holds one way, h(ab)=h(ba) obstruction the
+other way, unary class eventually polynomially bounded, floor(n/2)
+absent from all 36,978 size<=7 expressions -- bounded-search, stated
+as such). Touch-points: open problem 4 (sec:limits closing remark),
+both landscape ropes (once hinge and reversal are single questions
+across alphabets), intro paragraph, abstract clause, conclusion x2.
+Build: 0 errors / 0 undefined / 0 overfull, 78 pages (was 71).
+
+ANSWER TO THE USER'S QUESTION: the intuition is right in the strong
+form. Every reachable function conjugates along a good (comma-free)
+coding to a reachable function over ANY other alphabet of >= 2
+letters, both directions -- so no larger alphabet adds power up to
+conjugation, and every negative result proved over one alphabet
+excludes the conjugate over all. The reduction to TWO letters is
+genuine. Two qualifications: (1) what transfers is the CONJUGATE
+(block-level) function, not the native one -- which is exactly why
+the binary once-witness and the ternary resistance coexist; (2) the
+unary alphabet is a real edge: reachable from below, structurally
+not from above, and its class is eventually polynomially bounded.
+Open threads left deliberately un-chartered (user's scale rules):
+binary palindromic comma-free maxima (1,1,3,2,7,14 at ell=3..9) --
+unbounded?; floor(n/2) over unary beyond size 7 -- residue-leak
+proof or witness.
+
+## Rev agent round 10 CANCELLED by the user (2026-09-21)
+
+The user stopped the rev agent directly. Its mode-3 brute-force hunt
+(killed at 17 min, 0-byte log) was the last thing it ran; round 10
+produced no result. The no-brute-force / 1-minute rules were relayed
+before the stop. Standing state: rounds 1-9 verified and on record;
+phase_leftmove_fragment.tex still on HOLD; the descending-bijection
+invariant route (gap: prov_A itself descending is the two-pass
+loophole) remains the live proof question, unchartered. Do not
+restart the arc unless the user asks.
+
+Continuation (same day): at the user's request the rev arc was
+re-chartered as a NEW agent continuing round 10 in research/scratch/rev/
+(same state: descending-bijection invariant, two-pass gap), under the
+hard rules: no brute force, 1-minute cap per run, C/C++ only for
+compute-bound work. Old agent stays cancelled; the kill of its
+mode-3 hunt stands.

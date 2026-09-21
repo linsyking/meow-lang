@@ -1,0 +1,35 @@
+\documentclass[runningheads,envcountsect]{llncs}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{enumerate}
+\usepackage{mathpartir}
+\usepackage{stmaryrd}
+\usepackage{hyperref}
+\renewenvironment{remark}
+  {\rmfamily\trivlist\item[\hskip\labelsep{\itshape Remark.}]\ignorespaces}
+  {\endtrivlist}
+\makeatletter
+\def\endproof{\leavevmode\unskip\nobreak\hfil\penalty50
+  \hskip1em\null\nobreak\hfil\hbox{$\squareforqed$}%
+  \parfillskip\z@\finalhyphendemerits\z@\endgraf\@endtheorem}
+\makeatother
+\allowdisplaybreaks
+\emergencystretch=2em
+\title{Test}\author{}\institute{}
+\begin{document}
+\maketitle
+% dummy targets for the paper's labels referenced by the fragment
+\newcommand{\dummytargets}{}
+\begin{definition}\label{def:subst}dummy.\end{definition}
+\begin{definition}\label{def:reachable}dummy.\end{definition}
+\begin{theorem}\label{lem:multiple substitution}dummy.\end{theorem}
+\begin{proposition}\label{prop:del-leftmost}dummy.\end{proposition}
+\begin{proposition}\label{prop:kth}dummy.\end{proposition}
+\begin{proposition}\label{prop:unary-once}dummy.\end{proposition}
+\section{The Toolkit}\label{sec:toolkit}
+\section{The Calculus}\label{sec:calculus}
+\section{Variants}\label{sec:variants}
+\input{transfer.tex}
+\bibliographystyle{splncs04}
+\bibliography{../../../../references}
+\end{document}

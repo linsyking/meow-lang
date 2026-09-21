@@ -2,24 +2,29 @@ verify_r5.py -- R5: the single-pass ceiling + omega reading
 ======================================================================
 (A) freshness/branching/drift on all convergent orbits of the 930 rules x inputs <= 7 (203126 convergent orbits): A1 0, A2 0, A3 0, A4 0 failures
     [14.2s]
-(B) growing convergent rules (|A| > |B|, B not-in A, |A| <= 4): 140 of 148 total on all inputs <= 9
+(B) growing convergent rules (|A| > |B|, B not-in A, |A| <= 4): 144 of 148 total on all inputs <= 9 (caps 6000 sweeps / 2^16 chars)
+      non-conv at cap: [aabb/ba] on 'baa'...
+      non-conv at cap: [bbaa/ab] on 'aab'...
+      non-conv at cap: [abba/bab] on 'babb'...
+      non-conv at cap: [baab/aba] on 'aaba'...
     top by max output at n = 9 (f(n), K(n), R(n)):
-      [bba/ab]: (n,f,K,R) = [(0, 0, 0, 0), (1, 1, 0, 0), (2, 3, 1, 1), (3, 6, 3, 3), (4, 11, 6, 7), (5, 20, 11, 15), (6, 37, 20, 31), (7, 70, 37, 63), (8, 135, 70, 127), (9, 264, 135, 255)]
-      [abb/ba]: (n,f,K,R) = [(0, 0, 0, 0), (1, 1, 0, 0), (2, 3, 1, 1), (3, 6, 3, 3), (4, 11, 6, 7), (5, 20, 11, 15), (6, 37, 20, 31), (7, 70, 37, 63), (8, 135, 70, 127), (9, 264, 135, 255)]
+      [aaab/ba]: (n,f,K,R) = [(0, 0, 0, 0), (1, 1, 0, 0), (2, 4, 1, 1), (3, 11, 4, 4), (4, 30, 11, 13), (5, 85, 30, 40), (6, 248, 85, 121), (7, 735, 248, 364), (8, 2194, 735, 1093), (9, 6569, 2194, 3280)]
+      [abbb/ba]: (n,f,K,R) = [(0, 0, 0, 0), (1, 1, 0, 0), (2, 4, 1, 1), (3, 11, 4, 4), (4, 30, 11, 13), (5, 85, 30, 40), (6, 248, 85, 121), (7, 735, 248, 364), (8, 2194, 735, 1093), (9, 6569, 2194, 3280)]
+      [bbba/ab]: (n,f,K,R) = [(0, 0, 0, 0), (1, 1, 0, 0), (2, 4, 1, 1), (3, 11, 4, 4), (4, 30, 11, 13), (5, 85, 30, 40), (6, 248, 85, 121), (7, 735, 248, 364), (8, 2194, 735, 1093), (9, 6569, 2194, 3280)]
+      [baaa/ab]: (n,f,K,R) = [(0, 0, 0, 0), (1, 1, 0, 0), (2, 4, 1, 1), (3, 11, 4, 4), (4, 30, 11, 13), (5, 85, 30, 40), (6, 248, 85, 121), (7, 735, 248, 364), (8, 2194, 735, 1093), (9, 6569, 2194, 3280)]
       [aab/ba]: (n,f,K,R) = [(0, 0, 0, 0), (1, 1, 0, 0), (2, 3, 1, 1), (3, 6, 3, 3), (4, 11, 6, 7), (5, 20, 11, 15), (6, 37, 20, 31), (7, 70, 37, 63), (8, 135, 70, 127), (9, 264, 135, 255)]
       [baa/ab]: (n,f,K,R) = [(0, 0, 0, 0), (1, 1, 0, 0), (2, 3, 1, 1), (3, 6, 3, 3), (4, 11, 6, 7), (5, 20, 11, 15), (6, 37, 20, 31), (7, 70, 37, 63), (8, 135, 70, 127), (9, 264, 135, 255)]
+      [abb/ba]: (n,f,K,R) = [(0, 0, 0, 0), (1, 1, 0, 0), (2, 3, 1, 1), (3, 6, 3, 3), (4, 11, 6, 7), (5, 20, 11, 15), (6, 37, 20, 31), (7, 70, 37, 63), (8, 135, 70, 127), (9, 264, 135, 255)]
+      [bba/ab]: (n,f,K,R) = [(0, 0, 0, 0), (1, 1, 0, 0), (2, 3, 1, 1), (3, 6, 3, 3), (4, 11, 6, 7), (5, 20, 11, 15), (6, 37, 20, 31), (7, 70, 37, 63), (8, 135, 70, 127), (9, 264, 135, 255)]
       [bbab/abb]: (n,f,K,R) = [(0, 0, 0, 0), (1, 1, 0, 0), (2, 2, 0, 0), (3, 4, 1, 1), (4, 6, 2, 2), (5, 10, 4, 5), (6, 16, 7, 10), (7, 26, 12, 19), (8, 44, 21, 36), (9, 78, 38, 69)]
-      [babb/bba]: (n,f,K,R) = [(0, 0, 0, 0), (1, 1, 0, 0), (2, 2, 0, 0), (3, 4, 1, 1), (4, 6, 2, 2), (5, 10, 4, 5), (6, 16, 7, 10), (7, 26, 12, 19), (8, 44, 21, 36), (9, 78, 38, 69)]
       [aaba/baa]: (n,f,K,R) = [(0, 0, 0, 0), (1, 1, 0, 0), (2, 2, 0, 0), (3, 4, 1, 1), (4, 6, 2, 2), (5, 10, 4, 5), (6, 16, 7, 10), (7, 26, 12, 19), (8, 44, 21, 36), (9, 78, 38, 69)]
+      [babb/bba]: (n,f,K,R) = [(0, 0, 0, 0), (1, 1, 0, 0), (2, 2, 0, 0), (3, 4, 1, 1), (4, 6, 2, 2), (5, 10, 4, 5), (6, 16, 7, 10), (7, 26, 12, 19), (8, 44, 21, 36), (9, 78, 38, 69)]
       [abaa/aab]: (n,f,K,R) = [(0, 0, 0, 0), (1, 1, 0, 0), (2, 2, 0, 0), (3, 4, 1, 1), (4, 6, 2, 2), (5, 10, 4, 5), (6, 16, 7, 10), (7, 26, 12, 19), (8, 44, 21, 36), (9, 78, 38, 69)]
-      [bbbb/a]: (n,f,K,R) = [(0, 0, 0, 0), (1, 4, 1, 1), (2, 8, 1, 2), (3, 12, 1, 3), (4, 16, 1, 4), (5, 20, 1, 5), (6, 24, 1, 6), (7, 28, 1, 7), (8, 32, 1, 8), (9, 36, 1, 9)]
-      [aaaa/b]: (n,f,K,R) = [(0, 0, 0, 0), (1, 4, 1, 1), (2, 8, 1, 2), (3, 12, 1, 3), (4, 16, 1, 4), (5, 20, 1, 5), (6, 24, 1, 6), (7, 28, 1, 7), (8, 32, 1, 8), (9, 36, 1, 9)]
-      [aaab/baa]: (n,f,K,R) = [(0, 0, 0, 0), (1, 1, 0, 0), (2, 2, 0, 0), (3, 4, 1, 1), (4, 6, 2, 2), (5, 8, 3, 3), (6, 12, 5, 6), (7, 17, 7, 10), (8, 24, 10, 16), (9, 34, 14, 25)]
-      [abbb/bba]: (n,f,K,R) = [(0, 0, 0, 0), (1, 1, 0, 0), (2, 2, 0, 0), (3, 4, 1, 1), (4, 6, 2, 2), (5, 8, 3, 3), (6, 12, 5, 6), (7, 17, 7, 10), (8, 24, 10, 16), (9, 34, 14, 25)]
-    worst K on the domain: 135 sweeps ([bba/ab] at n = 9)
-    worst R on the domain: 255 fires ([bba/ab] at n = 9)
-    law f(n) <= 64*2^n, K(n) <= 2^n, R(n) <= 2^(n+1) on the domain: OK
-    [0.7s]
+    worst K on the domain: 2194 sweeps ([bbba/ab] at n = 9)
+    worst R on the domain: 3280 fires ([bbba/ab] at n = 9)
+    fire counts: max r_k over all census orbits = 9; longest strictly-growing run = 4 sweeps
+    law f,K,R <= (alpha-beta+1)^n + n per rule on the domain: OK (tight: base-m family attains it)
+    [1.0s]
 (C) amplifier [baa/ab] on a b^(n-1):
     n =  1: K =   0, R =        0, |out| =         1 (2^(n-1)+n-1 = 1)
     n =  2: K =   1, R =        1, |out| =         3 (2^(n-1)+n-1 = 3)
@@ -40,34 +45,53 @@ verify_r5.py -- R5: the single-pass ceiling + omega reading
     n = 17: K = 32783, R =    65535, |out| =     65552 (2^(n-1)+n-1 = 65552)
     n = 18: K = 65552, R =   131071, |out| =    131089 (2^(n-1)+n-1 = 131089)
     n = 19: K = 131089, R =   262143, |out| =    262162 (2^(n-1)+n-1 = 262162)
-    slow family under the sweep, on b^n a:
-      [aaab/ba]: (n, K, R, |out|) = [(2, 4, 4, 11), (3, 11, 13, 30), (4, 30, 40, 85), (5, 85, 121, 248), (6, 248, 364, 735), (7, 735, 1093, 2194), (8, 'DIV')]
-      [abbb/ba]: (n, K, R, |out|) = [(2, 2, 2, 7), (3, 3, 3, 10), (4, 4, 4, 13), (5, 5, 5, 16), (6, 6, 6, 19), (7, 7, 7, 22), (8, 8, 8, 25), (9, 9, 9, 28), (10, 10, 10, 31), (11, 11, 11, 34), (12, 12, 12, 37), (13, 13, 13, 40), (14, 14, 14, 43), (15, 15, 15, 46), (16, 16, 16, 49), (17, 17, 17, 52), (18, 18, 18, 55), (19, 19, 19, 58), (20, 20, 20, 61)]
-      [baaa/ab]: (n, K, R, |out|) = [(2, 0, 0, 3), (3, 0, 0, 4), (4, 0, 0, 5), (5, 0, 0, 6), (6, 0, 0, 7), (7, 0, 0, 8), (8, 0, 0, 9), (9, 0, 0, 10), (10, 0, 0, 11), (11, 0, 0, 12), (12, 0, 0, 13), (13, 0, 0, 14), (14, 0, 0, 15), (15, 0, 0, 16), (16, 0, 0, 17), (17, 0, 0, 18), (18, 0, 0, 19), (19, 0, 0, 20), (20, 0, 0, 21)]
-      [bbba/ab]: (n, K, R, |out|) = [(2, 0, 0, 3), (3, 0, 0, 4), (4, 0, 0, 5), (5, 0, 0, 6), (6, 0, 0, 7), (7, 0, 0, 8), (8, 0, 0, 9), (9, 0, 0, 10), (10, 0, 0, 11), (11, 0, 0, 12), (12, 0, 0, 13), (13, 0, 0, 14), (14, 0, 0, 15), (15, 0, 0, 16), (16, 0, 0, 17), (17, 0, 0, 18), (18, 0, 0, 19), (19, 0, 0, 20), (20, 0, 0, 21)]
-    champions on structured + random inputs (n, K, R, |out|):
-      [baa/ab]: best |out| = 16398, K = 8205, R = 16383 (at total length 15)
-FAIL C-K-poly16 (('baa', 'ab'), (16398, 8205, 16383, 15))
-      [aab/ba]: best |out| = 16, K = 0, R = 0 (at total length 16)
-      [abb/ba]: best |out| = 16, K = 0, R = 0 (at total length 16)
-      [bba/ab]: best |out| = 16398, K = 8205, R = 16383 (at total length 15)
-FAIL C-K-poly16 (('bba', 'ab'), (16398, 8205, 16383, 15))
-      [aaab/ba]: best |out| = 16, K = 0, R = 0 (at total length 16)
-      [baaa/ab]: best |out| = 26252, K = 8755, R = 13120 (at total length 12)
-FAIL C-K-poly16 (('baaa', 'ab'), (26252, 8755, 13120, 12))
-      [abbb/ba]: best |out| = 16, K = 0, R = 0 (at total length 16)
-      [bbba/ab]: best |out| = 26252, K = 8755, R = 13120 (at total length 12)
-FAIL C-K-poly16 (('bbba', 'ab'), (26252, 8755, 13120, 12))
-    [99.5s]
+    base-m family laws (exact):
+      S1(m) [b a^m/ab] on a^i b^j: m = 1, 42 cells exact
+      S1(m) [b a^m/ab] on a^i b^j: m = 2, 37 cells exact
+      S1(m) [b a^m/ab] on a^i b^j: m = 3, 25 cells exact
+      S1(m) [b a^m/ab] on a^i b^j: m = 4, 19 cells exact
+      S1(m) [b a^m/ab] on a^i b^j: m = 5, 17 cells exact
+      S2(m) [b^m a/ab] on a^i b^j: m = 1, 168 cells exact
+      S2(m) [b^m a/ab] on a^i b^j: m = 2, 131 cells exact
+      S2(m) [b^m a/ab] on a^i b^j: m = 3, 86 cells exact
+      S2(m) [b^m a/ab] on a^i b^j: m = 4, 68 cells exact
+      T1(m) [a^m b/ba] on b^j a^i: m = 1, 42 cells exact
+      T1(m) [a^m b/ba] on b^j a^i: m = 2, 37 cells exact
+      T1(m) [a^m b/ba] on b^j a^i: m = 3, 25 cells exact
+      T1(m) [a^m b/ba] on b^j a^i: m = 4, 19 cells exact
+      T2(m) [a b^m/ba] on b^j a^i: m = 1, 168 cells exact
+      T2(m) [a b^m/ba] on b^j a^i: m = 2, 131 cells exact
+      T2(m) [a b^m/ba] on b^j a^i: m = 3, 86 cells exact
+      T2(m) [a b^m/ba] on b^j a^i: m = 4, 68 cells exact
+      total family cells verified exact: 1169
+    champion inputs at n = 9 (argmax over all 2^9 inputs):
+      [baa/ab]: f(9) = 264 at 'abbbbbbbb' (= m^8 + 8, m = 2: the two-block Horner input)
+      [bba/ab]: f(9) = 264 at 'aaaaaaaab' (= m^8 + 8, m = 2: the two-block Horner input)
+      [aab/ba]: f(9) = 264 at 'bbbbbbbba' (= m^8 + 8, m = 2: the two-block Horner input)
+      [abb/ba]: f(9) = 264 at 'baaaaaaaa' (= m^8 + 8, m = 2: the two-block Horner input)
+      [baaa/ab]: f(9) = 6569 at 'abbbbbbbb' (= m^8 + 8, m = 3: the two-block Horner input)
+      [bbba/ab]: f(9) = 6569 at 'aaaaaaaab' (= m^8 + 8, m = 3: the two-block Horner input)
+      [aaab/ba]: f(9) = 6569 at 'bbbbbbbba' (= m^8 + 8, m = 3: the two-block Horner input)
+      [abbb/ba]: f(9) = 6569 at 'baaaaaaaa' (= m^8 + 8, m = 3: the two-block Horner input)
+    [69.5s]
 (D1) one pass is causal (output[:m-|B|] fixed by input[:m]): 300 random pairs: OK
-(D2) [baa/ab] on a b^omega, window W, 24 sweeps:
-    W =  8: window b^W from sweep None, stable True, min fires/sweep 1, slack cert True
-FAIL D2-window (8, None, 1)
-    W = 16: window b^W from sweep None, stable True, min fires/sweep 1, slack cert True
-FAIL D2-window (16, None, 1)
-    W = 32: window b^W from sweep None, stable True, min fires/sweep 1, slack cert True
-FAIL D2-window (32, None, 1)
-    W = 48: window b^W from sweep None, stable True, min fires/sweep 1, slack cert True
-FAIL D2-window (48, None, 1)
-    (pointwise limit b^omega; the orbit fires every sweep: never stepwise fixed; b^omega IS a fixed point: [baa/ab](b^omega) = b^omega)
-EXIT=143
+(D2) [baa/ab] on a b^omega (M = 2158, 1042 sweeps):
+     front dwell at v is 2^(v-1)+1 (v <= 10): OK [2, 3, 5, 9, 17, 33, 65, 129, 257, 513]
+     position j permanently b from sweep k_j = 2^j+j (j < 10): OK
+     k_j = [1, 3, 6, 11, 20, 37, 70, 135, 264, 521]
+     front non-decreasing: True; fires every sweep, growing (r_521 = 512, r_1042 = 1031): True; #a at horizon = 534044
+     slack certificate (M doubled to 4316): same dwell/k_j laws: OK
+     -> pointwise limit b^omega at cost 2^j+j sweeps per position j; the orbit never stops firing: the coinductive (pointwise) and stepwise readings of lim diverge on a b^omega
+(D3a) finite values: lim(a b^(n-1)) = b^(n-1) a^(2^(n-1)) (n <= 15), lim((ba)^n) = b^n a^n (n <= 40): OK -- both converge pointwise to b^omega
+(D3b) sort omega-orbit of (ba)^omega (window 48): final window 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', stabilized True
+     COMMUTES for the showcase rules: omega-orbit pointwise limit = pointwise limit of finite values = b^omega
+(D3c) [aa/a]: finite side lim(a^n) = 'a' for 1 <= n <= 60: OK
+     omega side: pass(a^omega) = a^omega (fires at 0,2,4,..., window-verified at 3 widths x 3 truncations), a fixed point -> coinductive lim([aa/a])(a^omega) = a^omega
+     NON-COMMUTATION: finite-approximation reading 'a' vs coinductive reading a^omega -- they differ at EVERY position >= 1 (least vs greatest fixpoint, cf. rem:leastfix)
+(D4) omega-census, 310 length-preserving rules x 4 periodic shapes, window 24, cap 60 sweeps: stabilized 1222, churning 18
+(D5) [eps/ab] on (ab)^omega: one sweep erases the whole infinite string (out = eps, verified on truncations of 17, 34, 71 pairs): OK
+    [1.5s]
+======================================================================
+TOTAL: 1224 checks, 0 failures
+ALL GREEN
+EXIT=0

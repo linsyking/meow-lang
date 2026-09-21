@@ -470,7 +470,7 @@ def partD():
         r = orbit_tracked('baa', 'ab', 'a' + 'b' * (n - 1),
                           capsteps=10 ** 6, caplen=1 << 22)
         if not (r[0] == 'conv'
-                and r[1] == 'b' ** (n - 1) + 'a' ** 2 ** (n - 1)):
+                and r[1] == 'b' * (n - 1) + 'a' * 2 ** (n - 1)):
             bad += 1
             check('D3-amplifier-finite', False, (n, r[0]))
     for n in range(1, 41):

@@ -1,0 +1,92 @@
+verify_r6.py -- R6: the sweep-count ceiling K <= c^|w|
+======================================================================
+(A) the 148 growing census rules (|A|>|B|, B not-in A, |A|<=4):
+    convergent on <= 9: 144; divergent: 4: ['[aabb/ba]', '[bbaa/ab]', '[abba/bab]', '[baab/aba]']
+    convergent WITH an affine potential: 114 (=> total, and K <= n*maxoff*maxmult^n)
+    convergent WITHOUT: 30: ['[aba/aa]', '[bab/bb]', '[abab/aa]', '[abab/bb]', '[abba/aa]', '[baab/bb]', '[baba/aa]', '[baba/bb]', '[aaab/baa]', '[aaba/aaa]', '[aabb/baa]', '[aabb/bba]', '[abaa/aaa]', '[abab/aab]', '[abab/abb]', '[abab/baa]', '[abab/bba]', '[abba/aba]', '[abbb/bba]', '[baaa/aab]', '[baab/bab]', '[baba/aab]', '[baba/abb]', '[baba/baa]', '[baba/bba]', '[babb/bbb]', '[bbaa/aab]', '[bbaa/abb]', '[bbab/bbb]', '[bbba/abb]']
+    divergent WITH a potential (would REFUTE the theorem): []
+(B) theorem verified per-orbit (v invariant every sweep, Phi >= 0, K*delta <= Phi0, Phi(final) = 0, final B-free) on all 114 admitting rules x all inputs <= 7: 29070 orbits
+    positivity, B-containing => Phi>=1, Phi0 <= (n+1)*maxoff*maxmult^n on random strings: OK
+    [2.2s]
+(C) convergent non-admitters: worst (f, K, R) per length, all inputs <= 9:
+    [aba/aa]: [(0, 0, 0, 0), (1, 1, 0, 0), (2, 3, 1, 1), (3, 5, 2, 2), (4, 7, 2, 3), (5, 9, 2, 4), (6, 11, 2, 5), (7, 13, 2, 6), (8, 15, 2, 7), (9, 17, 2, 8)]
+    [bab/bb]: [(0, 0, 0, 0), (1, 1, 0, 0), (2, 3, 1, 1), (3, 5, 2, 2), (4, 7, 2, 3), (5, 9, 2, 4), (6, 11, 2, 5), (7, 13, 2, 6), (8, 15, 2, 7), (9, 17, 2, 8)]
+    [abab/aa]: [(0, 0, 0, 0), (1, 1, 0, 0), (2, 4, 1, 1), (3, 5, 1, 1), (4, 8, 1, 2), (5, 9, 1, 2), (6, 12, 1, 3), (7, 13, 1, 3), (8, 16, 1, 4), (9, 17, 1, 4)]
+    [abab/bb]: [(0, 0, 0, 0), (1, 1, 0, 0), (2, 4, 1, 1), (3, 7, 2, 2), (4, 8, 2, 2), (5, 11, 2, 3), (6, 12, 2, 3), (7, 15, 2, 4), (8, 16, 2, 4), (9, 19, 2, 5)]
+    [abba/aa]: [(0, 0, 0, 0), (1, 1, 0, 0), (2, 4, 1, 1), (3, 7, 2, 2), (4, 10, 2, 3), (5, 13, 2, 4), (6, 16, 2, 5), (7, 19, 2, 6), (8, 22, 2, 7), (9, 25, 2, 8)]
+    [baab/bb]: [(0, 0, 0, 0), (1, 1, 0, 0), (2, 4, 1, 1), (3, 7, 2, 2), (4, 10, 2, 3), (5, 13, 2, 4), (6, 16, 2, 5), (7, 19, 2, 6), (8, 22, 2, 7), (9, 25, 2, 8)]
+    [baba/aa]: [(0, 0, 0, 0), (1, 1, 0, 0), (2, 4, 1, 1), (3, 7, 2, 2), (4, 8, 2, 2), (5, 11, 2, 3), (6, 12, 2, 3), (7, 15, 2, 4), (8, 16, 2, 4), (9, 19, 2, 5)]
+    [baba/bb]: [(0, 0, 0, 0), (1, 1, 0, 0), (2, 4, 1, 1), (3, 5, 1, 1), (4, 8, 1, 2), (5, 9, 1, 2), (6, 12, 1, 3), (7, 13, 1, 3), (8, 16, 1, 4), (9, 17, 1, 4)]
+    [aaab/baa]: [(0, 0, 0, 0), (1, 1, 0, 0), (2, 2, 0, 0), (3, 4, 1, 1), (4, 6, 2, 2), (5, 8, 3, 3), (6, 12, 5, 6), (7, 17, 7, 10), (8, 24, 10, 16), (9, 34, 14, 25)]
+    [aaba/aaa]: [(0, 0, 0, 0), (1, 1, 0, 0), (2, 2, 0, 0), (3, 4, 1, 1), (4, 5, 1, 1), (5, 7, 2, 2), (6, 9, 2, 3), (7, 10, 2, 3), (8, 12, 2, 4), (9, 14, 2, 5)]
+    [aabb/baa]: [(0, 0, 0, 0), (1, 1, 0, 0), (2, 2, 0, 0), (3, 4, 1, 1), (4, 6, 2, 2), (5, 8, 3, 3), (6, 12, 5, 6), (7, 16, 7, 9), (8, 22, 10, 14), (9, 30, 14, 21)]
+    [aabb/bba]: [(0, 0, 0, 0), (1, 1, 0, 0), (2, 2, 0, 0), (3, 4, 1, 1), (4, 6, 2, 2), (5, 8, 3, 3), (6, 12, 5, 6), (7, 16, 7, 9), (8, 22, 10, 14), (9, 30, 14, 21)]
+    [abaa/aaa]: [(0, 0, 0, 0), (1, 1, 0, 0), (2, 2, 0, 0), (3, 4, 1, 1), (4, 6, 2, 2), (5, 8, 3, 3), (6, 9, 3, 3), (7, 11, 3, 4), (8, 13, 3, 5), (9, 14, 3, 5)]
+    [abab/aab]: [(0, 0, 0, 0), (1, 1, 0, 0), (2, 2, 0, 0), (3, 4, 1, 1), (4, 6, 2, 2), (5, 8, 3, 3), (6, 10, 4, 4), (7, 12, 5, 5), (8, 14, 6, 6), (9, 16, 7, 7)]
+    [abab/abb]: [(0, 0, 0, 0), (1, 1, 0, 0), (2, 2, 0, 0), (3, 4, 1, 1), (4, 6, 2, 2), (5, 8, 3, 3), (6, 10, 4, 4), (7, 12, 5, 5), (8, 14, 6, 6), (9, 16, 7, 7)]
+    [abab/baa]: [(0, 0, 0, 0), (1, 1, 0, 0), (2, 2, 0, 0), (3, 4, 1, 1), (4, 5, 1, 1), (5, 8, 3, 3), (6, 10, 4, 4), (7, 12, 4, 5), (8, 14, 5, 6), (9, 16, 6, 7)]
+    [abab/bba]: [(0, 0, 0, 0), (1, 1, 0, 0), (2, 2, 0, 0), (3, 4, 1, 1), (4, 5, 1, 1), (5, 8, 3, 3), (6, 10, 4, 4), (7, 12, 4, 5), (8, 14, 5, 6), (9, 16, 6, 7)]
+    [abba/aba]: [(0, 0, 0, 0), (1, 1, 0, 0), (2, 2, 0, 0), (3, 4, 1, 1), (4, 5, 1, 1), (5, 7, 2, 2), (6, 8, 2, 2), (7, 10, 2, 3), (8, 11, 2, 3), (9, 13, 2, 4)]
+    [abbb/bba]: [(0, 0, 0, 0), (1, 1, 0, 0), (2, 2, 0, 0), (3, 4, 1, 1), (4, 6, 2, 2), (5, 8, 3, 3), (6, 12, 5, 6), (7, 17, 7, 10), (8, 24, 10, 16), (9, 34, 14, 25)]
+    [baaa/aab]: [(0, 0, 0, 0), (1, 1, 0, 0), (2, 2, 0, 0), (3, 4, 1, 1), (4, 6, 2, 2), (5, 8, 3, 3), (6, 12, 5, 6), (7, 17, 7, 10), (8, 24, 10, 16), (9, 34, 14, 25)]
+    [baab/bab]: [(0, 0, 0, 0), (1, 1, 0, 0), (2, 2, 0, 0), (3, 4, 1, 1), (4, 5, 1, 1), (5, 7, 2, 2), (6, 8, 2, 2), (7, 10, 2, 3), (8, 11, 2, 3), (9, 13, 2, 4)]
+    [baba/aab]: [(0, 0, 0, 0), (1, 1, 0, 0), (2, 2, 0, 0), (3, 4, 1, 1), (4, 5, 1, 1), (5, 8, 3, 3), (6, 10, 4, 4), (7, 12, 4, 5), (8, 14, 5, 6), (9, 16, 6, 7)]
+    [baba/abb]: [(0, 0, 0, 0), (1, 1, 0, 0), (2, 2, 0, 0), (3, 4, 1, 1), (4, 5, 1, 1), (5, 8, 3, 3), (6, 10, 4, 4), (7, 12, 4, 5), (8, 14, 5, 6), (9, 16, 6, 7)]
+    [baba/baa]: [(0, 0, 0, 0), (1, 1, 0, 0), (2, 2, 0, 0), (3, 4, 1, 1), (4, 6, 2, 2), (5, 8, 3, 3), (6, 10, 4, 4), (7, 12, 5, 5), (8, 14, 6, 6), (9, 16, 7, 7)]
+    [baba/bba]: [(0, 0, 0, 0), (1, 1, 0, 0), (2, 2, 0, 0), (3, 4, 1, 1), (4, 6, 2, 2), (5, 8, 3, 3), (6, 10, 4, 4), (7, 12, 5, 5), (8, 14, 6, 6), (9, 16, 7, 7)]
+    [babb/bbb]: [(0, 0, 0, 0), (1, 1, 0, 0), (2, 2, 0, 0), (3, 4, 1, 1), (4, 6, 2, 2), (5, 8, 3, 3), (6, 9, 3, 3), (7, 11, 3, 4), (8, 13, 3, 5), (9, 14, 3, 5)]
+    [bbaa/aab]: [(0, 0, 0, 0), (1, 1, 0, 0), (2, 2, 0, 0), (3, 4, 1, 1), (4, 6, 2, 2), (5, 8, 3, 3), (6, 12, 5, 6), (7, 16, 7, 9), (8, 22, 10, 14), (9, 30, 14, 21)]
+    [bbaa/abb]: [(0, 0, 0, 0), (1, 1, 0, 0), (2, 2, 0, 0), (3, 4, 1, 1), (4, 6, 2, 2), (5, 8, 3, 3), (6, 12, 5, 6), (7, 16, 7, 9), (8, 22, 10, 14), (9, 30, 14, 21)]
+    [bbab/bbb]: [(0, 0, 0, 0), (1, 1, 0, 0), (2, 2, 0, 0), (3, 4, 1, 1), (4, 5, 1, 1), (5, 7, 2, 2), (6, 9, 2, 3), (7, 10, 2, 3), (8, 12, 2, 4), (9, 14, 2, 5)]
+    [bbba/abb]: [(0, 0, 0, 0), (1, 1, 0, 0), (2, 2, 0, 0), (3, 4, 1, 1), (4, 6, 2, 2), (5, 8, 3, 3), (6, 12, 5, 6), (7, 17, 7, 10), (8, 24, 10, 16), (9, 34, 14, 25)]
+    [0.1s]
+(D) 400 random larger rules (2 <= |B| <= 3 < |A| <= 6, B not-in A, binary):
+    tested 400: convergent on <= 6: 372, divergent/capped: 28
+    convergent WITHOUT affine potential: 149: ['[abab/baa]', '[abbba/aba]', '[abbb/bba]', '[abab/bb]', '[abbbbb/bba]', '[baba/bb]', '[babab/aab]', '[abab/aab]', '[bbaba/aa]', '[bbabaa/abb]', '[baaabb/bab]', '[baab/bab]']
+    theorem spot-verified on 30 random larger admitting rules x random inputs: OK
+    [2.5s]
+(E) non-growing rules (|A| <= |B|), inputs <= 7:
+    convergent orbits: shrinking 79050 (K*(beta-alpha) <= n checked), length-preserving 79050 (K <= 2^n checked, states distinct)
+    (rules divergent or cycling on some input <= 7: 0 orbits; cycles are repeats, consistent with divergence)
+    [0.2s]
+(F) closed-form potentials for the four base-m shapes, m = 2..5, plus the amplifier's exact R = Phi0:
+    all 16 family instances: the search finds a potential; Phi0 matches i*m^j - i exactly; orbit checks pass; K <= Phi0/(m-1); R = Phi0/(m-1) EXACTLY (the potential counts the remaining fires)
+    [32.1s]
+(G) k-gram (substring-counting) potentials, Phi = #g1 + w*#g2, k in {2,3}, for the affine non-admitters:
+    [aba/aa]: Phi = #aa + 0*#aa (k=2), verified: K <= Phi0 <= n^2
+    [bab/bb]: Phi = #bb + 0*#bb (k=2), verified: K <= Phi0 <= n^2
+    [abab/aa]: Phi = #aa + 0*#aa (k=2), verified: K <= Phi0 <= n^2
+    [abab/bb]: Phi = #bb + 0*#bb (k=2), verified: K <= Phi0 <= n^2
+    [abba/aa]: Phi = #aa + 0*#aa (k=2), verified: K <= Phi0 <= n^2
+    [baab/bb]: Phi = #bb + 0*#bb (k=2), verified: K <= Phi0 <= n^2
+    [baba/aa]: Phi = #aa + 0*#aa (k=2), verified: K <= Phi0 <= n^2
+    [baba/bb]: Phi = #bb + 0*#bb (k=2), verified: K <= Phi0 <= n^2
+    [aaab/baa]: NO k-gram potential (k <= 3)
+    [aaba/aaa]: Phi = #aa + 0*#aa (k=2), verified: K <= Phi0 <= n^2
+    [aabb/baa]: NO k-gram potential (k <= 3)
+    [aabb/bba]: NO k-gram potential (k <= 3)
+    [abaa/aaa]: Phi = #aa + 0*#aa (k=2), verified: K <= Phi0 <= n^2
+    [abab/aab]: Phi = #aa + 0*#aa (k=2), verified: K <= Phi0 <= n^2
+    [abab/abb]: Phi = #ab + 2*#bb (k=2), verified: K <= Phi0 <= n^2
+    [abab/baa]: NO k-gram potential (k <= 3)
+    [abab/bba]: NO k-gram potential (k <= 3)
+    [abba/aba]: Phi = #aba + 0*#aba (k=3), verified: K <= Phi0 <= n^3
+    [abbb/bba]: NO k-gram potential (k <= 3)
+    [baaa/aab]: NO k-gram potential (k <= 3)
+    [baab/bab]: Phi = #bab + 0*#bab (k=3), verified: K <= Phi0 <= n^3
+    [baba/aab]: NO k-gram potential (k <= 3)
+    [baba/abb]: NO k-gram potential (k <= 3)
+    [baba/baa]: Phi = #aa + 0*#aa (k=2), verified: K <= Phi0 <= n^2
+    [baba/bba]: Phi = #ba + 2*#bb (k=2), verified: K <= Phi0 <= n^2
+    [babb/bbb]: Phi = #bb + 0*#bb (k=2), verified: K <= Phi0 <= n^2
+    [bbaa/aab]: NO k-gram potential (k <= 3)
+    [bbaa/abb]: NO k-gram potential (k <= 3)
+    [bbab/bbb]: Phi = #bb + 0*#bb (k=2), verified: K <= Phi0 <= n^2
+    [bbba/abb]: NO k-gram potential (k <= 3)
+    covered by k-gram potentials: 18 of 30; K <= n^k (polynomial)
+    all census orbits (inputs <= 7) of covered rules: Phi drops >= 1 per fire, K <= Phi0: OK
+    [0.1s]
+======================================================================
+TOTAL: 111 checks, 0 failures
+ALL GREEN
+EXIT=0

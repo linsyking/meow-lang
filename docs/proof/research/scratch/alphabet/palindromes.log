@@ -1,0 +1,10 @@
+P1 middle-marker family palindromic+comma-free+size (q-1)^m: 20 dictionaries, 0 failures
+OK   P1 middle-marker family (q>=3, m=1..5): 20 cases
+P2 binary size-3 palindromic comma-free dictionaries: 2 checked, 0 failures
+OK   P2 binary size-3 dictionaries: 2 cases
+P3 exact maxima of palindromic comma-free sets over binary: {3: 1, 4: 1, 5: 3, 6: 2, 7: 7, 9: 14} (ell=3..7,9; 2^ceil(ell/2) palindromes each)
+OK   P3 binary maxima computed (data): 6 cases
+P4a route (Sigma=binary): dict(c o e) comma-free for 3 choices of e: 3 checked, 0 failures (c ell=5)
+OK   P4a L3 for binary-source reversal routes: 3 cases
+P4b route (Sigma=ternary): e = {x:bab, y:cac} palindromic comma-free, dict(c o e) comma-free (c ell=6): 1/1
+OK   P4b L3 for the ternary-source reversal route: 1 cases

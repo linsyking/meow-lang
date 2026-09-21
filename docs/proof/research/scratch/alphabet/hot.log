@@ -1,0 +1,35 @@
+coding c: abc->xy ell=6 (a->xxyxyy b->xxyyxy c->xxyyyy )
+HA1 family comma-free (21 dicts) + Fib sizes                         31 cases        0 mismatches
+HA2 alignment occ(c(B)) in c(C) = ell*occ(B)                      14196 cases        0 mismatches
+HA3L pass transfer [cA/cB]cC = c([A/B]C)                         188760 cases        0 mismatches
+HA3v once/R/kth pass transfer                                     31200 cases        0 mismatches
+expression space: 2954 depth<=1 expressions
+HT1 Dir-1 (all depth<=1 exprs, |S|<=4, L)                        357434 cases        0 mismatches
+     undefined (matching both sides): 23912
+HT1 Dir-1 under once (|S|<=3)                                    118160 cases        0 mismatches
+HT1 Dir-1 under R (|S|<=3)                                       118160 cases        0 mismatches
+HU1 exhaustive unary space size<=7: 36978 expressions, 1707 distinct length maps on n=0..24
+HU1 with 3000 random depth<=4 supplement: 2065 distinct length maps (Python reference, own sample: 2091)
+     target id n        : FOUND
+     target 2n          : FOUND
+     target n^2         : FOUND
+     target n+1         : FOUND
+     target n^4         : NOT FOUND
+     target floor(n/2)  : NOT FOUND
+     target ceil(n/2)   : FOUND
+     target n mod 2     : FOUND
+     target max(n-1,0)  : NOT FOUND
+     target 2^n         : NOT FOUND
+     n^4 witness [[X/a]X / a]([X/a]X) at size 10: exact
+HU3a deterministic binary profiles (584 depth<=1 exprs): 456 total, 0 missing from unary size<=7 (+shifts)
+HU3b PRNG supplement (2000 random depth<=3): 12 total, 2 missing (independent sample)
+     missing: 0 4 6 8 12 14 16 20 22 24 28 30 32
+     missing: 3 7 11 15 20 25 33 39 45 57 64 71 87
+HP middle-marker family palindromic+comma-free+size                  20 cases        0 mismatches
+HP binary ell=3: 4 palindromes, max comma-free palindromic set: 1
+HP binary ell=4: 4 palindromes, max comma-free palindromic set: 1
+HP binary ell=5: 8 palindromes, max comma-free palindromic set: 3
+HP binary ell=6: 8 palindromes, max comma-free palindromic set: 2
+HP binary ell=7: 16 palindromes, max comma-free palindromic set: 7
+HP binary ell=9: 32 palindromes, max comma-free palindromic set: 14
+ALL OK

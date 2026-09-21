@@ -1,0 +1,440 @@
+% Alphabet invariance: paper-form write-up of the transfer theorem.
+% Self-contained section; labels are fresh (def:code, lem:dict, lem:selfsync,
+% lem:pass-transfer, def:conjugate, thm:transfer-forward, lem:compose,
+% lem:retract, thm:transfer, cor:uniform, lem:palindrome, thm:rev-uniform,
+% rem:native, prop:unary-edge). NOT integrated into main.tex; the constants
+% and conventions follow the paper's Sections 2-4.
+
+\section{Alphabet Invariance}
+\label{sec:alphabet}
+
+Every construction so far has fixed its alphabet, and the two letters always
+sufficed. This section addresses the fourth open problem of
+Section~\ref{sec:calculus} head on: \emph{which functions are reachable over
+every alphabet with $|\Sigma| \ge 2$, and does a larger alphabet ever add
+power?} The answer is that, up to a canonical conjugation, the reachable
+class does not depend on the alphabet at all: for any two alphabets of at
+least two letters and any \emph{good coding} between them, $f$ is reachable
+over the one iff its conjugate is reachable over the other. The boundary of
+the invariance is exactly $|\Sigma| = 1$: the conjugation exists one way and
+cannot exist the other way, for a structural reason.
+
+\subsection{Comma-Free Codings}
+
+\begin{definition}
+    (\emph{Good Codings})
+    \label{def:code}
+    A \emph{coding} is an injective monoid homomorphism $c : \Sigma^*
+    \rightarrow \Gamma^*$ with $D_c \triangleq c(\Sigma)$ of uniform length
+    $\ell \ge 1$ (a \emph{dictionary}); write $c(S)$ for the letter-by-letter
+    extension. The coding is \emph{good} if $D_c$ is \emph{comma-free}
+    (Golomb's condition; the theory of codes treats it under synchronizing
+    codes \cite{berstel85,lothaire97}): no $w \in D_c$ occurs in $u \cdot v$
+    at any of the junction-straddling positions $1, \dots, \ell-1$
+    ($u, v \in D_c$).
+\end{definition}
+
+Comma-freeness is the Golomb analogue of the Comma Code Lemma for
+$\mathtt{enc}^2_{b,x}$ (blocks $xc$): it is exactly the self-synchronization
+that makes the coding usable inside a scanning calculus. Without it the
+conjugacy class of a function depends on the coding, and the notion
+degenerates: a free assignment $\ell$ with $\ell(SS) = \ell(S)^2$, say,
+makes $X \mapsto XX$ conjugate to the unary squaring map. The good codings
+are the ones on which the conjugation is canonical.
+
+\begin{lemma}
+    (\emph{Existence: the Double-$a$ Family})
+    \label{lem:dict}
+    Let $\Gamma$ have two distinct letters $a \ne b$ and $\ell \ge 3$. Then
+    \begin{align}
+        D_\ell \;\triangleq\; \{\, a\,a\,m\,b \;:\; m \in
+        \Gamma^{\ell-3},\ aa \not\le m,\ m[0] \ne a \,\}
+    \end{align}
+    is comma-free, of uniform length $\ell$; over the binary alphabet
+    $|D_\ell| = \mathrm{Fib}(\ell-2)$, so good codings exist between any two
+    alphabets with at least two letters.
+\end{lemma}
+
+\begin{proof}
+    Every codeword starts with $aa$, contains $aa$ only at position $0$
+    (the interior $m$ avoids $aa$ and, for $\ell > 3$, does not start with
+    $a$), and ends with $b$. In $u \cdot v$ the factor $aa$ therefore occurs
+    only at $0$ and $\ell$ (the junction reads $b \cdot a$), and any
+    occurrence of a codeword, starting as it does with $aa$, starts at $0$
+    or $\ell$ -- aligned. The count: $m$ is $b$ followed by an $aa$-free
+    word of length $\ell-4$, counted by $\mathrm{Fib}(\ell-2)$.
+    (Verified: comma-freeness of all 21 dictionaries in the family, binary/
+    ternary/ quaternary, $\ell = 3..9$; sizes at $\ell = 3..12$ match
+    $\mathrm{Fib}(\ell-2)$ with $\mathrm{Fib}(1) = \mathrm{Fib}(2) = 1$.)
+\end{proof}
+
+\begin{lemma}
+    (\emph{Self-Synchronization})
+    \label{lem:selfsync}
+    Let $c$ be good and $B \ne \epsilon$. The occurrences of $c(B)$ in
+    $c(C)$ are exactly $\{\, \ell \cdot s \;:\; s$ an occurrence of $B$ in
+    $C \,\}$; in particular every occurrence of a codeword inside a
+    codeword-sequence starts at a multiple of $\ell$.
+\end{lemma}
+
+\begin{proof}
+    Uniform lengths first: an occurrence of $w \in D_c$ (length $\ell$)
+    lying wholly inside a single codeword (length $\ell$) of the surrounding
+    sequence starts at offset $0$. Otherwise the occurrence straddles at
+    least one junction $j\ell$ with $p < j\ell < p + \ell$, and its
+    restrictions to the two flanking codewords exhibit $w$ in their product
+    at the junction-straddling position $p - (j{-}1)\ell \in [1, \ell-1]$ --
+    against comma-freeness. For the block $c(B)$: its first codeword $c(B[0])
+    \in D_c$ occurs at a multiple of $\ell$ by the first part, the block
+    then covers whole codewords of $c(C)$, and these spell $B$; the converse
+    is immediate. (Verified: all $B \in \{a,b,c\}^{\le 3} \setminus
+    \{\epsilon\}$, $C \in \{a,b,c\}^{\le 5}$ -- 14,196 cases, zero
+    exceptions.)
+\end{proof}
+
+\begin{lemma}
+    (\emph{Pass Transfer})
+    \label{lem:pass-transfer}
+    Let $c$ be good. For all $A, C \in \Sigma^*$ and $B \in \Sigma^*
+    \setminus \{\epsilon\}$,
+    \begin{align}
+        [\,c(A)/c(B)\,]\; c(C) \;=\; c\big([\,A/B\,]C\big),
+    \end{align}
+    and the same identity holds for the once, rightmost, and $k$-th
+    occurrence primitives: the greedy occurrence lists correspond
+    order-isomorphically under $s \mapsto \ell s$.
+\end{lemma}
+
+\begin{proof}
+    Induction along the scan. By Self-Synchronization the occurrence lists
+    correspond, and the correspondence preserves order and disjointness
+    (positions scale by $\ell$), so leftmost, $k$-th and rightmost all
+    transfer; it is direction-free, so the right-to-left variant transfers
+    too. For the full pass, write $C = X B Y$ with $|X|$ minimal: the first
+    occurrence of $c(B)$ in $c(X)\,c(B)\,c(Y)$ is the aligned one at
+    $\ell|X|$ (any earlier one would be an aligned occurrence inside
+    $c(X)$, i.e.\ an occurrence of $B$ in $X$), the scan resumes at
+    $\ell(|X|{+}|B|)$ -- aligned again, and the inserted $c(A)$ is never
+    re-entered, matching the never-rescan clause of Definition~\ref{def:subst}.
+    Both sides now split as $c([A/B]X) \cdot c(A) \cdot c([A/B]Y)$ with
+    $|X|, |Y| < |C|$. (Verified: $A, C \in \{a,b,c\}^{\le 3}$, $B \in
+    \{a,b,c\}^{1..3}$ -- 188,760 leftmost cases; once, rightmost and
+    $k$-th ($k \le 3$) on the smaller box -- 31,200 cases; zero mismatches.)
+\end{proof}
+
+\subsection{The Transfer Theorem}
+
+\begin{definition}
+    (\emph{Conjugate})
+    \label{def:conjugate}
+    For $f$ an $n$-ary partial function on $\Sigma^*$ and $c : \Sigma
+    \rightarrow \Gamma^\ell$ a good coding, the \emph{conjugate}
+    $f^c : \mathrm{image}(c)^n \rightharpoonup \mathrm{image}(c)$ is
+    $c \circ f \circ c^{-1}$ -- a partial function in the sense of the
+    restriction clause of Definition~\ref{def:reachable}.
+\end{definition}
+
+\begin{theorem}
+    (\emph{Direction 1})
+    \label{thm:transfer-forward}
+    Let $E \in \mathrm{Exp}_n$ over $\Sigma$ and $c$ good. Define $E^c$ by:
+    constants $W \mapsto c(W)$, variables and both constructors unchanged.
+    Then
+    \begin{align}
+        \llbracket E^c \rrbracket\big(c(\vec S)\big) \;=\;
+        c\big(\llbracket E \rrbracket(\vec S)\big)
+    \end{align}
+    whenever the right-hand side is defined, and the two sides are
+    undefined together (the pattern is $\epsilon$ on one side iff on the
+    other). Moreover $|E^c| = |E|$ (node count; constant symbols grow
+    $\ell$-fold in length), $\deg(E^c) = \deg(E)$, and
+    $\mathrm{Safe}(E) \Rightarrow \mathrm{Safe}(E^c)$; and if $\llbracket E
+    \rrbracket$ is total then a \emph{total} $\Gamma$-expression agreeing
+    with $E^c$ on the image exists -- wrap the pattern once:
+    $[R^c/\gamma(P^c)]\,E^c$ with $\gamma(X) \triangleq
+    \mathtt{if}(\mathtt{eq}(X,\epsilon), b, X)$.
+\end{theorem}
+
+\begin{proof}
+    Induction on $E$. Variables and constants are immediate; concatenation
+    commutes with $c$ because $c$ is a homomorphism. For the pass node the
+    patterns and replacements are the $c$-images of the sub-values, and
+    Pass Transfer applies at every value of the sub-expressions; the
+    definedness clause is the $\epsilon$-condition, and $c(B) = \epsilon$
+    iff $B = \epsilon$. Safety and degree are structural ($c(W)$ is a
+    nonempty constant iff $W$ is; $\deg$ reads the replacement, and the
+    replacement's image has the same degree). (Verified: all 2,954
+    depth-$\le 1$ expressions over $\{a,b,c\}$ with constants $\le 2$, on
+    all 121 inputs of length $\le 4$ -- 357,434 evaluations, 0 mismatches,
+    23,912 undefined on both sides; 48,000 further evaluations of random
+    depth-$\le 3$ expressions; the same under once and rightmost semantics,
+    118,160 evaluations each; degree and safety over the full space, 2,954
+    expressions, 0 violations; node count equal in every case.)
+\end{proof}
+
+\begin{lemma}
+    (\emph{Composition})
+    \label{lem:compose}
+    If $c : \Sigma \rightarrow \Gamma^{\ell_c}$ and $d : \Gamma \rightarrow
+    \Sigma^{\ell_d}$ are good, then $d \circ c$ is good: $\{d(w) : w \in
+    D_c\}$ is comma-free over $\Sigma$, of uniform length
+    $\ell_c\ell_d$.
+\end{lemma}
+
+\begin{proof}
+    An occurrence of $d(w)$ inside a sequence of $d$-images of
+    $D_c$-codewords begins with $d(w[0]) \in D_d$, which by
+    Self-Synchronization over $D_d$ starts on the $D_d$-grid; the whole
+    block $d(w)$ then covers $D_d$-codewords spelling
+    $d(w[0]) \cdots d(w[\ell_c{-}1])$, so by injectivity of $d$ the word $w$
+    occurs among the pre-image codewords, and if the block did not start on
+    the outer ($\ell_c\ell_d$-) grid, $w$ would occur in a product of two
+    $D_c$-codewords at a junction-straddling position -- against the
+    comma-freeness of $D_c$. (Verified: $\{d(c(\sigma))\}$ for $c :
+    \{a,b,c\} \rightarrow \{x,y\}^6$ and $d : \{x,y\} \rightarrow
+    \{a,b,c\}^4$, length-24 dictionary, comma-free.)
+\end{proof}
+
+\begin{lemma}
+    (\emph{Retraction})
+    \label{lem:retract}
+    Let $h = d \circ c : \Sigma \rightarrow \Sigma^{\ell_c\ell_d}$ with
+    $c, d$ good. Then $h$ is good, and both $h$ and a decoder $H_h$ with
+    $H_h \circ h = \mathrm{id}$ are \emph{total} $L$-reachable: $h$ is
+    $\mathrm{rep}_{|\Sigma|}$ with the single characters as patterns and
+    the $h$-codewords as replacements, $H_h$ the same with the roles
+    exchanged -- $\mathrm{rep}_n$ places no restriction on its patterns
+    (Theorem~\ref{lem:multiple substitution}).
+\end{lemma}
+
+\begin{proof}
+    Comma-freeness is Lemma~\ref{lem:compose}; on an $h$-image the codeword
+    occurrences are aligned (Self-Synchronization), so the freezing
+    semantics of $\mathrm{rep}_n$ tiles the text exactly, replacing each
+    $h(\sigma)$ by $\sigma$. Both $\mathrm{rep}_n$ have constant, nonempty
+    patterns, hence are total. (Verified: the $h$- and $H_h$-expressions
+    against their intended semantics on all 40 inputs of length $\le 3$
+    over $\{a,b,c\}$; and as part of the roundtrip below.)
+\end{proof}
+
+\begin{theorem}
+    (\emph{Transfer})
+    \label{thm:transfer}
+    For all finite $\Sigma, \Gamma$ with $|\Sigma|, |\Gamma| \ge 2$, every
+    good coding $c$, and every partial function $f$ on $\Sigma^*$:
+    \begin{align}
+        f \text{ is $L_\Sigma$-reachable} \;\iff\; f^c \text{ is
+        $L_\Gamma$-reachable},
+    \end{align}
+    and when $f$ is total the $\Gamma$-witness may be taken total. The
+    $\Gamma$-witness of Direction 2 is $H_h\big(E'_d(h(X_1), \dots,
+    h(X_n))\big)$ with $E' = E^c$, $E'_d = (E^c)^d$, $h = d \circ c$; it has
+    $\deg$ equal to $\deg(E)$ and node count $|E|$ plus a constant depending
+    only on the two alphabets.
+\end{theorem}
+
+\begin{proof}
+    Direction 1 is Theorem~\ref{thm:transfer-forward}. For Direction 2 let
+    $E'$ over $\Gamma$ witness $f^c$. Every $h(X_i) = d(c(X_i))$ lies in
+    $\mathrm{image}(d)$, where $E'_d$ computes $d$ of the $E'$-value
+    (Direction 1, for the coding $d$); so
+    \begin{align*}
+        \llbracket E'_d \rrbracket\big(h(\vec X)\big)
+        \;=\; d\big(\llbracket E' \rrbracket(c(\vec X))\big)
+        \;=\; d\big(c(f(\vec X))\big) \;=\; h\big(f(\vec X)\big),
+    \end{align*}
+    and $H_h$ returns $f(\vec X)$ by the Retraction lemma. Definedness
+    tracks $f$'s: $h$ and $H_h$ are total, and $E'_d$ is defined at the
+    $h$-images exactly when $E$ is at $\vec X$. The degree and node claims
+    follow from Theorem~\ref{thm:transfer-forward} and the constant patterns
+    of the two $\mathrm{rep}_n$. (Verified: the full roundtrip $E_0 \mapsto
+    E' \mapsto E_{\mathrm{final}}$ on all 155 depth-$\le 1$ expressions
+    with constants $\le 1$, on all 40 inputs of length $\le 3$ -- 6,200
+    evaluations, 0 mismatches, 1,025 undefined on both sides; $\deg
+    E_{\mathrm{final}} = \deg E_0$ in all 155 cases, node overhead 528 for
+    the $(3,2)$-alphabet pair.)
+\end{proof}
+
+\begin{corollary}
+    (\emph{Alphabet-Uniform Questions})
+    \label{cor:uniform}
+    The right pass $\mathrm{r}$, the once-hinge $\mathrm{r}_1$, and every
+    $k$-th-occurrence node are \emph{coding-equivariant} -- they commute
+    with every good coding, by Lemma~\ref{lem:pass-transfer} -- so each of
+    their reachability questions is a single question, not one per
+    alphabet: reachable over one alphabet with at least two letters iff
+    reachable over every. The same holds for $\mathrm{rev}$ by
+    Theorem~\ref{thm:rev-uniform} below. Consequently every negative
+    search of Sections~\ref{sec:calculus}--\ref{sec:variants} run over one
+    alphabet excludes the conjugate over \emph{every} alphabet of at least
+    two letters.
+\end{corollary}
+
+\begin{proof}
+    Equivariance plus Theorem~\ref{thm:transfer}: if $F$ commutes with the
+    good coding $e$, then a $\Sigma$-witness for $F$ conjugates along $c$
+    to a $\Gamma$-function which, composed with the retraction $q = c
+    \circ e$, computes the native $F$ over $\Gamma$ -- the identical
+    construction as in Theorem~\ref{thm:rev-uniform}, with the equivariance
+    of Lemma~\ref{lem:pass-transfer} in place of the palindrome clause.
+    (Verified end to end: the pass node over $\{a,b,c\}$ transferred to
+    $\{x,y\}$ and retracted -- a full binary expression in the leftmost
+    calculus, 294 evaluations, 0 mismatches; once, rightmost and second
+    occurrence as semantic compositions, 882 evaluations, 0 mismatches;
+    equivariance of all four passes under the retraction codings, 2,352
+    cases, 0 mismatches; the doubling function as a further end-to-end
+    witness, 31 inputs.)
+\end{proof}
+
+\subsection{Reversal}
+
+Reversal is the one equivariance that codings do not enjoy for free: a
+letter-by-letter reversal reverses \emph{each codeword individually}, so
+$c(\mathrm{rev}\,S) = \mathrm{rev}(c(S))$ holds iff every codeword is a
+palindrome -- a false claim in an earlier draft of this section, caught by
+the verification battery (60 failures on 31 inputs). The naive ``rev on the
+code image'' is not the reversal of the image; the repair is to retract
+along a coding whose outer half is palindromic.
+
+\begin{lemma}
+    (\emph{Palindromic Dictionaries})
+    \label{lem:palindrome}
+    \begin{enumerate}[(i)]
+        \item $c(\mathrm{rev}\,S) = \mathrm{rev}(c(S))$ for all $S$ iff
+        every codeword of $c$ is a palindrome; then
+        $e(\mathrm{rev}\,T) = \mathrm{rev}(e(T))$ for every such $e$.
+        \item (\emph{Middle-marker family.}) For $\mu \in \Sigma$ and
+        $m \ge 1$, $\{\, \alpha\,\mu\,\mathrm{rev}(\alpha) : \alpha \in
+        (\Sigma \setminus \mu)^m \,\}$ is comma-free and palindromic, of
+        size $(|\Sigma|-1)^m$ -- unbounded for $|\Sigma| \ge 3$.
+        \item Over the binary alphabet the family degenerates (size 1),
+        but size-3 palindromic comma-free dictionaries exist:
+        $\{\mathtt{aabaa}, \mathtt{ababa}, \mathtt{abbba}\}$ and
+        $\{\mathtt{aabaa}, \mathtt{babab}, \mathtt{bbabb}\}$.
+    \end{enumerate}
+\end{lemma}
+
+\begin{proof}
+    (i) is immediate on one-letter words. (ii) $\mu$ occurs in each codeword
+    only at the exact middle, and in $u \cdot v$ only at the two middles;
+    an occurrence of a codeword has its $\mu$ at $p + m$, hence $p \in
+    \{0, 2m+1\}$ -- aligned. (iii) by inspection. (Verified: (ii) 20
+    dictionaries, ternary and quaternary, $m \le 5$, all comma-free with the
+    stated sizes; (iii) both dictionaries comma-free; exact maxima of
+    palindromic comma-free sets over binary, by branch and bound:
+    $1, 1, 3, 2, 7, 14$ at $\ell = 3, 4, 5, 6, 7, 9$ -- data, not a
+    formula.)
+\end{proof}
+
+\begin{theorem}
+    (\emph{Reversal Uniformity})
+    \label{thm:rev-uniform}
+    $\mathrm{rev} \in L$ over one alphabet with at least two letters iff
+    over every: $\mathrm{rev} \in L_\Sigma$ and a good $c : \Sigma
+    \rightarrow \Gamma^\ell$, a good \emph{palindromic} $e : \Gamma
+    \rightarrow \Sigma^k$ (Lemma~\ref{lem:palindrome}) and $q \triangleq c
+    \circ e$ give
+    \begin{align}
+        \mathrm{rev}_\Gamma \;=\; H_q \circ \llbracket E' \rrbracket
+        \circ q, \qquad E' = E^c .
+    \end{align}
+\end{theorem}
+
+\begin{proof}
+    $q(T) = c(e(T))$, so $\llbracket E' \rrbracket(q(T)) = c(\mathrm{rev}
+    \, e(T))$ by Direction 1; the palindrome clause gives
+    $\mathrm{rev}\, e(T) = e(\mathrm{rev}\, T)$, hence
+    $\llbracket E' \rrbracket(q(T)) = c(e(\mathrm{rev}\,T)) = q(\mathrm{rev}
+    \,T)$, and $H_q$ returns $\mathrm{rev}\,T$. The needed dictionaries
+    exist for every pair of alphabets: from a source of at least three
+    letters use the middle-marker family for $e$; from a binary source,
+    first move to a ternary alphabet along the size-3 binary dictionary of
+    Lemma~\ref{lem:palindrome}(iii) -- a coding of three letters needs
+    three codewords, and three exist -- and then proceed as before; $c$
+    itself is never required to be palindromic (Lemma~\ref{lem:dict}
+    suffices), and $D_q = \{c(e(\gamma))\}$ is comma-free by
+    Lemma~\ref{lem:compose}. (Verified: $e = \{\mathtt{x} \mapsto
+    \mathtt{bab}, \mathtt{y} \mapsto \mathtt{cac}\}$ over $\Sigma = \{
+    \mathtt{a},\mathtt{b},\mathtt{c}\}$, $c$ the length-6 double-$a$ coding
+    to $\{\mathtt{x},\mathtt{y}\}$; $q$ and $H_q$ as \emph{expressions},
+    with the oracle $D = c \circ \mathrm{rev} \circ c^{-1}$ standing in for
+    $\llbracket E' \rrbracket$ ($\mathrm{rev}$-reachability being the
+    hypothesis): $H_q(D(q(T))) = \mathrm{rev}\,T$ on all 63 inputs of
+    length $\le 5$, zero failures.)
+\end{proof}
+
+\begin{remark}
+    (\emph{No Contradiction with the Native Results})
+    \label{rem:native}
+    Theorem~\ref{thm:transfer} conjugates; Propositions
+    \ref{prop:del-leftmost} and \ref{prop:kth} speak of \emph{native}
+    functions, and the two live in different conjugacy classes. The binary
+    witness $W$ of the leftmost deletion transfers to a ternary alphabet as
+    the \emph{block-level} function $[\,\epsilon/c(b)\,]_1$ on the image of
+    $c$ -- it deletes an $\ell$-block, not a character, and is not the
+    native ternary $[\,\epsilon/\gamma\,]_1$; the negative ternary searches
+    could not have seen the transferred witness in any case, its depth
+    after transfer and retraction being far beyond the exhaustive depth-3
+    and randomized $4$--$7$-pass spaces. Nor is the $\ell = 1$ coding a
+    loop-hole:
+    an injective character map is (trivially) good, and conjugating the
+    binary once-deletion along it yields the native ternary function
+    \emph{restricted to a two-letter sub-alphabet} -- reachable as a partial
+    function, exactly the anchored-domain face of the phenomenon, and
+    consistent with the resistance being about general position over three
+    letters. Finally, the once-calculus -- and the rightmost and
+    $k$-th-occurrence calculi -- have transfer theorems of their own:
+    Lemma~\ref{lem:pass-transfer} is scan-direction- and
+    multiplicity-agnostic, the first coded occurrence being the coding of
+    the first native one. The marker-freshness obstruction of
+    Proposition~\ref{prop:kth}(iii) is a statement about native simulation
+    within one alphabet and is untouched.
+\end{remark}
+
+\subsection{The Unary Edge}
+
+\begin{proposition}
+    (\emph{The Boundary $|\Sigma| = 1$})
+    \label{prop:unary-edge}
+    \begin{enumerate}[(i)]
+        \item $c(\mathtt{a}) = \mathtt{ab}$ is good ($\{w\}$ is
+        comma-free iff $w$ is primitive), and every unary-reachable
+        function is the restriction of a binary-reachable one.
+        \item There is no injective monoid homomorphism $\{\mathtt{a},
+        \mathtt{b}\}^* \rightarrow \{\mathtt{a}\}^*$: any $h$ has
+        $h(\mathtt{ab}) = h(\mathtt{a})h(\mathtt{b}) =
+        h(\mathtt{b})h(\mathtt{a}) = h(\mathtt{ba})$ while $\mathtt{ab} \ne
+        \mathtt{ba}$. So no coding-conjugation crosses the $|\Sigma| = 1$
+        boundary from above, and the transfer theorem is sharp: it holds
+        for exactly the alphabets of at least two letters.
+        \item Every unary $L$-expression computes a length map in the
+        closure of $\{n \mapsto n,\ n \mapsto k\}$ under pointwise sum
+        (concatenation) and $(g,r,p) \mapsto \big(n \mapsto r(n)
+        \lfloor g(n)/p(n) \rfloor + g(n) \bmod p(n)\big)$ (the pass; the
+        constant case is $n \mapsto i\lfloor n/j \rfloor + n \bmod j$, and
+        $[\,X_1/a\,]X_1$ squares). Every such map is eventually
+        polynomially bounded, so $n \mapsto 2^n$ is unreachable at any
+        size. The floor-halving $n \mapsto \lfloor n/2 \rfloor$ -- the
+        unary-domain function of Proposition~\ref{prop:unary-once} -- is
+        absent from every unary expression of size $\le 7$ (36,978
+        expressions, 2,091 distinct length maps on $n \le 24$): every
+        single pass leaks its residue $n \bmod j$, and subtraction is not
+        among the closures.
+    \end{enumerate}
+\end{proposition}
+
+\begin{proof}
+    (i) is Direction 1 for the coding $c$ (verified: all 258 depth-$\le 1$
+    unary expressions on $a^0..a^{24}$, 6,450 evaluations, 0 mismatches,
+    plus 12,000 deeper-random; alignment and the pass law, 566 cases). (ii)
+    is the displayed computation. (iii): the pass law is the greedy scan of
+    a unary string (verified: 20 $(i,j)$ pairs); the growth bound is an
+    induction -- a pass outputs at most $|R| \cdot \lfloor |E|/|P| \rfloor
+    \cdot |P| + |E| \le |R||E| + |E|$ characters; the halving search is
+    exhaustive at size $\le 7$ ($\lceil n/2 \rceil$ and $n \bmod 2$ are
+    present at size 4, $n^4$ at size 10 via $[\,[X/a]X / a\,]([X/a]X)$,
+    verified). Of 480 total binary length profiles $n \mapsto
+    |\llbracket E \rrbracket(a^n)|$ ($n \le 12$), exactly two are realized
+    by no size-$\le 7$ unary expression nor any constant shift of one --
+    bounded-search evidence for the strictness of (i)'s converse.
+\end{proof}
