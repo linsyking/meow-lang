@@ -507,3 +507,135 @@ del1b variant, then the simpler tail-trim composition; gold-standard
 AST verification (ev_eager); documented the mechanism and the boundary;
 updated this report.  Next (R4): the |Sigma| >= 3 lift; then the
 computed-needle once-node; then ONCE sqsubseteq L or the exact boundary.
+
+---
+
+# ROUND 4 (2026-09-21): THE |Sigma| >= 3 LIFT -- BLOCKED FOR THE PARITY FAMILY, BOUNDARY SHARPENED
+
+## 17. Coordinator cross-verification
+
+The coordinator independently re-ran the witness through the paper's own
+cross-verified evaluator: W exact on all 511 binary strings <= 8, and my
+full battery green at both levels.  Confirmed dead: the "junction-local
+bounded left-context" invariant family for hinge 1 -- the cascade reads
+exactly bounded (parity) information at the junction, so no such invariant
+can separate L from ONCE.  The rev/L+R obstructions (crossings,
+residue-position) are untouched.  ONCE-side unification is dead; the
+computed-needle question is the live front.
+
+## 18. What breaks over |Sigma| >= 3 (diagnosis, machine-confirmed)
+
+W's five passes treat c's as inert chars: every maximal a-run is
+doubled/marked/paired/collapsed INDEPENDENTLY.  Consequences, verified:
+  * a-runs strictly inside gaps round-trip to identity (a^k -> ... -> a^k):
+    the damage is localized to junction-adjacent runs.
+  * W[1:] == del1b fails on exactly those strings where some gap j >= 1
+    STARTS with 'c' (stage 3 [ba->b] cannot delete the unit after such a
+    b, so gap j's parity accounting drifts and b_{j+1} gets eaten too), or
+    where gap 0 does not END with an a-run (the residue lands mid-gap, not
+    at the junction).  Damage rate: 2256/3280 abc-strings <= 7,
+    102/384 on the c-spliced domain.
+
+## 19. The homogeneity obstruction (why the parity family does not lift)
+
+The cascade's selection = a two-step conversion:
+  (i) a GLOBAL parity asymmetry: the gap before the first b is the only
+      pre-b gap that is never post-b, so [+1 before every b][-1 after
+      every b] leaves gap 0 odd and all other pre-b gaps even;
+  (ii) a LOCAL conversion: the greedy pairing [aa->ab] turns run parity
+      into a residue 'a' at the junction, which the final greedy walk
+      eats together with the first b.
+Step (ii) needs homogeneous (single-letter) runs, and step (i)'s
+cancellation needs front-deletions to commute with back-marks -- true
+within an a-run, false across mixed content.  Every repair scheme tried
+re-instantiates the original selection problem:
+  * front-marks (+1 after every b) land at the wrong gap end; the
+    migration pass [ba->ab] moves ALL of them globally.
+  * sentinel sandwiches [b->aab]/[b->aba] mark every junction alike.
+  * heterogeneous [-1 after every b] (per-sigma [b.sigma -> b]) cascades:
+    sequential passes re-match at exposed positions, deleting a
+    data-dependent number of chars (2 for a gap starting ac, 1 for ca).
+  * a^k-codings of {a,c}* into {a}* do not exist (no injective code), so
+    the binary cascade cannot be "escaped around"; the comma code keeps
+    gap interiors heterogeneous, and the paper's own general-alphabet
+    reduction (main.tex:1597, Horner into a-tallies) lives at the level of
+    RECURSIVE definitions, not of passes -- it does not transfer.
+In the comma-coded world the heterogeneous [-1] IS solved (the char
+after every b is always the comma), which is a real gain -- but the gap
+interiors stay mixed, so the pairing still fails.
+
+## 20. Search statistics for the lift (all negative, all re-runnable)
+
+  * Paper vocabulary (156 passes, patterns/repls <= 2 over abc), c-spliced
+    domain (binary <= 5 with one c at every position, 384 strings):
+    exhaustive MITM depth <= 4 and <= 5: NO witness for rep1b
+    (925 full checks).  search_lift.py mitm3, lift.log.
+  * Cascade-shaped vocabulary (35 passes: doublings, halvings, marks,
+    sandwiches, junction swaps), same domain: exhaustive MITM depth
+    <= 6 (3+3): NO witness (6,687 full checks).  search_lift2.py
+    stage4, stage4.log.
+  * Repair-suffix search: [repair <= 3 passes] o W on the c-spliced
+    domain (15,710 states explored): NO repair.  search_lift2.py wpre,
+    wpre.log.
+
+## 21. The live lead for R5: the anchored-needle reduction
+
+R1's cluster (verify_r1b.py) already machine-verified, OVER TERNARY TOO:
+P (the longest b-free prefix) implies D via the fresh-anchored needle
+A.enc2(P).B with A = bb (fresh in every enc2-image) -- the anchor kills
+the tie obstruction.  So the |Sigma| >= 3 lift reduces to computing P
+(or a prefix tally a^{|P|}) -- and the first-b index is PRESERVED by the
+c-deletion projection pi = [eps/c]X (one pass), over which the binary
+cascade machinery applies.  Concrete R5 sub-problems:
+  (a) is the prefix tally a^{|P|} L-computable over binary?  The
+      cascade's stage-4 text T4 = (ab)^n0 . a . b . ... carries a
+      complete encoding of n0 at the string head; extraction needs a
+      "delete the variable tail" step (an end-anchored fresh needle, the
+      prop:last device, over enc2-space).
+  (b) if (a) is yes: ternary del1b = the R1 anchored construction with
+      P replaced by the pi-projected tally (the c-positions inside P are
+      exactly what the anchored needle does NOT need to know -- it needs
+      only the b-free PREFIX LENGTH plus a fresh anchor; the needle
+      A.enc2(a^{|P|}).B pins the site by length, and enc2-faithfulness
+      does the rest).  [to be verified]
+  (c) the computed-needle once-node [A/B]_1 for ONCE sqsubseteq L:
+      escape + [c/B']-marking reduces it to "edit at the leftmost
+      c-site", the parity cascade's home turf -- the missing piece is a
+      replacement of computed (variable) length at the marked site.
+
+## 22. Round log
+
+R4: coordinator cross-verification received; diagnosis of W's c-damage
+(localized to junction-adjacent runs); the homogeneity obstruction
+formulated after systematic design-space walk (front/back marks,
+migration swaps, sandwiches, per-sigma deletions and their cascades,
+comma-coded worlds, a^k-codings, the paper's recursive-level alphabet
+reduction); three exhaustive/near-exhaustive searches launched and
+completed negative (mitm3, stage4, wpre); R5 lead identified (the
+anchored-needle reduction via the pi-projection and the prefix tally).
+Files: search_lift.py, search_lift2.py, verify_r3.py, REPORT.md (this
+file); logs lift.log, stage4.log, wpre.log, r3.log.
+
+## 20b. Additional negative: the pre/post wrap (R4c)
+
+[post <= 2] o W o [pre <= 2] over the cascade vocabulary: 1,590,121 wraps
+checked (early abort) on the c-spliced domain, 0 candidates
+(search_wrap.py, wrap.log).  W cannot be repaired by escaping in and out
+with up to 2 passes on either side.
+
+## 23. Structural observation: complementary alphabet requirements
+
+Two selection devices emerged from this investigation:
+  - the PARITY CASCADE (the witness): needs homogeneous gap filler
+    (|Sigma| = 2) and NO fresh patterns (it encodes onto the data itself);
+  - the BLOCK-ENCODING device (fresh junction patterns like "bab" that
+    distinguish keep-sites from eat-sites, needed for keep-vs-delete
+    distinctions such as extracting P.b or prefix tallies): needs a third
+    character (over {a,b}, any block encoding ending in 'b' contains
+    "ab", and any avoiding "ab" cannot end in 'b').
+They have OPPOSITE alphabet requirements, so they cannot be composed over
+either alphabet: over |Sigma| = 2 the cascade works but extraction dies;
+over |Sigma| >= 3 extraction-freshness works but the cascade dies on
+heterogeneous gaps.  This is the sharpest statement of why the |Sigma| >= 3
+lift resists: it needs a selection mechanism that is simultaneously
+heterogeneity-tolerant AND fresh-pattern-free.

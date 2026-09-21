@@ -675,3 +675,329 @@ L+R ARC COMPLETE AND INTEGRATED (four rounds, all verified by coordinator):
   from both the once side (tie obstruction, P = takeWhile) and the L+R side
   (residue routing, v5 boundary through computed needles); rev agent's
   conjectures A/B/C are reordering-specific (predicted NOT to separate P).
+
+## Session 6 (continued): rev round 4 verified + integrated; lim R1 battery green
+
+- rev agent round 4 (rev ∉ L program) -- ALL claims reproduced under my
+  own runs (verify_round4_hinges.py, verify_round4_ladder.py,
+  search_shaving.py; then my supplementary verify_round4_extra.py):
+  * CROSS-HINGE: P = takeWhile≠b and f2 = [b/aa]^R both have χ = 0 on
+    every binary input ≤ 12 (8,191 each) and prov width 1 at mult 1 --
+    the A/B/C invariant family is rev-SPECIFIC; a crossing-count proof
+    of rev ∉ L cannot double for either sibling (once / direction).
+  * LADDER: revlast_k = cat(last∘init^j, init^k) built (320/2,498/
+    17,689/123,971 nodes), exact on all binary inputs (≤10 for k≤2,
+    ≤8 for k≤4); crossings at n=14 worst-of-56: 13/25/36/46, matching
+    the closed form χ = k(n−k)+C(k,2) = C(n,2)−C(n−k,2); rev = 91.
+    Barriers machine-checked: content-relabeling (canonical consistent
+    labeling width ≤ #classes; brute-forced optimal ≤ 6) and faking
+    (anchored rungs rebuild from constants: provLDS 0).
+  * SHAVING v2 (the Conjecture-B piece): a copy's residual is a function
+    of (entry offset, |B|−1 following chars) → ≤ |B|·|Σ|^{|B|−1}
+    distinct residuals; verified as a function property + count bound,
+    3,000 trials, 0 failures (v1 refuted: 318 same-offset trials).
+    Constant-pattern case closed (prov LDS ≤ 1 outright); the remaining
+    gap to B is exactly variable patterns -- same boundary as
+    thm:subsequential. Genetic + hand attacks top out at LDS@mult1 = 2.
+  * MY SUPPLEMENTARY (verify_round4_extra.py): rotR_k built for k ≤ 4,
+    exact, crossings = k(n−k) exactly; cat(X,X) crossings 0 (all rows
+    doubletons); 1,000 random pipelines at n=12: max χ = 3, top-5 flat
+    at n=8..14. CAUGHT: swapfl expression duplicates on |w| ≤ 1 (last
+    = head); exact on all 4,092 strings of lengths 2..11 -- the remark
+    states the |w| ≥ 2 domain.
+- PAPER: Remark rem:price "The Price of Reordering" in The Landscape
+  (§5.7), right after the two-ropes enumerate: χ_f defined from flip
+  influence, the ladder table (init/last/rotR/swap-fl/revlast_k/rev with
+  closed forms), the c(E)·|w| suggestion with the full verification
+  parenthetical, three delimitations recast without the provenance
+  formalism (pair counts die on cat(X,X); content relabeling; tracing
+  fakeable), and the rev-specificity paragraph (three obstructions:
+  unbounded reordering / left-anchored region deletion / residue
+  routing). Forward pointers added in §5.3 (direction) and the
+  conclusion. 55 pages, 0 errors, 0 overfull, no undefined refs.
+- lim R1 battery (verify_r1.py) ALL GREEN under my run: 65,788 checks,
+  0 failures; 166 census agreement; 3,306 value mismatches / 290 verdict
+  mismatches on exactly [baab/aba],[abba/bab]; unbordered-B slow-agree
+  classification (17 raw → 0 true); towers carry through lim (t=3
+  output length 65,556 = b^22·a^65,534). The script's stale "paper says
+  170" note is now moot (paper fixed).
+
+## Session 6 (continued): once arc COMPLETE + integrated (prop:del-leftmost)
+
+- once agent final arc (R1-R4) -- the positive claim re-verified by me
+  THREE ways: (a) my corrected independent inline check (W and guarded
+  del1b, 2,047 strings <= 10 + 20,000 random <= 49, 0 failures -- my
+  first attempt had two reference bugs of my own: a looping rep1b and
+  an empty-string no-b case, caught and fixed); (b) my re-run of
+  verify_r3.py (4095 + 400,000 random; AST-level 2047 + 20,000; del1b
+  511 + 3,000; parity account 8 shapes; ternary lift 2,256/3,280 --
+  all green); (c) the earlier session checks. W = [a/ab][ab/aa][b/ba]
+  [ab/b][aa/a] = [a/b]_1 exactly; del1b = if(contains b, tail(W), X).
+  Mechanism hand-re-verified by me on the stage table (gap arithmetic:
+  2g+1 unique-odd pre-b gap; [aa->ab] pairing leaves the residue at
+  the junction; [ab->a] consumes residue+b).
+- PAPER INTEGRATED: prop:del-leftmost (The Leftmost Deletion, over Two
+  Letters) in 5.1 with the gap-parity proof + verification note; the
+  mirror remark gains the conjugation corollary (rightmost deletion
+  R-reachable over binary) and its central-problem paragraph REWRITTEN
+  (old searches explained: witness needs depth 5, random search
+  sampled 0.08%; closest misses = the junction; what remains: constant
+  needle over |Sigma|>=3 with the homogeneity obstruction, computed
+  needle over every alphabet); Landscape rope 1 updated; conclusion
+  once-clause updated; price remark's third obstruction relabeled
+  "the computed needle". 56 pages, 0 errors, 0 overfull.
+- Ternary boundary (agent's R4, search-negative, recorded not
+  integrated): parity cascade vs fresh-block-encoding have
+  COMPLEMENTARY alphabet requirements; every repair scheme re-creates
+  first-site selection; W fails 2,256/3,280 abc-strings <= 7, 3,402/
+  5,461 abcd <= 6. R5 lead if resumed: anchored needle (P => D,
+  verified over ternary) reduces the lift to the prefix-tally/P
+  question; first-b index preserved by pi = [eps/c]X.
+- design-space: verify_r3c GREEN under my run (rank-1 == rank-0
+  collapse: 146/12/4 identical; amplifier rank-1 lens [2,5,10,19,36,
+  69,134,263] vs rank-0 doubling; rank-2 cures fail at length 24;
+  rank-1 robustness 0 flagged). verify_r3.py timed out at 900s on the
+  first attempt (exit 124, output lost to buffering) -- re-running
+  unbuffered at 5400s.
+
+## Session 6 (continued): rev round 5 verified (proof fragment); systems D-battery green
+
+- rev round 5 (the user-directed rev-not-in-L proof attempt, first round):
+  verified by me, ALL GREEN — but the crux had NO verification code
+  (verify_round5_phases.py covers parts 1-4 only; the 1.15M-text
+  Left-Move run was unreproducible). I wrote verify_round5_leftmove.py
+  myself: 1,152,480 texts, max strictly-decreasing position chain
+  through pairwise-disjoint residuals = EXACTLY 2, no chain of 3
+  anywhere; 40,000 random (|A|<=7, |B|<=6, 6 copies): max 2. Bookkeeping
+  note: my qualifying-text count 23,368 ("any pair disjoint") vs their
+  4,730 (likely "all disjoint") — check is a superset, a fortiori.
+  Round 5 substance: Lemma Phases (residual = f(entry straddle o, exit
+  straddle j), #(1+|O|)(1+|J|)+1 — overlap sets, superseding |B|*s^|B-1|
+  (3 <= 4 vs 12 on the validated construction)); Lemma Overlap-
+  Periodicity (border-chain structure; AP phases => repetition; density
+  bound FALSE: A=aabaabaa, B=xaabaa, O={1,2,5}, p=3); Left-Move Wall
+  (verified fact, proof open); Base Case Proposition LDS <= 2*LDS
+  (prov_A)+1 for [A/sigma][eps/B] at mult 1 (205,585 instances; max 1
+  constant A, 3 = 1+2*2 variable). Full-proof gap list: faking caveat
+  (both routes needed), prove the wall, value recursion at intermediate
+  multiplicity, multi-pass composition. NOT integrated (fragment in
+  research record; holds until the wall is proved or arc ceiling).
+  Round 6 resumed: prove the wall, value recursion, LINE 2 crossings.
+- systems R3 now FULLY verified: my verify_r3d.py (occ_fast
+  equivalence-proven, D1 = 8,000 rank-0 == restart agreements; D2 census
+  at adequate caps (5000/8000): rank 0 = 166 = 162 + the four; rank 1 =
+  166 SAME SET; rank 2 = 148 with the 18 cures exactly 16 A=B |A|=4 +
+  [abba/bab],[baab/aba]; no creations) + verify_r3c green earlier +
+  parts A-C green in the truncated run. Systems agent resumed for R4
+  (flat lazy-pass calculus).
+
+## Session 6 (continued): lim round 3 verified (all four steers green)
+
+- lim R3 verified by me: verify_r3.py = 964,604 checks, 0 failures
+  (occurrence census: edge lengths {0,1,2} at every pc + systematic
+  0..40 + 400 random <= 1000, offsets 2/3/7 + empirical offset-1;
+  the three normalization lemmas B1/B2i/B2ii with raw failures
+  demonstrated; containment driver 135 conv + 29 div at BOTH toolkit
+  roles + the 2CM steps themselves + selfloop diverging both sides);
+  verify_r2.py re-run after the agent's mk_contains fix (mask must
+  differ from pattern; R2 was immune -- all long frame patterns):
+  50,744/0 unchanged. Occurrence lemma hand-checked by me (Steps 1-3
+  sound: gap sequences (2;1^k-1;3), pattern gaps only {1,3,5} never
+  0/2, tau-to-consecutive-tau mapping, three-step pinning).
+  occurrence_lemma.tex is paper-grade.
+- Round substance: the general occurrence lemma (ALL pc,x,y -- proof
+  by gap calculus); fix_selfjump / swap_counters / add_cleanup as
+  verified lemmas (complete normalization pipeline); lim(L) <=>
+  lazy-pass recursion via the RUN driver; convergence undecidability
+  (Sigma01 convergence, Pi02 totality). NEW growth finding: [aabb/ba]
+  and [bbaa/ab] grow exponentially under lim sweeps (len 8 -> 204 in
+  10 sweeps) -- ONE pass + one lim node doubles per iteration vs
+  cor:towers needing 2t-1 nested nodes.
+- R4 resumed: the paper-form assembly (variant subsection after
+  "Restarting from Zero": syntax/denotation, fixed-point-set lemma,
+  compilation theorem with preprocessing, occurrence lemma, partiality,
+  containment, the punchline corollary flat-L+one-lim = lazy-pass
+  recursion = partial computable, undecidability corollaries, growth
+  proposition, landscape row).
+
+## Session 6 (continued): systems round 4 verified (flat lazy-pass collapses into L)
+
+- systems R4 verified by me, ALL THREE BATTERIES GREEN:
+  verify_r4.py (A1 cross-check: 1,500 exprs x 15 inputs x 2 runtimes =
+  0 mismatches; A2 lpcons over the FULL depth<=2 space: 599,844
+  expressions x 31 inputs, eager-defined 7,242,300 points all in exact
+  agreement, 10,211,456 undefined-both, 1,141,408 LAZY-ONLY
+  definedness points, all with the discarded-replacement mechanism --
+  undefined node inside a subtree the sweep discards; no R-slot
+  mechanisms); verify_r4b.py (hand cases 4x31; TR vs the paper's own
+  run_eager 25x31; ALL 193 lazy-only witnesses x 31 inputs; 250 random
+  depth<=2; escalation 25 witnesses x 127 inputs |S|<=6 -- all 0
+  mismatches, 0 Phi-undefinedness); verify_r4c.py (O unit test 15^2
+  pairs 0 undefined / 0 wrong; 120 random depth-3 x 31 inputs 0
+  mismatches; TR sizes to 31,036 nodes).
+- The theorem: the flat lazy-pass calculus COLLAPSES into L as partial
+  functions. TR(E) = [a/if(F(E),a,eps)]Phi(E) is an explicit eager
+  pipeline with Phi([R/P]T) = [PhiR/g(PhiP)]PhiT (patterns eps-coerced
+  via g(X)=if(eq(X,eps),a,X); scrutinees uncoerced), occurrence test
+  O(u,v) = if(eq(u,b), [bb/b]v != v, [b/g(u)]v != v) (mask-must-differ
+  trick), and the guard gate uses [a/a]=identity vs [a/eps]=undefined.
+  Punchline: laziness adds DEFINEDNESS, not power -- every lazy-only
+  point is a defined-elsewhere-identical node hidden inside a subtree
+  the leftmost sweep discards; and the paper's S6 universality is
+  genuinely a RECURSION phenomenon (the gate), not an evaluation-order
+  phenomenon.
+- Construction scrutiny: sound. ONE write-up bug found: REPORT S9.4's
+  typeset F-formula has an antecedent-scope error -- "(F_T and F_P and
+  isne) => (not-O or F_R)" as written makes eps-pattern nodes DEFINED;
+  the code (verify_r4b.py: cond = and3(F(T), F(P), isne(sg, PHI(P)));
+  rest = or2(notb(O(...)), F(R)); tk.if_(sg, cond, rest, K(BOT))) is
+  CORRECT: F = F_T and F_P and isne and (not-O or F_R), the isne is a
+  CONJUNCT. Flagged to the agent for the report fix; load-bearing for
+  any paper version.
+- Agent resumed for R5 (final): the two paper-ready drafts (flat-lazy
+  collapse as a S6 theorem; L_k mosaic as a landscape addition), the
+  final design-space map, and remaining survey rows as budget allows.
+  Integration queue: this is the second S6-theorem candidate behind
+  the lim arc's universality subsection.
+
+## Session 6 (continued): systems R5 verified + lim R4 verified -- BOTH INTEGRATED; paper 67 pages
+
+- systems R5 (final) verified by me: verify_r5.py rows 1 and 3
+  (once+rescan = ONCE: 2,646/0; once+restart(node) = MARKOV: 2,646/0 --
+  both by airtight arguments + machine) and verify_r5b.py for ROW 2
+  CORRECTED: pass-granularity restart (iterate the full unsafe pass) is
+  NOT Markov -- 9,322 agreements, 2 differences; witness [aba/bab] on
+  'bbabb': pass-iter 'baaba' vs Markov 'abaab'; I hand-checked the
+  witness against the paper's own def:rescan (freeze b, freeze a, T =
+  aba -> 'baaba') -- CORRECT. NOTE: verify_r5.py's internal
+  unsafe_pass re-implementation failed its own sanity check (46
+  mismatches vs systems.rescan) and its [ba/ab] "witness" prints same;
+  dead code superseded by verify_r5b. The S9.4 F-formula scoping typo
+  was fixed by the agent (isne now a conjunct).
+- systems R5 integration (my fixes to the drafts): (1) thm:flatlazy
+  "Flat lazy passes denote L" after cor:barriers -- relabeled
+  sigma/sigma_1/sigma_2 to the paper's b/x convention; juxtaposition
+  for concatenation; isnе referenced from rem:ifgate; FIXED THE SIZE
+  ARGUMENT (draft said "each level multiplies by a constant" = c^depth
+  exponential on spines; true accounting: F adds a copy of Phi of each
+  node's pattern and scrutinee -> |E^+| = O(|E|^2), a sum over nodes);
+  tightened the occ verification note to "the load-bearing branch"; all
+  numbers confirmed against my r4/r4b/r4c runs (the 193 are distinct
+  lazy denotation tuples no depth-2 eager expression has, verified via
+  smallest witnesses). (2) prop:kth "The k-th-occurrence family" after
+  the eq-conjecture paragraph: fixed the test set to 63 strings
+  (includes epsilon; the draft said 62); DROPPED the 688,499 claim (it
+  is the ANCHORED reduced-vocab space from verify_r2.py part E, whose
+  target battery never tested [a/b]_2-type functions -- the REPORT's
+  8.5 verdict line conflated it in; only 969,321 and 3,773 were
+  [a/b]_2-tested); softened "each [A/B]_j" to the verified instances
+  ([a/b]_j diagonal + [aa/b]_2); marker-freshness stated as
+  thm:pos-hinge(ii)'s hypothesis (fresh for B, A AND the input); the
+  opening's "none collapses into ONCE" qualified (over |Sigma|>=3 the
+  constant fragments DO collapse by marking). (3) Landscape table rows
+  for L_k and lim; walking-paragraph clauses; intro/abstract/conclusion
+  touch-points. Re-established verify_r3 parts A-C with visible output
+  (my earlier r3 run's output was lost to the timeout): 135,136/0 + 0
+  classical violations; 38,959/28,090/2,307 with the diagonal matrix;
+  18,522; 969,321 + absences + depth-1 sanity; 3,773 + absences. ALL
+  GREEN. Systems ARC CLOSED.
+- lim R4 verified by me: verify_r4.py re-run = 364,693 checks, 0
+  failures, ALL GREEN (fp-set 930x255; census <=6 114,300 pairs
+  126/20/0; all draft witnesses incl. [ab/bb] on bbbb lim 'abab' vs
+  restart 'aaab' -- MY hand-check initially disagreed; found MY error:
+  'abbb'.find('bb') = 1, not 2, so restart goes bbbb->abbb->aabb->aaab;
+  the agent's witness is correct; amplifier law on 8,391+200 inputs +
+  50 traces + n<=14; towers t<=3 (65,556 at n=4); Fibonacci |s_k| =
+  2F_{k+1}+2k+6 through k=28 (|s_28| = 1,028,520 = 2*514229+62 -- I
+  checked against F_29 = 514,229), bbaa law +2, mirror, sort). The <=9
+  census numbers (3,306/290/0) confirmed present in MY earlier
+  lim_verify_r1.out run. sanity_lim.tex compiles clean under my run.
+  I hand-verified V(k) arithmetic (length 2k+4, gaps (2;1^{k-1};3)),
+  the half-node/amplifier closed form (v after (ab)^j = 2^{j+1}-2), the
+  driver, and the undecidability reductions.
+- lim R4 integration: lim_section.tex (605 lines) inserted after the
+  sort remark, before "Both Directions at Once", as \subsection
+  {Converging to the Fixed Point} (ssec:lim): def:lim, lem:fpsweep +
+  eq:contains, prop:limtotal, rem:limstrategies, thm:lim2cm
+  (construction + correctness via lem:occurrence's gap calculus),
+  thm:limpartial, prop:limcontain (the RUN driver), cor:limclass (flat
+  L + one lim node = lazy-pass recursion = partial computable),
+  cor:limundec (Sigma01/Pi02-complete), prop:limgrowth (amplifier with
+  complete potential proof; towers 2t-1 nodes), rem:fiborbit (Fibonacci
+  divergent orbits, the R1 "doubling" corrected to golden-ratio growth;
+  witnesses corrected to paper notation [babb/bbbb],[ab/abba],
+  [baab/aba]). The draft's mini landscape table folded into the real
+  table (lim row: trivially / refuted / verbatim / unbounded; I changed
+  the toolkit cell "flat" -> "verbatim" to match the table's vocabulary
+  and the draft's own explanation). Touch-points: the flatlazy closing
+  paragraph gains the bookend sentence (the loop, with no recursion to
+  unwind, is the whole of it); intro variants paragraph, abstract,
+  conclusion. All cross-references verified to exist (def:markov,
+  thm:termination items (i),(ii),(iii),(v) -- the paper's own proof
+  states the position-independence prop:limtotal leans on; thm:
+  amplifier, cor:towers, minsky67, geser01; mathpartir's mathpar).
+  BUILD: 67 pages, 0 errors, 0 undefined references, 0 overfull.
+- Paper now 56 -> 67 pages this session: rem:price, prop:del-leftmost,
+  thm:flatlazy, prop:kth, the lim subsection, 3 new landscape rows
+  (L_k, lim; once row context), and touch-points in abstract, intro,
+  open problems, and conclusion. Nothing committed (user commits
+  externally).
+
+## Session 6 (continued): rev round 6 verified -- a NEGATIVE round, honestly reported; HOLD continues
+
+- rev round 6 (the user-directed rev-not-in-L proof attempt) verified by
+  me, all four batteries green under my runs:
+  verify_round6_witness.py (the staircase family table: mult=3 pinned,
+  LDS=j exactly, content==den every row; the B2 triple standalone;
+  the staircase provs), verify_round6_conjAB.py (d=2..6 family sweep
+  j=2..40 with den_ok; the mod-3 rows; the d=4 extension),
+  verify_round6_mult1_sweep.py (25 constructions x 7 patterns x 6
+  sigmas: NO row with mult=1 and LDS>=4; top rows all mult>=2),
+  verify_round6_leftmove.py (PART A: the round-5 domain re-run, 0
+  triples, 4,730 vs 23,368 = pure counting conventions; PART B1: the
+  B^inf skeleton solver finds the triple deterministically; PART B2:
+  300K structured randoms, histogram {0:35235, 1:258135, 2:6629, 3:1}).
+- MY OWN HAND-TRACE of the headline witness settles the prov machinery:
+  E2 = [eps/init^2 X][X/b]X on w=b(ab)^2='babab': inner [w/b]w gives
+  T = X a X a X (17 chars, labels [0,1,2,3,4,1,0,1,2,3,4,3,0,1,2,3,4]),
+  outer deletes init^2w='bab' greedily at spans 0-2,4-6,8-10,12-14,
+  survivors at T-positions 3,7,11,15,16 -> prov = (3,1,3,3,4) -- the
+  staircase (n-2, n-4, ..., 1, n-2, n-2, n-1), mult 3 (label 3 thrice),
+  LDS 2, output 'aaaab'. Machine matches at every j. I also probed
+  independently: initd(2)('babab') = 'bab' (true init^2) and
+  L.den(E2)('babab') = 'aaaab' -- so the conjAB SANITY block's "INIT
+  BAD" flags are label-convention artifacts exactly as the agent said
+  (content correct; the family rows all content==den).
+- THE RESULTS: (1) the Left-Move Wall (round 5's max-chain-2) is
+  FALSE -- a small-domain artifact; refuted twice (the B2 triple:
+  B='ababa', A='bababab', gaps aa,a,a,a, residuals {4},{2},{0,6},
+  picks 4>2>0; and the staircase family: chains of length ~|w|/2
+  through pairwise-disjoint singleton residuals). (2) HEADLINE:
+  Conjecture A (LDS <= C(E)*mult) is REFUTED -- the fixed two-pass
+  expression [eps/init^2 X][X/b]X on b(ab)^j has LDS=j exactly, mult=3
+  exactly, j=2..40 (ratio 13.3 at j=40); init^4 gives LDS=j/2+1 at
+  mult 4-5. Mechanism: the MODULAR STAIRCASE (odd-length needle from
+  the same alternating stream; greedy scan emits one atom per match at
+  offsets (m+pi/2)c mod (n+g), descending by constant step; boundary
+  emissions contribute only the pinned constant duplications). This
+  also kills the round-5 base-case DERIVATION. (3) Conjecture B
+  (mult 1 => LDS <= C(E)) SURVIVES every attack (no mult-1 row with
+  LDS >= 4 anywhere swept) and is now THE single live atom-route
+  invariant -- rev's prov has mult exactly 1 with LDS = n. (4)
+  Conjecture C: vacuous on the staircase families (they change output
+  length under input flips) -- the length-discard rule is load-bearing
+  wherever C is used.
+- phase_leftmove_fragment.tex honestly revised: the wall struck
+  through and marked REFUTED with both counterexamples; the staircase
+  remark added; the base case withdrawn as a derivation and restated
+  as a conjecture with its evidence. HOLD CONTINUES: nothing enters
+  the paper this round (the wall fell; the atom route runs through the
+  unproven mult-1 theorem). The paper's rem:price conjecture
+  (chi <= c(E)|w|) is NOT affected -- the staircase's LDS is linear
+  in |w|, consistent with a linear bound; different measure, different
+  claim. One cosmetic for the record: the staircase's descent is
+  always odd labels (n-2, n-4, ..., 1), so the fragment's "..., 2, 1"
+  should read "..., 3, 1".
+- Round 7 resumed: prove the mult-1 theorem (the duplication argument:
+  long chain needs the staircase; the staircase's wrap and the
+  end-of-text dump both duplicate labels, forcing mult >= 2).

@@ -1,0 +1,14 @@
+stage4: cascade vocab MITM 3+3 on 160 strings
+  building g-side (first 3 passes) ...
+    level 1: +31 (cum 32), 0s
+    level 2: +776 (cum 808), 0s
+    level 3: +17568 (cum 18376), 1s
+  building f-side (last 3 passes) ...
+    level 1: +31 (cum 32), 0s
+    level 2: +776 (cum 808), 0s
+    level 3: +17568 (cum 18376), 1s
+  |S_g|=18376 |S_f|=18376
+  probe images |U|=1767
+  probe filter: 6250 f-candidates, 1s
+  full checks 6687: no witness for rep1b@stage4 at depth <= 6
+total 4s

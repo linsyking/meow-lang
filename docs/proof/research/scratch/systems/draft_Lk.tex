@@ -1,0 +1,83 @@
+% ============================================================================
+% Draft for Section 5 (variants / landscape), after the once- and
+% positional-variant discussions.  Voice and notation follow main.tex.
+% Verification: docs/proof/research/scratch/systems/verify_r3.py
+% (parts A-C) -- every battery re-runs.
+% ============================================================================
+
+\paragraph{The $k$-th-occurrence calculi.}
+The once-primitive freezes the multiplicity axis at ``one''; between
+once and the full pass sits a family, one point per address:
+$[\,A/B\,]_k$ replaces the $k$-th occurrence of $B$ in the greedy
+non-overlapping order ($k = 1$ is the once-primitive itself), and
+$\mathrm{L}_k$ is the calculus built on that node.  The family is not a
+hierarchy, and none of its members collapses into another or into
+$\mathrm{ONCE}$.
+
+\begin{proposition}
+    \label{prop:kth}
+    \begin{enumerate}[(i)]
+        \item \emph{(Invariants transfer.)}  The four invariants of
+        Theorem~\ref{thm:once-invariants} hold verbatim for every
+        $\mathrm{L}_k$, $k \geq 1$: a $k$-th-occurrence node performs
+        at most one splice, so the run, balance and growth bookkeeping
+        of the once-calculus applies unchanged.  Consequently
+        $\mathrm{L} \not\sqsubseteq \mathrm{L}_k$ for every $k$: the
+        witnesses of Corollary~\ref{cor:once-sep} are unreachable
+        exactly as there.  (Verified for the mixed single-site family --
+        once, anchored, and $\mathrm{repOcc}(k)$ nodes together, depth
+        $\leq 3$: $135{,}136$ checks of the generalized two-sided
+        measure bound and $0$ violations of the four classical
+        invariants, max-run multiplicities included.)
+        \item \emph{(The ladder is a mosaic.)}  Over the binary
+        alphabet, the constant-pattern fragments are pairwise
+        incomparable at bounded depth: in the depth-$3$ spaces over the
+        $62$-string test set ($|S| \leq 5$), each $[\,A/B\,]_j$ is
+        reachable in $\mathrm{L}_j$ and in no other $\mathrm{L}_k$
+        ($38{,}959$, $28{,}090$ and $2{,}307$ distinct functions at
+        $k = 1, 2, 3$) -- and the spaces \emph{shrink} with $k$: a
+        higher-rank pass fires less often, so addressing power buys no
+        breadth.
+        \item \emph{(Versus once: marker freshness.)}  Over
+        $|\Sigma| \geq 3$ the marking chain of
+        Theorem~\ref{thm:pos-hinge}(ii) simulates $[\,A/B\,]_k$ from
+        once-primitives exactly whenever $B$ misses a letter:
+        $\mathrm{repOcc}(k,B,A) =
+        [\,M/B\,]_1^{k}[\,A/B\,]_1[\,B/M\,]_1^{k}$ with $M$ disjoint
+        from $B$'s alphabet ($18{,}522$ exact agreements over $B \in
+        \{a,b\}^{\leq 3}$, $|A| \leq 2$, $|S| \leq 5$, $k \leq 2$).
+        Over $|\Sigma| = 2$ no disjoint marker exists, and the functions
+        $[\,a/b\,]_2$, $[\,a/ab\,]_2$, $[\,aa/b\,]_2$ are absent from
+        every once-space searched: the constant-pattern space of depth
+        $\leq 4$ ($969{,}321$ distinct functions), the variable-pattern
+        space of depth $\leq 3$ ($3{,}773$), and the reduced-vocabulary
+        space of depth $\leq 3$ ($688{,}499$).  The
+        $\mathrm{ONCE}$-versus-$\mathrm{L}_2$ question thus reduces to
+        marker freshness -- the alphabet-sensitivity of
+        Section~\ref{sec:variants}'s unary dichotomy, reappearing on
+        the multiplicity axis.
+    \end{enumerate}
+\end{proposition}
+
+The suggested row for the landscape table
+(Table~\ref{tab:variants}):
+
+\begin{center}
+\begin{tabular}{lccccc}
+    variant & $L \sqsubseteq V$ & $V \sqsubseteq L$ & toolkit & growth \\
+    \hline
+    $k$-th occurrence $\mathrm{L}_k$ & no (invariants verbatim,
+    Prop.~\ref{prop:kth}(i)) & open ($k = 1$ \emph{is} the once-hinge;
+    $k \geq 2$ no easier over $|\Sigma| = 2$) & untested & degree
+    $\leq 1$ (invariants verbatim) \\
+\end{tabular}
+\end{center}
+
+The $V \sqsubseteq L$ entry deserves its comment: at $k = 1$ it is
+exactly the once-hinge of Section~\ref{sec:variants}'s first open
+problem; for $k \geq 2$ nothing is known over the binary alphabet, and
+over $|\Sigma| \geq 3$ the marking chain reduces it to the once-hinge.
+The multiplicity axis is thus, like the direction axis, controlled by
+a single reachability question -- but unlike the direction axis it
+fans out into a family of pairwise incomparable fragments rather than
+a single mirror class.

@@ -1,0 +1,36 @@
+R3: occurrence lemma + normalization lemmas + lazy-pass containment
+part A (offset=3, lemma hypothesis satisfied) ...
+  double [hypothesis]: A0-A4 OK (36 edge + 6724 systematic + 400 random cfgs)
+  adder [hypothesis]: A0-A4 OK (27 edge + 5043 systematic + 400 random cfgs)
+  c2drain [hypothesis]: A0-A4 OK (45 edge + 8405 systematic + 400 random cfgs)
+part A escalation: offsets 2 and 7 ...
+  double@2 [hypothesis]: A0-A4 OK (36 edge + 6724 systematic + 400 random cfgs)
+  adder@2 [hypothesis]: A0-A4 OK (27 edge + 5043 systematic + 400 random cfgs)
+  double@7 [hypothesis]: A0-A4 OK (36 edge + 6724 systematic + 400 random cfgs)
+  adder@7 [hypothesis]: A0-A4 OK (27 edge + 5043 systematic + 400 random cfgs)
+part A note: offset=1 (violates k >= 2; empirical only) ...
+  double@1 [EMPIRICAL (k>=2 violated)]: A0-A4 OK (36 edge + 6724 systematic + 400 random cfgs)
+part B ...
+part B: the normalization lemmas
+  B1: zero-branch self-jump (hyb)
+part 0/1: toolkit polarity probes + constant-family invariants
+  hyb-fixed: step = 445 nodes, 124 passes (112 constant-pattern), MAIN = 457 nodes, 1 lim node -- OK
+  B1 OK: raw fixed point shown; fix+cleanup == original semantics; MAIN partiality exact
+  B2i: counter swap (output naturally in counter 1)
+part 0/1: toolkit polarity probes + constant-family invariants
+  drain1-swapped: step = 223 nodes, 62 passes (56 constant-pattern), MAIN = 235 nodes, 1 lim node -- OK
+  B2i OK: swap preserves output value, now in counter 2
+  B2ii: cleanup loop (scratch not drained at halt)
+part 0/1: toolkit polarity probes + constant-family invariants
+  dirty-clean: step = 223 nodes, 62 passes (56 constant-pattern), MAIN = 235 nodes, 1 lim node -- OK
+  B2ii OK: raw garbage shown; cleanup drains; values correct
+part C ...
+part C: lim(L) <= lazy-pass recursive L (the driver)
+  (b,x)=(a,b): 8 rules + branching: 135 conv (values exact) + 29 div OK
+  (b,x)=(b,a): 8 rules + branching: 135 conv (values exact) + 29 div OK
+  2CM driver: double n=0..5 halt configs match lim exactly
+  2CM driver: adder n=0..5 halt configs match lim exactly
+  2CM driver: selfloop diverges on both sides
+
+R3 RESULT: 964604 checks, 0 failures
+R3EXIT=0

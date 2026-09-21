@@ -1,0 +1,118 @@
+%% =====================================================================
+%%  THE PRICE OF REORDERING -- paper-grade draft remark (Round 4).
+%%
+%%  Drop-in location: Section 4, immediately after the open-problems
+%%  remark (its item 2 asks whether reversal is reachable); a forward
+%%  reference from the hinge discussion of Section 5.6 also fits, e.g.
+%%  "...the reordering hinge is quantitative -- Remark~\ref{rem:price}."
+%%
+%%  Every number below is machine-verified and re-runnable:
+%%    docs/proof/research/scratch/rev/verify_round4_ladder.py
+%%    docs/proof/research/scratch/rev/verify_round4_hinges.py
+%%  (ladder: expressions built and checked exhaustively; crossings at
+%%   n = 14 worst-case over 56 inputs; barriers brute-forced).
+%% =====================================================================
+
+\begin{remark}
+    (\emph{The Price of Reordering})
+    \label{rem:price}
+    Open problem~2 -- is reversal reachable? -- has a quantitative form.
+    For a function $f$ and an input $w$, let $w^{p}$ be $w$ with its $p$-th
+    character flipped, and let
+    \[
+        D_f(w,p) \;\triangleq\; \{\, i : f(w)_i \neq f(w^{p})_i \,\},
+    \]
+    discarding the flips that change the output length. Where the surviving
+    rows are singletons meeting distinct columns, they induce a partial
+    injective map $\pi_w$ from input positions to output positions, and
+    \[
+        \chi_f(w) \;\triangleq\; \#\{(p < p') : \pi_w(p) > \pi_w(p')\}
+    \]
+    counts its \emph{crossings}: the disorder of $f$'s output routing.
+    Reading the right end is free -- $\mathtt{last}$
+    (Proposition~\ref{prop:last}) has a single far cell of influence and
+    zero crossings -- and so is deleting a prefix. What costs crossings is
+    \emph{moving} characters, and the costs of the functions the calculus
+    demonstrably \emph{can} build form a ladder (all rows at $|w| = 14$,
+    worst input; the $k$-th rung family
+    $\mathrm{revlast}_k(w) \triangleq w_{n-1} w_{n-2} \cdots w_{n-k}
+    w[{:}n{-}k]$ is $L$-expressible for every fixed $k$, by $k$ anchored
+    right-end reads $\mathtt{last} \circ \mathtt{init}^{j}$ glued with
+    $\mathtt{cat}$):
+
+    \begin{center}
+        \small
+        \begin{tabular}{llll}
+            \hline
+            $f$ & in $L$? & $\chi_f$ & closed form \\
+            \hline
+            $\mathtt{init}$ & yes & $0$ & order-preserving \\
+            $\mathtt{last}$ & yes (Prop.~\ref{prop:last}) & $0$ & reads the far end \\
+            $\mathrm{rotR} = \mathtt{cat}(\mathtt{last},\mathtt{init})$
+                & yes & $13$ & $n-1$ \\
+            swap-first-last & yes & $25$ & $2(n{-}2)+1$ \\
+            $\mathrm{revlast}_k$, $k=1,2,3,4$ & yes, fixed $k$
+                & $13,\,25,\,36,\,46$ & $\binom{n}{2}-\binom{n-k}{2}$ \\
+            $\mathrm{rev}$ & \emph{open} & $91$ & $\binom{n}{2}$ \\
+            \hline
+        \end{tabular}
+    \end{center}
+
+    The ladder is exact: $\mathrm{revlast}_k$ reverses a $k$-character tail
+    block and moves it to the front, so its crossings are the block's
+    internal reversals $\binom{k}{2}$ plus its crossings of the untouched
+    head $k(n-k)$ -- which sum to $\binom{n}{2} - \binom{n-k}{2}$, the
+    number of pairs involving at least one moved character. Each fixed $k$
+    is affordable; reversal is the $k = n$ rung, and it is the only row
+    whose crossing count is quadratic in $n$. Every $L$-expression measured
+    so far -- the table, the rotations by any $k$, the doubling
+    $\mathtt{cat}(X,X)$, several thousand random pipelines -- pays
+    $O(n)$ crossings, suggesting the quantitative form of the hoped
+    negative answer: there is a constant $c(E)$, depending only on the
+    expression, with $\chi_{\llbracket E \rrbracket}(w) \leq c(E)\cdot|w|$
+    for all $w$; reversal needs $|w|(|w|{-}1)/2$. (Verified for the
+    table's built expressions -- exact on all binary inputs of length
+    $\leq 10$ for $k \leq 2$, $\leq 8$ for $k \leq 4$ -- and for the
+    closed form at $k \leq 4$.)
+
+    Three delimitations keep the suggestion honest. \emph{(i) Mass is the
+    wrong measure.} The doubling $\mathtt{cat}(X,X)$ has
+    $\binom{n}{2}$ inversions in its natural atom-provenance at longest
+    decreasing subsequence $2$ (Dilworth: two increasing runs), so any
+    obstruction stated as inversion mass is falsified on the spot; only
+    subsequence-width (on provenance) and crossing count (on influence) --
+    both path-based, not pair-counting -- survive. \emph{(ii) Content is
+    relabelable.} Over a fixed finite alphabet, the atoms of
+    $\mathrm{rev}(w)$ admit a content-consistent labeling that is
+    increasing within each character class (each class of $\mathrm{rev}(w)$
+    is a class of $w$), and a strictly decreasing subsequence of such a
+    labeling uses at most one position per class -- at most $|\Sigma|$ in
+    all. So no invariant computable from output content alone can
+    distinguish $\mathrm{rev}$ from an order-preserving function; a proof
+    must constrain the provenance the calculus actually produces.
+    (Verified: the canonical labeling's width is at most the number of
+    distinct characters, on all inputs of length $\leq 14$, and by brute
+    force over \emph{all} consistent labelings on all inputs of length
+    $\leq 6$.) \emph{(iii) Provenance is fakeable.} The anchored
+    constructions of the ladder rebuild their outputs from constant
+    characters -- the atom-provenance of $\mathtt{last}$, $\mathrm{rotR}$,
+    swap-first-last and every $\mathrm{revlast}_k$ is \emph{empty} -- so an
+    atom-provenance invariant excludes none of them and constrains a
+    hypothetical reversal witness only on its verbatim routes. The
+    crossing count is defined through output influence and is immune to
+    constant reconstruction; that is the sense in which it, not
+    atom-provenance, carries the suggestion above.
+
+    Finally, the obstruction the ladder measures is \emph{reversal-specific}.
+    The canonical functions of the other two hinges -- the longest
+    $b$-free prefix (the reduced form of the once-hinge) and the
+    right-to-left pass $[\,b/aa\,]^{\mathrm{R}}$ (the minimal hard case of
+    the direction hinge, Theorem~\ref{thm:subsequential}) -- have
+    $\chi = 0$ on \emph{every} binary input of length $\leq 12$
+    ($8{,}191$ inputs each) and atom-provenance width $1$ at multiplicity
+    $1$: a prefix cut and a local halving reorder nothing globally. A
+    crossing-count proof that $\mathrm{rev} \notin L$ therefore cannot
+    double as a proof of either sibling hinge; unbounded reordering, the
+    spanning needle, and residue routing are three obstructions, and the
+    ladder prices only the first.
+\end{remark}

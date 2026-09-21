@@ -33,7 +33,7 @@
 \maketitle
 
 \begin{abstract}
-Search-and-replace is a primitive every programmer knows; this note takes it seriously as a model of computation. We study the single operation $[A/B]S$ -- replace, in one left-to-right pass over $S$, every occurrence of $B$ by $A$, taking the leftmost match first and never rescanning inserted text -- over a finite alphabet. A chain of elementary lemmas turns this one operation into a complete toolkit: escaping and unescaping, concatenation, head and tail, equality, selection, and simultaneous multiple substitution are each exactly a short composition of substitutions, for arbitrary strings. We then formalize ``built from substitution'' as a small expression calculus and measure its power: every reachable function is computable in polynomial time, with degree bounded by its expression, while quadratic growth is reachable and exponential growth is not. Finally we locate the primitive's design choices by varying them one at a time -- once-only, positional, right-to-left, rescanning, and Markov-style iteration -- and then admitting both directions at once, obtaining concrete separations, collapses, a single-function collapse criterion for the union, and a classification of the divergent small rules. Allowing recursive definitions -- the \texttt{meow} language's own feature -- and varying only the runtime then separates sharply: eager and lazy-argument evaluation leave the reachable class unchanged, while evaluating a pass's replacement only when its pattern occurs -- the operator's own non-strictness -- makes the calculus universal, and a coinductive reading on infinite strings reaches beyond every finite-state emitter. Every computational claim is verified by exhaustive enumeration over the finite domains stated where it occurs.
+Search-and-replace is a primitive every programmer knows; this note takes it seriously as a model of computation. We study the single operation $[A/B]S$ -- replace, in one left-to-right pass over $S$, every occurrence of $B$ by $A$, taking the leftmost match first and never rescanning inserted text -- over a finite alphabet. A chain of elementary lemmas turns this one operation into a complete toolkit: escaping and unescaping, concatenation, head and tail, equality, selection, and simultaneous multiple substitution are each exactly a short composition of substitutions, for arbitrary strings. We then formalize ``built from substitution'' as a small expression calculus and measure its power: every reachable function is computable in polynomial time, with degree bounded by its expression, while quadratic growth is reachable and exponential growth is not. Finally we locate the primitive's design choices by varying them one at a time -- once-only, positional, right-to-left, rescanning, and Markov-style iteration -- and then admitting both directions at once, obtaining concrete separations, collapses, a single-function collapse criterion for the union, a classification of the divergent small rules, and, by promoting the iteration from rules to expressions, an exact characterization: one fixed-point node over a flat pipeline computes precisely the partial computable functions. Allowing recursive definitions -- the \texttt{meow} language's own feature -- and varying only the runtime then separates sharply: eager and lazy-argument evaluation leave the reachable class unchanged, while evaluating a pass's replacement only when its pattern occurs -- the operator's own non-strictness -- makes the calculus universal, though without recursion that same non-strictness buys definedness, not power, and a coinductive reading on infinite strings reaches beyond every finite-state emitter. Every computational claim is verified by exhaustive enumeration over the finite domains stated where it occurs.
 
 \keywords{string substitution \and string rewriting \and finite alphabets \and rewriting calculus}
 \end{abstract}
@@ -62,7 +62,7 @@ Three design choices are built into $[A/B]$: the scan goes left to right and tak
 
 \paragraph{The calculus (Section~\ref{sec:calculus}).} ``Constructible from substitution'' is made precise by a small expression calculus with variables, string constants, one substitution constructor, and concatenation. A syntactic safety condition implies totality; concatenation is eliminable (every expression is equivalent to a pure pipeline of passes); and every reachable function is computable in polynomial time, with the exponent bounded by the expression. The hierarchy is nontrivial: quadratic growth is reachable, while $X \mapsto X^{2^{|X|}}$ is not.
 
-\paragraph{The variants (Section~\ref{sec:variants}).} We vary the design choices one at a time -- single-occurrence substitution, positional substitution, right-to-left scanning, rescanning of inserted text, and Markov-style iteration to a fixed point -- and measure the damage: which variants can simulate which, what survives of the toolkit, and how the growth rates separate. Among other things, the once-only primitive provably cannot simulate a full pass; rescan-based substitution agrees with the safe primitive exactly on a decidable local condition; Markov iteration reaches arbitrary towers of exponentials while the bounded pipeline stays polynomial; and the union of both scanning directions collapses onto the baseline exactly when the right pass, as a function of its arguments, is itself reachable -- which every search says it is not. A census of all binary rules with $|A|, |B| \le 4$ classifies every divergent one.
+\paragraph{The variants (Section~\ref{sec:variants}).} We vary the design choices one at a time -- single-occurrence substitution, its $k$-th-occurrence generalization, positional substitution, right-to-left scanning, rescanning of inserted text, and Markov-style iteration to a fixed point -- and measure the damage: which variants can simulate which, what survives of the toolkit, and how the growth rates separate. Among other things, the once-only primitive provably cannot simulate a full pass; the $k$-th-occurrence family between them spreads into a mosaic of pairwise incomparable fragments whose relation to once reduces to marker freshness; rescan-based substitution agrees with the safe primitive exactly on a decidable local condition; Markov iteration reaches arbitrary towers of exponentials while the bounded pipeline stays polynomial; and promoting the iteration from rules to expressions -- iterating a pipeline to its fixed point -- pins the class exactly: one such node over a flat pipeline computes precisely the partial computable functions. The union of both scanning directions collapses onto the baseline exactly when the right pass, as a function of its arguments, is itself reachable -- which every search says it is not. A census of all binary rules with $|A|, |B| \le 4$ classifies every divergent one.
 
 \paragraph{Recursive definitions (Section~\ref{sec:recursion}).} The \texttt{meow} language recurses; the calculus can too, with named definitions and call nodes, mutual recursion included. What that buys depends only on the runtime. Under eager evaluation and under lazy arguments, nothing: every recursive definition either inlines to a plain expression or never returns, and the reachable class is unchanged. Under lazy \emph{passes} -- the replacement of a pass being evaluated only when its pattern occurs, which is the operator's own non-strictness -- everything: guarded recursion through pattern gates computes exactly the partial computable functions, reversal and the exponential function become total recursions, and totality of a definition is undecidable. A coinductive reading on infinite strings replaces termination by productivity and outgrows every finite-state emitter.
 
@@ -977,10 +977,24 @@ The point: $XX$ is a marker that is \emph{fresh with respect to $X$ by length} (
 
 So any proof that the once-primitive is not $L$-reachable must use general position -- on unary, or otherwise anchored, domains, computed needles do the job.
 
-\begin{remark}
-    \emph{The mirror and the hinge.} The rightmost variant $[\,A/B\,]_1^{\mathrm{R}}$ (replace the rightmost occurrence) is the rev-conjugate of the once-calculus, and the conjugation of Theorem~\ref{thm:conjugation} below applies verbatim. Its anchor is the unconditional Suffix Substitution lemma, $A \neq \epsilon \Rightarrow [\,C/A\,]_1^{\mathrm{R}}(BA) = B\,C$: the rightmost occurrence of $A$ in $BA$ is always the final one. This gives the two-pass \emph{zipper} $\mathtt{cat}(X,Y) = [\,Y/a\,]_1^{\mathrm{R}}[\,X/b\,]_1^{\mathrm{R}}(ba)$. Nothing provable separates the two once-calculi without settling reversal: by conjugation, $L \sqsubseteq \mathrm{ONCE}^{\mathrm{R}}$ iff $\mathrm{R} \sqsubseteq \mathrm{ONCE}$, and the pair ``delete the leftmost $b$'' / ``delete the rightmost $b$'' are mutual witnesses of one statement. Where the rightmost calculus genuinely struggles is destructuring: $\mathtt{head}$, $\mathtt{tail}$, $\mathtt{eq}$, $\mathtt{if}$ are absent from every once-rightmost expression of size $\leq 7$ and every constant-pattern pipeline of depth $\leq 4$ -- deleting a left-anchored variable-length region seems to require computing that region first, which is the very function sought (conjecturally unreachable).
+\begin{proposition}
+    (\emph{The Leftmost Deletion, over Two Letters})
+    \label{prop:del-leftmost}
+    Over $\Sigma = \{\mathtt{a},\mathtt{b}\}$, ``delete the leftmost $b$'' -- the once-node $[\,\epsilon/b\,]_1$ -- is $L$-reachable. The pipeline
+    \begin{align}
+        W \;\triangleq\; [\,a/ab\,]\,[\,ab/aa\,]\,[\,b/ba\,]\,[\,ab/b\,]\,[\,aa/a\,]
+    \end{align}
+    computes $[\,a/b\,]_1$ on every binary string, and $[\,\epsilon/b\,]_1 X = \mathtt{tail}\big(W(X)\big)$ whenever $b$ occurs in $X$; the no-$b$ case is the identity, and the two cases are joined by the selection on an occurrence test (Proposition~\ref{prop:last}'s device).
+\end{proposition}
 
-    The central open problem of the variant: \emph{is the once-primitive $L$-reachable at all} -- say, is ``delete the leftmost $b$'' expressible? Proposition~\ref{prop:unary-once} rules out every unary-domain invariant; all bounded searches fail: exhaustive breadth-first search over constant-pattern $L$-pipelines -- every pattern and replacement of length at most $2$ over a ternary alphabet, to depth $3$, with behavior dedup -- and randomized search over pipelines of $4$--$7$ passes find no witness, and the closest misses differ at exactly one position.
+\begin{proof}
+    Read $W$ right to left, tracking the $a$-gaps of $X = a^{g_0}\,b\,a^{g_1}\,b \cdots b\,a^{g_k}$ (either end gap may be empty). The first three passes fix every $b$ in place and act on gap lengths only: $[\,aa/a\,]$ doubles each gap; $[\,ab/b\,]$ prefixes every $b$ with an $a$, adding one to the gap before it; $[\,b/ba\,]$ deletes the $a$ after every $b$ -- its matches are disjoint, one $a$ per $b$ -- subtracting one from the gap after it. Every gap before a $b$ is thereby even except the first, which has no $b$ before it to pay the debit; the trailing gap is odd too, but borders no $b$. The last two passes convert parity into position: $[\,ab/aa\,]$ pairs each maximal $aa$ of a gap into $ab$, so an odd gap before a $b$ leaves a single residue $a$ immediately in front of its $b$, and $[\,a/ab\,]$ collapses the pairs back -- consuming, in particular, the residue together with the first $b$ as one $ab \to a$. The first gap is the odd one, so the first $b$ is replaced by $a$ and nothing else moves: the even gaps pair off exactly, and the trailing residue has no $b$ to pair with. If $b$ does not occur, the doubling and the pairing round-trip ($a^{g} \to a^{2g} \to (ab)^{g} \to a^{g}$) and the middle passes are inert: $W(X) = X$. For the deletion, $[\,a/b\,]_1 X$ begins with the merged leading run $a^{g_0}a$, so one $\mathtt{tail}$ removes exactly the inserted character. (Verified: $W$, as a genuine five-node pipeline, on all $2{,}047$ binary strings of length $\leq 10$ and $400{,}000$ random strings of length $\leq 59$; the guarded deletion on all $511$ binary strings of length $\leq 8$ and $3{,}000$ random strings of length $\leq 39$.)
+\end{proof}
+
+\begin{remark}
+    \emph{The mirror and the hinge.} The rightmost variant $[\,A/B\,]_1^{\mathrm{R}}$ (replace the rightmost occurrence) is the rev-conjugate of the once-calculus, and the conjugation of Theorem~\ref{thm:conjugation} below applies verbatim. Its anchor is the unconditional Suffix Substitution lemma, $A \neq \epsilon \Rightarrow [\,C/A\,]_1^{\mathrm{R}}(BA) = B\,C$: the rightmost occurrence of $A$ in $BA$ is always the final one. This gives the two-pass \emph{zipper} $\mathtt{cat}(X,Y) = [\,Y/a\,]_1^{\mathrm{R}}[\,X/b\,]_1^{\mathrm{R}}(ba)$. Nothing provable separates the two once-calculi without settling reversal: by conjugation, $L \sqsubseteq \mathrm{ONCE}^{\mathrm{R}}$ iff $\mathrm{R} \sqsubseteq \mathrm{ONCE}$, and the pair ``delete the leftmost $b$'' / ``delete the rightmost $b$'' are mutual witnesses of one statement. By Theorem~\ref{thm:conjugation}, Proposition~\ref{prop:del-leftmost} transfers: over two letters, the rightmost deletion $[\,\epsilon/b\,]_1^{\mathrm{R}}$ is $\mathrm{R}$-reachable -- the mirror of $W$, every constant reversed and the factor order mirrored. Where the rightmost calculus genuinely struggles is destructuring: $\mathtt{head}$, $\mathtt{tail}$, $\mathtt{eq}$, $\mathtt{if}$ are absent from every once-rightmost expression of size $\leq 7$ and every constant-pattern pipeline of depth $\leq 4$ -- deleting a left-anchored variable-length region seems to require computing that region first, which is the very function sought (conjecturally unreachable).
+
+    The central open problem of the variant -- \emph{is the once-primitive $L$-reachable at all?} -- survives Proposition~\ref{prop:del-leftmost} in sharpened form. The earlier negative searches now read correctly: the witness needs depth $5$, beyond the exhaustive ternary search of depth $3$, and the randomized search over $4$--$7$-pass pipelines sampled $0.08\%$ of the depth-$5$ space; the exhaustive meet-in-the-middle search at that depth finds $W$ -- which also explains those searches' closest misses, differing at exactly one position: the junction where the parity residue must land. What remains is twofold. Over $|\Sigma| \geq 3$ the constant needle is open, with a precise obstruction: the parity-to-residue conversion needs gaps of a single character, and every repair scheme searched -- front-marks, migration swaps, sentinel sandwiches, per-letter deletions, comma-coded worlds (cascade-shaped vocabularies to depth $6$, suffix repairs to depth $3$, $1.6$ million pre/post wraps) -- re-creates the first-site selection it was meant to remove. And over every alphabet the \emph{computed} needle is untouched: Proposition~\ref{prop:unary-once} shows computed needles do the job on anchored domains, and no search has found one in general position.
 \end{remark}
 
 \subsection{Positional Addressing}
@@ -1080,6 +1094,20 @@ The positional family replaces the scan by an \emph{address}: write at index $i$
 
 Equality testing, by contrast, is conjecturally not positional in any fragment: $\mathtt{eq}$ must broadcast a global comparison into a two-character output, while every positional detection mechanism is local -- fire or not, at one site; all searches to depth $3$ over the computed-index node space fail.
 
+The positional constructors address by index and the once-primitive freezes multiplicity at one; between the two sits a family with a node per address. Let $[\,A/B\,]_k$ replace the $k$-th occurrence of $B$ in the left-to-right, non-overlapping enumeration that the full pass itself uses ($k = 1$ is the once-primitive), and let $\mathrm{L}_k$ be the calculus built on the node. Its nodes splice at most once, so the once-bookkeeping survives; what the family adds is a mosaic of incomparable fragments rather than a hierarchy.
+
+\begin{proposition}
+    (\emph{The $k$-th-occurrence family})
+    \label{prop:kth}
+    \begin{enumerate}[(i)]
+        \item \emph{(Invariants transfer.)} The four invariants of Theorem~\ref{thm:once-invariants} hold verbatim for every $\mathrm{L}_k$: the node case of the induction is a computation about a single splice, and a $k$-th-occurrence node performs exactly one. Consequently $L \not\sqsubseteq \mathrm{L}_k$ for every $k$: the witnesses of Corollary~\ref{cor:once-sep} are unreachable exactly as there. (Verified on a $2{,}500$-expression corpus over the mixed single-site family -- anchored, once, and $k$-th-occurrence nodes together, depth $\leq 3$: the generalized two-sided measure bound in $135{,}136$ checks and the four classical invariants, max-run multiplicities included, with zero violations.)
+        \item \emph{(A mosaic, not a hierarchy.)} Over the binary alphabet, at bounded depth the constant-pattern fragments are pairwise incomparable and shrink with the rank: the depth-$3$ spaces on the $63$ strings of length $\leq 5$ hold $38{,}959$, $28{,}090$ and $2{,}307$ distinct functions at $k = 1, 2, 3$, and the addressing nodes sit on the diagonal -- $[\,a/b\,]_j$ is reachable in $\mathrm{L}_j$ and in no other $\mathrm{L}_k$, $[\,aa/b\,]_2$ likewise -- while a higher-rank pass fires less often, so addressing power buys no breadth.
+        \item \emph{(Versus once: marker freshness.)} By Theorem~\ref{thm:pos-hinge}(ii), $\mathtt{repOcc}(k, B, A) = [\,M/B\,]_1^k\,[\,A/B\,]_1\,[\,B/M\,]_1^k$ whenever a marker letter $M$ is fresh for $B$, $A$ and the input ($18{,}522$ exact agreements over $B \in \{a,b\}^{\leq 3}$, $|A| \leq 2$, $|S| \leq 5$, $k \leq 2$, the marker $c$ over the ternary alphabet). So wherever a letter is spare the question is the once-hinge itself, and no alphabet is tighter than the binary one: there, for inputs using both letters, no marker exists, and the functions $[\,a/b\,]_2$, $[\,a/ab\,]_2$, $[\,aa/b\,]_2$ are absent from the once constant-pattern space of depth $\leq 4$ ($969{,}321$ distinct functions -- the once node $[\,a/b\,]_1$ itself is present at depth $1$), $[\,a/b\,]_2$ and $[\,a/ab\,]_2$ likewise from the once variable-pattern space of depth $\leq 3$ ($3{,}773$). The $\mathrm{ONCE}$-versus-$\mathrm{L}_2$ question thus reduces to marker freshness -- the alphabet-sensitivity of the once-hinge, reappearing on the multiplicity axis.
+    \end{enumerate}
+\end{proposition}
+
+The multiplicity axis is thus controlled, like the direction axis, by a single reachability question -- but unlike the direction axis it fans out, over the binary alphabet, into a family of pairwise incomparable fragments rather than a single mirror class.
+
 \subsection{The Other Direction}
 \label{subsec:direction}
 
@@ -1130,7 +1158,7 @@ Equality testing, by contrast, is conjecturally not positional in any fragment: 
     Write $m(f)$ for the mirror $\vec S \mapsto \mathrm{rev}\big(f(\mathrm{rev}S_1, \dots, \mathrm{rev}S_n)\big)$. The conjugation of Theorem~\ref{thm:conjugation} is a bijection between the two expression sets, so the $\mathrm{R}$-reachable class is exactly the $m$-image of the $L$-reachable class; $m$ is an involution on functions ($m(m(f)) = f$, undefinedness together, since $\mathrm{rev}$ is total and $\mathrm{rev}\,\mathrm{rev} = \mathrm{id}$). Applying $m$ to the inclusion $\mathrm{R} \sqsubseteq L$ therefore yields $L \sqsubseteq \mathrm{R}$ -- $m$ carries each class onto the other -- and the converse is the same argument mirrored. Either inclusion says the $L$-reachable class is closed under $m$, which is exactly $L = \mathrm{R}$.
 \end{proof}
 
-So the second open problem of Section~4 -- is reversal reachable? -- is direction-independent, and it decides whether $L = \mathrm{R}$. The two inclusions of the landscape's right-to-left row are not two questions but one (Corollary~\ref{cor:incl-symmetry}); what reversal would decide is that one question's \emph{answer}.
+So the second open problem of Section~4 -- is reversal reachable? -- is direction-independent, and it decides whether $L = \mathrm{R}$. The two inclusions of the landscape's right-to-left row are not two questions but one (Corollary~\ref{cor:incl-symmetry}); what reversal would decide is that one question's \emph{answer}. The question also has a quantitative face, the crossing ladder of Remark~\ref{rem:price}.
 
 \begin{proposition}
     (\emph{Agreement})
@@ -1391,6 +1419,597 @@ This makes the closing remark of Section~4 quantitative: unbounded iteration of 
     Single restart nodes already compute nontrivial total functions: $[\,ba/ab\,]^{\mathrm{m}}$ sorts its input to $b^*a^*$, and $[\,a/aa\,]^{\mathrm{m}}$ collapses $a$-runs -- one node, where the baseline needs the three-pass pipeline of Proposition~\ref{prop:rescan-survives}.
 \end{remark}
 
+\subsection{Both Directions at Once}).  Every numeric
+% claim is machine-verified; the scripts and domains are named in the
+% (Verified: ...) notes and in research/scratch/lim/REPORT.md (R2-R4):
+%   verify_r2.py (round2.log)   -- the compilation, end to end
+%   verify_r3.py (round3.log)    -- occurrence census, normalizations, driver
+%   verify_r4.py  (round4.log)  -- every number this section states
+% Compiles standalone: 0 errors (see the wrapper in the sanity harness).
+% ============================================================================
+
+\subsection{Converging to the Fixed Point}
+\label{ssec:lim}
+
+Restart iterates a \emph{rule}; we now iterate an \emph{expression}. The
+variant of this subsection adds one node to the grammar: apply the
+unary expression to its own output until nothing changes. Where
+Definition~\ref{def:markov} normalizes one rewrite rule
+$B \to A$ under the leftmost strategy, the new node normalizes a whole
+pipeline under the strategy the calculus already has -- the sweep -- and
+the two normalizers of the same rule will turn out to be genuinely
+different functions (Remark~\ref{rem:limstrategies} below). The reward for the
+difference is a characterization the restart calculus does not have:
+with this one node the flat calculus computes \emph{exactly} the partial
+computable functions, and the entire distance between the bounded
+calculus of Theorem~\ref{thm:fp} and universality turns out to be one
+iteration node (Corollary~\ref{cor:limclass}).
+
+\begin{definition}
+    (\emph{Fixed-Point Iteration})
+    \label{def:lim}
+    Extend the grammar of Definition~\ref{def:exp} by the rule
+    \begin{mathpar}
+        \inferrule{E \in \mathrm{Exp}_1, \; E_0 \in \mathrm{Exp}_n}{\mathrm{lim}(E)[E_0] \in \mathrm{Exp}_n}
+    \end{mathpar}
+    where $X_1$ is \emph{bound} in $E$ by the node; the free variables of
+    $\mathrm{lim}(E)[E_0]$ are those of $E_0$. The \emph{orbit} of
+    $E \in \mathrm{Exp}_1$ on $w$ is $s_0 = w$ and
+    $s_{k+1} = \llbracket E \rrbracket(s_k)$, and
+    \begin{align}
+        \llbracket \mathrm{lim}(E)[E_0] \rrbracket(\vec S) \;=\; s_K
+        \quad \text{for the least $K$ with } s_{K+1} = s_K\,,
+    \end{align}
+    with $s_0 = \llbracket E_0 \rrbracket(\vec S)$: the first state the
+    iterand does not change. If some $s_{k+1}$ is undefined, or no such
+    $K$ exists, the node is undefined (in the second case it
+    \emph{diverges}). Substitution acts on the start expression,
+    \begin{align}
+        \mathrm{lim}(E)[E_0]\big[F_1/X_1, \dots, F_n/X_n\big]
+        \;=\; \mathrm{lim}(E)\big[\,E_0[F_1/X_1, \dots, F_n/X_n]\,\big],
+    \end{align}
+    capture-free, since only $X_1$ is bound and only in $E$ -- so
+    Lemma~\ref{lem:beta} survives verbatim for the extended grammar.
+\end{definition}
+
+An $L{+}\mathrm{lim}$ expression is \emph{flat} if its iterands contain no
+$\mathrm{lim}$ nodes; a single node $\mathrm{lim}([\,A/B\,])$ iterates one
+constant pass, the \emph{sweep} $w \mapsto [\,A/B\,]w$. The preceding
+remark's sort has its sweep twin: $\mathrm{lim}([\,ba/ab\,])$ also maps
+every input to $b^{\#b}a^{\#a}$ (verified on all binary inputs of length
+$\leq 12$ and $100$ random ones of length $13$--$16$).
+
+\begin{lemma}
+    (\emph{The Fixed Points of a Pass})
+    \label{lem:fpsweep}
+    For $B \neq \epsilon$ and $A \neq B$:
+    \begin{align}
+        [\,A/B\,]w = w \quad\Longleftrightarrow\quad B \not\subset w .
+    \end{align}
+\end{lemma}
+
+\begin{proof}
+    If $B$ does not occur, the scan never fires. If it does, the sweep
+    performs $m \geq 1$ non-overlapping replacements, changing the length
+    by $m(|A| - |B|)$ -- so $w$ is changed whenever $|A| \neq |B|$ -- and
+    when $|A| = |B|$ (with $A \neq B$) the first replacement spells $A$
+    where $w$ spells $B$ at the same position, with the prefix before it
+    untouched.
+\end{proof}
+
+So for $A \neq B$ the sweep's fixed points are exactly the $B$-free
+strings -- the same stop set as the restart process of
+Definition~\ref{def:markov}, which stops at the first $B$-free
+trajectory term. Lemma~\ref{lem:fpsweep} is also a complete decision
+procedure for the \emph{occurrence} of a constant, and at one stroke a
+subroutine of the compilation below: a pass with a one-character
+replacement tests containment,
+\begin{align}
+    \mathtt{contains}_B(E) \;\triangleq\; \mathtt{eq}\big([\,c/B\,]E,\; E\big),
+    \qquad c \text{ any character with } \{c\} \neq B,
+    \label{eq:contains}
+\end{align}
+because $[\,c/B\,]E = E$ iff $B \not\subset E$.
+
+\begin{proposition}
+    (\emph{One-Rule Totality})
+    \label{prop:limtotal}
+    Let $B \neq \epsilon$.
+    \begin{enumerate}[(i)]
+        \item $|A| \leq |B|$ and $A \neq B$: $\mathrm{lim}([\,A/B\,])$ is total.
+        \item $B \subset A$: $\mathrm{lim}([\,A/B\,])$ diverges on every $B$-containing input.
+        \item $A = B$: $\mathrm{lim}([\,A/B\,])$ is the identity.
+    \end{enumerate}
+\end{proposition}
+
+\begin{proof}
+    The proofs of Theorem~\ref{thm:termination}(i) and (ii) bound a
+    replacement at \emph{any} position -- length in (i), the potential
+    $V$ in (ii) -- so each sweep with at least one replacement strictly
+    decreases a measure that takes finitely many values, and the orbit
+    of sweeps reaches a $B$-free string, a fixed point by
+    Lemma~\ref{lem:fpsweep}: (i). For (ii), every replaced site
+    re-contains $B$, so after every sweep the string still contains $B$
+    and is not a fixed point; for (iii) the pass is the identity, so the
+    first sweep already is a fixed point. Note the one divergence from
+    the restart column: at $A = B$ the restart process still hunts a
+    redex and diverges (Theorem~\ref{thm:termination}(iii)), while the
+    sweep stops -- the two stop rules agree exactly when $A \neq B$.
+\end{proof}
+
+\begin{remark}
+    (\emph{Two Normalizers, Neither Canonical})
+    \label{rem:limstrategies}
+    $\mathrm{lim}([\,A/B\,])$ and $[\,A/B\,]^{\mathrm{m}}$ are two
+    deterministic normalizers of the one-rule system $B \to A$, and
+    one-rule systems are not confluent: they disagree. On the census
+    domain of Theorem~\ref{thm:termination}(v) -- the $930$ binary rules
+    with $|A|, |B| \leq 4$ on all inputs of length $\leq 9$, restart at
+    a $3 \cdot 10^5$ step cap -- the two disagree on \emph{value} on
+    $3{,}306$ pairs and on \emph{termination} on $290$ pairs, the latter
+    exactly the two rules $[\,abba/bab\,]$ and $[\,baab/aba\,]$, all in
+    the direction restart-diverges, sweep-converges, and \emph{none} in
+    the reverse direction; re-verified on all inputs of length $\leq 6$
+    at a $2{,}000$ step cap ($126$ value, $20$ termination disagreements,
+    $0$ reverse). Witnesses, at a $10^5$ step restart cap:
+    $[\,ab/bb\,]$ on $bbbb$ gives $\mathtt{abab}$ (one sweep replaces
+    the two disjoint occurrences) against restart's $\mathtt{aaab}$
+    (three sequential leftmost splices, each shifting the next site);
+    $[\,ab/abba\,]$ on $abbababba$ gives $abb$ in two sweeps against
+    restart's $abbba$; and $[\,baab/aba\,]$ on $aaaba$ goes
+    $aaaba \to aabaab \to abaabab \to baabbaabb$ -- three sweeps, done --
+    where restart diverges, each leftmost splice re-creating an $aba$ at
+    the junction, the census mechanism of
+    Theorem~\ref{thm:termination}(v). The sweep is thus
+    \emph{sometimes} the better-defined of the two strategies, and
+    sometimes not definable from it at all: neither normalizer computes
+    the other's values on a non-confluent rule.
+\end{remark}
+
+The rest of this subsection shows that this modest operator -- iterate a
+flat expression to its fixed point -- is exactly the missing piece
+between the polynomial calculus of Theorem~\ref{thm:fp} and universality.
+
+\begin{theorem}
+    (\emph{Compiling Two-Counter Machines Flat})
+    \label{thm:lim2cm}
+    Fix $\Sigma$ with $|\Sigma| \geq 2$ and two characters
+    $\sigma \neq \tau \in \Sigma$. For every two-counter machine $M$ with
+    instructions $\mathrm{inc}(r, j)$, $\mathrm{decjz}(r, j_0, j_1)$ and
+    halt (counters $r \in \{1, 2\}$), there are flat expressions
+    $\mathrm{INIT}, \mathrm{step}, \mathrm{OUT} \in \mathrm{Exp}_1$ such
+    that
+    \begin{align}
+        \mathrm{MAIN} \;\triangleq\; \mathrm{OUT}\big[\,F/X_1\,\big],
+        \qquad F \;\triangleq\; \mathrm{lim}(\mathrm{step})\big[\,\mathrm{INIT}\,\big],
+    \end{align}
+    has exactly one $\mathrm{lim}$ node and computes the partial
+    function of $M$ on tallies: $\mathrm{MAIN}(\tau^n)$ is the
+    counter-2 tally $\tau^{f(n)}$ when $M$ halts on input $n$ with
+    counter 2 equal to $f(n)$ and counter 1 empty, and is undefined
+    exactly when $M$ does not halt. The iterand $\mathrm{step}$ is an
+    if-chain of the Section~\ref{sec:toolkit} constructions over
+    constant occurrence tests~(\ref{eq:contains}), all of whose branches
+    are constant passes.
+\end{theorem}
+
+\begin{proof}[Proof (construction)]
+    Three compile-time transformations of $M$ come first, each
+    preserving its partial function: (N1) a $\mathrm{decjz}$ whose
+    zero-branch jumps to itself would leave the configuration
+    untouched -- a non-halting fixed point of the compiled step -- so it
+    is replaced by a fresh self-looping increment (both diverge);
+    (N2) the output is read from counter 2 (swap the counters if $M$
+    leaves its result in counter 1); (N3) jumps to the halt
+    instruction are retargeted through a fresh draining instruction
+    $\mathrm{decjz}(1, \mathrm{halt}, \mathrm{drain})$, so counter 1 is
+    empty at halt.
+
+    \emph{Frames.} Write
+    $V(k) = \sigma^2(\tau\sigma)^{k-1}\tau\sigma^3$ for $k \geq 1$:
+    $k$ isolated $\tau$'s, head run $\sigma^2$, interior $\sigma$-runs
+    of length $1$, tail run $\sigma^3$, length $2k+4$. The compiler
+    assigns each \emph{frame constant} a distinct $V(k)$ with $k \geq 2$:
+    delimiters $D_0, D_1, D_2, D_3$, instruction codes
+    $P_1, \dots, P_s, P_H$ for the instructions of the normalized
+    machine, and the wrap marker $M$.
+
+    \emph{Configurations.} For $i \in \{1, \dots, s\}$ let $\Pi(i)$ be
+    the program list $P_1 \cdots P_s P_H$ with the $i$-th code wrapped,
+    and $\Pi(0) = P_1 \cdots P_s\, M P_H M$ the halted list. The
+    configuration with instruction counter $i$ and counter values $x, y$
+    is
+    \begin{align}
+        C(i, x, y) \;=\; D_0\;\Pi(i)\;D_1\;\tau^{x}\;D_2\;\tau^{y}\;D_3 ,
+    \end{align}
+    an empty tally meaning adjacent delimiters.
+
+    \emph{The step.} On a configuration the current instruction is the
+    wrapped one, so dispatch is the occurrence test of
+    $M P_i M$~(\ref{eq:contains}): $\mathrm{step}$ is the if-chain
+    $\mathtt{if}(\mathtt{contains}_{M P_i M}, \mathrm{body}_i,
+    \cdots)$ over $i = 1, \dots, s$, with the identity as the final
+    else -- the halted configuration is a fixed point. Each
+    $\mathrm{body}_i$ is three constant passes:
+    \begin{enumerate}[(a)]
+        \item \emph{operate}: for $\mathrm{inc}(r, j)$, the pass
+        $[\,D_r\tau/D_r\,]$ (a new tally character at the left edge of
+        counter $r$'s run); for $\mathrm{decjz}(r, j_0, j_1)$, the test
+        $\mathtt{contains}_{D_r D_{r'}}$ -- adjacent delimiters, i.e.\
+        counter $r$ empty (Lemma~\ref{lem:occurrence}(iii)) -- selects
+        between the jump $j_0$ and $[\,D_r/D_r\tau\,]$ followed by the
+        jump $j_1$ (the decrement deletes the first tally character,
+        pinned by Lemma~\ref{lem:occurrence}(iv));
+        \item \emph{unwrap}: $[\,P_i/M P_i M\,]$;
+        \item \emph{wrap}: $[\,M P_j M/P_j\,]$ for the jump target $j$.
+    \end{enumerate}
+    Unwrap before wrap: on a self-jump ($j = i$) the wrap pattern
+    $P_j$ would otherwise occur inside the block being unwrapped, and
+    double-wrap. Every pattern is a nonempty constant, so every branch
+    is total on every input, and an unselected branch's passes are
+    merely \emph{discarded}: nothing needs the lazy gate of
+    Section~\ref{sec:recursion}, because a flat branch has no
+    undefined part to guard. (For the doubling machine:
+    $\mathrm{step}$ is $298$ nodes, $83$ passes, of which $75$
+    constant-pattern; $\mathrm{MAIN}$ is $310$ nodes.)
+\end{proof}
+
+\begin{lemma}
+    (\emph{Occurrence})
+    \label{lem:occurrence}
+    Let the frame constants be assigned pairwise distinct family
+    indices $k \geq 2$. Then for every instruction counter
+    $i \in \{0, \dots, s\}$ and every $x, y \geq 0$, in $C(i, x, y)$:
+    \begin{enumerate}[(i)]
+        \item every frame constant occurs exactly at its slots ($M$
+        twice, at the two wrap positions; every other constant once);
+        \item $M P_i M$ occurs iff $i$ is the current instruction
+        ($i \geq 1$), and $M P_H M$ iff $i = 0$; in either case exactly
+        once;
+        \item $D_r D_{r'}$ occurs iff counter $r$ is zero, exactly once;
+        \item $D_r\tau$ occurs iff counter $r$ is nonzero, exactly
+        once, ending at the \emph{first} tally character;
+        \item the output prefix $D_0\,\Pi(0)\,D_1 D_2$ occurs iff
+        $i = 0$ and $x = 0$, exactly once, at position $0$.
+    \end{enumerate}
+\end{lemma}
+
+\begin{proof}
+    The proof is a \emph{gap calculus}. For a string $W$ containing at
+    least one $\tau$ and no $\tau\tau$, let its \emph{gap sequence} be
+    $(h;\, g_1, \dots, g_{m-1};\, t)$: the number of $\sigma$'s before
+    the first $\tau$, between consecutive $\tau$'s, and after the last.
+
+    \emph{Step 1 (configurations).} Every frame constant has gap
+    sequence $(2;\, 1^{k-1};\, 3)$. Concatenating two constants merges
+    the trailing $\sigma^3$ of the first with the leading $\sigma^2$ of
+    the second: an interior gap of $5$. A tally $\tau^{n}$, $n \geq 1$,
+    between its delimiters contributes $3\,0^{\,n-1}\,2$; an empty tally
+    makes them touch, a gap of $5$. So a configuration's gaps are: head
+    $2$, then the constants' interior $1$-blocks interleaved with
+    junction gaps of $5$, the two tally junctions $3\,0^{x-1}\,2$ or
+    $5$, tail $3$.
+
+    \emph{Step 2 (patterns cannot cross tallies).} Every pattern of
+    the construction has at least two $\tau$'s, no $\tau\tau$, head
+    exactly $2$, tail in $\{0, 3\}$, and interior gaps in $\{1, 3, 5\}$
+    only -- never $0$ and never $2$. If a pattern $W$ occurs in
+    $C(i,x,y)$, its $\tau$'s map to \emph{consecutive} $\tau$'s of the
+    configuration (a skipped $\tau$ would have to appear among $W$'s
+    $\sigma$'s), so every interior gap of $W$ equals the corresponding
+    gap of the configuration. Gaps of $0$ arise only inside tallies of
+    length $\geq 2$, so $W$ covers no two consecutive tally characters;
+    a gap of $2$ arises only after the last character of a tally, so
+    $W$'s $\tau$-sequence cannot cross a tally's right edge; and if
+    $W$'s first $\tau$ were a tally character, its next gap would have
+    to be $0$ or $2$ -- both impossible. The only pattern that can meet
+    a tally at all is the decrement pattern $D_r\tau$, whose last gap
+    $3$ pins its last $\tau$ to the tally's \emph{first} character.
+    Every other pattern avoids tallies entirely.
+
+    \emph{Step 3 (pinning).} Let $W$'s leading segment (up to its
+    first gap of $3$ or $5$) contain $k$ $\tau$'s, all separated by
+    gaps of $1$. Its first $\tau$ must be a constant's \emph{first}
+    $\tau$: a middle $\tau$ of a constant has one $\sigma$ before it
+    inside the constant, and $W$'s head $\sigma^2$ must fit in the
+    preceding $\sigma$-run. If that constant had more than $k$ $\tau$'s,
+    the $(k{+}1)$-st would follow a gap of $1$ where $W$ has its seam
+    $3$ or $5$: impossible; so the constant has exactly $k$ $\tau$'s,
+    and by the distinctness of family indices it is the unique slot
+    holding that string. The same argument applies constant-by-constant
+    along $W$'s seams (a seam of $5$ matches a junction, so the
+    constants on both sides occupy adjacent slots). Assembling:
+    $M P_i M$ can only chain the $M$-slot, a junction, the $P_i$-slot,
+    a junction, the $M$-slot, and the two $M$-slots of a configuration
+    bracket exactly one code -- the wrapped one: (ii). $D_r D_{r'}$
+    chains $D_r$'s slot to the next only through a gap of $5$, which
+    after $D_r$'s slot arises exactly when the tally is empty: (iii).
+    The output prefix is pinned at $D_0$'s slot and then slot-by-slot
+    through the program zone (matching $\Pi(0)$ iff $i = 0$), then
+    across the first tally junction ($5$ iff $x = 0$): (v). Finally a
+    single frame constant $V(k)$ is itself such a pattern, pinned by
+    Step 3 to a slot holding that string: the two $M$-slots are the two
+    wrap positions, every other constant has one slot: (i).
+\end{proof}
+
+\begin{proof}[Proof of Theorem~\ref{thm:lim2cm} (correctness)]
+    $\mathrm{INIT} = D_0\,\Pi(1)\,D_1\cdot[\,\tau/\sigma\,]X_1\cdot D_2 D_3$
+    maps any $w$ over $\{\sigma, \tau\}$ to $C(1, |w|, 0)$: one constant
+    pass turns the input into a $\tau$-tally of its length, and the
+    frame constants sandwich it. By Lemma~\ref{lem:occurrence} the
+    dispatch test of the current instruction is the only one that
+    fires, the operation pass acts on exactly the intended tally, and
+    unwrap-then-wrap moves the wrap to exactly the target code -- so an
+    induction along the run of $M$ gives
+    $\mathrm{step}(C(i, x, y)) = C(i', x', y')$ for the machine's step,
+    and the halted configuration -- where every dispatch test fails and
+    the identity branch runs -- is a fixed point. It is the unique
+    fixed point among configurations: every non-halted configuration
+    moves, since its instruction either edits a tally or jumps (the
+    zero-branch self-jump that would not move is excluded by (N1)).
+    The orbit of $\mathrm{lim}(\mathrm{step})$ on a configuration is
+    therefore exactly the run of $M$, sweep for step: it converges iff
+    $M$ halts, in as many sweeps as the machine takes steps. At halt,
+    (N2) puts the result in counter 2 and (N3) empties counter 1, so
+    Lemma~\ref{lem:occurrence}(v) applies to the configuration
+    $C(0, 0, y)$: $\mathrm{OUT} =
+    [\,\epsilon/D_0\Pi(0)D_1D_2\,][\,\epsilon/D_3\,]$ deletes the
+    constant prefix (which occurs exactly once, at position $0$) and
+    the closing delimiter, leaving $\tau^{y}$. Both deletion passes sit
+    outside the iterand, so $\mathrm{step}$ itself is total.
+
+    Verified end to end (the scripts and full domains are in the
+    research log, research/scratch/lim/): the compiled doubling machine
+    on $n \leq 12$ ($\tau^{2n}$ exact), the adder on all $25$ input
+    pairs $n, m \leq 4$ plus a $7 \times 7$ border grid, a
+    counter-draining machine on a $5 \times 5$ grid, and the
+    normalization pipeline (N1)--(N3) demonstrated on a machine
+    needing all three, with the raw defects shown (a non-halting fixed
+    point, a counter-1 output, a dirty halt) and repaired; divergence
+    verified on a self-looping and a two-cycling machine, the orbit
+    matching the simulated run on every point; $\mathrm{step}$'s
+    totality on $400$ random large strings and on every branch; the
+    occurrence census of Lemma~\ref{lem:occurrence} at the edge
+    lengths $x, y \in \{0, 1, 2\}$ for every instruction counter,
+    systematically for $x, y \leq 40$, and on $400$ random
+    configurations up to $1000$, at three constant assignments (a
+    fourth, violating the distinctness hypothesis, run as a stress
+    test); and the whole of it re-run under both swaps of the
+    Section-2 toolkit roles.
+\end{proof}
+
+\begin{theorem}
+    (\emph{The Compiled Program Computes the Machine})
+    \label{thm:limpartial}
+    Over any alphabet with $|\Sigma| \geq 2$, the flat calculus with one
+    $\mathrm{lim}$ node computes exactly the partial computable
+    functions $\Sigma^* \rightharpoonup \Sigma^*$: it computes all of
+    them (Theorem~\ref{thm:lim2cm} and Minsky's two-counter machines
+    \cite{minsky67}, arbitrary inputs brought to tallies by the
+    two-letter prefix-code reduction of Theorem~\ref{thm:universal}),
+    and it computes nothing else: a converging evaluation is a finite
+    sequence of sweeps, each a primitive-recursive pass, halted by a
+    decidable fixed-point test, so every denotation is partial
+    computable.
+\end{theorem}
+
+\begin{proposition}
+    (\emph{One Node Is Enough: the Driver})
+    \label{prop:limcontain}
+    Every $L{+}\mathrm{lim}$ expression is computed by a lazy-pass
+    recursive $L$ expression of the same size up to a constant factor:
+    the unary function $\mathrm{lim}(E)$ over a flat iterand $E$ is the
+    guarded definition
+    \begin{align}
+        \mathrm{RUN}(X) \;\triangleq\; \mathtt{if}\big(\mathtt{eq}(E(X),\, X),\;\; X,\;\; \mathrm{RUN}(E(X))\big),
+    \end{align}
+    with the recursive call in the \emph{dead} branch's replacement --
+    the pattern-gated position of Remark~\ref{rem:ifgate}, where the
+    two-way gate of Theorem~\ref{thm:gate} makes $\mathtt{if}$ sound
+    both ways.
+\end{proposition}
+
+\begin{proof}
+    Induction on the expression, replacing each $\mathrm{lim}$ node by
+    its driver bottom-up: the iterand $E$ is then $\mathrm{lim}$-free
+    by the induction hypothesis, and the node
+    $\mathrm{lim}(E)[E_0]$ is the driver applied to the start,
+    $\mathrm{RUN}[E_0/X]$. The driver unrolls the orbit exactly: its
+    guard tests $s_{k+1} = s_k$, and its else-branch forces $E(X)$ --
+    one sweep -- before recurring, so the recursion halts on the least
+    $K$ with $s_{K+1} = s_K$ and diverges with the orbit; and if
+    $E(X)$ is undefined at any point, the guard is undefined and so is
+    the driver, exactly as the orbit's undefinedness makes the node
+    undefined (Definition~\ref{def:lim}) -- the two are undefined
+    together, as in Lemma~\ref{lem:beta}'s caveat. What the eager
+    calculus could not do -- evaluate a branch that may diverge -- is
+    not asked of it: the dead branch's round is a discarded
+    replacement (Remark~\ref{rem:ifgate}'s minimal repair), and the
+    two-way gate of Theorem~\ref{thm:gate} is what makes that sound.
+    Verified: the driver against the direct orbit for eight rules
+    (convergent and divergent, census witnesses included) on $19$
+    inputs each under both choices of the toolkit roles -- $135$
+    convergent orbits value-exact, $29$ divergent -- plus the compiled
+    iterands of Theorem~\ref{thm:lim2cm} (the drivers of the doubling
+    and adder machines match $\mathrm{MAIN}$ exactly on $n \leq 5$) and
+    a self-looping machine diverging on both sides.
+\end{proof}
+
+\begin{corollary}
+    (\emph{One Node Is the Whole Gap})
+    \label{cor:limclass}
+    Over any alphabet with $|\Sigma| \geq 2$:
+    \begin{align}
+        \text{flat } L + \text{ one } \mathrm{lim} \text{ node}
+        \;&=\; \text{lazy-pass recursive } L \notag \\
+        \;&=\; \text{the partial computable functions.}
+    \end{align}
+\end{corollary}
+
+\begin{proof}
+    Left to right by Proposition~\ref{prop:limcontain} (one driver per
+    node; the calculus underneath is untouched), right to left by
+    Theorem~\ref{thm:limpartial} together with the soundness direction
+    of Theorem~\ref{thm:universal}.
+\end{proof}
+
+This is the inertness story of Section~\ref{sec:recursion}, sharpened
+to a single quantifier. The bounded calculus is polynomial
+(Theorem~\ref{thm:fp}); recursion under eager evaluation changes
+nothing (Theorem~\ref{thm:eager}), and neither do lazy arguments
+(Theorem~\ref{thm:lazyargs}); the two-way gate plus recursion is
+universal (Theorem~\ref{thm:universal}). The gate's condition --
+evaluate the replacement only when the pattern fires -- is exactly the
+fixed-point test of Definition~\ref{def:lim}, and
+Proposition~\ref{prop:limcontain} says the translation is an
+equality of classes, not an embedding of one into a richer one: the
+power was never in the recursion depth, it is unbounded guarded
+iteration, and one iteration node over a flat pipeline already has
+all of it.
+
+\begin{corollary}
+    (\emph{Undecidability})
+    \label{cor:limundec}
+    \begin{enumerate}[(i)]
+        \item Given a flat $E \in \mathrm{Exp}_1$ and $w$, whether
+        $\mathrm{lim}(E)(w)$ is defined is $\Sigma^0_1$-complete.
+        \item Given a flat $E \in \mathrm{Exp}_1$, whether
+        $\mathrm{lim}(E)$ is total is $\Pi^0_2$-complete.
+    \end{enumerate}
+\end{corollary}
+
+\begin{proof}
+    Both problems are in their classes because ``the orbit converges
+    within $k$ sweeps'' is decidable, each sweep a primitive-recursive
+    pass. Hardness: $\mathrm{MAIN}(\tau^{n})$ is defined iff $M$ halts
+    on $n$ (Theorem~\ref{thm:lim2cm}), a $\Sigma^0_1$-hard relation,
+    and $\mathrm{MAIN}$ is total iff $M$ halts on \emph{every} input
+    (every $n$ is $\mathrm{INIT}$'s image of some string -- every
+    length is hit), a $\Pi^0_2$-hard one. The undecidability of
+    totality is the sibling of Corollary~\ref{cor:barriers}(4) for the
+    recursive calculus.
+\end{proof}
+
+\begin{proposition}
+    (\emph{Growth})
+    \label{prop:limgrowth}
+    \begin{enumerate}[(i)]
+        \item (\emph{exponential output, one node}) Writing $v$ for the
+        Horner value of Theorem~\ref{thm:amplifier} ($a$ adds $1$, $b$
+        doubles),
+        \begin{align}
+            \mathrm{lim}([\,baa/ab\,])(w) \;=\; b^{\,\#b(w)}\, a^{\,v(w)}
+        \end{align}
+        for every $w$, in at most $v(w) - \#a(w)$ sweeps; in particular
+        \begin{align}
+            \mathrm{lim}([\,baa/ab\,])(a\,b^{\,n-1}) \;=\;
+            b^{\,n-1} a^{\,2^{\,n-1}} \text{ of length } 2^{\,n-1} + n - 1 .
+        \end{align}
+        One constant pass under one $\mathrm{lim}$ node has exponential
+        output: the length bound of Lemma~\ref{lem:length} fails at
+        depth one.
+        \item (\emph{towers, nested nodes}) The block
+        $\mathrm{lim}([\,baa/ab\,]) \circ \mathrm{lim}([\,ab/aa\,])$
+        maps $b^{m} a^{K}$ to
+        $b^{\,m + \lfloor K/2 \rfloor}\,
+        a^{\,2^{\lfloor K/2 \rfloor + 1} - 2 + (K \bmod 2)}$ -- the
+        closed form of Corollary~\ref{cor:towers}'s two restart nodes,
+        now for sweep normalizers -- so $2t - 1$ constant-pattern
+        $\mathrm{lim}$ nodes produce output of tower height $t$ in the
+        input length, and $\mathrm{lim}(L) \sqsubseteq L$ fails: three
+        nodes already outgrow Lemma~\ref{lem:length}'s polynomial
+        bound.
+    \end{enumerate}
+\end{proposition}
+
+\begin{proof}
+    (i) Each replacement $ab \to baa$ preserves $\#b$ and $v$:
+    reading $v$ left to right, $v(x\,ab) = (v(x)+1) \cdot 2 =
+    v(x\,baa)$, and appending the same suffix multiplies both equally
+    -- formally $v(uv) = v(u) \cdot 2^{\#b(v)} + v(v)$. So the sweep,
+    which performs several such replacements at disjoint sites,
+    preserves them too. The potential $\Phi(w) = v(w) - \#a(w)$ is
+    nonnegative -- $v$ sums $2^{\#b(\text{after})}$ over the $a$'s of
+    $w$ -- drops by exactly $1$ per replacement ($\#a$ grows, $v$
+    does not), and is $0$ exactly when no $a$ has a $b$ after it, i.e.\
+    on the $ab$-free strings, which by Lemma~\ref{lem:fpsweep} are the
+    sweep's fixed points. The orbit therefore reaches an $ab$-free
+    string after at most $\Phi(w)$ replacements -- hence at most that
+    many sweeps -- and an $ab$-free string with the same $\#b$ and $v$
+    is $b^{\#b} a^{v}$, both invariants forcing the exponents. The
+    potential also re-proves the termination of the restart process of
+    Theorem~\ref{thm:amplifier}, and the two normalizers of this rule
+    agree on every input. (Verified: all binary inputs of length
+    $\leq 12$, $200$ random of length $13$--$16$, the invariants per
+    sweep on $50$ traces, and the tally witness for $n \leq 14$.)
+    (ii) The half node maps $b^{m} a^{K}$ to
+    $b^{m} (ab)^{\lfloor K/2 \rfloor} a^{K \bmod 2}$ in \emph{one}
+    sweep -- the greedy pairing of the $a$-run -- and is then inert
+    ($ab$ contains no $aa$); composing with (i) and counting the
+    $b$'s after each $a$ of $(ab)^{j}$ gives the displayed form, the
+    Horner computation of Corollary~\ref{cor:towers}. (Verified
+    against the closed forms for $t \leq 3$ -- $5$ nodes, output
+    length $65{,}556$ at $n = 4$ -- and the block on the grid
+    $m \leq 3$, $K \leq 14$.)
+\end{proof}
+
+\begin{remark}
+    (\emph{Divergent Orbits Grow Like Fibonacci})
+    \label{rem:fiborbit}
+    The census's divergent rule $[\,aabb/ba\,]$ diverges under the sweep
+    too, but with a law: on $aabbaabb$ the orbit lengths are
+    $2F_{k+1} + 2k + 6$ for the Fibonacci numbers $F$, i.e.\ $8 \to 10
+    \to 14 \to 18 \to \cdots \to 204$ in ten sweeps $\to \cdots \to
+    1{,}028{,}520$ in twenty-eight -- growth by the golden ratio per
+    sweep, exponential in the iteration count; on $bbaa$ the law is
+    $2F_{k+1} + 2k + 2$, and the mirror rule $[\,bbaa/ab\,]$ runs the
+    reversed orbits (verified exactly through $k = 28$, the sweep
+    strings cross-checked against the evaluator through $k = 16$). The
+    mechanism is the census splice of
+    Theorem~\ref{thm:termination}(v) -- a prefix ending $aab$ against
+    the replacement $aabb$, re-creating a junction $ba$ -- compounding:
+    a junction in the context $(b, a)$ doubles per sweep, a junction in
+    $(a, a)$ or $(b, b)$ persists, one in $(a, b)$ dies, and the two
+    persistent species follow the Fibonacci recurrence. So the growth
+    of the iterated calculus lives in the \emph{iteration}, not the
+    nesting: Corollary~\ref{cor:towers} needs $2t-1$ nested nodes for
+    tower height $t$, but one node already produces exponential output
+    (Proposition~\ref{prop:limgrowth}(i)) and Fibonacci divergent
+    orbits -- while divergent restart rules were the \emph{only}
+    obstacle left in the one-rule census, here divergence is the
+    engine.
+\end{remark}
+
+The landscape closes one row and opens a question. $L \sqsubseteq \mathrm{lim}(L)$ trivially, the grammar growing
+by one node kind; $\mathrm{lim}(L) \sqsubseteq L$ refuted by
+Proposition~\ref{prop:limgrowth} (one node, exponential output); the
+toolkit carried verbatim -- the compilation of
+Theorem~\ref{thm:lim2cm} needs no recursion and no nesting, an if-chain
+of Section~\ref{sec:toolkit} passes; growth unbounded, the class being
+the partial computable functions. Restart and $\mathrm{lim}$ are the
+two iteration operators over the same grammar -- one rule iterated
+against one expression iterated -- and both escape $L$ on growth
+(Corollary~\ref{cor:towers}, Proposition~\ref{prop:limgrowth}), but
+$\mathrm{lim}$'s class is exactly characterized
+(Corollary~\ref{cor:limclass}) where the Markov row's entries carry
+Conjecture~\ref{conj:ic}. What the characterization does \emph{not}
+settle is the one-rule fragment: is convergence of
+$\mathrm{lim}([\,A/B\,])$ decidable? Proposition~\ref{prop:limtotal}
+settles everything outside the strategic case $|A| > |B|$ with
+$B \not\subset A$, and Remark~\ref{rem:limstrategies} shows the sweep
+and leftmost versions of that case are genuinely different problems --
+the sweep sibling of Theorem~\ref{thm:termination}(v)'s strategic
+termination problem, whose unrestricted form is the long-standing open
+one-rule termination problem \cite{geser01}. And the hierarchy inside the
+operator: one $\mathrm{lim}$ node over a \emph{single constant pass}
+reaches exponential output and Fibonacci orbits
+(Proposition~\ref{prop:limgrowth}, Remark~\ref{rem:fiborbit}) -- whether
+it reaches universality is open; the amplifier of
+Proposition~\ref{prop:limgrowth}(i) sorts and Horner-codes, and every
+fixed point of a one-rule sweep is $B$-free
+(Lemma~\ref{lem:fpsweep}), but no argument is known in either
+direction.
+
 \subsection{Both Directions at Once}
 \label{ssec:union}
 
@@ -1457,6 +2076,8 @@ The evidence is fourfold. (i) The constant fragments are provably incomparable (
     \hline
     once & refuted & open & rebuilt & linear \\
     positional & refuted & iff once $\in L$ & $\mathtt{tail}$, $\mathtt{head}$ & linear \\
+    $k$-th occurrence $\mathrm{L}_k$ & refuted & open & untested & linear \\
+    $\mathrm{lim}$ & trivially & refuted & verbatim & unbounded \\
     right-to-left & open & open & verbatim & polynomial \\
     unsafe & open & open & collapses & poly.\ fragment \\
     Markov & conj.\ no & refuted & black-box $\mathtt{enc}$ & towers \\
@@ -1464,13 +2085,50 @@ The evidence is fourfold. (i) The constant fragments are provably incomparable (
 \end{tabular}
 \end{center}
 
-The right-to-left row's two ``open'' cells and the union row's one are a single question: either inclusion implies the other (Corollary~\ref{cor:incl-symmetry}), and $L{+}\mathrm{R} \sqsubseteq L$ iff $\mathrm{R} \sqsubseteq L$ iff $\mathrm{r} \in L$ (Theorem~\ref{thm:union-collapse}) -- Conjecture~\ref{conj:union} predicts the negative answer for all three. Both inclusions hold if $\mathrm{rev}$ is reachable in either calculus, and no other route between $L$ and $\mathrm{R}$ is known (Theorem~\ref{thm:subsequential} separates only the constant fragments). The two ``refuted'' entries of the once and positional rows are Corollaries~\ref{cor:once-sep} and~\ref{cor:pos-sep}; the Markov row's is Corollary~\ref{cor:towers}. The unsafe row's two ``open''s carry the conjectures after Proposition~\ref{prop:rescan-survives}; the Markov row's ``conj.\ no'' is Conjecture~\ref{conj:ic}, with the doubling node of Theorem~\ref{thm:no-injective} the concrete obstacle.
+The right-to-left row's two ``open'' cells and the union row's one are a single question: either inclusion implies the other (Corollary~\ref{cor:incl-symmetry}), and $L{+}\mathrm{R} \sqsubseteq L$ iff $\mathrm{R} \sqsubseteq L$ iff $\mathrm{r} \in L$ (Theorem~\ref{thm:union-collapse}) -- Conjecture~\ref{conj:union} predicts the negative answer for all three. Both inclusions hold if $\mathrm{rev}$ is reachable in either calculus, and no other route between $L$ and $\mathrm{R}$ is known (Theorem~\ref{thm:subsequential} separates only the constant fragments). The two ``refuted'' entries of the once and positional rows are Corollaries~\ref{cor:once-sep} and~\ref{cor:pos-sep}, and the $k$-th-occurrence row's is Proposition~\ref{prop:kth}(i); the Markov row's is Corollary~\ref{cor:towers}. The $k$-th-occurrence row's ``open'' reduces, wherever a marker letter is fresh, to the once-hinge by Proposition~\ref{prop:kth}(iii). The $\mathrm{lim}$ row is the only one whose class is exactly characterized (Corollary~\ref{cor:limclass}) -- its ``refuted'' is Proposition~\ref{prop:limgrowth}, one constant pass under one iteration node already outgrowing Lemma~\ref{lem:length} -- where the Markov row's entries carry Conjecture~\ref{conj:ic}; restart and $\mathrm{lim}$ are the two iteration operators over the same grammar, one rule against one expression, and both escape $L$ on growth, but only $\mathrm{lim}$'s escape is total. The unsafe row's two ``open''s carry the conjectures after Proposition~\ref{prop:rescan-survives}; the Markov row's ``conj.\ no'' is Conjecture~\ref{conj:ic}, with the doubling node of Theorem~\ref{thm:no-injective} the concrete obstacle.
 
 The web hangs on two ropes, and both are reachability questions about the baseline itself:
 \begin{enumerate}
-    \item \emph{Is the once-primitive $L$-reachable?} By Theorem~\ref{thm:pos-hinge} this decides $\mathrm{POS} \sqsubseteq L$, and with it the whole once-family's relation to $L$. Proposition~\ref{prop:unary-once} rules out the easy invariants, and every bounded search fails.
+    \item \emph{Is the once-primitive $L$-reachable?} By Theorem~\ref{thm:pos-hinge} this decides $\mathrm{POS} \sqsubseteq L$, and with it the whole once-family's relation to $L$. The probe is affirmative over two letters (Proposition~\ref{prop:del-leftmost}); over $|\Sigma| \geq 3$ the constant needle resists with a precise obstruction, and the computed needle is open over every alphabet. The $k$-th-occurrence family rides on the same hinge wherever a marker letter is spare (Proposition~\ref{prop:kth}(iii)); over the binary alphabet its $k \geq 2$ nodes are absent from every once-space searched.
     \item \emph{Is reversal $L$-reachable?} This decides whether $L = \mathrm{R}$ (Theorem~\ref{thm:conjugation}), and by the mirror symmetry of the once-calculi it is also the hinge between once-left and once-right. (Section~\ref{sec:recursion} settles the recursive version: reversal is computable there by a three-line guarded recursion; and the bounded calculus can already read and edit its right end, Proposition~\ref{prop:last} -- the question is now sharp: the bounded calculus, or nothing.) The union calculus (Section~\ref{ssec:union}) refines the stakes: $\mathrm{rev} \in L$ is sufficient but not necessary for $L = \mathrm{R}$ -- the exact criterion is $\mathrm{r} \in L$, and every search for it has failed (Conjecture~\ref{conj:union}).
 \end{enumerate}
+
+\begin{remark}
+    (\emph{The Price of Reordering})
+    \label{rem:price}
+    The second open problem -- is reversal $L$-reachable? -- has a quantitative form. For a function $f$ and an input $w$, let $w^{p}$ be $w$ with its $p$-th character flipped, and let
+    \[
+        D_f(w,p) \;\triangleq\; \{\, i : f(w)_i \neq f(w^{p})_i \,\},
+    \]
+    discarding the flips that change the output length. Where the surviving rows are singletons meeting distinct columns, they induce a partial injective map $\pi_w$ from input positions to output positions, and
+    \[
+        \chi_f(w) \;\triangleq\; \#\{(p < p') : \pi_w(p) > \pi_w(p')\}
+    \]
+    counts its \emph{crossings}: the disorder of $f$'s output routing. Reading the right end is free -- $\mathtt{last}$ (Proposition~\ref{prop:last}) routes its single far cell with zero crossings -- and so is dropping the final character ($\mathtt{init}$, the same proposition). What costs crossings is \emph{moving} characters, and the costs of the functions the calculus demonstrably \emph{can} build form a ladder (all rows at $|w| = 14$, worst input; the $k$-th rung family $\mathrm{revlast}_k(w) \triangleq w_{n-1} w_{n-2} \cdots w_{n-k} \cdot w[:n{-}k]$ is $L$-expressible for every fixed $k$, by $k$ anchored right-end reads $\mathtt{last} \circ \mathtt{init}^{j}$ ($j < k$) and the remaining head $\mathtt{init}^{k}$, glued with $\mathtt{cat}$):
+
+    \begin{center}
+        \small
+        \begin{tabular}{llll}
+            \hline
+            $f$ & in $L$? & $\chi_f$ & closed form \\
+            \hline
+            $\mathtt{init}$ & yes & $0$ & order-preserving \\
+            $\mathtt{last}$ & yes & $0$ & reads the far end \\
+            $\mathrm{rotR} = \mathtt{cat}(\mathtt{last},\mathtt{init})$ & yes & $13$ & $n-1$ \\
+            swap-first-last & yes & $25$ & $2(n{-}2)+1$ \\
+            $\mathrm{revlast}_k$, $k=1,2,3,4$ & yes, fixed $k$ & $13,\,25,\,36,\,46$ & $\binom{n}{2}-\binom{n-k}{2}$ \\
+            $\mathrm{rev}$ & \emph{open} & $91$ & $\binom{n}{2}$ \\
+            \hline
+        \end{tabular}
+    \end{center}
+
+    The ladder is exact: $\mathrm{revlast}_k$ reverses a $k$-character tail block and moves it to the front, so its crossings are the block's internal reversals $\binom{k}{2}$ plus its crossings of the untouched head $k(n-k)$ -- which sum to $\binom{n}{2} - \binom{n-k}{2}$, the number of pairs involving at least one moved character. Each fixed $k$ is affordable; reversal is the $k = n$ rung, and it is the only row whose crossing count is quadratic in $n$. Every $L$-expression measured so far -- the built rungs of the table, the rotations $\mathrm{rotR}_k$ for $k \leq 4$, the doubling $\mathtt{cat}(X,X)$, a thousand random pipelines -- pays $O(n)$ crossings, suggesting the quantitative form of the hoped negative answer: there is a constant $c(E)$, depending only on the expression, with $\chi_{\llbracket E \rrbracket}(w) \leq c(E)\cdot|w|$ for all $w$; reversal needs $|w|(|w|{-}1)/2$. (Verified: the built rungs compute their functions exactly on all binary inputs of length $\leq 10$ for $k \leq 2$ and $\leq 8$ for $k \leq 4$, and their measured crossings at $|w| = 14$ -- worst of $56$ inputs -- agree with the closed forms; likewise the rotations, with closed form $k(n{-}k)$; swap-first-last exactly on all binary inputs of lengths $2$ to $11$; the random corpus is a thousand expressions of depth $\leq 4$ at $|w| = 12$, none paying more than $3$ crossings, the five heaviest re-measured at $|w| = 8, 10, 14$ and exceeding $3$ at no length.)
+
+    Three delimitations keep the suggestion honest. \emph{(i) Pair counts are the wrong measure.} The doubling $\mathtt{cat}(X,X)$ repeats the input, and under the natural correspondence sending each input position to its two output copies, $\binom{n}{2}$ pairs come out inverted -- for input positions $i < j$, the first copy of $j$ lands before the second copy of $i$. The doubling is as cheap as an expression gets, so any obstruction that counts inverted pairs of a natural input--output correspondence is falsified on the spot; the crossing count survives it because it is computed flip by flip, and the doubling's flips each move the two copies of one character together -- non-singleton rows, discarded by construction. \emph{(ii) Content is relabelable.} Label each character of $\mathrm{rev}(w)$ by the input position it comes from, consistently (same character, distinct positions); there is such a labeling increasing within each character class -- each class of $\mathrm{rev}(w)$ is a class of $w$ -- and a strictly decreasing subsequence of it uses at most one position per class, at most $|\Sigma|$ in all. So no invariant computable from output content alone can distinguish $\mathrm{rev}$ from an order-preserving function; a proof must constrain which input characters the calculus delivers where. (The within-class-increasing labeling has width at most the number of distinct characters on all inputs of length $\leq 14$, and brute force over \emph{all} consistent labelings confirms it optimal on all inputs of length $\leq 6$.) \emph{(iii) Tracing is fakeable.} The anchored constructions of the ladder rebuild their outputs from constant characters -- Proposition~\ref{prop:last} \emph{emits} the right end rather than moving it -- so an invariant that demands output characters be moved input characters excludes none of the anchored rungs and constrains a hypothetical reversal witness only on its verbatim routes. The crossing count is defined through output influence, which constant reconstruction cannot fake; that is the sense in which it carries the suggestion above.
+
+    Finally, the obstruction the ladder measures is \emph{reversal-specific}. The canonical functions of the two sibling questions -- the longest $b$-free prefix (truncation at the leftmost $b$, the left end of the once-problem's probe, ``delete the leftmost $b$'') and the right-to-left pass $[\,b/aa\,]^{\mathrm{R}}$ (Theorem~\ref{thm:subsequential}'s separating witness) -- have $\chi = 0$ on \emph{every} binary input of length $\leq 12$ ($8{,}191$ inputs each): a prefix cut and a local halving reorder nothing globally. A crossing-count proof that $\mathrm{rev} \notin L$ therefore cannot double for either sibling; unbounded reordering, the computed needle, and residue routing are three obstructions, and the ladder prices only the first.
+\end{remark}
+
 Beyond the two hinges:
 \begin{enumerate} \setcounter{enumi}{2}
     \item Conjecture~\ref{conj:ic} (IC): no total injective growing core Markov expression. Either answer reorganizes the Markov row.
@@ -1616,6 +2274,44 @@ The strictness that makes recursion inert is the strictness of the \emph{scrutin
     \end{enumerate}
 \end{corollary}
 
+Universality needed the gate, and the gate needs the loop: without self-reference, even the operator's own non-strictness leaves the reachable class exactly where it was. Proposition~\ref{prop:lpcons} located the call-free machine's extra definedness -- every point of it comes from a discarded replacement -- but did not say whether that definedness is \emph{realizable}: whether the lazy-pass denotation of a call-free expression is the partial function of some plain expression. It is, by an explicit translation.
+
+Two small constructions carry it. First, the \emph{coercion}, fixing the two distinct characters $b, x \in \Sigma$ of Definition~\ref{def:gate}: $\gamma(X) \triangleq \mathtt{if}\big(\mathtt{eq}(X, \epsilon),\, b,\, X\big)$, total, with $\gamma(w) = w$ for $w \neq \epsilon$ and $\gamma(\epsilon) = b$ -- a pattern wrapped in $\gamma$ is never empty. Second, the \emph{occurrence test} for total values $U, V$:
+\begin{align*}
+    \mathtt{occ}(U,V) \;\triangleq\; \mathtt{if}\Big(&\mathtt{eq}(U, x),\;
+        \mathtt{if}\big(\mathtt{eq}([\,xx/x\,]V,\, V),\, \bot,\, \top\big),\\
+        &\mathtt{if}\big(\mathtt{eq}([\,x/\gamma(U)\,]V,\, V),\, \bot,\, \top\big)\Big),
+\end{align*}
+total, with value $\top$ iff $U$ occurs in $V$ whenever $U \neq \epsilon$ (the value at $U = \epsilon$ is defined but never load-bearing). Soundness is the observation that a pass whose replacement differs from its pattern changes its scrutinee iff the pattern occurs -- if the pattern is absent the text stands, and if it is present the spliced span, or the length, must move -- and the replacement $x$ differs from the pattern $\gamma(U)$ on the second branch by the case split itself, while the first branch's $[\,xx/x\,]$ strictly grows on firing. No freshness assumption is needed: the one degeneracy, pattern $=$ replacement, is routed around by testing $U$ first. (Verified: $225$ value pairs, $|U|, |V| \leq 3$: zero undefined, zero wrong answers on the load-bearing branch.)
+
+\begin{theorem}
+    (\emph{Flat lazy passes denote $\mathrm{L}$.})
+    \label{thm:flatlazy}
+    For every call-free expression $E$ over any alphabet with $|\Sigma| \geq 2$ there is a plain expression $E^{+}$ with $\llbracket E^{+} \rrbracket = \llbracket E \rrbracket^{\mathrm{lp}}$ -- the same partial function, domain included -- and $E^{+}$ is polynomially larger than $E$.
+\end{theorem}
+
+\begin{proof}
+    Write $\llbracket E \rrbracket^{\mathrm{lp}}$ for the lazy-pass denotation of the call-free $E$. Two mutually recursive translations, by structural induction. The \emph{value part} $\Phi(E)$ replaces every pattern by its coerced version: $\Phi(X_i) = X_i$, $\Phi(W) = W$, $\Phi(E_1 E_2) = \Phi(E_1)\Phi(E_2)$, and
+    \begin{align*}
+        \Phi\big(\,[\,R/P\,]\,T\,\big) \;=\; \big[\,\Phi R\,/\,\gamma(\Phi P)\,\big]\,\Phi T .
+    \end{align*}
+    Every pattern in $\Phi(E)$ is a $\gamma$-image, never empty, and every other position is total by induction, so $\Phi(E)$ is total. On an input where the lazy-pass machine defines $E$, the patterns are forced and nonempty, so each $\gamma$ acts as the identity there; an inert pass contributes its scrutinee either way (its replacement, total, is discarded); and a firing pass forces $R$, where $\Phi R$ agrees with $R$ by induction. Hence $\Phi(E)$ agrees with $\llbracket E \rrbracket^{\mathrm{lp}}$ on its domain.
+
+    The \emph{domain part} $F(E) \in \{\top, \bot\}$, total, indicates the domain: $F(X_i) = F(W) = \top$; $F(E_1 E_2) = F(E_1) \wedge F(E_2)$; and
+    \begin{align*}
+        F\big(\,[\,R/P\,]\,T\,\big) \;=\;
+        F(T) \,\wedge\, F(P) \,\wedge\, \mathtt{isne}(\Phi P)
+        \,\wedge\, \big(\neg\,\mathtt{occ}(\Phi P, \Phi T) \;\vee\; F(R)\big),
+    \end{align*}
+    with $\mathtt{isne}$ as in Remark~\ref{rem:ifgate} and the connectives $\mathtt{if}$-combinations of $\top$ and $\bot$, all total -- note the \emph{conjunction}: an empty forced pattern must falsify $F$ outright, not vacuously satisfy it. The sub-expressions of $F$ are total -- the scrutinee and pattern of a node enter through $F$ itself, their \emph{values} only through the total $\Phi$ images -- so $F$ is well defined, and $F(E) = \top$ exactly on $\mathrm{dom}\big(\llbracket E \rrbracket^{\mathrm{lp}}\big)$: the node is defined iff its scrutinee and pattern are, the pattern is nonempty, and either the pattern is absent or the forced replacement is defined.
+
+    Finally the \emph{guard}: $E^{+} \triangleq [\,b/\,\mathtt{if}(F(E),\, b,\, \epsilon)\,]\;\Phi(E)$. On the domain the pass is $[\,b/b\,]$, the identity; off it the pattern is empty and the expression is undefined. The size is a \emph{sum over the nodes, not a product over the levels}: $\Phi(E)$ is linear in $|E|$, and $F$ at a node adds $F$ of the children plus one copy each of the $\Phi$-images of the node's own pattern and scrutinee, so $|E^{+}| = O(|E|^2)$.
+
+    (Verified exhaustively on the depth-$\leq 2$ call-free space over $\{a,b\}$ -- $599{,}844$ expressions, where the lazy-pass machine has $193$ denotations that no depth-$2$ eager expression has: for the simplest witness of each, $E^{+}$ reproduces the lazy partial function on all $31$ inputs $|S| \leq 4$ with zero mismatches; likewise for $250$ random depth-$2$ and $120$ random depth-$3$ expressions, $|E^{+}|$ up to ${\sim}3.1 \times 10^4$ nodes; $25$ witnesses re-verified on all $127$ inputs $|S| \leq 6$; and $31$ expressions cross-checked against an independent evaluator of the eager runtime -- zero mismatches throughout, and $\Phi$ total throughout.)
+\end{proof}
+
+The theorem completes Proposition~\ref{prop:lpcons} and sharpens the border this section draws. Eager evaluation and lazy arguments leave the reachable class unchanged even with recursion (Theorems~\ref{thm:eager} and~\ref{thm:lazyargs}); lazy passes make recursion universal through the gate (Theorem~\ref{thm:universal}). Theorem~\ref{thm:flatlazy} shows that the evaluation order \emph{alone} -- the operator's own non-strictness, without a self-reference to guard -- never leaves $\mathrm{L}$: the gate needs the loop. Section~\ref{sec:variants}'s $\mathrm{lim}$ node is the same border seen from the far side: flat $\mathrm{L}$ plus one iteration node computes \emph{exactly} the partial computable functions (Corollary~\ref{cor:limclass}) -- the loop, with no recursion to unwind, is the whole of it. In the terms of Proposition~\ref{prop:lpcons}, every discarded replacement is not merely harmless but \emph{recoverable}: the definedness the eager reading would lose to it is exactly the definedness the guard re-inserts.
+
 \subsection{Streams: Productivity}
 \label{sec:rec-streams}
 
@@ -1691,9 +2387,9 @@ The four rows share one primitive; the distance between the second and the third
 
 \section{Conclusion}
 
-This note took search-and-replace seriously as a model of computation, and found a small theory with classical echoes. The single pass $[A/B]$ -- leftmost-first, all occurrences, no re-entry into inserted text -- supports a complete toolkit: escaping, concatenation, head and tail, equality, selection, and simultaneous multiple substitution are each an explicit composition of passes with a correctness proof, over any alphabet with at least two characters. The calculus built on the primitive is structurally well-behaved: a syntactic safety condition implies totality, concatenation is eliminable, and every reachable function is computable in polynomial time, with the degree read off the expression -- while quadratic growth is reachable and exponential growth is not. Varying the three design choices one at a time separated the once-primitive from full passes, tied the right-to-left fragment to the reachability of reversal, collapsed the toolkit under rescanning, and let Markov iteration outgrow every polynomial -- at the price of re-entering the classical one-rule termination problem, where the census found the leftmost strategy to cost nothing. Admitting both directions at once reduced the union's collapse to a single three-argument function, the right pass itself -- present in no searched space, and carried by a mechanism, residue routing, that the left-to-right frontier cannot perform. Letting definitions recurse, finally, split the runtimes rather than the primitive: eager and lazy-argument evaluation buy nothing -- every recursive definition either inlines to a plain expression or never returns -- while the operator's one non-strictness, the replacement of a pass evaluated only when the pattern occurs, carries the calculus to universality, and the coinductive reading on infinite strings beyond every finite-state emitter.
+This note took search-and-replace seriously as a model of computation, and found a small theory with classical echoes. The single pass $[A/B]$ -- leftmost-first, all occurrences, no re-entry into inserted text -- supports a complete toolkit: escaping, concatenation, head and tail, equality, selection, and simultaneous multiple substitution are each an explicit composition of passes with a correctness proof, over any alphabet with at least two characters. The calculus built on the primitive is structurally well-behaved: a syntactic safety condition implies totality, concatenation is eliminable, and every reachable function is computable in polynomial time, with the degree read off the expression -- while quadratic growth is reachable and exponential growth is not. Varying the three design choices one at a time separated the once-primitive from full passes, spread the $k$-th-occurrence family between them into a mosaic of incomparable fragments, tied the right-to-left fragment to the reachability of reversal, collapsed the toolkit under rescanning, let Markov iteration outgrow every polynomial -- at the price of re-entering the classical one-rule termination problem, where the census found the leftmost strategy to cost nothing -- and closed the variant story with an exact class: iterating an expression to its fixed point, one node over a flat pipeline already computes every partial computable function, and one constant pass under it already grows exponentially while its divergent orbits grow like Fibonacci. Admitting both directions at once reduced the union's collapse to a single three-argument function, the right pass itself -- present in no searched space, and carried by a mechanism, residue routing, that the left-to-right frontier cannot perform. Letting definitions recurse, finally, split the runtimes rather than the primitive: eager and lazy-argument evaluation buy nothing -- every recursive definition either inlines to a plain expression or never returns -- while the operator's one non-strictness, the replacement of a pass evaluated only when the pattern occurs, carries the calculus to universality -- though, without recursion, it buys definedness, not power -- and the coinductive reading on infinite strings beyond every finite-state emitter.
 
-Two questions about the baseline itself carry the structure of the whole landscape: whether the once-primitive is $L$-reachable, and whether reversal is -- the second now sharpened by the union's criterion, which asks only whether the right pass as a function is reachable, and every search for which has failed. Around them, the exact characterization of each variant's reachable class, the growth dichotomy for total restart rules, the strategy question of Theorem~\ref{thm:termination}(v), and the guardedness boundary for stream definitions remain open. Everything finite in this note was verified by machine on the domains stated in situ; the two hinges are where the theory now asks to be settled by hand.
+Two questions about the baseline itself carry the structure of the whole landscape: whether the once-primitive is $L$-reachable, and whether reversal is. The first is affirmative at its probe over two letters (Proposition~\ref{prop:del-leftmost}) and now rests on the computed needle and on alphabets of three or more letters; the second is sharpened by the union's criterion, which asks only whether the right pass as a function is reachable, and every search for which has failed, and priced by the crossing ladder of Remark~\ref{rem:price}. Around them, the exact characterization of each variant's reachable class, the growth dichotomy for total restart rules, the strategy question of Theorem~\ref{thm:termination}(v), and the guardedness boundary for stream definitions remain open. Everything finite in this note was verified by machine on the domains stated in situ; the two hinges are where the theory now asks to be settled by hand.
 
 \bibliographystyle{splncs04}
 \bibliography{references}

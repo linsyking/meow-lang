@@ -1,0 +1,8 @@
+A1 cross-check: 1500 exprs x 15 inputs x 2 runtimes: 0 mismatches (expect 0)
+A2 space: 599844 expressions depth <= 2, 31 inputs |S| <= 4
+MECHANISM? ('S', ('S', ('K', ''), ('K', ''), ('K', '')), ('K', 'a'), ('K', ''))  ('undef', 'P', ('S', ('K', ''), ('K', ''), ('K', '')))
+MECHANISM? ('S', ('S', ('K', ''), ('K', ''), ('K', '')), ('K', 'a'), ('K', '')) a ('undef', 'P', ('S', ('K', ''), ('K', ''), ('K', '')))
+MECHANISM? ('S', ('S', ('K', ''), ('K', ''), ('K', '')), ('K', 'a'), ('K', '')) b ('undef', 'P', ('S', ('K', ''), ('K', ''), ('K', '')))
+MECHANISM? ('S', ('S', ('K', ''), ('K', ''), ('K', '')), ('K', 'a'), ('K', '')) aa ('undef', 'P', ('S', ('K', ''), ('K', ''), ('K', '')))
+MECHANISM? ('S', ('S', ('K', ''), ('K', ''), ('K', '')), ('K', 'a'), ('K', '')) ab ('undef', 'P', ('S', ('K', ''), ('K', ''), ('K', '')))
+A2 lpcons: eager-defined 7242300 (all in exact agreement: True); undefined-both 10211456; LAZY-ONLY definedness points 1141408; non-R-slot mechanisms 1141408 (expect 0)

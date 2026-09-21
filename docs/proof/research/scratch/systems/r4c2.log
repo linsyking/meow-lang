@@ -1,0 +1,5 @@
+O unit test: 15^2 pairs, 0 undefined (expect 0), 0 wrong answers on u!=eps (expect 0)
+depth-3 TR sizes (first 10): [3491, 21090, 19502, 31036, 14551, 6470, 20518, 22, 16661, 22808]
+random depth-3 sample (120): 120 expressions x 31 inputs: 0 mismatches (expect 0), 0 Phi-undefinedness (expect 0)
+TR vs paper machine: 6 exprs x 31 inputs: 0 mismatches (expect 0)
+verify_r4c done

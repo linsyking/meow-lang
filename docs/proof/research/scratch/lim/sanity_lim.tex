@@ -1,0 +1,77 @@
+% sanity_lim.tex -- standalone compile harness for lim_section.tex.
+% Replicates the preamble of docs/proof/main.tex (llncs, packages, remark
+% redefinition, QED) plus stub statements carrying every label the draft
+% references, so that (a) the draft compiles with 0 errors and (b) any
+% mistyped cross-reference shows up as an undefined reference.
+\documentclass[runningheads,envcountsect]{llncs}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{enumerate}
+\usepackage{mathpartir}
+\usepackage{stmaryrd}
+\usepackage{hyperref}
+
+\renewenvironment{remark}
+  {\rmfamily\trivlist\item[\hskip\labelsep{\itshape Remark.}]\ignorespaces}
+  {\endtrivlist}
+\makeatletter
+\def\endproof{\leavevmode\unskip\nobreak\hfil\penalty50
+  \hskip1em\null\nobreak\hfil\hbox{$\squareforqed$}%
+  \parfillskip\z@\finalhyphendemerits\z@\endgraf\@endtheorem}
+\makeatother
+\allowdisplaybreaks
+\emergencystretch=2em
+\hypersetup{colorlinks, linkcolor=black, urlcolor=cyan}
+
+\title{Sanity Harness: the lim section}
+\author{Y. Xiang}
+\institute{}
+
+\begin{document}
+\maketitle
+
+% ---- stubs: every paper label the draft references ------------------
+\section{Stub Toolkit Section}
+\label{sec:toolkit}
+\begin{definition}\label{def:exp}stub\end{definition}
+\begin{definition}\label{def:den}stub\end{definition}
+\begin{definition}\label{def:subst}stub\end{definition}
+\begin{lemma}\label{lem:beta}stub\end{lemma}
+\begin{theorem}\label{thm:totality}stub\end{theorem}
+
+\section{Stub Limits Section}
+\label{sec:limits}
+\begin{proposition}\label{prop:pipeline}stub\end{proposition}
+\begin{lemma}\label{lem:length}stub\end{lemma}
+\begin{theorem}\label{thm:fp}stub\end{theorem}
+
+\section{Stub Variants Section}
+\label{sec:variants}
+\begin{definition}\label{def:markov}stub\end{definition}
+\begin{theorem}\label{thm:termination}stub\end{theorem}
+\begin{theorem}\label{thm:amplifier}stub\end{theorem}
+\begin{corollary}\label{cor:towers}stub\end{corollary}
+\begin{conjecture}\label{conj:ic}stub\end{conjecture}
+
+\section{Stub Recursion Section}
+\label{sec:recursion}
+\begin{theorem}\label{thm:eager}stub\end{theorem}
+\begin{theorem}\label{thm:lazyargs}stub\end{theorem}
+\begin{proposition}\label{prop:lpcons}stub\end{proposition}
+\begin{definition}\label{def:gate}stub\end{definition}
+\begin{theorem}\label{thm:gate}stub\end{theorem}
+\begin{remark}\label{rem:ifgate}stub\end{remark}
+\begin{theorem}\label{thm:universal}stub\end{theorem}
+\begin{corollary}\label{cor:barriers}stub\end{corollary}
+
+% ---- the draft under test -------------------------------------------
+\input{lim_section.tex}
+
+\begin{thebibliography}{9}
+\bibitem{minsky67} M.~L. Minsky. \emph{Computation: Finite and Infinite
+Machines}. Prentice-Hall, 1967.
+\bibitem{geser01} A.~Geser, J.~Giesl. Termination of one-rule
+string rewriting systems. 2001.
+\end{thebibliography}
+
+\end{document}

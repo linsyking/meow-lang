@@ -1,0 +1,34 @@
+verify_r4.py -- the lim section draft, machine verification
+======================================================================
+(0) direct sweep orbit == lim_core evaluator on 400 random (rule, input) pairs: OK  [28.2s]
+(1) fixed-point set: [A/B]w = w iff B not in w, all 930 rules x all 255 inputs |w| <= 7: OK  [0.1s]
+(2a) census, 930 rules x all inputs |w| <= 6 (114300 pairs, restart cap 2000): agree 102050, value-mismatch 126, lim-conv/restart-div 20, lim-div/restart-conv 0, both div 12104
+     shortest value-mismatch witness: [ab/bb] on 'bbbb': lim 'abab' vs restart 'aaab'
+     [59.7s]
+(2b) [abba/bab]: smallest input with lim converging (restart diverging): 'babbb' -> lim 'aabbaabba' in 3 sweeps
+     [abba/bab] orbit on 'babbb': babbb -> abbabb -> ababbab -> aabbaabba (fixed); restart diverges at cap 10^5; evaluator agrees
+     [ab/bb] on 'bbbb': lim 'abab' (1 sweeps), restart 'aaab'  [value: lim abab, restart aaab]
+     [babb/bbbb] on 'abbbbbbbb': lim 'ababbbabb' (1 sweeps), restart 'ababababb'  [value: lim ababbbabb, restart ababababb]
+     [ab/abba] on 'abbababba': lim 'abb' (2 sweeps), restart 'abbba'  [value: lim abb, restart abbba]
+     [baab/aba] on 'aaaba': lim 'baabbaabb' (3 sweeps), restart DIVERGED at cap 10^5  [verdict: lim baabbaabb in 3 sweeps]
+     [baab/aba] orbit on aaaba: aaaba -> aabaab -> abaabab -> baabbaabb (fixed)
+     [7.5s]
+(3a) lim([baa/ab])(w) = b^#b a^v(w), sweeps <= v(w) - #a(w): all 8391 binary inputs <= 12 + 200 random 13..16: OK
+     #b and v invariant under every sweep, 50 random traces: OK
+     lim([baa/ab])(a b^(n-1)) = b^(n-1) a^(2^(n-1)), length 2^(n-1)+n-1, n <= 14 (also via the AMP expression): OK
+     [0.5s]
+(3b) tower t=1 (1 lim node) on a b^(n-1), n <= 7, output length 2^(n-1)+n-1: OK
+     tower t=2 (3 lim nodes) on a b^(n-1), n <= 6, == closed form (height-2 tower in the input length): OK; n=6 output length 131091
+     block AMP(HALF): b^m a^K -> b^(m+K/2) a^(2^(K/2+1)-2+K%2), grid m <= 3, K <= 14: OK
+     tower t=3 (5 lim nodes) on a b^(n-1), n <= 4, == closed form: OK; n=4 output length 65556
+     [12.6s]
+(3c) [aabb/ba] orbit of aabbaabb: |s_k| = 2F_(k+1)+2k+6 for k <= 28 (|s_28| = 1,028,520, strictly increasing: True): OK
+     [aabb/ba] orbit of bbaa: |s_k| = 2F_(k+1)+2k+2 for k <= 28 (|s_28| = 1,028,516): OK
+     first 16 sweeps of the orbit == evaluator trace: OK
+     mirror rule [bbaa/ab] on bbaabbaa = reversal of the [aabb/ba] orbit on aabbaabb, k <= 16 (same Fibonacci law): OK
+     lim([ba/ab]) sorts to b^#b a^#a: all inputs <= 12 + 100 random 13..16: OK
+     [0.0s]
+======================================================================
+TOTAL: 364693 checks, 0 failures
+ALL GREEN
+EXIT=0

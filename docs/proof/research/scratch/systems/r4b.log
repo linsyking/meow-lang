@@ -1,0 +1,7 @@
+hand cases: 4 expressions x 31 inputs: 0 mismatches (expect 0), 0 Phi-undefinedness (expect 0)
+TR vs paper machine: 25 exprs x 31 inputs: 0 mismatches (expect 0)
+verifying all 193 lazy-only witnesses ...
+lazy-only witnesses: 193 expressions x 31 inputs: 0 mismatches (expect 0), 0 Phi-undefinedness (expect 0)
+random depth<=2 sample: 250 expressions x 31 inputs: 0 mismatches (expect 0), 0 Phi-undefinedness (expect 0)
+escalation |S|<=6 (25 witnesses): 25 expressions x 127 inputs: 0 mismatches (expect 0), 0 Phi-undefinedness (expect 0)
+verify_r4b done

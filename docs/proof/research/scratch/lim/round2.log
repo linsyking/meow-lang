@@ -1,0 +1,56 @@
+R2: flat-L two-counter machines under lim
+part 0/1 ...
+part 0/1: toolkit polarity probes + constant-family invariants
+  double: step = 298 nodes, 83 passes (75 constant-pattern), MAIN = 310 nodes, 1 lim node -- OK
+  adder: step = 223 nodes, 62 passes (56 constant-pattern), MAIN = 235 nodes, 1 lim node -- OK
+part 2/3/4 ... (core domain pc x y in 0..s x 0..4 x 0..4)
+  double: core invariants + totality done
+  adder: core invariants + totality done
+part 5 ... end-to-end (core)
+  double: n=0..8 -> t^2n OK;  adder: 5x5 grid -> t^(n+m) OK
+part 5b ... divergence
+part 0/1: toolkit polarity probes + constant-family invariants
+  selfloop: step = 76 nodes, 21 passes (19 constant-pattern), MAIN = 88 nodes, 1 lim node -- OK
+  selfloop: lim diverges on n=0,2,5; orbit = machine run OK
+part 0/1: toolkit polarity probes + constant-family invariants
+  twocycle: step = 151 nodes, 42 passes (38 constant-pattern), MAIN = 163 nodes, 1 lim node -- OK
+  twocycle: lim diverges on n=0,2,5; orbit = machine run OK
+part 5c ... counter-2 paths
+part 0/1: toolkit polarity probes + constant-family invariants
+  c2drain: step = 445 nodes, 124 passes (112 constant-pattern), MAIN = 457 nodes, 1 lim node -- OK
+  c2drain: MAIN2(t^n, t^m) = t^n on 5x5 grid OK
+part 6 ... escalation
+  double: invariants on x,y in 0..8 OK
+  adder: invariants on x,y in 0..8 OK
+  double n=9..12, adder 7x7 border OK
+part 0/1: toolkit polarity probes + constant-family invariants
+  double[a,b,False]: step = 298 nodes, 83 passes (75 constant-pattern), MAIN = 310 nodes, 1 lim node -- OK
+  adder[a,b,False]: step = 223 nodes, 62 passes (56 constant-pattern), MAIN = 235 nodes, 1 lim node -- OK
+  toolkit (b,x)=(a,b) swap=False: full battery OK
+part 0/1: toolkit polarity probes + constant-family invariants
+  double[a,b,True]: step = 298 nodes, 83 passes (75 constant-pattern), MAIN = 310 nodes, 1 lim node -- OK
+  adder[a,b,True]: step = 223 nodes, 62 passes (56 constant-pattern), MAIN = 235 nodes, 1 lim node -- OK
+  toolkit (b,x)=(a,b) swap=True: full battery OK
+part 0/1: toolkit polarity probes + constant-family invariants
+  double[b,a,False]: step = 298 nodes, 83 passes (75 constant-pattern), MAIN = 310 nodes, 1 lim node -- OK
+  adder[b,a,False]: step = 223 nodes, 62 passes (56 constant-pattern), MAIN = 235 nodes, 1 lim node -- OK
+  toolkit (b,x)=(b,a) swap=False: full battery OK
+part 0/1: toolkit polarity probes + constant-family invariants
+  double[b,a,True]: step = 298 nodes, 83 passes (75 constant-pattern), MAIN = 310 nodes, 1 lim node -- OK
+  adder[b,a,True]: step = 223 nodes, 62 passes (56 constant-pattern), MAIN = 235 nodes, 1 lim node -- OK
+  toolkit (b,x)=(b,a) swap=True: full battery OK
+part 0/1: toolkit polarity probes + constant-family invariants
+  double@7/2: step = 298 nodes, 83 passes (75 constant-pattern), MAIN = 310 nodes, 1 lim node -- OK
+  adder@7/2: step = 223 nodes, 62 passes (56 constant-pattern), MAIN = 235 nodes, 1 lim node -- OK
+  offset=7 spread=2: full battery OK
+part 0/1: toolkit polarity probes + constant-family invariants
+  double@13/3: step = 298 nodes, 83 passes (75 constant-pattern), MAIN = 310 nodes, 1 lim node -- OK
+  adder@13/3: step = 223 nodes, 62 passes (56 constant-pattern), MAIN = 235 nodes, 1 lim node -- OK
+  offset=13 spread=3: full battery OK
+part 0/1: toolkit polarity probes + constant-family invariants
+  double@1/1: step = 298 nodes, 83 passes (75 constant-pattern), MAIN = 310 nodes, 1 lim node -- OK
+  adder@1/1: step = 223 nodes, 62 passes (56 constant-pattern), MAIN = 235 nodes, 1 lim node -- OK
+  offset=1 spread=1: full battery OK
+
+R2 RESULT: 50744 checks, 0 failures
+R2EXIT=0

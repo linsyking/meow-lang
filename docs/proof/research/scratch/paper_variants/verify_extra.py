@@ -13,9 +13,12 @@ import sys
 sys.path.insert(0, '/home/cc/projects/meow-lang/docs/proof/research/scratch/paper_variants')
 from verify_variants import strings_upto, repC_comma_restart, rep_ref, restart
 
-CAP = 1000000  # must exceed the slow terminators: the aaab/abbb families take
-# up to 3,280 leftmost steps on inputs <= 9 (misclassified as divergent at any
-# cap <= 3,280; the original CAP=2000 made `extra == FOUR` fail with 8 rules)
+CAP = 10000  # must exceed the slow terminators: the aaab/abbb families take up
+# to 3,280 leftmost steps on inputs <= 9 (misclassified as divergent at the
+# original CAP=2000, which made `extra == FOUR` fail with 8 rules).  The slow
+# families are separately certified to terminate at cap 10^6 (strings stay
+# bounded); the four truly divergent rules are certified by exhibited
+# infinite trajectories, so 10^4 here is for speed, not soundness.
 
 print("=== (a) restart-comma unconditional n=1: fail <=> X1 = b and b in S ===")
 evals = fails = bad = 0
@@ -68,7 +71,7 @@ print(f"[c] count = {len(small)} (expect 0)")
 print("=== (d) growth census, total rules |A|,|B| <= 3 ===")
 tot = []
 for A, B in rules:
-    if len(A) > 3:
+    if len(A) > 3 or len(B) > 3:
         continue
     if (A, B) in div:
         continue
@@ -103,8 +106,8 @@ bad = 0
 for m in range(0, 4):
     for K in range(0, 9):
         S = 'b' * m + 'a' * K
-        t1 = restart('baa', 'ab', S, cap=100000)
-        t2 = restart('ab', 'aa', t1, cap=100000)
+        t1 = restart('ab', 'aa', S, cap=100000)          # rightmost first: aa -> ab
+        t2 = restart('baa', 'ab', t1, cap=100000)        # then the amplifier
         want = 'b' * (m + K // 2) + 'a' * (2 ** (K // 2 + 1) - 2 + K % 2)
         if t2 != want:
             bad += 1

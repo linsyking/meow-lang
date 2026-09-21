@@ -1,0 +1,129 @@
+% ============================================================================
+% Draft for Section 6 (recursion / runtimes), to follow prop:lpcons.
+% Voice and notation follow main.tex.  All verification numbers from
+% docs/proof/research/scratch/systems/{verify_r4.py,verify_r4b.py,
+% verify_r4c.py}; every battery re-runs.
+% ============================================================================
+
+\paragraph{Flat lazy passes.}
+Proposition~\ref{prop:lpcons} located the call-free lazy-pass machine's
+extra definedness: every point of it comes from a discarded replacement.
+It did not say whether that definedness is \emph{realizable} -- whether
+the lazy-pass denotation of a call-free expression is the partial
+function of \emph{some} plain expression.  The answer is yes, by an
+explicit translation, and so the call-free fragment of the lazy-pass
+runtime denotes exactly $\mathrm{L}$: without self-reference, the
+operator's non-strictness buys definedness, not power.
+
+Two small constructions carry the translation.  First, the
+\emph{coercion}: fixing $\sigma \in \Sigma$,
+\begin{align*}
+  \gamma(X) \;\triangleq\; \mathtt{if}\big(\mathtt{eq}(X,\epsilon),\;
+  \sigma,\; X\big),
+\end{align*}
+total, with $\gamma(w) = w$ for $w \neq \epsilon$ and
+$\gamma(\epsilon) = \sigma$ -- a pattern wrapped in $\gamma$ is never
+empty.  Second, the \emph{occurrence test} for total values: for total
+$U, V$ over $\{\sigma_1, \sigma_2\}$,
+\begin{align*}
+  \mathtt{occ}(U,V) \;\triangleq\;
+  \mathtt{if}\Big(\mathtt{eq}(U,\sigma_2),\;
+    \mathtt{if}\big(\mathtt{eq}([\,\sigma_2\sigma_2/\sigma_2\,]V,\,V),\,
+      \bot,\,\top\big),\;
+    \mathtt{if}\big(\mathtt{eq}([\,\sigma_2/\gamma(U)\,]V,\,V),\,
+      \bot,\,\top\big)\Big),
+\end{align*}
+total, with value $\top$ iff $U$'s value occurs in $V$'s whenever
+$U \neq \epsilon$ (the value at $U = \epsilon$ is never read).  Soundness
+is the observation that a pass whose replacement differs from its
+pattern changes its scrutinee iff the pattern occurs -- the replacement
+$\sigma_2$ differs from the pattern on the second branch by the case
+split, and the first branch's $[\,\sigma_2\sigma_2/\sigma_2\,]$ strictly
+grows on firing -- so the $\mathtt{eq}$-comparison detects the firing.
+No freshness assumption is needed: the only degeneracy, pattern $=
+$ replacement, is routed around by the test on $U$ itself.
+(Verified: $225$ value pairs, $|u|, |v| \leq 3$, zero undefined, zero
+wrong answers.)
+
+\begin{theorem}
+    \label{thm:flatlazy}
+    (\emph{Flat lazy passes denote $\mathrm{L}$.})  For every call-free
+    expression $E$ over any alphabet with $|\Sigma| \geq 2$ there is a
+    call-free expression $E^{+}$ of the plain calculus with
+    $\llbracket E^{+} \rrbracket \;=\; \llbracket E \rrbracket^{\mathrm{lp}}$
+    -- the same partial function, domain included -- and $E^{+}$ is
+    polynomially larger than $E$.
+\end{theorem}
+
+\begin{proof}
+    Two mutually recursive translations, by structural induction on $E$.
+    The \emph{value part} $\Phi(E)$ replaces every pattern by its
+    coerced version:
+    $\Phi(X_i) = X_i$, $\Phi(w) = w$,
+    $\Phi(E \cdot G) = \Phi(E) \cdot \Phi(G)$, and
+    \begin{align*}
+      \Phi\big(\,[\,R/P\,]\,T\,\big) \;=\;
+      \big[\,\Phi R\,/\,\gamma(\Phi P)\,\big]\,\Phi T .
+    \end{align*}
+    Every pattern in $\Phi(E)$ is a $\gamma$-image, so $\Phi(E)$ is
+    total.  On an input where the lazy-pass machine defines $E$, the
+    forced patterns are nonempty (the machine forces them), so each
+    $\gamma$ acts as the identity there; an inert pass contributes its
+    scrutinee either way; and a firing pass forces $R$, where $\Phi R$
+    agrees with $R$ by induction.  Hence $\Phi(E)$ is total and agrees
+    with $\llbracket E \rrbracket^{\mathrm{lp}}$ on its domain.
+
+    The \emph{domain part} $F(E) \in \{\top, \bot\}$, total, indicates
+    the domain: $F(X_i) = F(w) = \top$;
+    $F(E \cdot G) = F(E) \wedge F(G)$; and
+    \begin{align*}
+      F\big(\,[\,R/P\,]\,T\,\big) \;=\;
+      F(T) \,\wedge\, F(P) \,\wedge\, \mathtt{isne}(\Phi P)
+      \,\wedge\, \big(\neg\,\mathtt{occ}(\Phi P, \Phi T)
+      \;\vee\; F(R)\big),
+    \end{align*}
+    where $\mathtt{isne}(X) \triangleq
+    \mathtt{if}(\mathtt{eq}(X,\epsilon),\bot,\top)$; note the
+    \emph{conjunction}: an empty forced pattern must falsify $F$
+    outright, not vacuously satisfy it.  The boolean connectives are
+    $\mathtt{if}$/$\mathtt{eq}$/$\cdot$ combinations of the values, all
+    total.  All sub-expressions of $F$ are total -- the partial
+    scrutinee and pattern of the node enter only through $F$ itself,
+    and their \emph{values} only through the total $\Phi$ images -- so
+    the recursion is well-defined and $F(E) = \top$ exactly on
+    $\mathrm{dom}(\llbracket E \rrbracket^{\mathrm{lp}})$ by the
+    forcing discipline.
+
+    Finally the \emph{guard}: $E^{+} \triangleq
+    [\,\sigma_1\,/\,\mathtt{if}(F(E),\sigma_1,\epsilon)\,]\;\Phi(E)$.
+    On the domain the pattern is $\sigma_1$ and the pass is
+    $[\,\sigma_1/\sigma_1\,]$, the identity; off the domain the pattern
+    is empty and the expression is undefined.  The size is polynomial:
+    each level of the recursion multiplies by a constant (the toolkit
+    constructions behind $\mathtt{if}$, $\mathtt{eq}$, $\cdot$ are
+    fixed), so $|E^{+}| = |E|^{O(1)}$.
+
+    (Verified exhaustively on the depth-$\leq 2$ call-free space over
+    $\{a,b\}$ -- $599{,}844$ expressions -- where the lazy-pass machine
+    has $193$ denotations that no depth-$2$ eager expression has: for
+    the simplest witness of each, $E^{+}$ reproduces the lazy partial
+    function on all $31$ inputs $|S| \leq 4$ with zero mismatches;
+    likewise for $250$ random depth-$2$ and $120$ random depth-$3$
+    expressions ($|E^{+}|$ up to ${\sim}3.1 \times 10^4$ nodes); the
+    translation was additionally cross-checked against the reference
+    machine of this section on $31$ expressions, and $25$ of the
+    witnesses were re-verified on all $127$ inputs $|S| \leq 6$; zero
+    mismatches throughout, and $\Phi$ total throughout.)
+\end{proof}
+
+Theorem~\ref{thm:flatlazy} completes Proposition~\ref{prop:lpcons} and
+sharpens the border this section draws.  Eager evaluation and lazy
+arguments leave the reachable class unchanged even with recursion
+(Theorem~\ref{thm:lazyargs}); lazy passes make recursion universal
+through the gate.  Theorem~\ref{thm:flatlazy} shows that the evaluation
+order \emph{alone} -- the operator's own non-strictness, without a
+self-reference to guard -- never leaves $\mathrm{L}$: the gate needs
+the loop.  In the terms of Proposition~\ref{prop:lpcons}, every
+discarded replacement is not merely harmless but \emph{recoverable}:
+the definedness it would have destroyed is exactly the definedness the
+guard re-inserts.

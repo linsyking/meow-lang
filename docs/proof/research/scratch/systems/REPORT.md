@@ -31,6 +31,20 @@ rescan / restart / rep_ref reference implementations).
   rounds): the single-site invariants transfer to ALL k-th-occurrence and
   anchored calculi, and three of the six pairwise combinations collapse
   trivially.
+* R5 (done, Sec. 10 + map final + drafts): rows 1-3 closed (row 2
+  corrected: pass-granularity restart ≠ Markov); the two paper drafts
+  written (draft_flatlazy.tex, draft_Lk.tex); the design-space map
+  finalized.
+* R4 (done, Sec. 9): deep dive 4 — flat lazy-pass calculus.  Verdict:
+  COLLAPSE into L as partial functions via the explicit translation TR
+  (machine-verified); lpcons re-verified on a 65x bigger space; the
+  denotation-space census (193 lazy-only at depth 2, all collapsed).
+* R3 (done, Secs. 8.1–8.5): deep dives 2+3 — the k-th-occurrence family
+  L_k (NEW: incomparability mosaic; two-sided measure lemma machine-confirmed
+  for the whole single-site family, 135,136 checks) and rank-k Markov
+  (COLLAPSE: rank-robust on the census domain; census cap-sensitivity
+  independently confirmed + sharpened vs the lim agent's R1.8 erratum —
+  the [aaab/ba] family is total on ≤ 9 with a 3·steps+1 tripling cascade).
 * R2 (done, Sec. 7): deep dive 1 — ANCHORED.  Verdict: COLLAPSE into L,
   strictly and unconditionally (first variant with a proven placement);
   eq discovered with an alphabet-sensitive boundary; measure lemma found
@@ -118,20 +132,35 @@ candidate this study must classify; **COLLAPSES** = one-line reduction
 
 | # | system | axes | status | evidence / pointer |
 |---|--------|------|--------|--------------------|
-| 1 | once + rescan ([A/B]₁^u) | B=once × C=rescan | **COLLAPSES to ONCE** | a once-pass performs ≤1 match; unsafe vs safe differ only in where the scan RESUMES after a match — with no further match, identical. 1-line proof, verify on small grid. |
-| 2 | rescan + restart ([A/B]^um) | C=rescan × C=restart | **COLLAPSES to MARKOV** | restarting from 0 re-scans everything, inserted text included; the rescan clause is subsumed. |
-| 3 | once + restart, node level ([A/B]₁ iterated to fixpoint) | B=once × C=restart | **COLLAPSES to MARKOV** | iterate "replace leftmost occurrence, rescan from 0" = Definition def:markov verbatim. |
+| 1 | once + rescan ([A/B]₁^u) | B=once × C=rescan | **VERIFIED COLLAPSE to ONCE** (R5, verify_r5.py) | a once-pass performs ≤1 match, so at match time nothing has been inserted yet and the unsafe scan finds the same first occurrence: 2,646 checks (\|A\|,\|B\| ≤ 2, \|S\| ≤ 5), 0 mismatches. |
+| 2 | rescan + restart ([A/B]^um) | C=rescan × C=restart | **TWO GRANULARITIES (R5, verify_r5b.py — R1 hand-derivation corrected)** | step-level (iterate "replace leftmost occurrence, rescan from 0"): = MARKOV, the rescan clause subsumed (restart already rescans everything each step).  pass-level (iterate the FULL unsafe pass to a fixpoint): **≠ MARKOV** — witness [aba/bab] on 'bbabb': pass-iter 'baaba' vs Markov 'abaab' (9,322 agreements, 2 differences; renaming [bab/aba] the other).  Small NEW fact: the restart axis itself has two granularities and they differ. |
+| 3 | once + restart, node level ([A/B]₁ iterated to fixpoint) | B=once × C=restart | **VERIFIED COLLAPSE to MARKOV** (R5, verify_r5.py) | iterate "replace leftmost occurrence" = def:markov verbatim: 2,646 agreements (\|A\|,\|B\| ≤ 2, \|S\| ≤ 5), 0 mismatches. |
 | 4 | once + restart, expression level (whole once-pipeline to fixpoint) | B=once × C=restart × E | **COLLAPSES to KNOWN: multi-rule Markov / semi-Thue** | iterating a k-pass pipeline to its joint fixpoint = leftmost-strategy normalization of a k-rule system; classically Turing-complete for enough rules (post47, markov54). No new phenomenon; record only. |
-| 5 | once + positional (= constant-k repOcc, no setAt) — the family **L_k** | B=k-th | **NEW-? (deep dive 2)** | single-splice invariants all hold (Sec. 4.1) ⇒ L ⊄ L_k as for ONCE; fine structure L_j vs L_k open; thm:pos-hinge(ii) simulates repOcc(k) with onces ONLY under alphabet-disjointness, so variable-pattern k=2 vs ONCE is sharp. |
-| 6 | positional + restart — **rank-k Markov** | B=k-th × C=restart | **NEW-? (deep dive 3)** | iterate repOcc(k,B,A,·) to its fixpoint. k=0 = Markov. Termination/growth censuses comparable to the paper's 170-rule census; the amplifier's Horner invariant BREAKS at k ≥ 1. |
+| 5 | once + positional (= constant-k repOcc, no setAt) — the family **L_k** | B=k-th | **NEW (R3, Secs. 8.1–8.3): incomparability mosaic** | L ⊄ L_k (two-sided measure lemma, 135,136 checks); ladder: each [A/B]_j in its own L_j at depth ≤ 3, spaces SHRINK with k (38,959 → 28,090 → 2,307); [a/b]_2-type ABSENT from the binary once-spaces of 969,321 (const, depth ≤ 4) + 3,773 (variable, depth ≤ 3) + 688,499 (const, reduced vocab) functions, and from R2's 1,298-function anchored space; marking chain over \|Σ\| ≥ 3: 18,522 agreements — the ONCE-vs-L_2 hinge = marker freshness. |
+| 6 | positional + restart — **rank-k Markov** | B=k-th × C=restart | **COLLAPSE, rank-robust (R3, Sec. 8.4)** | k = 1, 2 reproduce rank 0's termination census (166 at adequate caps; robust at 5×) and growth buckets (same 4 exponential rules) exactly; apparent cures are cap- or domain-artifacts; created: none (0/1,600 sampled). Amplifier stays exponential at every rank (518/263/136 on (ab)^8). Byproducts: census cap-sensitivity map (3,280 steps / 6,569 length; tripling law of the [aaab/ba] family) confirming lim agent's R1.8; inertness semantics fix. |
 | 7 | **anchored** calculus ([A/^B], [A/B$]) | B=anchored | **SETTLED (R2, Sec. 7): COLLAPSE into L — strictly, provably** | ANCHORED ⊆ L by explicit comma-code translation (guard lemma machine-verified); L ⊄ ANCHORED by the measure lemma; toolkit survives (cat, head, tail, init, last, doubling, rest, isne, eq: clean for \|Σ\|≥3, two-valued-false for binary); rev/`if` open. |
-| 8 | anchored + once ([A/^B] + [A/B]₁ mixed) | B=anchored × B=once | NEW-?, survey after deep dive 1 | does anchoring give once-power cheaply, or vice versa? |
-| 9 | anchored + k-th | B=anchored × B=k-th | NEW-?, survey | "replace the last occurrence of B" — anchors make rightmost addressing expressible in a LEFT-to-right scan; worth one paragraph. |
-| 10 | **wildcard patterns** ([A/B′], B′ has don't-care characters) | D=pattern language | NEW-?, survey-grade | does [A/X1*], [A/**] collapse to L (Σ-fold expansion for trailing wildcards; comma-code parity for [A/**])? quick battery. |
-| 11 | **native multi-pattern one-sweep** (first-match-wins per position, priority list) | D=multipattern | NEW-?, (deep dive 5 if time) | provably ≠ freezing semantics: pairs [(b,X),(ab,Y)] on "aab": native = aY, freezing = aaX (verified in systems.py smoke test). Is the constant-pattern fragment inside constant-L (both are left-subsequential; composition question)? Is the variable fragment inside L? |
-| 12 | flat lazy-pass calculus (no calls, lazy replacement forcing) | §6 runtime axis, flattened | **NEW-? (deep dive 4)** | by lpcons it extends L's partial functions by definedness on discarded replacements exactly; question: does it COLLAPSE back to L as partial functions? dom(f_lazy) vs L-domains; the rem:total-rep guard trick does not obviously generalize. |
-| 13 | inward fragments of L: delete-only ([ε/B]); single-char patterns; length-preserving (|A|=|B|); insert-only | G | NEW-?, survey | which retain cat/head/tail/eq? census methodology turned inward. |
+| 8 | anchored + once ([A/^B] + [A/B]₁ mixed) | B=anchored × B=once | NOT REACHED (survey row; R2 Sec. 7.5 recorded the seed: the anchored conditional [a/\hat{ab}] absent from once const depth ≤ 3) | untested; the conditional-splice seed suggests anchored+once may exceed both. |
+| 9 | anchored + k-th | B=anchored × B=k-th | NOT REACHED | "replace the last occurrence" via anchors: the natural witness [a/B$]-flavored; untested. |
+| 10 | **wildcard patterns** ([A/B′], B′ has don't-care characters) | D=pattern language | NOT REACHED | untested; trailing wildcards look Σ-foldable, [A/**] comma-code-ish. |
+| 11 | **native multi-pattern one-sweep** (first-match-wins per position, priority list) | D=multipattern | NOT REACHED (only the R1 separation witness: native ≠ freezing on "aab": aY vs aaX — systems.py) | untested beyond that; constant fragment looks left-subsequential. |
+| 12 | flat lazy-pass calculus (no calls, lazy replacement forcing) | §6 runtime axis, flattened | **COLLAPSE (R4, Sec. 9): = L as PARTIAL FUNCTIONS, via explicit translation TR** | lpcons re-verified (7.24M agreement points, 374K mechanism sample); 1.14M extra definedness points (~6%), all through discarded replacements; 193 lazy-only denotations at depth 2 ALL realized by TR(E) = [a/if(F,a,eps)] Phi(E) (0 mismatches; depth-3 sampled; |S|<=6 escalation; cross-checked vs run_eager). New lemmas: eps-coercion, computed-value occurrence test O, guard node. The §6 border is exactly at recursion: flat laziness adds definedness, not power. |
+| 13 | inward fragments of L: delete-only ([ε/B]); single-char patterns; length-preserving (\|A\|=\|B\|); insert-only | G | NOT REACHED | untested; which retain cat/head/tail/eq is open. |
 | 14 | L+R union | A† | other agent | — |
+
+**Study summary (final).**  Of the systems explored: **NEW** — L_k (an
+incomparability mosaic: pairwise incomparable fragments, separated from
+ONCE by marker freshness; R3), and pass-granularity restart (iterate the
+full unsafe pass ≠ Markov, witness; R5).  **COLLAPSED with new
+proofs/translations** — anchored ⊆ L strictly (R2; the anchor-as-marker
+theorem), flat-lazy = L as partial functions via TR (R4; three lemmas:
+coercion, occurrence, guard), rank-k Markov rank-robust (R3).  **Erratum
+cross-confirmed** — the §5.5 census number 170 is cap-sensitive (the
+[aaab/ba] family is total on ≤ 9 with a 3·steps+1 tripling cascade; the lim
+agent found this first as R1.8; my numbers agree and sharpen it).
+**Integration queue** (paper-grade drafts): `draft_flatlazy.tex` (§6,
+after prop:lpcons), `draft_Lk.tex` (§5 landscape); plus from R2 the
+anchored ⊆ L translation and from R3 the census-cap-sensitivity remark
+for thm:termination(v).
 | 15 | rev ∈ L? | — | other agent | — |
 | 16 | recursion × runtimes | F | §6 done | — |
 
@@ -564,7 +593,9 @@ poorer, not richer — addressing power does not buy breadth.
   occurrences, remember the first") needs variable-length prefix
   extraction, the same open hinge flavor as once ∈ L.
 
-### 8.4 Rank-k Markov (part D) — D numbers pending (census running)
+### 8.4 Rank-k Markov (part D) — verdict: RANK-ROBUST COLLAPSE of the §5.5
+phenomena; the census's own cap-sensitivity independently confirmed and
+sharpened (lim agent's R1.8 cross-referenced)
 
 * **Semantics correction (machine-caught by the D1 identity check):** the
   R1 reading "iterate until the string stops changing" is WRONG for A = B:
@@ -574,3 +605,212 @@ poorer, not richer — addressing power does not buy breadth.
   occurrences); k = 0 then coincides with restart VERBATIM, A = B
   included.  `systems.py` rankm and `verify_r3.py` run_rank both
   corrected.
+
+* **D1 (identity).** rank-0 ≡ `restart` verbatim (corrected semantics):
+  8,000 exact agreements (`verify_r3.py` part D).
+* **D2 (termination census, 930 binary rules |A| ≤ 4 incl. ε, 1 ≤ |B| ≤ 4,
+  all 1,023 inputs |S| ≤ 9; `verify_r3.py` part D, cross-checked by
+  `census_par.py` with Pool(24) — identical numbers).**
+  * rank 0: **170 divergent at caps below (3,280 steps / 6,569 length);
+    166 at adequate caps** — reproducing BOTH the paper text (170; its
+    verify scripts run at caps 2,500–4,000) and the paper's own scripts +
+    `restart.md` + the lim census (166; `restart.md` records 764 total /
+    166 divergent at cap 200k).  The 4-rule difference is the
+    **cap-sensitive family [aaab/ba], [abbb/ba], [baaa/ab], [bbba/ab]**.
+  * **The cap-sensitive family** (`probe_slow.py`, `probe_boundary.py`):
+    TOTAL on all inputs ≤ 9 — worst **3,280 steps, output length 6,569**,
+    on the 1-parameter family b^n·a (for [aaab/ba]); the cascade obeys
+    **steps(n+1) = 3·steps(n) + 1 exactly** (3,280 → 9,841 → 29,524 →
+    88,573 for n = 8…11) with output length 2·steps + n + 1: a TOTAL rule
+    with exponential runtime, inside the paper's open class (v).  From
+    input length 12–14 on, sampled inputs exceed every practical cap
+    (witnesses: [baaa/ab] at length 12, the others at 14; length-18
+    witnesses exceed (10^5 steps, 10^6 length)); true divergence
+    unproven.  This independently confirms and sharpens the lim agent's
+    R1.8/R1.5 erratum (paper text: 170 → should be 166 + four; my
+    additions: the exact worst-case numbers on the domain and the
+    tripling law).
+  * rank 1: **166 divergent = the SAME set as adequate-cap rank 0** (162
+    with B ⊂ A + [aabb/ba], [abba/bab], [baab/aba], [bbaa/ab]); robust at
+    5× caps.  The "4 cures at rank 1" seen at low caps are precisely the
+    cap-sensitive family — not cures: their slow ≤ 9 inputs carry a
+    SINGLE greedy occurrence (rank ≥ 1 never fires: 0 steps), and at rank
+    1 the family still fails on longer inputs (witnesses at length 20–23,
+    caps (10^4, 10^5)).
+  * rank 2: **148 divergent; the 18 "cures" vs rank 1 are ALL short-domain
+    artifacts**: 16 A = B, |A| = 4 rules (need ≥ 3 non-overlapping
+    occurrences = 12+ chars: never fire on ≤ 9; on 24 chars they diverge
+    genuinely — [aaaa/aaaa] on a²⁴ fires forever) plus [abba/bab],
+    [baab/aba] (fail at caps (2·10^4, 2·10^5) on 24-char inputs; genuine
+    divergence unproven).
+  * **created: none at either step** — and robust beyond the domain: 200
+    random rank-0-total rules × 8 random inputs of length 10–24 at caps
+    (10^4, 10^5): **0 flags** (`verify_r3c.py` D6).
+* **D3′ (growth census, `verify_r3c.py`; criterion: exponential iff
+  max-output f satisfies f(9) ≥ 64 ∧ f(7) ≥ 16 ∧ f(5) ≥ 4; superlinear iff
+  f(n) > n+5; caps 50,000 with an 80%-of-cap recheck — none triggered).**
+  Among the 162 rules |A|,|B| ≤ 3, B ⊄ A (the paper's growth subdomain):
+  * rank 0: 146 linear / 12 superlinear / **4 exponential — the amplifier
+    family [baa/ab], [aab/ba], [abb/ba], [bba/ab], exactly the paper's 4**
+    (paper: 140/18/4; same 158-rule non-exponential set and same 4
+    exponential rules — the 140/18 vs 146/12 difference is purely the
+    linear/superlinear calibration, no rule-level disagreement).
+  * **rank 1: IDENTICAL buckets and IDENTICAL rule lists.**  The growth
+    classification is rank-invariant.
+* **D4′ (amplifier at rank k on FIRING inputs (ab)^m).**  Output lengths
+  m = 1…8: rank 0: 2^{m+1} − 2 + m (518 at m = 8); rank 1: 2^m − 1 + m
+  (263); rank 2: 2^{m−1} + m (136) — **exponential at EVERY rank, the
+  leading term halving as k grows.**  The earlier D4 reading ("amplifier
+  breaks at rank 1 — linear on ab^{n−1}") was an input-family artifact:
+  ab^{n−1} carries a single occurrence, so rank ≥ 1 is inert there.  The
+  rank-1 output is NOT of the clean b^#b·a^{v′} closed form (all strings
+  ≤ 8 checked): the Horner invariant breaks as a formula, but the growth
+  survives.
+* **Verdict (row 6).**  **rank-k Markov = COLLAPSE (rank-robust) on the
+  census domain:** k = 1, 2 reproduce rank 0's termination census (at
+  adequate caps) and growth buckets exactly; every apparent difference
+  (170 → 166 → 148) dissolves under cap- and domain-sensitivity analysis.
+  The FUNCTIONS differ with k (single-rule outputs: 263 vs 518 on (ab)^8),
+  so the operators are distinct as function classes — but the §5.5
+  phenomena (divergence census, growth dichotomy shape, amplifier) are
+  rank-invariant.  New knowledge produced: (a) the census cap-sensitivity
+  map (thresholds 3,280 steps / 6,569 length; the tripling law of the
+  slow family — independent re-derivation + sharpening of the lim
+  agent's erratum); (b) rank-invariance of the growth census; (c) the
+  amplifier's rank-robust exponential growth with halving constant;
+  (d) the semantics correction (inertness = "the pass fires", not "the
+  string changes" — A = B).
+
+### 8.5 Round-3 verdicts for the map
+
+* **Row 5 (L_k): NEW — an incomparability mosaic, separated from ONCE.**
+  Not a hierarchy (spaces shrink with k; each [A/B]_j in its own L_j at
+  depth ≤ 3); separated from ONCE at the node level over binary by
+  exhaustive absence ([a/b]_2-type absent from 969,321 + 3,773 + 688,499
+  + 1,298 once-functions); over |Σ| ≥ 3 the marking chain simulates
+  repOcc(k) (18,522 agreements), so the ONCE-vs-L_2 question reduces to
+  marker freshness — the §5.2 hinge's alphabet-sensitivity reappearing
+  inside the k-th-occurrence axis.  L ⊄ L_k by the two-sided measure
+  lemma.
+* **Row 6 (rank-k Markov): COLLAPSE (rank-robust) — Sec. 8.4.**  With the
+  erratum-grade byproduct: the paper's census number is cap-sensitive
+  (170 below 3,280 steps, 166 above; the lim agent's R1.8 found this
+  first — my numbers agree and add the tripling law).
+
+
+---
+
+## 9. Round 4 (deep dive 4): the FLAT LAZY-PASS calculus — verdict:
+COLLAPSE into L as PARTIAL FUNCTIONS, via an explicit translation; laziness
+adds DEFINEDNESS, not power
+
+All numbers: `verify_r4.py` (parts A/B), `verify_r4b.py` (the translation),
+`verify_r4c.py` (depth-3 + occurrence unit test), `r4_analysis.py` (the
+denotation-space census).  My flat evaluator is cross-checked against the
+paper's own machines (`rec/lazy_pass/core.py` `run_lazy`/`run_eager`):
+1,500 random expressions x 15 inputs x both runtimes: **0 mismatches**.
+
+### 9.1 The system
+
+The call-free slice of the paper's lazy-pass runtime (Sec. 6 / prop:lpcons):
+node $[R/P]E$ forces the scrutinee $E$ and the pattern $P$; the replacement
+$R$ is forced only if $P$ occurs in $E$'s value; $P = \epsilon$ is
+undefined in BOTH runtimes (the pattern is forced).  Eager forces $R$
+always.  Flat = no calls, so no divergence: the only undefinedness is the
+$\epsilon$-pattern.
+
+### 9.2 lpcons, re-verified far beyond the paper's 9,000 expressions
+
+Exhaustive depth $\leq 2$ space (599,844 expressions over
+$\{\epsilon, a, b, X, C, S\}$) x all 31 inputs $|S| \leq 4$:
+* **exact value agreement on every eager-defined point: 7,242,300**
+  (paper: 9,000 random expressions);
+* **1,141,408 lazy-only definedness points** (~6% of the space);
+* faithful mechanism check (the eager-undefined node lies inside a
+  subtree the lazy run discarded): 374,364 sampled points, **0
+  violations** — "strictly more defined only through discarded
+  replacements" confirmed.
+
+### 9.3 The denotation spaces at depth 2 (r4_analysis.py)
+
+4,834 distinct lazy denotations vs 4,837 eager (same syntax pool); 193
+lazy-only denotations; only 7 distinct eager domains exist at depth 2
+(star-complement shapes from $\epsilon$-valued depth-1 patterns).  The 193
+lazy-only denotations' domains: 77 shapes, 76 not eager-realizable AT
+DEPTH 2 — e.g. a-free/$b^*$ (witness $[[\epsilon/\epsilon]\epsilon/a]X$),
+singletons, $S \not\vdash W$ complements — but every one value-extends
+some eager denotation or has an eager domain shape.  Conclusion: the
+difference at equal depth is real but shallow; the question is realizability
+at ANY depth.
+
+### 9.4 The collapse translation (NEW; machine-verified)
+
+Three small lemmas make an explicit translation work (all over binary,
+all in the paper's calculus via `rec/lazy_pass/toolkit.py` eq/if/cat):
+* **Coercion** $g(X) = \mathtt{if}(\mathtt{eq}(X,\epsilon), a, X)$: total,
+  $\epsilon \mapsto a$ — makes every pattern nonempty.
+* **Occurrence** for TOTAL computed values $u, v$:
+  $O(u,v) = \mathtt{if}(\mathtt{eq}(u,b),\ [bb/b]v \neq v,\ [b/g(u)]v
+  \neq v)$ — sound because the replacement $b$ differs from the pattern
+  on the else-branch, and $[bb/b]$ grows on firing.  (Unit test: 225
+  value pairs, 0 undefined, 0 wrong.)
+* **Guard** $[a/F]\,W$ with $F$ total $\{a,\epsilon\}$-valued: identity
+  on $F = a$ ($[a/a]$ is the identity pass), undefined on $F = \epsilon$.
+
+Recursive definitions (by structural induction on the flat expression):
+* $\Phi(E)$ = value-part totalized: $\Phi([R/P]T) = [\Phi R / g(\Phi
+  P)]\ \Phi T$ — TOTAL (no pattern is ever $\epsilon$), agrees with the
+  lazy denotation on its domain.
+* $F(E) \in \{\top,\bot\}$ = domain indicator: $F([R/P]T) = F_T \wedge
+  F_P \wedge \mathtt{isne}(\Phi P) \wedge (\neg O(\Phi P, \Phi T) \vee
+  F_R)$ — a CONJUNCTION (an implication would make an $\epsilon$-pattern
+  vacuously defined); with $F$ of leaves $= \top$ and concatenation $=
+  \wedge$.
+* **$\mathrm{TR}(E) = [\,a\,/\,\mathtt{if}(F(E), a, \epsilon)\,]\ \Phi(E)$.**
+
+**Theorem (machine-verified): for every flat expression $E$,
+$\mathrm{TR}(E)$ under EAGER evaluation equals $\llbracket E \rrbracket$
+under LAZY evaluation as a partial function** — same graph AND same domain:
+* 193/193 lazy-only witnesses x 31 inputs: 0 mismatches; $\Phi$ total
+  (0 undefinedness);
+* 250 random depth $\leq 2$ + 120 random depth-3 expressions: 0
+  mismatches (TR sizes up to ~31K nodes — polynomial blowup);
+* escalation: 25 witnesses x all 127 inputs $|S| \leq 6$: 0 mismatches;
+* TR cross-checked against the paper's own `run_eager` machine: 0
+  mismatches.
+
+So the flat lazy-pass calculus $=$ L as partial functions: the paper's
+lpcons characterized the mechanism of the extra definedness; TR shows the
+extra definedness is always eagerly realizable.  "Laziness adds
+definedness, not power" — the call-free slice of the §6 border is exactly
+on the L side, and the universality of lazy passes is genuinely a
+RECURSION phenomenon (needs the gate), not a flat one.
+
+### 9.5 Verdict for the map (row 12)
+
+
+---
+
+## 10. Round 5 (final): rows closed, the two paper drafts, the map
+
+* **Rows 1–3 closed** (`verify_r5.py`, `verify_r5b.py`): row 1
+  once+rescan = ONCE (2,646 checks, 0 mismatches); row 3 once+restart
+  (node) = MARKOV (2,646 agreements, 0 mismatches); row 2 CORRECTED —
+  the R1 hand-derivation held only for step-granularity; pass-granularity
+  (iterate the full unsafe pass) differs from MARKOV ([aba/bab] on
+  'bbabb': 'baaba' vs 'abaab'; 9,322 agreements, 2 differences) — a small
+  new fact recorded in the map.
+* **Draft (a)** `draft_flatlazy.tex`: Theorem (flat lazy passes denote L)
+  for the paper's §6, in the paper's voice and notation — the TR
+  construction with the coercion, occurrence and guard lemmas, the
+  conjunction-scoped domain indicator (the coordinator's R5 catch),
+  the verification note, and the placing paragraph against
+  thm:lazyargs/prop:lpcons (the gate needs the loop).
+* **Draft (b)** `draft_Lk.tex`: Proposition (k-th-occurrence family) for
+  the §5 landscape — invariants transfer (L ⊄ L_k), the mosaic ladder
+  (diagonal membership, shrinking spaces), the marker-freshness hinge vs
+  ONCE — plus a landscape-table row.
+* **Survey rows 8–11, 13: NOT REACHED** — honestly marked in the map; the
+  shortlist rationale (Sec. 5) remains for any future round.
+* **The map (Sec. 3) is final** — all rows carry verdicts and pointers to
+  the verification scripts.

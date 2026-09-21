@@ -1,0 +1,7 @@
+wpre: domain 384 c-spliced strings, |V|=35
+wpre: W-prefix distance to rep1b: 102/384
+wpre: depth 1: 30 new, best 144, 0s
+wpre: depth 2: 720 new, best 119, 0s
+wpre: depth 3: 15710 new, best 135, 2s
+wpre: no repair at depth <= 3
+total 2s

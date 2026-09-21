@@ -1,0 +1,156 @@
+% occurrence_lemma.tex -- the load-bearing lemma for the L+lim universality
+% construction (R3, item 1).  Self-contained; written in the notation of
+% docs/proof/main.tex ([A/B] substitution, \sigma/\tau alphabets).
+% Machine verification: research/scratch/lim/verify_r3.py, part A.
+
+\subsection{The occurrence lemma for the two-counter compilation}
+
+Fix $\Sigma=\{\sigma,\tau\}$ (any two characters of the ambient
+alphabet; the compiler is symmetric under swapping them).  Write
+$V(k)$ for the \emph{frame family}
+\[
+V(k) \;=\; \sigma^2(\tau\sigma)^{k-1}\tau\sigma^3 ,
+\qquad k \ge 1 ,
+\]
+i.e.\ the binary string $\sigma\sigma\,\tau\sigma\,\tau\sigma\cdots
+\tau\sigma\,\sigma\sigma$ with $k$ copies of $\tau\sigma$, of length
+$2k+4$.  $V(k)$ has $k$ isolated $\tau$'s, head run $\sigma^2$, $k-1$
+interior $\sigma$-runs of length $1$, and tail run $\sigma^3$;
+distinct $k$ give pairwise non-occurring strings (the $\sigma$-run
+signature $[2,1^{\,k-1},3]$ forces any occurrence to consume the
+whole string, as proved below).
+
+\paragraph{Configurations.}
+A compiled two-counter machine with instructions $1,\dots,s$ and halt
+slot $H$ uses \emph{frame constants}: delimiters $D_0,D_1,D_2,D_3$,
+instruction codes $P_1,\dots,P_s,P_H$, and the wrap marker $M$ -- each
+assigned a distinct $V(k)$ with $k\ge 2$.  A configuration is
+\[
+\cfg \;=\; D_0\;\Pi\;D_1\;\tau^{x}\;D_2\;\tau^{y}\;D_3 ,
+\]
+where the \emph{program zone} $\Pi$ lists $P_1\cdots P_s\,P_H$ in
+order with the \emph{current} instruction wrapped between two copies
+of $M$: $\cdots M P_i M\cdots$ (write $\pc=i$; write $\pc=0$ for the
+halted configuration $P_1\cdots P_s\,M P_H M$), and where
+$\tau^{x},\tau^{y}\ge 0$ are the \emph{tallies} of the two counters
+(an empty tally makes its delimiters adjacent).  The step function
+and the output stage are built from the following \emph{patterns}:
+the dispatch/unwrap patterns $M P_i M$, the wrap targets $P_j$, the
+increment patterns $D_r$, the decrement patterns $D_r\tau$, the zero
+tests $D_rD_{r'}$ (adjacent delimiters), the halt dispatch $M P_H M$,
+and the output prefix $D_0\Pi(0)D_1D_2$.
+
+\begin{lemma}[occurrence]\label{lem:occurrence}
+Let the frame constants be assigned pairwise distinct family indices
+$k\ge 2$.  Then for every $\pc\in\{0,\dots,s\}$ and every $x,y\ge 0$,
+in $\cfg(\pc,x,y)$:
+\begin{enumerate}
+\item[(i)] every frame constant occurs exactly at its slots ($M$
+      twice, at the two wrap positions; every other constant once);
+\item[(ii)] $M P_i M$ occurs iff $\pc=i$ ($i\in\{1,\dots,s\}$), and
+      $M P_H M$ occurs iff $\pc=0$; in either case exactly once;
+\item[(iii)] $D_rD_{r'}$ occurs iff counter $r$ is zero, exactly once;
+\item[(iv)] $D_r\tau$ occurs iff counter $r$ is nonzero, exactly
+      once, and its occurrence ends at the \emph{first} tally
+      character;
+\item[(v)] the output prefix $D_0\Pi(0)D_1D_2$ occurs iff $\pc=0$ and
+      $x=0$, exactly once, at position $0$.
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+The proof is a \emph{gap calculus}.  For a string $W$ containing at
+least one $\tau$ and no $\tau\tau$, let its \emph{gap sequence} be
+$(h;\,g_1,\dots,g_{m-1};\,t)$ where $h$ is the number of $\sigma$'s
+before the first $\tau$, $g_i$ the number of $\sigma$'s between the
+$i$-th and $(i{+}1)$-st $\tau$, and $t$ the number of $\sigma$'s after
+the last $\tau$.
+
+\emph{Step 1 (the gap sequences of configurations).}  Every frame
+constant has gap sequence $(2;\,1^{\,k-1};\,3)$.  Concatenating two
+frame constants merges the trailing $\sigma^3$ of the first with the
+leading $\sigma^2$ of the second: an interior gap of $5$.  A tally
+$\tau^{n}$ ($n\ge 1$) between its delimiters contributes the gap
+pattern $3\,0^{\,n-1}\,2$ (delimiter tail $\sigma^3$, then $n-1$ gaps
+of $0$ inside the tally, then delimiter head $\sigma^2$); an empty
+tally makes the delimiters touch, a gap of $5$.  So the gap sequence
+of any configuration is: head $2$ (the string starts with $D_0$'s
+$\sigma^2$), then the constants' interior $1$-blocks interleaved with
+junction gaps of $5$, with the two tally junctions $3\,0^{x-1}\,2$
+(or $5$), and tail $3$ (the string ends with $D_3$'s $\sigma^3$).
+
+\emph{Step 2 (patterns cannot cross tallies).}  Every pattern has at
+least two $\tau$'s, no $\tau\tau$, head exactly $2$, tail in
+$\{0,3\}$, and interior gaps in $\{1,3,5\}$ only -- never $0$ and
+never $2$.  Now let a pattern $W$ occur in $\cfg$.  Matching
+character-for-character, each $\tau$ of $W$ is a $\tau$ of $\cfg$,
+and since between two consecutive $\tau$'s of $W$ there are only
+$\sigma$'s, the $\tau$'s of $W$ map to \emph{consecutive} $\tau$'s of
+$\cfg$ (a skipped $\tau$ would have to appear among $W$'s
+$\sigma$'s).  Hence every interior gap of $W$ equals the
+corresponding gap of $\cfg$.  Gaps of $0$ occur in $\cfg$ only
+inside tallies of length $\ge 2$, so $W$ covers no two consecutive
+tally characters.  A gap of $2$ occurs in $\cfg$ only after the last
+character of a tally, so $W$'s $\tau$-sequence cannot cross a tally's
+right edge; and if $W$'s \emph{first} $\tau$ were a tally character,
+then $W$'s next gap would have to be $0$ (deeper into the tally) or
+$2$ (out of it) -- both impossible -- unless the tally has length
+exactly $1$ and $W$'s next gap is $2$: also impossible.  The only
+pattern whose $\tau$-sequence can meet a tally at all is one whose
+\emph{last} gap is $3$ -- the decrement pattern $D_r\tau$ -- and the
+gap $3$ pins that last $\tau$ to the tally's \emph{first} character
+(the gap $3$ occurs in $\cfg$ only at a nonzero tally's left edge).
+This proves (iv) modulo the pinning of Step 3, and shows that every
+other pattern avoids tallies entirely.
+
+\emph{Step 3 (pinning).}  It remains to show that a pattern that
+avoids tallies aligns slot-exactly with the frame constants.  Let
+$W$'s leading segment (up to its first gap of $3$ or $5$) contain
+$k$ $\tau$'s, all separated by gaps of $1$.  The first of these
+$\tau$'s must be a constant's \emph{first} $\tau$: a middle $\tau$
+of a constant has only one $\sigma$ before it, but $W$'s head is
+$\sigma^2$ and the head run must fit inside the preceding
+$\sigma$-run.  If the constant had more than $k$ $\tau$'s, the
+$(k{+}1)$-st would follow a gap of $1$, where $W$ has its seam $3$
+or $5$ -- impossible; so the constant has exactly $k$ $\tau$'s, and
+by the distinctness of family indices it is the unique slot holding
+that constant string.  The same argument applies constant-by-constant
+along $W$'s seams (each seam of $5$ matches a junction, i.e.\ the
+$\tau$'s on both sides belong to adjacent slots; the seam of $3$
+matches only a tally's left edge).  Assembling: $M P_i M$ can only
+chain $M$-slot, junction, $P_i$-slot, junction, $M$-slot, and the two
+$M$ slots in a configuration bracket exactly one code -- the wrapped
+one -- giving (ii).  $D_rD_{r'}$ chains $D_r$'s slot to the
+\emph{next} slot only through a gap of $5$, which after $D_r$'s slot
+arises exactly when the tally is empty: (iii).  The output prefix is
+pinned at $D_0$'s slot and then slot-by-slot through the program
+zone (which matches $\Pi(0)$ iff $\pc=0$), then across the first
+tally junction ($5$ iff $x=0$): (v).  Finally (i): a single frame
+constant $V(k)$ is itself a pattern with leading $1$-block of length
+$k-1\ge 1$, pinned by Step 3 to a slot holding that string; the
+slots holding $V(k_M)$ are exactly the two wrap positions of $M$,
+every other constant has exactly one slot.
+\end{proof}
+
+\begin{remark}
+The hypothesis $k\ge 2$ is used only to keep every pattern at two or
+more $\tau$'s (a lone $V(1)$ would be pinned only by its neighbors).
+The machine verification (part A of \texttt{verify\_r3.py}) also runs
+the full census under the hypothesis-violating assignment $k=1$ for
+one constant and finds no spurious occurrence there either -- the
+\emph{sequence} of constants in a long pattern pins it even when an
+individual constant is not unique -- but the clean statement above
+does not need this.
+\end{remark}
+
+\begin{remark}[why the census cap cannot hide a failure]
+Lemma~\ref{lem:occurrence} is a statement about \emph{all}
+$x,y\ge 0$, and its proof is the finite case analysis of Steps 1--3:
+the only $x,y$-dependent gaps are the tally patterns
+$3\,0^{\,n-1}\,2$, and the case split on $n=0$, $n=1$, $n\ge 2$ is
+exhaustive.  The machine check therefore samples edge lengths
+$x,y\in\{0,1,2\}$ at every $\pc$ explicitly, all $x,y\le 40$
+systematically, and $400$ random states up to $1000$: the census
+counts every pattern in every configuration and agrees with the
+lemma's predictions everywhere.
+\end{remark}

@@ -1,0 +1,248 @@
+%% =====================================================================
+%%  ROUND 5, REVISED IN ROUND 6 -- the proof fragment: phases, overlap
+%%  periodicity, and the mult-1 wall.  Paper-voice draft of what is
+%%  PROVED, what is machine-verified-but-unproved, and exactly what
+%%  remains for "rev is not L-reachable".
+%%
+%%  ROUND 6 REVISIONS:
+%%   - Fact (no consecutive left-moves): REFUTED at larger sizes
+%%     (B^inf-structured triple + the staircase).  Retained as the
+%%     record of the small-domain verdict, marked refuted.
+%%   - The staircase remark added: LDS ~ |w|/2 at mult 3 for a fixed
+%%     two-pass expression -- Conjecture A (LDS <= C(E) mult) REFUTED.
+%%   - Base case restated as a CONJECTURE (the round-5 derivation used
+%%     the refuted fact; the statement has no counterexample).
+%%
+%%  Machine verification (re-runnable):
+%%    docs/proof/research/scratch/rev/verify_round5_phases.py
+%%  (Lemma phasing: 4,000 copy-gap texts; Lemma overlap: 128,520 word
+%%   pairs exhaustive; base case: 205,585 real pipeline instances.)
+%%    docs/proof/research/scratch/rev/verify_round6_witness.py
+%%  (wall refutations: the B^inf triple standalone + the staircase
+%%   family to j=40, every row content-cross-checked; Conjecture A
+%%   refutation.)
+%%    docs/proof/research/scratch/rev/verify_round6_mult1_sweep.py
+%%  (mult-1 hunt: no row with mult=1 and LDS>=4.)
+%% =====================================================================
+
+\subsection{The Structure of a Shaving Pass}
+
+Fix a value $A$ (the replacement of an earlier pass) occurring as
+$m$ disjoint copies in the current text, and a deletion pass
+$[\,\epsilon/B\,]$.  A copy is entered at an \emph{offset} $o$: either
+$0$ (the scan stands at the copy's first atom) or the landing point of
+a match that straddled the left boundary; in the latter case $B$'s
+suffix of length $o$ is $A$'s prefix of length $o$.  A copy is exited
+at a \emph{depth} $j$: either no match crosses the right boundary
+($j = 0$) or a single match does, consuming $j$ copy atoms, and then
+$B$'s prefix of length $j$ is $A$'s suffix of length $j$.  Write
+\begin{align*}
+    O(A,B) &\triangleq \{\, o \in [1, \min(|A|,|B|{-}1)] :
+              A[{:}o] = B[|B|{-}o{:}] \,\}, \\
+    J(A,B) &\triangleq \{\, j \in [1, \min(|A|,|B|{-}1)] :
+              A[|A|{-}j{:}] = B[{:}j] \,\}.
+\end{align*}
+
+\begin{lemma}
+    (\emph{Phases})
+    \label{lem:phase}
+    The residual of a copy is a function of $(o, j)$ alone; the possible
+    pairs lie in $(\{0\} \cup O(A,B)) \times (\{0\} \cup J(A,B))$, plus one
+    further class of residuals, the empty one, produced by matches that
+    cover a copy entirely.  Hence the copies' residuals take at most
+    $(1 + |O(A,B)|)(1 + |J(A,B)|) + 1$ distinct values.
+\end{lemma}
+
+\begin{proof}
+    From offset $o$ the greedy scan through the copy is deterministic
+    and independent of the surrounding text while its windows lie
+    inside $A$; the only interaction with the following gap is the
+    single match that crosses the right boundary, at depth $j$, after
+    which the scan has left the copy.  A match ending at atom $o$
+    covers $A[0{:}o]$ followed by the preceding text, so $B$ ends with
+    $A[{:}o]$; a match crossing from atom position $q$ covers
+    $A[q{:}]$ followed by gap characters, so $B$ starts with
+    $A[q{:}]$ and $j = |A| - q$.
+\end{proof}
+
+This supersedes the cruder bound
+$|B| \cdot |\Sigma|^{|B|-1}$: the per-pass diversity of shaving is
+governed not by the needle's length but by its \emph{overlap sets} with
+the copied value.  Those sets are classical objects:
+
+\begin{lemma}
+    (\emph{Overlap Periodicity})
+    \label{lem:overlap}
+    Let $o_1 < o_2 < \cdots < o_k$ be the elements of $O(A,B)$ and
+    $o_{\max} = o_k$.  Then:
+    (i) every $o_i$, $i < k$, is a border of the prefix $A[{:}o_{\max}]$
+    (its length-$o_i$ prefix equals its length-$o_i$ suffix);
+    (ii) every difference $o_k - o_i$ is a period of $A[{:}o_k]$;
+    (iii) if $O(A,B)$ is an arithmetic progression with step $d$, then
+    $d$ is a period of $A[{:}o_{\max}]$: the straddled prefix is an
+    $(o_{\max}/d)$-fold repetition of a word of length $d$.  The mirror
+    statements hold for $J(A,B)$ on $A$'s suffix.
+\end{lemma}
+
+\begin{proof}
+    All elements of $O$ are suffixes of $B$ of the corresponding
+    lengths and prefixes of $A$ of the same lengths; nested suffixes of
+    one word give the border and period relations by the standard
+    arguments (a word whose first $b$ characters equal its last $b$ has
+    period $|w| - b$).  \emph{Verified exhaustively} for all $A$ with
+    $|A| \leq 8$ and $B$ with $|B| \leq 7$ over $|\Sigma| = 2$
+    ($128{,}520$ pairs), all clauses.
+\end{proof}
+
+\noindent The quantitative form one might hope for -- $|O| \leq
+o_{\max}/p$ for the minimal period $p$ -- is \emph{false} in general
+($A = \mathtt{aabaabaa}$, $B = \mathtt{xaabaa}$ gives $O = \{1,2,5\}$
+at $p = 3$); the border-chain structure of (i)--(ii) is the correct
+statement.  In the extremal case -- the run mechanism of the
+variable-depth constructions -- $O$ is a full arithmetic progression
+and the copied value's prefix is a repetition, which is exactly why
+uniform runs are where all known disorder lives, and why that disorder
+is content-invisible.
+
+\subsection{The Left-Move Wall}
+
+Call a pair of copies $c < c'$ (in text order) with residuals $R_c
+\ni p$, $R_{c'} \ni q$ a \emph{left-move} if $q < p$: the later copy
+keeps a \emph{smaller} position.  At multiplicity $1$ the residuals
+are pairwise disjoint on atoms, and every strictly decreasing chain of
+w-atoms through the copies induces left-moves whenever the copied
+value's provenance is increasing.  The machine verdict:
+
+%% ------------------------------------------------------------------
+%% ROUND 6 REVISION.  The Fact below, as stated in round 5, is REFUTED
+%% at larger sizes.  It is retained (struck through) as the record of
+%% what the small domain suggested, followed by the correct mechanism.
+%% ------------------------------------------------------------------
+
+\begin{fact}
+    (\emph{No Consecutive Left-Moves}; REFUTED in round 6)
+    \label{fact:leftmove}
+    \emph{Round 5 statement}: after one deletion pass, among copies
+    whose residuals are pairwise disjoint, the longest strictly
+    decreasing position chain has length exactly $2$ -- verified
+    exhaustively over all texts with $|A| \leq 4$, $|B| \leq 3$, gaps
+    of length $\leq 2$, at most three copies ($1{,}152{,}480$ texts;
+    $4{,}730$ under the all-disjoint convention, $23{,}368$ under the
+    exists-a-disjoint-pair convention), and on $40{,}000$ random texts.
+    \emph{Round 6 refutation}: a targeted search over
+    $B^{\infty}$-structured texts (the habitat pinned by the power
+    equations) yields the triple $B = \mathtt{ababa}$, $A =
+    \mathtt{bababab}$, gaps $\mathtt{aa},\mathtt{a},\mathtt{a},
+    \mathtt{a}$ with residuals $\{4\}, \{2\}, \{0,6\}$ and picks
+    $4 > 2 > 0$; and the staircase family of
+    Remark~\ref{rem:staircase} realizes chains of length
+    $\sim |w|/2$ through pairwise disjoint singleton residuals.  The
+    round-5 domain was too small.
+\end{fact}
+
+The correct mechanism is the \emph{modular staircase}.  When the
+needle $B$ is a factor of the same periodic stream that the copies
+tile, the greedy scan matches at spacing $m + \pi/2$ (where $\pi$ is
+the stream's period) and emits a fixed small number of atoms between
+consecutive matches; emission $c$ lands at offset $(m +
+\pi/2)\,c \bmod (n + g)$ in its copy unit, which \emph{descends by a
+constant step per emission}.  The strictly descending run before the
+first wrap has length linear in $|w|$; the wrap and the end-of-text
+dump each duplicate labels.  This is what long decreasing chains look
+like, and why they come with multiplicity $\geq 2$.
+
+\begin{remark}
+    (\emph{The Staircase}; machine-verified)
+    \label{rem:staircase}
+    For $E = [\,\epsilon/\mathrm{init}^2 X\,]\,[\,X/b\,]X$ and $w_j =
+    \mathtt{b}(\mathtt{ab})^{j}$, the output provenance is
+    \[
+        (n-2,\; n-4,\; \ldots,\; 3,\; 1,\; n-2,\; n-2,\; n-1),
+        \qquad n = 2j+1
+    \]
+    (the descent is always on \emph{odd} labels; $n$ is odd),
+    with $\mathrm{LDS} = j$ \emph{exactly} and multiplicity $3$
+    \emph{exactly}, for $j = 2, \ldots, 40$ (and $\mathrm{LDS} =
+    j/2 + 1$ at multiplicity $4$--$5$ for $\mathrm{init}^4$).  Hence
+    $\mathrm{LDS}/\mathrm{mult} \to \infty$ for a \emph{fixed}
+    two-pass expression: the bound
+    $\mathrm{LDS} \leq C(E) \cdot \mathrm{mult}$ is false.  Every row
+    is cross-checked against an independent implementation of the
+    denotation.
+\end{remark}
+
+\begin{conjecture}
+    (\emph{Base Case}; restated -- round 5 proved nothing here)
+    \label{prop:basecase}
+    For the two-pass fragment $[\,A/\sigma\,]\,[\,\epsilon/B\,]$ with
+    $A = \llbracket R \rrbracket(w)$: at multiplicity $1$,
+    \[
+        \mathrm{LDS}(\mathrm{prov}) \;\leq\; 2 \cdot
+        \mathrm{LDS}(\mathrm{prov}_A) + 1 .
+    \]
+\end{conjecture}
+
+\noindent The round-5 \emph{derivation} of this bound used the (now
+refuted) Fact~\ref{fact:leftmove} and is withdrawn.  What survives is
+the evidence: $205{,}585$ (pipeline, input) instances over all library
+replacements $R$, all constant $B$ with $|B| \leq 4$, all inputs $|w|
+\leq 7$ plus run-structured inputs: no violation; the maximum observed
+is $3 = 1 + 2$ with $\mathrm{LDS}(\mathrm{prov}_A) = 2$; and the
+round-6 mult-$1$ hunts -- $25$ needle constructions $\times$ $7$
+periodic input families $\times$ $6$ sigmas, plus $\mathrm{init}^d$
+for $d = 2, \ldots, 6$ on the alternating family -- found \emph{no}
+row with multiplicity $1$ and $\mathrm{LDS} \geq 4$.  The structural
+reason to believe it: a long descending chain needs the staircase,
+the staircase wraps or dumps the tail at the end of the text, and both
+wrap and dump duplicate labels.  Formalizing that duplication
+argument is the open problem.
+
+\subsection{What This Gives, and What Remains}
+
+Read recursively, Proposition~\ref{prop:basecase} converts the
+reordering question for pipelines into the same question for the
+\emph{values} their replacements denote: disorder is not created by
+shaving, only inherited (up to a factor $2$ and a verbatim atom).  One
+delimitation must be said plainly: this is the \emph{atom route}.  A
+hypothetical reversal witness could instead rebuild its output from
+constant characters selected by content gates (the toolkit's
+$\mathtt{cat}$/$\mathtt{dec}$ do exactly that, and the anchored
+constructions of Remark~\ref{rem:price} have empty atom-provenance);
+such a witness has prov-width $0$ and is invisible to
+Proposition~\ref{prop:basecase}.  Closing it requires the
+influence-crossing side -- the quantitative form of open problem~2 in
+Remark~\ref{rem:price} -- so a complete proof needs \emph{both} routes:
+the atom route bounded here, the constant-gate route by crossings.
+Subject to that, the proof needs exactly three further steps, and the
+round isolates them:
+
+\begin{enumerate}
+    \item \emph{Prove Conjecture~\ref{prop:basecase}} (equivalently,
+    the mult-$1$ case of Conjecture B): at multiplicity $1$ the
+    descending chains are short, because a long chain needs the
+    staircase and the staircase's wrap and end-of-text dump each
+    duplicate a label.  The duplication argument is sketched in the
+    conjecture's remark; it is the one machine-verified link without a
+    written proof.  Note the mult-$1$ hypothesis is now
+    \emph{load-bearing}: the multiplicative form $\mathrm{LDS} \leq
+    C(E) \cdot \mathrm{mult}$ is refuted
+    (Remark~\ref{rem:staircase}).
+    \item \emph{The value recursion at intermediate multiplicity:}
+    bound $\mathrm{LDS}(\llbracket R \rrbracket(w))$ for sub-expressions
+    $R$ \emph{without} a multiplicity-$1$ hypothesis.  Round 6 shows
+    the intermediate regime admits staircases with $\mathrm{LDS} \sim
+    |w|/d$ where $d$ is the needle's length defect, at multiplicity
+    pinned small ($3$--$5$); the recursion must therefore tolerate
+    linear disorder at small multiplicity and rely on the
+    \emph{outer} passes to kill duplicates -- which is where phase
+    diversity (Lemma~\ref{lem:phase}) and periodicity
+    (Lemma~\ref{lem:overlap}) have to be composed.
+    \item \emph{Multi-pass composition:} the mult-$1$ bound must be
+    proved at every stage of a pipeline, where the ``copies'' of stage
+    $\ell + 1$ are the residuals of stage $\ell$ -- nested, already
+    shorn of their uniform ends.
+\end{enumerate}
+
+The three sibling obstructions stay orthogonal, as
+Remark~\ref{rem:price} records: the once-hinge and direction-hinge
+canonical functions pass all of the above with $\chi = 0$.

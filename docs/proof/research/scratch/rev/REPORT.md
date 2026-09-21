@@ -241,3 +241,387 @@ verify_round2.py, verify_round2b.py (prov corpus, influence) |
 search_r2.py (rev synthesis) | search_lds.py, search_lds2.py (disorder
 frontier) | search_2pass.py (exhaustive 2-pass) | search_halves.py
 (swap-halves litmus).
+
+---
+
+## Round 4 (coordinator-directed): cross-hinge tests, the price ladder,
+## and the Shaving Lemma
+
+### 4.1 Cross-hinge tests (verify_round4_hinges.py) -- the invariant
+### family is REV-SPECIFIC
+
+Both sibling hinges' canonical functions run through prov.py and the
+Conjecture A/B/C machinery (content side; P's provenance is forced since
+its output chars are verbatim w-chars; f2's via a labeled right-to-left
+substitution lsubstR, cross-checked against lrcore.substR on ALL |w|<=12):
+
+* P = takeWhile != b (once-hinge reduction, once/REPORT.md R1-R3):
+  prov (all |w|<=10): max LDS = 1, max mult = 1.  Influence (all 8191
+  binary inputs |w|<=12): crossings = 0 on EVERY input; influence is pure
+  truncation (mean 2 len-changing rows, 9 empty of 11).  A/B/C hold with
+  room to spare.
+* f2 = [b/aa]^R (L+R hinge; rho's minimal hard instance):
+  lsubstR faithfulness PASS (all |w|<=12).  prov: max LDS = 1 at mult 1
+  (R-pass preserves the order of surviving w-atoms; inserted b's are
+  constants).  Influence (all 8191 inputs |w|<=12): crossings = 0 on
+  EVERY input; local disorder only (mean maxdisp 1.76, mean 5.8
+  len-changing rows of 11).
+
+CONCLUSION (both predictions confirmed): Conjectures A/B/C exclude rev
+but NOT the other two hinges.  No unified separation theorem via this
+invariant family; the three hinges need three different obstructions --
+unbounded reordering (rev), the spanning needle (once), residue routing
+(L+R direction).  Corollary for the paper: a crossing-count proof of
+rev !in L cannot double as a proof of either sibling.
+
+### 4.2 The price-of-reordering ladder (verify_round4_ladder.py,
+### paper draft: price_of_reordering.tex)
+
+Every rung now has a BUILT, exhaustively-verified expression (the
+rev-last-k family built as cat(last o init^j) for j<k, init^k; sizes
+320/2,498/17,689/123,971 for k=1..4; exact on all binary inputs |w|<=10
+for k<=2, |w|<=8 for k<=4).  Crossings at n=14 (worst of 56 inputs):
+
+  id 0 | init 0 | last 0 | rotR1 13 = n-1 | swap-fl 25 = 2(n-2)+1
+  rev-last-k: 13, 25, 36, 46 for k=1..4  |  rev 91 = C(14,2)
+
+CLOSED FORM (new, exact): chi(rev-last-k) = k(n-k) + C(k,2) =
+C(n,2) - C(n-k,2) -- the moved tail block's crossings of the untouched
+head plus the block's internal reversal.  At k=n this is C(n,2) = chi(rev)
+(rev-last-n = rev).  Every L-expressible rung sits at O(n); rev is the
+k=n rung and needs Theta(n^2).
+
+Two barriers, both now machine-checked:
+* RELABELING (sharper than round 3's palindrome route): the canonical
+  content-consistent labeling of rev(w) (increasing within each
+  character class) has LDS <= #distinct chars <= |Sigma| -- a strictly
+  decreasing subsequence cannot use two positions of one class.  Verified
+  at n=14 (max 2 over 56 inputs) and by BRUTE FORCE over all consistent
+  bijections, |w|<=6 (canonical is optimal).  No output-content-only
+  order invariant can exclude rev.
+* FAKING: the ladder's own provLDS column is 0 for every anchored rung
+  (last/init/rotR1/swap-fl/rev-last-k rebuild outputs from CONSTANTS) --
+  atom-provenance invariants miss them entirely; only influence
+  crossings measure their reordering.  Also cat(X,X): C(14,2)=91
+  inversions at prov LDS 2, mult 2 -- inversion MASS is the wrong
+  measure (Dilworth); width is right.
+
+Paper-voice draft: price_of_reordering.tex (LNCS remark + table,
+compiles standalone; drop-in after open problem 2 or referenced from
+5.6).  It includes the cross-hinge observation of 4.1.
+
+### 4.3 The Shaving Lemma (search_shaving.py) -- v1 refuted, v2 verified
+
+V1 (residuals a function of the entry offset alone, <= |B| distinct):
+REFUTED by the machine -- 33/3000 trials with #distinct residuals >
+|B| (e.g. A='aabb', B='ba', gaps ab/baaa/ba/a: residuals {1,2,3},
+{0,1,2,3}, {0,1,2}); 318/3000 trials with same-offset/different-
+residual.  Mechanism: EXIT straddles -- matches starting inside a copy
+extend into the following gap, so the residual depends on what follows.
+
+V2 (correct, verified): the residual of a copy is a function of
+  (o, h) = (entry offset in {0..|B|-1}, the |B|-1 text chars following
+  the copy),
+so #distinct residuals <= |B| * |Sigma|^{|B|-1}.  Verified as a FUNCTION
+PROPERTY (same (o,h) => same residual: 3000 trials, 0 failures) and as
+a count bound (0 failures), random + run-biased copy-gap texts.
+
+CONSEQUENCES:
+(3) At final mult 1, any residual class with >= 2 copies contains no
+    w-ATOMS (each would be duplicated).  So a strictly decreasing chain
+    through former copies of A picks w-atoms only from single-copy
+    classes:  chain <= LDS_w(A) * prod_j (|B_j(w)| * s^{|B_j|-1}).
+    For CONSTANT patterns every factor is O(1): deletion passes convert
+    NONE of the inserted structure into disorder beyond a constant.
+    (Also: constant-pattern pipelines have prov LDS <= 1 outright --
+    replacements are constant strings, so no w-atoms are ever inserted;
+    the content of Conjecture B is entirely in the variable world.)
+    The remaining gap to Conjecture B is exactly the VARIABLE patterns
+    (|B(w)| unbounded) -- the same gap as thm:subsequential.  A full
+    proof needs: long computed needles cannot be shaved at many distinct
+    phases on copies of a bounded sub-expression's value without paying
+    multiplicity (needle-content recursion through w).
+
+### 4.4 The attacks through the gap (both fail to beat LDS@mult1 = 3)
+
+* Part B: genetic search over "copy, then shave" 3-6-pass pipelines,
+  168 copy-creating first passes x 36 shave passes including LONG
+  VARIABLE needles (aX, Xbb, enc2aa, ... : needle length grows with
+  |w|): 250 x 150, re-verified on |w|<=8 + structured: max LDS@mult1 = 2
+  (two independent runs).  The 2-pass exhaustive max 3 stands.
+* Part C: the double-sided-cut hand constructions (cut left depths per
+  copy, kill tails, cut right depths -> disjoint singleton residuals
+  {K-j}): best LDS@mult1 = 1.  The construction dies at the multiplicity
+  wall: per-copy surgical deletion needs per-copy patterns, and uniform
+  rules destroy the copy/gap contrast that creates the phases.
+* Champion dissection (depth-2 max 3, w='bbaab'): prov (2,1,4,0) =
+  1 verbatim atom + LDS 2 of ONE inserted rot1X copy -- whose own prov
+  (1,4,0) mixes w-atoms with CONSTANT a's (tail/head rebuilds them).
+  Pass 1 [b/b] is a CONSTANTIZER: it kills all b-atom labels, the
+  faking route again.  No multi-copy shaving stress even at the top.
+
+### 4.5 Swap-halves: the three-way litmus (coordinator priority 3)
+
+Unreachable in L (round 3 litmus: 14/86, 55/86, 28/86 on |w|<=6, 0/3 on
+|w|=10..14); in ONCE it is the P-wall (left-anchored variable-length
+deletion); in L+R it is the residue question.  NEW from this round
+(transferable): the natural halves-extraction route through run-cutting
+(the double-sided singleton construction of 4.4 Part C) fails exactly at
+the multiplicity wall -- copies cannot be shaved to disjoint
+variable-length residuals by bounded constant rules.  Same wall as
+hinge 1's P and the shaving lemma's variable-pattern gap.
+
+### 4.6 Round 4 verdict
+
+No witness, no full impossibility proof.  The frontier moved:
+(i) the invariant family is proven rev-specific (both sibling hinges
+pass with extremal values); (ii) the reordering ladder is exact with a
+closed form and every rung machine-verified end-to-end, with both
+barriers (relabeling, faking) quantified; (iii) the Shaving Lemma
+exists in a verified v2 form with the constant-pattern case closed and
+the variable-pattern gap isolated as THE missing piece, isomorphic to
+the paper's subsequentiality boundary.
+
+### 4.7 Next round plan
+
+1. LONG-NEEDLE SHAVING (the isolated gap): for a variable pattern
+   B(w) to shave copies of A(w) at many distinct phases, B(w) must
+   occur inside A(w) at many offsets -- a self-reference constraint
+   through w.  Formalize and machine-test: bound #distinct effective
+   phases by the overlap structure of occurrences of B(w) in A(w)
+   (periodicity: fine65/lothaire97-style run arguments).
+2. Fold v2 + the chain bound into a proved THEOREM for the fragment
+   "insertions of variable values + constant deletion patterns" (chain
+   <= 1 + sum_i LDS(R_i(w)) * O(1)) and check it against the corpus.
+3. Conjecture C escalation: measure crossings for more anchored
+   constructions (rep_n, escape, the recursive-lite shapes) at n=20+.
+
+### 4.8 Script index (round 4)
+
+verify_round4_hinges.py  -- cross-hinge tests (4.1)
+verify_round4_ladder.py -- ladder build/verify/measure + barriers (4.2)
+price_of_reordering.tex -- paper-voice remark draft (4.2)
+search_shaving.py       -- v1 refutation, v2 verification, attacks (4.3-4.5)
+
+---
+
+## Round 5: THE PROOF ATTEMPT (user charter: prove rev is not in L)
+
+No full theorem this round; the attempt produced a proved and
+machine-verified FRAGMENT that reduces the pipeline question to a
+value recursion, plus one machine-verified fact whose proof is the
+remaining crux.  Paper-voice draft: phase_leftmove_fragment.tex.
+
+### 5.1 Lemma Phase (proved + verified; supersedes Shaving v2's count)
+
+A deletion pass [eps/B] on copies of A: each copy's residual is a
+function of (o, j) = (entry straddle depth, exit straddle depth) with
+  o in {0} u O(A,B),  O = {o: A[:o] = B[-o:]},
+  j in {0} u J(A,B),  J = {j: A[-j:] = B[:j]},
+plus one extra class (fully covered copies, residual empty).  So
+  #distinct residuals <= (1+|O|)(1+|J|) + 1
+-- governed by the OVERLAP SETS, not by |B|*|Sigma|^{|B|-1}.
+[verify_round5_phases.py PART 2: function property, o/j membership,
+count: PASS on 4000 random+run copy-gap texts.  The first version's
+count was refuted by the machine (167 -> 4 cases: the +1 class); the
+off-by-one in my exit-crossing condition was also machine-caught.]
+
+### 5.2 Lemma Overlap-Periodicity (proved + exhaustive)
+
+O's phases are border-chain structure: (i) every smaller phase is a
+border of A[:max]; (ii) every difference is a period of the longer
+prefix; (iii) arithmetic-progression phases with step d => d is a
+period of A[:max] (the straddled prefix is an o_max/d-fold repetition).
+[PART 1: all A<=8, B<=7 over {a,b}: 128,520 pairs, all clauses PASS.]
+The hoped-for density bound |O| <= o_max/p is FALSE (A=aabaabaa,
+B=xaabaa: O={1,2,5}, p=3) -- found by hand outside the first machine
+range, then exhibited in-machine.  The run mechanism (all known
+disorder) sits exactly at the AP extreme: prefix a repetition.
+
+### 5.3 The Left-Move Wall (machine-verified; proof open -- THE CRUX)
+
+At mult 1 (pairwise disjoint residuals) there are NO two consecutive
+left-moves: the longest strictly decreasing position chain through
+disjoint residuals is exactly 2.  [Exhaustive: 1,152,480 texts
+(|A|<=4, |B|<=3, gaps<=2, <=3 copies; 4,730 with >=2 disjoint
+residuals; max chain 2.  Plus 40,000 random texts up to |A|=7, |B|=6,
+6 copies: max 2.]  Mechanism (singleton case): residual {p} requires
+the needle to BOTH end with A's prefix of length p AND start with A's
+suffix of length |A|-1-p -- both straddles paid from the same needle;
+a triple needs the gap sandwich laid twice in a row.
+
+### 5.4 Proposition Base Case (derived; conditional on 5.3)
+
+For [A/sigma][eps/B], A = R(w), at mult 1:
+   LDS(prov) <= 2*LDS(prov_A) + 1.
+Proof: no two consecutive position-descents (5.3); delete the later
+pick of each descent pair -> survivors are an ascending-position,
+descending-value subsequence of prov_A (<= LDS(A)); descents <= half
+the steps.  [Verified: 205,585 (pipeline, input) instances, all
+library R x constant B<=4 x |w|<=7+structured: 0 violations.  Constant
+A: exhaustive 1,860 pipelines, all |w|<=8: max 1 = the bound.]
+Shaving does not create disorder; it inherits it (factor 2 + verbatim).
+
+### 5.5 What a full rev-not-in-L proof still needs (the honest list)
+
+(0) THE FAKING CAVEAT: the fragment is the ATOM route.  A constant-gate
+witness (empty prov, output assembled from constants by content
+tests) is invisible to it; that route needs the influence-crossing
+side (Conjecture C / rem:price).  Both routes must be closed.
+(1) PROVE the Left-Move fact (5.3) -- the sandwich argument.
+(2) THE VALUE RECURSION at intermediate multiplicity: LDS(R(w)) for
+sub-expressions without a mult-1 hypothesis (Conjecture A form), then
+compose with the phase/periodicity lemmas as the outer passes kill
+duplicates.
+(3) MULTI-PASS composition: the left-move wall at every stage, where
+stage l+1's "copies" are stage l's residuals (nested, shorn).
+Traps respected: no content-only invariant (relabeling barrier), no
+atom-only invariant (faking), no pair-mass (XX), and no reliance on
+"L cannot select an extremal site" (prop:del-leftmost kills that).
+
+### 5.6 Script index (round 5)
+
+verify_round5_phases.py -- all of the above (PARTs 1-4)
+phase_leftmove_fragment.tex -- paper-voice fragment (compiles)
+
+---
+
+## ROUND 6 -- the wall falls, Conjecture A falls, Conjecture B stands
+
+Priority order was: (1) prove the Left-Move Wall, (2) the value recursion,
+(3) LINE 2.  What actually happened: the wall is FALSE at larger sizes,
+and chasing WHY produced a construction that refutes Conjecture A
+outright.  Conjecture B -- the mult-1 invariant, and rev is a mult-1
+function with LDS = n -- survived every attack and is now the single
+live thread of the atom route.
+
+### 6.1 Count reconciliation (coordinator's item (a))
+
+Round 5's Left-Move Wall domain (1,152,480 texts, |A|<=4, |B|<=3,
+gaps<=2, m in (2,3)):
+  * "ALL nonempty residuals pairwise disjoint": 4,730 texts (my round-5
+    convention)
+  * "EXISTS a disjoint pair": 23,368 texts (the coordinator's
+    verify_round5_leftmove.py convention)
+  Both re-run in verify_round6_leftmove.py PART A.  The two numbers are
+  the same domain under two conventions; no discrepancy.
+
+### 6.2 The Left-Move Wall is FALSE (priority item 1, negative outcome)
+
+The round-5 Fact ("max strictly-decreasing chain through pairwise-
+disjoint residuals = 2", verified on 1,152,480 texts + 40,000 random)
+was a SMALL-DOMAIN ARTIFACT.  Two refutations, both machine-checked:
+
+(1) THE B2 TRIPLE (targeted hunt).  The power equations of round 5 pin
+    a triple's habitat to B^INFINITY-structured texts (stretches between
+    picks are B-powers).  B1 (all-straddle skeleton solver, 18 forced
+    texts) found none; B2 (300,000 B^inf-structured random texts,
+    n<=10, m<=8) found exactly one:
+        B='ababa', A='bababab', gaps=['aa','a','a','a']
+        residuals {0:[4], 1:[2], 2:[0,6]}, picks 4 > 2 > 0, disjoint.
+    Standalone re-check in verify_round6_witness.py PART 2a.
+(2) THE STAIRCASE (see 6.3): family-1 provs contain decreasing chains
+    of length j through j pairwise-disjoint SINGLETON residuals
+    (e.g. j=8: (15,13,11,9,7,5,3,1) with residuals {15},{13},...{1}).
+    The wall is not merely false; the true chain length is ~|w|/2 in
+    this family.  The round-5 wall (chain<=2) and the base-case
+    proposition's DERIVATION (no two consecutive descents) are dead.
+
+### 6.3 CONJECTURE A REFUTED (the headline result)
+
+Conjecture A (rounds 2-5): LDS(prov) <= C(E) * mult for a constant
+C(E).  FALSE.  Witness family (all rows content-cross-checked against
+lcore's independent den, verify_round6_witness.py PART 1):
+
+    E2 = [eps/init^2 X] . [X/b] X    on   w_j = b(ab)^j
+
+    prov(w_j) = (n-2, n-4, n-6, ..., 3, 1, n-2, n-2, n-1)  [odd labels; n odd]
+    (n = |w_j| = 2j+1); LDS = j EXACTLY, mult = 3 EXACTLY, j = 2..40
+    (ratio 13.33 at j=40; prov j=12: (23,21,...,1,23,23,24)).
+    E4 = [eps/init^4 X].[X/b]X: LDS = j/2+1 at mult 4-5
+    (ratio 5.0 at j=40).  LDS/mult -> infinity in both.
+
+MECHANISM (the modular staircase).  w = b(ab)^j is alternating, so
+[X/b]X tiles the line with copies of w separated by single 'a' gaps:
+the text is alternating throughout.  B = init^d(w) has odd length
+m = n-d and is a factor of the same alternating stream, so the greedy
+scan of [eps/B] matches at spacing m+1 and emits exactly one 'b'
+between consecutive matches.  Emission c sits at global position
+(m+1)c; copy units have length n+1; the emitted atom's offset within
+its copy is  (m+1)c mod (n+1) = n-d + ... , i.e. it DESCENDS BY d
+PER EMISSION (a modular staircase with step d).  The strictly
+descending run before the first wrap has length ~(n+1)/d, and the
+boundary emissions (the leading atom of copy 0, the last gap atom,
+the final wrap emission) contribute only the CONSTANT number of
+duplicated labels (n-2 appears 3x; hence mult=3, pinned, while
+LDS = j = (n-1)/2 grows linearly).  This also kills the round-5
+"Base-Case Proposition" derivation (no-two-consecutive-descents is
+false: the staircase is j-1 consecutive descents) -- although the
+proposition's STATEMENT (mult 1 => LDS <= 2 LDS(A)+1) has still not
+been violated (6.4).
+
+### 6.4 CONJECTURE B SURVIVES (mult 1 => LDS <= C(E)); rev is mult-1
+
+Attack surface swept (verify_round6_conjAB.py, verify_round6_mult1_
+sweep.py): 25 needle constructions (tail^d for d<=8 -- cheap, tk.tail
+is linear; init^2; a./b. cat-phase shifts) x 7 periodic w families x
+6 sigmas x j<=10, plus init^d for d in 2..6 on the alternating family:
+NO row with mult = 1 and LDS >= 4 anywhere.  (init^d beyond d=2 is
+exponentially expensive: leaf-substitution composition blows the AST
+up 4^d; 3.3M nodes at d=6.  tail^d and cat-shifts are the cheap probes.)
+
+STRUCTURAL STORY (hand analysis, machine-consistent, not yet a proof):
+in the 2-pass family [eps/B(X)].[X/sigma]X a long descending chain
+requires the staircase; the staircase must not wrap (a wrap re-emits
+offsets already emitted: duplicates), and the end-of-text dump emits
+the last copy's top offsets, which the staircase's FIRST emissions
+also hit.  Both effects force mult >= 2 whenever the chain is long;
+equivalently mult = 1 pins the chain to O(1) in every construction
+we can build.  Since rev's prov (n, n-1, ..., 0) has mult = 1 and
+LDS = n, Conjecture B is exactly the invariant that separates rev
+from L, and it is now the ONLY surviving member of the A/B/C family:
+  A: REFUTED (6.3).  B: open, all attacks repelled.  C: untouched
+  (influence-crossing; the length-changing rows are discarded, and
+  every family in this round changes output length under input flips,
+  so C holds vacuously on them -- the discard rule is load-bearing).
+
+### 6.5 Corrected status of the round-5 fragment
+
+phase_leftmove_fragment.tex must be revised before any integration:
+  * Fact No-Consecutive-Left-Moves: REFUTED (the staircase).
+  * Proposition Base Case: statement not violated (no mult-1
+    counterexample found), derivation broken.  It should be re-stated
+    as a CONJECTURE with the mult-1 hypothesis explicit.
+  * Lemma Phases / Lemma Overlap-Periodicity: unaffected (they are
+    about residual classification, not chain length).
+
+### 6.6 Next round (priority order)
+
+(1) PROVE CONJECTURE B for the 2-pass fragment: at mult 1 the
+    surviving-copy offsets form a "staircase with no wrap and no tail
+    collision" -- formalize the duplication argument (wrap duplicates
+    offsets; the end-of-text dump duplicates the top offsets) into:
+    mult 1 => chain <= f(|B|, structure of sigma-sites).  The B2
+    triple and the family-1 provs are the test cases.
+(2) VALUE RECURSION at intermediate mult: family 1 shows the
+    intermediate-mult regime has LDS ~ n/d with d = |B|-defect; a
+    recursion  LDS(stage l+1) <= g(LDS(stage l), mult) must tolerate
+    staircases -- the round-5 plan is unchanged in shape but the
+    constants grow.
+(3) Conjecture C (LINE 2): now the only other live invariant; the
+    length-discard caveat must be stated wherever it is used.
+
+### 6.7 Script index (round 6)
+
+verify_round6_leftmove.py -- wall re-verification + count
+    reconciliation + B1 skeleton solver + B2 triple hunt + pair
+    classification
+verify_round6_conjAB.py -- init^d leaf-substitution composition;
+    family 1/2 tables; init sanity (init is CORRECT on all 511
+    binary |w|<=8; the round-6 "INIT BAD" flags were label-provenance
+    checks, not content)
+verify_round6_mult1_sweep.py -- the mult-1 hunt (cheap needles);
+    NO mult-1 rows with LDS >= 4
+verify_round6_witness.py -- FINAL WITNESSES: A-refutation extended to
+    j=40 (every row content==den), B2 triple standalone, staircase
+    provs printed
