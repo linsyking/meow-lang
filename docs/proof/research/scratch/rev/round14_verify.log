@@ -1,0 +1,44 @@
+ROUND 14 -- machine verification (falsify/discover only)
+========================================================================
+
+[A] coordinator seed: junction-shave stratum (their c values)
+  M=bab    c=1: VERIFIED
+  M=baab   c=2: VERIFIED
+  M=babab  c=1: VERIFIED
+  M=baac   c=2: VERIFIED
+  M=bb     c=2: VERIFIED
+[A] seed (junction shaves, c in {1,2}): ALL VERIFIED
+
+[B] fixed-middle theorem, OPTIMAL c = 0: E_M = [M^R/X].C([e/M]X, M, [e/M]X)
+  28 middles (incl. all five seed M and M = b): ALL VERIFIED on full family {i,k >= 0}
+  prov injective, never DB: VERIFIED
+  M = b reproduces round-13 E_swap: VERIFIED
+  B3 junction-shave c-formula (2045 in-region trials): VERIFIED
+
+[C] self-anchoring lemma, string level
+  (i)   M unique in a^i M a^k:             VERIFIED
+  (ii)  pattern unique in a^L M a^L:       VERIFIED
+  (iii) greedy [e/M] on a^i M a^k = a^ik:   VERIFIED
+
+[D] calculus fact (strengthens 13.2(i))
+  D1 psi(u) = r*floor(u/p) + u mod p:      VERIFIED
+  D2 15625 compositions (depth 3, p,r<=5); tail-translations u-c, c!=0: 0
+     no constant shaved off a b-free run by b-free means: VERIFIED
+
+[E] reduction SPLIT => REV-ON-W2 (computed palindrome middle)
+  engine on fixed-j slices j=1..6 (grids + 300 random each): VERIFIED
+  laundered L_a.L_b.E_bab: rev with prov = (): VERIFIED
+
+[F] degenerate M = a^d (pure filler): family is the one-b slice; [e/a^d] fires
+     inside flanks; handled by round 13. Not a case of the theorem (M must
+     contain a non-flank letter).  Documented only -- no run needed.
+
+========================================================================
+  A seed                   OK
+  B c=0 theorem            OK
+  B3 junction c-formula    OK
+  C self-anchoring         OK
+  D calculus fact          OK
+  E reduction + laundered  OK
+ROUND 14: ALL VERIFIED  (23.5s)
+23.49s

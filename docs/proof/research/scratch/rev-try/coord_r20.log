@@ -1,0 +1,16 @@
+# Coordinator round-20 fresh-encoding battery (Lane C / OL-1).
+# /usr/bin/python3 -W ignore ../rev-try/coord_r20_check.py   (cwd=rev/; wall 2.1 s)
+# Run 2: after fixing two bugs in MY OWN checks (the '+i' depth term and a
+# wrong k in the ladder-cap bound) -- both mine, no claim of theirs moved.
+# Run 1 (FAILS: 5) preserved at $CLAUDE_JOB_DIR/tmp/coord_r20_run1.log in
+# the session record; the two failures were my T4i depth formula (+i) and
+# my ladder-cap k-mismatch, both diagnosed by hand before the re-run.
+
+1. Lemma M: 400 random (p0,p1,M,k) -- my simulation == my formula construction == evaluator; cumulative depths == closed forms
+2. pair equation solutions: 182, all ladder rungs or cross-pairs
+3. ghost inequality, Lemma S forcing/window/exclusivity: 0 violations
+4. T4i ladder + T4iii double-exact-tuned: byte-exact
+5. mod-3 closure + ladder cap: 0 violations
+6. filter exhibit: c=35 (Delta=0) IS in their T3 census class (35 = I(2,3)-I(0,0)), realized by P=b.a^81 / R=a^35.b.a^46; real hits 0; idealized hits {0,1} form a cross-pair; the machine filter (anchored at first IDEALIZED hit) ghosts it -- the census is corroboration; real-channel coverage is the hand kill (FIT at the real firing), which I verified independently.
+7. my census: 6500 small passes on D(5;3), 0 mirror-depth plants
+FAILS: 0

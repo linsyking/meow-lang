@@ -1,0 +1,12 @@
+== PART 1: one-b family, enriched library ==
+  SWAP S1 [non-circular]: F=bigsym P=w R=b
+  HALF-SWAP S1 [non-circular]: F=bigsym P=w R=ba
+  HALF-SWAP S1 [non-circular]: F=bigsym P=shrinkR R=b
+  HALF-SWAP S1 [non-circular]: F=bigsym P=shrinkR R=ba
+S1: 121930 sims; swap 216 (215 circular, not listed), split-i 0, split-j 0, half-swap 198
+S2: 598350 sims; swap 244 (244 circular, not listed), split-i 0, split-j 0, half-swap 682 (caps 0)
+VERDICT 1: swap reachable (construction + trivial identities on swapv); NO split at depth <= 2 over the enriched library
+== PART 2: two-b frontier w2 = a^i b a^j b a^k ==
+S1': 56952 sims; rev 0, splits 0, flank-progress 0
+S2': 86436 sims; rev 0, splits 0, flank-progress 0 (caps 0)
+VERDICT 2: two-b frontier clean at depth <= 2 -- the symmetrization trick does not lift (interior-exactness wall, REPORT 13.7)

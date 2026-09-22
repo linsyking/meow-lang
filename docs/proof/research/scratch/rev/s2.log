@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File [35m"<string>"[0m, line [35m1[0m, in [35m<module>[0m
+    import sys; sys.argv=['sweep2','800','3','222']; [1;31mimport sweep2[0m; sweep2.main()
+                                                     [1;31m^^^^^^^^^^^^^[0m
+[1;35mModuleNotFoundError[0m: [35mNo module named 'sweep2'[0m
+exit=1

@@ -1,0 +1,29 @@
+=== [SD] site distinctness on distinct-run inputs ===
+  q>=2 positive-interior patterns on distinct scrutinees: 2007 cases, violations 0
+  controls (q<=1 or zero-interior): 1993 cases, 1036 fired >1
+=== [OPS] k-adaptive separator ops, closed forms ===
+  k=1: 16 vectors checked
+  k=2: 64 vectors checked
+  k=3: 256 vectors checked
+  k=4: 1024 vectors checked
+  k=5: 4096 vectors checked
+  k=6: 16384 vectors checked
+  k=7: 65536 vectors checked
+  k=8: 262144 vectors checked
+=== [CEN] halver census spread at fixed (S_a,k) ===
+  k=1 S_a=7: halver takes 1 distinct a-counts (expected 1 by parity census)
+  k=2 S_a=9: halver takes 2 distinct a-counts (expected 2 by parity census)
+  k=3 S_a=11: halver takes 2 distinct a-counts (expected 2 by parity census)
+  k=4 S_a=13: halver takes 3 distinct a-counts (expected 3 by parity census)
+  k=5 S_a=15: halver takes 3 distinct a-counts (expected 3 by parity census)
+  k=6 S_a=17: halver takes 4 distinct a-counts (expected 4 by parity census)
+  k=7 S_a=19: halver takes 4 distinct a-counts (expected 4 by parity census)
+=== [FP] final-pass constraint ===
+  multi-b multi-fire cases: 4000 (all != rev, 4000 with X twice)
+  Lane C engine (k=2): 343 correct reversals, top pass t=1 on 343, t!=1 on 0
+=== [SB] separation budget, merge-free regime ===
+  merge-free derivations: 2112, budget held: 2112; mergey with Phi'>budget: 0
+  POLLUTION WITNESS k=9: Phi'=9 budget=8 (merge-free would cap at budget)
+  POLLUTION WITNESS k=10: Phi'=10 budget=8 (merge-free would cap at budget)
+== total: 1755621 checks, 0 failures ==
+elapsed 0.8s

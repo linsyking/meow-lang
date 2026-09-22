@@ -1,0 +1,12 @@
+A  E_mix fresh encoding, 13^3 grid + 500 random: VERIFIED
+B  E_{c,d} fresh encoding, 12 pairs (incl. 7/3, 5/6): VERIFIED
+C  rev-slack calculus PAD/STRIP (corrected signs, 400): VERIFIED
+D  slack-class closure, affine action on (d1,c,d2) (300): VERIFIED
+E  A7-convergence [eps/(b.M.b)]w2 = a^{i+k} (4 families x 200): VERIFIED
+F  E_mix: tree nodes 58, S-nodes 15, S-depth 4, AST depth 8 (nodes) / 7 (edges)
+F  E_{1,1}: tree nodes 40, S-nodes 9, S-depth 3, AST depth 7 (nodes) / 6 (edges)
+F  E_{2,1}: tree nodes 40, S-nodes 9, S-depth 3, AST depth 7 (nodes) / 6 (edges)
+F  E_{1,2}: tree nodes 40, S-nodes 9, S-depth 3, AST depth 7 (nodes) / 6 (edges)
+G  ST2 cells: halver total = (S+#odd)/2 per mod-2 cell; per-run ceil-halving (7^3): VERIFIED
+
+ROUND-15 COORDINATOR BATTERY: ALL VERIFIED

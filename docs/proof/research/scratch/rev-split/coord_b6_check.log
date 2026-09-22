@@ -1,0 +1,5 @@
+1. PO-1 window anatomy: 12 windows checked, 0 violations
+2. replica structure on T = [X/b]X
+   (their threshold patterns: copy 0 fails, k-1 fire)
+3. EPT arithmetic spot checks
+FAILS: 0

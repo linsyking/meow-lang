@@ -1,0 +1,77 @@
+INVOCATION: ./ledger3 all 271828 1200   [mode=all seed=271828 trials=1200]
+=== [forms] exact closed forms on D(k;B), B=2 and B=3 ===
+  mrg: exact forms checked on B=2,3
+  half: exact forms checked on B=2,3
+  third: exact forms checked on B=2,3
+  dbl: exact forms checked on B=2,3
+  shave: exact forms checked on B=2,3
+  dropab: exact forms checked on B=2,3
+  Eleak: exact forms checked on B=2,3
+  Eprod: exact forms checked on B=2,3
+  dlast: exact forms checked on B=2,3
+  dfirst: exact forms checked on B=2,3
+  Elast: exact forms checked on B=2,3
+  Ecbox: exact forms checked on B=2,3
+  Esmm: exact forms checked on B=2,3
+  Eh2: exact forms checked on B=2,3
+  dblmerge: exact forms checked on B=2,3
+  decb: exact forms checked on B=2,3
+  mrg: exact forms checked on B=2,3
+  half: exact forms checked on B=2,3
+  third: exact forms checked on B=2,3
+  dbl: exact forms checked on B=2,3
+  shave: exact forms checked on B=2,3
+  dropab: exact forms checked on B=2,3
+  Eleak: exact forms checked on B=2,3
+  Eprod: exact forms checked on B=2,3
+  dlast: exact forms checked on B=2,3
+  dfirst: exact forms checked on B=2,3
+  Elast: exact forms checked on B=2,3
+  Ecbox: exact forms checked on B=2,3
+  Esmm: exact forms checked on B=2,3
+  Eh2: exact forms checked on B=2,3
+  dblmerge: exact forms checked on B=2,3
+  decb: exact forms checked on B=2,3
+=== [ledger] term ledger at the value level on D(k;3) ===
+  battery: max ledger terms observed 2 (bound M=4)
+  random compositions: 1049/1049 fully classified, 75605 runs (global max terms 2)
+=== [spec] classifier specificity on D(k;3)-scale values ===
+  positive controls: 150/150 pass
+  LEDGER adversarial structured: 50/50, random: 400/400 pass --
+    at k<=8 the closure lattice covers the value range:
+    the ledger check is a NECESSARY condition only (specificity
+    needs k >> C_V, beyond the string cap); load-bearing
+    verification is the exact [forms] battery + the proof.
+  BA adversarial structured: 48/50, random: 400/400 simple
+    (want ~0: THIS check has teeth at k<=8)
+=== [ba3] boundary alignment on D(k;3) ===
+  battery: all first/last runs simple
+  random: 1049/1049 boundary pairs simple
+=== [atoms] atoms are NOT the ledger (B=3, k=5) ===
+  dropab  run: value=359 support-atoms=1
+  Eprod   run: value=1 support-atoms=1
+  Eprod   run: value=365 support-atoms=1
+  Eprod   run: value=1457 support-atoms=1
+  Eprod   run: value=4733 support-atoms=1
+  Eprod   run: value=14561 support-atoms=1
+  Eprod   run: value=44045 support-atoms=1
+  decb    run: value=2 support-atoms=1
+  decb    run: value=3 support-atoms=1
+  decb    run: value=9 support-atoms=1
+  decb    run: value=27 support-atoms=1
+  decb    run: value=81 support-atoms=1
+  decb    run: value=247 support-atoms=2
+  decb    run: value=3 support-atoms=1
+  decb    run: value=9 support-atoms=1
+  hand: dropab support-atoms=1 (one interval, collapses) and
+  value S-k = 1 site term + k-affine: consistent; Eprod run j
+  has support-atoms=1 but value 1+floor(3^j/2)*S: the site-j
+  reference rides the PINNED COUNT, not the support -- the
+  ledger lives at the value/measure level, not the atom level.
+=== [msb3] two-stratum budget identities on D(k;3) ===
+  per-node identity: 559/559 hold; tree total: 353/353
+  E_poll k=3: Phi'=3 MJ=5187 (identity: 3 <= 0+0+4+5187)
+  E_poll k=4: Phi'=4 MJ=145140 (identity: 4 <= 0+0+4+145140)
+  E_poll k=5: Phi'=5 MJ=4007883 (identity: 5 <= 0+0+4+4007883)
+== total: 293 checks, 0 failures ==
+elapsed 0.2s

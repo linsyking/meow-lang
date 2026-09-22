@@ -1,0 +1,6 @@
+# Coordinator B7 fresh-encoding battery (Lane B round 7 / INV4).
+# /usr/bin/python3 -W ignore ../rev-split/coord_b7_check.py   (cwd=rev/; ~11 s)
+# Run 2: my own two script bugs fixed (S_ shadowing, one [S_] leftover);
+# run 1's failures were both mine, no claim of theirs moved.
+
+FAILS: 0

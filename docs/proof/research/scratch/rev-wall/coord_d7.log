@@ -1,0 +1,17 @@
+# Coordinator D7 fresh-encoding battery (Lane D round 7 / S4.3-general).
+# /usr/bin/python3 -W ignore coord_d7_check.py   (cwd=rev-wall/; ~9 s)
+# Run 3: my E1 construction fixed (theirs isolates the prefix via the
+# a^{3^{t+1}} deletion; mine now matches), my random sampler replaced
+# with constructive enumeration, and my n=4 probe's missing fourth
+# piece bug fixed (the 92177 'violations' were mine -- an incomplete
+# piece list). Run 1-2 failures all diagnosed as my own bugs by hand.
+
+1. my constructive catalog (a,b<=8, u,v<=7, |t|<3^u): 2269 solutions n<=3, violations of m*-1: 0; n=4 probe (smaller box): 210075 sols, m*-1 violations 0, m*-2 violations 0 (G2 data)
+2. 7.2 fresh (c<=200, u,v<=9, U,V<=10): 341 solutions, 219 shifts, all classified
+3. 7.3: i+j <= 4*3^u < 3^{v+1}/(v-u+1) for all u<v (|R|<0): OK
+4. witnesses (tripler, full merge, H2, E1, E3, F, G, pair-merge): OK
+5a. H3B FLAG: witness (1,27) at k=7 fires {2,4,5,6} -- NOT "the junctions with 3^{s+1}>=27"={2,3,4,5,6}: junction 3 is blocked (remnant 0 < i) and 5,6 CHAIN after 4. The report sentence "fires exactly at the junctions sigma with 3^{sigma+1} >= j" is FALSE in general (its own hand note blocks u+1); the k=5 witness is real.
+5b. H3B FLAG: interior (i=1, j=20, u=2: 18<20<=27, the stated window) fires {2,3,4}: runs 2..5 chain into ONE run -- no width-1 atom I(2,3) bounded by surviving separators. The atom needs 3^{u+1}-j < i (block junction u+1): the CORRECT window is max(3^u, 3^{u+1}-i) < j <= 3^{u+1}.
+5c. corrected window (j=3^{u+1}): the width-1 atom I(u,u+1) at depth 1 confirmed u=1..3 (the chain to the right merges the tail, the atom itself is bounded by the blocked junction u+1)
+6. [a^5/tripler-text]tripler-text = a^5: the whole-text match collapses to R -- embedded cheapness does not compose
+FAILS: 0

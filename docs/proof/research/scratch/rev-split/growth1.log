@@ -1,0 +1,9 @@
+[growth] W2 ensemble: 8000 exprs, slices S=9,15,21,27 (a- and b-counts)
+  computed 6436, skipped 1564, flags 0, max a-support 25, max b-support 24
+[growth] F ensemble: 8000 exprs, slices S=12,18,24,30
+  computed 6429, skipped 1571, flags 0, max a-support 6, max b-support 6
+[growth-ctl]
+  merge         W2 max a/b supports: 1/1
+  half          W2 max a/b supports: 2/1
+  dbl           W2 max a/b supports: 1/1
+  LA-quadratic  W2 max a/b supports: 1/1

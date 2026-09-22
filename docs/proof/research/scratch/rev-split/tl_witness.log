@@ -1,0 +1,5 @@
+INVOCATION: ./tl_witness   [tl_witness: replication degree]
+  decb2 k=3 distinct a-run values [value xcount]:
+   [4 x1] [3 x27] [9 x27] [31 x9] [37 x9] [59 x3] [65 x3] [87 x1] [93 x1] [108 x1] 
+  profile head: 4 1 3 1 9 1 31 1 3 1 9 1 37 1 3 1 9 1 59 1 3 ... (163 entries)
+== total: 29 checks, 0 failures ==

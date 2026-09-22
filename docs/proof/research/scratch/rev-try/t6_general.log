@@ -1,0 +1,25 @@
+k=1 same-letter [b]: grid 9^2 (boundaries incl.): VERIFIED
+k=1 same-letter [b]: random 200 to 120: VERIFIED
+k=1 same-letter [b]: intermediates mrg/L_m/D_m, 4^2 grid: VERIFIED
+k=2 same-letter [b,b]: grid 8^3 (boundaries incl.): VERIFIED
+k=3 same-letter [b,b,b]: grid 5^4 (boundaries incl.): VERIFIED
+k=3 same-letter [b,b,b]: random 400 to 80: VERIFIED
+k=3 same-letter [b,b,b]: intermediates mrg/L_m/D_m, 4^4 grid: VERIFIED
+k=3 prov never DB + injective (200 random): VERIFIED
+k=3 laundered L_a.L_b.E: rev with prov == (): VERIFIED
+k=4 same-letter [b,b,b,b]: grid 4^5 (boundaries incl.): VERIFIED
+k=4 same-letter [b,b,b,b]: random 300 to 50: VERIFIED
+mixed [b,b,c]: grid 5^4 (boundaries incl.): VERIFIED
+mixed [b,b,c]: random 400 to 80: VERIFIED
+mixed [b,b,c]: intermediates mrg/L_m/D_m, 4^4 grid: VERIFIED
+mixed [b,c,b]: grid 5^4 (boundaries incl.): VERIFIED
+mixed [b,c,b]: random 300 to 80: VERIFIED
+mixed [c,b] (E_mix cross-check): grid 7^3 (boundaries incl.): VERIFIED
+mixed [c,b] (E_mix cross-check): random 300 to 100: VERIFIED
+size k=2 (E_rev): 75 nodes, S-depth 4, AST depth 8 (edges)
+size k=3: 160 nodes, S-depth 5, AST depth 12 (edges)
+size k=4: 279 nodes, S-depth 6, AST depth 16 (edges)
+GENERAL ENGINE: ALL VERIFIED
+multi-letter k=2 [bc,cb]: grid 7^3 (boundaries incl.): VERIFIED
+multi-letter k=2 [bc,cb]: random 300 to 100: VERIFIED
+multi-letter intermediates mrg/L/D, 5^3 grid: VERIFIED

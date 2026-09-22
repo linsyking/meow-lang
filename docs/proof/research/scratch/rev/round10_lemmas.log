@@ -1,0 +1,7 @@
+inputs: 70; FDI depth-2 outputs checked: 59300
+sandwich firings (per-run instances): 22938
+mirror-sandwich firings: 21498
+(per-copy convention firings: sandwich 22957, mirror 21514)
+copy-pick instances seen: 59374; transport pairs flagged: 0
+violations: 0
+Pick/Slice/Sandwich/Mirror/Transport: VERIFIED on this domain

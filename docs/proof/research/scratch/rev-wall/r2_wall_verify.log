@@ -1,0 +1,9 @@
+1  dissection replay (Lane D sweep, seed 4242):
+   k=2 SUM-MINUS-MAX hits replayed: 1
+   values at k=1..6: ['aaaa', 'aaaa', 'aaaa', 'aaaa', 'aaaa', 'aaaa']
+1  dissection (hits are constant, not extraction): VERIFIED
+2  B1 [R/X](X.a) on a.b^k (k=1..60) + fails at k=0: VERIFIED
+3  B2 [ba/ab]X on (ab)^k (k=1..60), off-family not rev: VERIFIED
+4  SNF vs campaign evaluator: 765/765 agree -> VERIFIED
+
+COORDINATOR BATTERY (rev-wall round 2): ALL VERIFIED

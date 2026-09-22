@@ -1,0 +1,45 @@
+round11_hunt: 232 inputs, 23 F/Y forms, 8 inner pats, 23 final pats (residual regime)
+  DB HIT: w=aa n=2 F=pre:b|mid:a|suf:b|1 Y=pre:ab|mid:|suf:ba|0 xp=b P=aabaa Pform=|b||1
+  DB HIT: w=aa n=2 F=pre:|mid:bb|suf:|1 Y=pre:ba|mid:|suf:ab|0 xp=b P=aabaa Pform=|b||1
+  DB HIT: w=ab n=2 F=pre:b|mid:b|suf:b|1 Y=pre:b|mid:|suf:a|0 xp=bb P=baba Pform=b||a|0
+  DB HIT: w=bb n=2 F=pre:a|mid:b|suf:a|1 Y=pre:ba|mid:|suf:ab|0 xp=a P=bbabb Pform=|a||1
+sims: 22281480; FDI outputs: 345448 (max length 3); DB hits: 4
+VERDICT: depth-2 chain2 residual-regime DB hits: 4 (Theorem 3 bounds n by a constant of E; n=2 is inside every nontrivial bound; nothing at n>=3 on this domain)
+  MIXED DB HIT: w=aa n=2 f=pre:|mid:|suf:|0 Y=pre:a|mid:|suf:|0 xp=a g1=ab g2=b.w P=abaa Pform=ab|||0
+  MIXED DB HIT: w=aa n=2 f=pre:|mid:|suf:|0 Y=pre:a|mid:|suf:a|0 xp=a g1=w.b g2=b.w P=aabaa Pform=|b||1
+  MIXED DB HIT: w=aa n=2 f=pre:|mid:|suf:|0 Y=pre:a|mid:b|suf:a|1 xp=aa g1=w.b g2=b.w P=aabaa Pform=|b||1
+  MIXED DB HIT: w=aa n=2 f=pre:a|mid:|suf:|0 Y=pre:a|mid:b|suf:a|1 xp=aaa g1=w.b g2=b.w P=aabaa Pform=|b||1
+  MIXED DB HIT: w=aa n=2 f=pre:a|mid:|suf:|0 Y=pre:|mid:b|suf:|1 xp=a g1=a g2=a P=aaabaaa Pform=a|b|a|1
+  MIXED DB HIT: w=aa n=2 f=pre:a|mid:|suf:|0 Y=pre:|mid:b|suf:|1 xp=a g1=a g2=ab P=aaabaaa Pform=a|b|a|1
+  MIXED DB HIT: w=aa n=2 f=pre:|mid:|suf:a|0 Y=pre:a|mid:b|suf:a|1 xp=aaa g1=w.b g2=b.w P=aabaa Pform=|b||1
+  MIXED DB HIT: w=aa n=2 f=pre:|mid:|suf:a|0 Y=pre:|mid:b|suf:|1 xp=a g1=a g2=a P=aaabaaa Pform=a|b|a|1
+  MIXED DB HIT: w=aa n=2 f=pre:|mid:|suf:a|0 Y=pre:|mid:b|suf:|1 xp=a g1=a g2=ab P=aaabaaa Pform=a|b|a|1
+  MIXED DB HIT: w=aa n=2 f=pre:b|mid:|suf:|0 Y=pre:a|mid:|suf:|0 xp=a g1=a g2=b.w P=abaa Pform=ab|||0
+  MIXED DB HIT: w=aa n=2 f=pre:b|mid:|suf:|0 Y=pre:a|mid:|suf:a|0 xp=a g1=w g2=b.w P=aabaa Pform=|b||1
+  MIXED DB HIT: w=aa n=2 f=pre:b|mid:|suf:|0 Y=pre:a|mid:|suf:a|0 xp=a g1=a.w g2=b.w P=aabaa Pform=|b||1
+  MIXED DB HIT: w=aa n=2 f=pre:b|mid:|suf:|0 Y=pre:a|mid:|suf:a|0 xp=a g1=b.w g2=b.w P=aabaa Pform=|b||1
+  MIXED DB HIT: w=aa n=2 f=pre:b|mid:|suf:|0 Y=pre:a|mid:b|suf:a|1 xp=aa g1=w g2=b.w P=aabaa Pform=|b||1
+  MIXED DB HIT: w=aa n=2 f=pre:b|mid:|suf:|0 Y=pre:a|mid:b|suf:a|1 xp=aa g1=a.w g2=b.w P=aabaa Pform=|b||1
+  MIXED DB HIT: w=aa n=2 f=pre:b|mid:|suf:|0 Y=pre:a|mid:b|suf:a|1 xp=aa g1=b.w g2=b.w P=aabaa Pform=|b||1
+  MIXED DB HIT: w=aa n=2 f=pre:|mid:|suf:b|0 Y=pre:a|mid:|suf:|0 xp=a g1=ab g2=w P=abaa Pform=ab|||0
+  MIXED DB HIT: w=aa n=2 f=pre:|mid:|suf:b|0 Y=pre:a|mid:|suf:|0 xp=a g1=ab g2=w.a P=abaa Pform=ab|||0
+  MIXED DB HIT: w=aa n=2 f=pre:|mid:|suf:b|0 Y=pre:a|mid:|suf:|0 xp=a g1=ab g2=w.b P=abaa Pform=ab|||0
+  MIXED DB HIT: w=aa n=2 f=pre:|mid:|suf:b|0 Y=pre:a|mid:|suf:a|0 xp=a g1=w.b g2=w P=aabaa Pform=|b||1
+  MIXED DB HIT: w=aa n=2 f=pre:|mid:|suf:b|0 Y=pre:a|mid:|suf:a|0 xp=a g1=w.b g2=w.a P=aabaa Pform=|b||1
+  MIXED DB HIT: w=aa n=2 f=pre:|mid:|suf:b|0 Y=pre:a|mid:|suf:a|0 xp=a g1=w.b g2=w.b P=aabaa Pform=|b||1
+  MIXED DB HIT: w=aa n=2 f=pre:|mid:|suf:b|0 Y=pre:a|mid:b|suf:a|1 xp=aa g1=w.b g2=w P=aabaa Pform=|b||1
+  MIXED DB HIT: w=aa n=2 f=pre:|mid:|suf:b|0 Y=pre:a|mid:b|suf:a|1 xp=aa g1=w.b g2=w.a P=aabaa Pform=|b||1
+  MIXED DB HIT: w=aa n=2 f=pre:|mid:|suf:b|0 Y=pre:a|mid:b|suf:a|1 xp=aa g1=w.b g2=w.b P=aabaa Pform=|b||1
+  MIXED DB HIT: w=aa n=2 f=pre:|mid:|suf:b|0 Y=pre:|mid:b|suf:|1 xp=a g1=ab g2=a P=abaaba Pform=ab||ba|0
+  MIXED DB HIT: w=aa n=2 f=pre:|mid:|suf:b|0 Y=pre:|mid:b|suf:|1 xp=a g1=ab g2=ab P=abaaba Pform=ab||ba|0
+  MIXED DB HIT: w=aa n=2 f=pre:a|mid:|suf:a|0 Y=pre:a|mid:|suf:|0 xp=aa g1=ab g2=b.w P=abaa Pform=ab|||0
+  MIXED DB HIT: w=aa n=2 f=pre:a|mid:|suf:a|0 Y=pre:a|mid:|suf:a|0 xp=aa g1=w.b g2=b.w P=aabaa Pform=|b||1
+  MIXED DB HIT: w=aa n=2 f=pre:a|mid:|suf:a|0 Y=pre:a|mid:b|suf:a|1 xp=aaaa g1=w.b g2=b.w P=aabaa Pform=|b||1
+  MIXED DB HIT: w=aa n=2 f=pre:|mid:|suf:|1 Y=pre:a|mid:|suf:|0 xp=aa g1=ab g2=b.w P=abaa Pform=ab|||0
+  MIXED DB HIT: w=aa n=2 f=pre:|mid:|suf:|1 Y=pre:a|mid:|suf:a|0 xp=aa g1=w.b g2=b.w P=aabaa Pform=|b||1
+  MIXED DB HIT: w=aa n=2 f=pre:|mid:|suf:|1 Y=pre:a|mid:b|suf:a|1 xp=aaaa g1=w.b g2=b.w P=aabaa Pform=|b||1
+  MIXED DB HIT: w=aa n=2 f=pre:|mid:a|suf:|1 Y=pre:a|mid:|suf:|0 xp=aa g1=w.b g2=b.w P=aabaa Pform=|b||1
+  MIXED DB HIT: w=aa n=2 f=pre:|mid:a|suf:|1 Y=pre:a|mid:|suf:|0 xp=aaa g1=ab g2=b.w P=abaa Pform=ab|||0
+  MIXED DB HIT: w=aa n=2 f=pre:|mid:a|suf:|1 Y=pre:a|mid:|suf:a|0 xp=aaa g1=ab g2=b.w P=abaa Pform=ab|||0
+PHASE 2 (mixed shapes): 39628160 sims; FDI outputs: 903629 (max length 3; len<=3: 903629); DB hits: 36
+VERDICT (mixed shapes): 36 DB hits on [eps/X](g1.[Y/xp].f.g2), g1/g2 run-bearing or constant flanks, n<=14 -- consistent with the repaired Theorem 3 (junction gaps bounded by 2c_Y + c_F + beta' - 1 per gap)

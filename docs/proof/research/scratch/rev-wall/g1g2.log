@@ -1,0 +1,24 @@
+INVOCATION: /usr/bin/python3 -W ignore /home/cc/projects/meow-lang/docs/proof/research/scratch/rev-wall/g1g2_check.py  (cwd: /home/cc/projects/meow-lang/docs/proof/research/scratch/rev-wall)
+== 0: THE H3b ERRATUM (the pair-merge fired set, by the round-6 recursion theorem) ==
+  0 the pair-merge fired set IS the recursion theorem's; the width-1 atom I(u,u+1) window max(3^u, 3^{u+1}-i) < j <= 3^{u+1} (j > 3^u blocks sigma <= u-1 by the right flank; j > 3^{u+1}-i blocks u+1 by the shrunken remnant; the upper junctions CHAIN to the top): evaluator-verified u=1..3; the negative witnesses ((1,27) k=7 fires {2,4,5,6}; (1,20) fires {2,3,4}, runs 2..5 chain into ONE run) confirmed; the window sweep 351 cases: EXACT MATCH
+  [0.0s] 0 done
+== A: G1 — THE STRATA-PIECE CATALOG (the digit-defect machinery) ==
+  A strata catalog (pieces: q*3^e + I(a,b) + G(r,T,m); 3 pieces; |bite| <= 18 collected affine+junk; targets I(u,v), 3<=u<v<=6): 8937 solutions (capped at 50000); the top-defect inequality |mu_d*|3^d* <= Sum_{d<d*}|mu_d|3^d: HOLDS (identity); the deficit bound m*(k) - max Omega(p) <= 1 + floor(log_3 M) (M = Sum|mu_d|, the RAW digit mass; Omega(p) = min(top scale, k - bottom scale)): 0 violations; max deficit 1 (solutions with deficit >= 2: 0)
+  A2 the affine pieces (Ak+B, A<=2): top ternary scale <= 3 over k in [4,16] — the material sits at the scales log_3 k + O(1) (the EPT range: inert for the targets with u >= log_3(2C_V k)+1; the final law's -O(log k) slack absorbs it)
+  (the anchored exponents play the interval endpoints' role; the deficit is the CARRY-CHAIN length into the worst scale, bounded by 1 + log_3 of the raw mass — the count/carry channels of round 7 at the strata altitude; the F3 geometric sums are exactly Lane B's periodic-fired-set measure form, and they land in the count channel's classification 7.2)
+  [0.3s] A done
+== B: G2 — THE PIECE-COUNT GENERALIZATION (the mass form) ==
+  B(i) exhaustive interval catalog (a,b<=3, u<v<=3, |t|<3^u, total multiplicity <= 7): 52959 solutions; m*-1 VIOLATIONS by piece count n: [(7, 1)]; the MASS FORM max Omega >= m* - 1 - floor(log_3 M): 0 violations
+     first m*-1 violation: [(1, (0, 1)), (1, (0, 1)), (1, (0, 1)), (1, (0, 1)), (1, (0, 1)), (1, (0, 1)), (1, (0, 1))] + 8 = I(2,3), deficit 2, raw mass 20
+  B(ii) the directed exhibits (hand-derived first):
+     7*I(0,1)+8 = I(2,3)    n= 7 deficit 2  (floor(log_3 M)=2, M=20)
+     8*I(0,1)+4 = I(2,3)    n= 8 deficit 2  (floor(log_3 M)=2, M=20)
+     9*I(1,3) = I(3,5)      n= 9 deficit 2  (floor(log_3 M)=3, M=28)
+     3*I(0,1) = I(1,2)      n= 3 deficit 1  (floor(log_3 M)=1, M=6)
+  B(iii) exhaustive n<=4 on the coordinator's box (a,b<=5, u<v<=5, t in [-2,2]): 7871 solutions, m*-1 violations: 0 (the coordinator's 210075 = my multisets x the ordering factor 4!=24 and the +-canonicalization: the m*-1 form holds while the concentrated raw mass stays < 9 = 3^2)
+  B(iv) random signed multisets n in [2,12] (a,b<=2, u<=2<v<=4, |t|<3^u): 4299 solutions, MASS-FORM violations: 0, max(deficit - floor(log_3 M)): 0 (the tight margin: the deficit never exceeds floor(log_3 M) on any observed solution)
+  [2.7s] B done
+== C: G3 — THE CONSTANT (the induction's closing arithmetic) ==
+  C the closing arithmetic 1 + (m*-1)/2 >= m*/2 holds for all m* >= 2 (verified 2..39): the induction closes EXACTLY at C=2; the witnessed routes (round-7 D/F/G, the stopping flank, the isolation walk) are consistent with C in [2,4]; the additive term 1 + floor(log_3 M) is the carry-chain length (parts A/B)
+ROUND 8 BATTERY COMPLETE — FAILS: 0
+  [2.7s] done

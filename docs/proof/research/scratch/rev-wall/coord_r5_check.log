@@ -1,0 +1,13 @@
+1. two-flank single-b fired sets (the lemma-(i) probe)
+   fired=[1, 3] is_suffix=False (contains suffix: False)
+   fired=[0, 2, 3] is_suffix=False (contains suffix: False)
+   fired=[1, 3, 4] is_suffix=False (contains suffix: False)
+   (sweep cross-check done)
+   one-flank suffix property: 4 k-values x 41 x 2, 0 non-suffix
+   skip-after-bite structure: 3 k-values x 10 x 28, 0 violations
+   no clean proper-prefix deletion: 0 over all probes
+2. E1/E2 at k=2
+3. bonus construction
+4. mod-3 lemma
+5. L_m anchored runs (engine, k=4)
+FAILS: 0

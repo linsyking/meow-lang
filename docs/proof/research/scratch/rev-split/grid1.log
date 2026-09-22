@@ -1,0 +1,38 @@
+rev-split ROUND 1 -- grid identities (falsify/discover only)
+========================================================================
+
+[A1] [e/C(shrinkL,shrinkR)]C(w,w) = "aa"
+  8x8 grid: VERIFIED
+
+[A2] [e/C(shrinkL,swap)]C(w,swap) = "a"
+  8x8 grid: VERIFIED
+
+[A3] systematic two-b deletion engine (7^4 quadruples, 4x4 grid)
+  firings checked: 2184, no-fire cases: 36232, skipped (shape): 0
+  formula violations: 0 => VERIFIED
+
+[A4] division-remainder engine [e/merge]dbl^2
+  OPEN cone i>3j (92 pts): VERIFIED
+  OPEN cone j<i<3j (200 pts): VERIFIED
+  cut lines i=j, i=3j (33 pts) -> "b": VERIFIED
+
+[A5] complement engine [R/w]bigsym = (j+r0, i+r1)
+  441 pts (r0,r1<=2, 7x7): VERIFIED
+
+[A6] DIAGONAL exception: [a/aa]merge = a^i on j=i and j=i-1
+  line j=i: VERIFIED | line j=i-1: VERIFIED
+
+[A7] W2 lock-baked mechanism (baked middle, NOT constructible)
+  5x5x5 grid: VERIFIED
+
+[A8] [b/swap]bigsym = w ; [e/swap]bigsym = merge (b-free merges)
+  8x8 grid: VERIFIED
+
+[A9] [e/C(shrinkR,shrinkL)]C(w,w) = C(w,w) (never fires)
+  7x7 grid: VERIFIED
+
+[A10] [e/C(w,swap)]C(w,swap) = eps (self-collapse)
+  7x7 grid: VERIFIED
+
+ROUND 1 grid identities: ALL VERIFIED
+3.4s

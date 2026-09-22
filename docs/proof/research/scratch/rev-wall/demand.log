@@ -1,0 +1,29 @@
+== A: D1 per-node remnant-order preservation (FU position flow) ==
+  [0.0s] start
+  A: 300 exprs, 1594 node-checks, 98 skipped (bail/mismatch), 0 violations
+  A: D1 remnant-channel order preservation: VERIFIED
+  [1.2s] A done
+== B: T6 engine on D(k;3): rev + provenance trichotomy census ==
+  k=2: rev VERIFIED (tagged-eval ok); runs=3  T1(F-pure clean)=2 T2(copy-routed clean)=0  T3(merged/multi)=1; b: routed=2 input=0
+       T1 labels: [2] (D1'': all F-pure single-label runs share ONE label -> VERIFIED)
+  k=3: rev VERIFIED (tagged-eval ok); runs=4  T1(F-pure clean)=3 T2(copy-routed clean)=0  T3(merged/multi)=1; b: routed=3 input=0
+       T1 labels: [3] (D1'': all F-pure single-label runs share ONE label -> VERIFIED)
+  k=4: rev VERIFIED (tagged-eval ok); runs=5  T1(F-pure clean)=4 T2(copy-routed clean)=0  T3(merged/multi)=1; b: routed=4 input=0
+       T1 labels: [4] (D1'': all F-pure single-label runs share ONE label -> VERIFIED)
+  k=5: rev VERIFIED (tagged-eval ok); runs=6  T1(F-pure clean)=5 T2(copy-routed clean)=0  T3(merged/multi)=1; b: routed=5 input=0
+       T1 labels: [5] (D1'': all F-pure single-label runs share ONE label -> VERIFIED)
+  [1.3s] B done
+== C: engine ledger k=4,5: per-S-node firings, pattern deep amounts, anchored offsets ==
+  k=4: 50 S-nodes, total firings 151 (multi-firing nodes 34), L2.2 violations 0; distinct D_m head sums (anchored offsets realized) = 4 of 4 junctions
+       L_m del-chain lengths (end-walks to junction m): [9, 9, 9, 9] (total 36 = Theta(k^2); the Omega(k) floor is the k distinct offsets)
+  k=5: 77 S-nodes, total firings 284 (multi-firing nodes 52), L2.2 violations 0; distinct D_m head sums (anchored offsets realized) = 5 of 5 junctions
+       L_m del-chain lengths (end-walks to junction m): [12, 12, 12, 12, 12] (total 60 = Theta(k^2); the Omega(k) floor is the k distinct offsets)
+  [1.7s] C done
+== D: plant census at k=4: output b positions vs top-anchored sums ==
+  output b a-masses: [81, 108, 117, 120]
+  top-anchored sums: [81, 108, 117, 120]
+  match: VERIFIED
+  b routing depths: [1, 1, 1, 1]
+  (every output b is a ROUTED plant: carried by a D_m box splice; the input b positions are bottom-anchored, the output ones top-anchored)
+  [1.7s] D done
+ROUND 4 BATTERY COMPLETE

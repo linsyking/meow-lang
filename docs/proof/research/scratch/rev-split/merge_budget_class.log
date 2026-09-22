@@ -1,0 +1,12 @@
+INVOCATION: ./merge_budget class 12345 20000   [mode=class seed=12345 trials=20000]
+=== [class] repaired-schema battery on w^(k) ===
+  exact battery done (all runs must classify)
+  random compositions: 17792/17792 fully classified
+== total: 63 checks, 0 failures ==
+elapsed 0.2s
+INVOCATION: ./merge_budget class 99991 20000   [mode=class seed=99991 trials=20000]
+=== [class] repaired-schema battery on w^(k) ===
+  exact battery done (all runs must classify)
+  random compositions: 17753/17753 fully classified
+== total: 63 checks, 0 failures ==
+elapsed 0.2s

@@ -1,0 +1,11 @@
+PART A (match anchoring + one-b calculus): A1 13246, A2 13291, A3 3653, A4 4424, A5 13246 cases
+  verdict: VERIFIED
+B1 primitive catalogue on the 8x8 grid: VERIFIED
+B2 flank-swap mechanism ([e/(a^M b)] on a (j, M, i) text, M > j): VERIFIED
+B3 lock-deletion mechanism ([e/(a^i b a^y)]X = a^{j-y}): VERIFIED
+C1/C2 E_swap computes rev on the full one-b language {a^* b a^*}: VERIFIED
+C3 prov(E_swap,w) = ascending labels minus the b: VERIFIED
+C4 L_a.L_b.E_swap: rev with prov = (): VERIFIED
+C5 E_swap . E_swap = id (involution): VERIFIED
+C6 two-b lift dead ([b/w2]big2 never fires; [e/w2](w2.b) = b): VERIFIED
+ROUND 13 spot-checks: ALL VERIFIED

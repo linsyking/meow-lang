@@ -1,0 +1,8 @@
+m=1: family j=(m-1)(i+k): grid 12x12 + random 300 + intermediates: VERIFIED
+m=2: family j=(m-1)(i+k): grid 12x12 + random 300 + intermediates: VERIFIED
+m=3: family j=(m-1)(i+k): grid 12x12 + random 300 + intermediates: VERIFIED
+m=4: family j=(m-1)(i+k): grid 12x12 + random 300 + intermediates: VERIFIED
+E_2 near-miss ledger (d=0 rev / d=1 flanks+1 / d>=2 no rev): VERIFIED
+E_2 off-family (297 non-family inputs): rev outputs: 0 (expected 0) VERIFIED
+m=2,3 prov never DB + injective (200 random each): VERIFIED
+T3 m-FAMILY: ALL VERIFIED

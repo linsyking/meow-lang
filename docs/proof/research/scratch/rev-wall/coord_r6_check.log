@@ -1,0 +1,6 @@
+1. recursion theorem vs greedy: 600 cases, 0 mismatches
+2. COR-A/B/B1 witnesses
+   (COR-A/B sweeps: k=3..5, i,j<=12)
+3. MASS on D(6;3), p=1..40
+4. fixed points
+FAILS: 0

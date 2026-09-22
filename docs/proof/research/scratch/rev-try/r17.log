@@ -1,0 +1,29 @@
+A single-b FP tweak set {0,-p0+m1,-p1+m2,-p0-p1+m1+m2}, 8 inputs x 256 constant passes: VERIFIED
+A pure-a chain-sum gaps, 8 inputs x 48 passes: VERIFIED
+B exact tuning: fully-consumed values subset of {p0,p1,p0+p1}, full sweeps k=4..6, targeted k=7 (cap over all sweeps: 2): VERIFIED
+C pinned flanks (mrg, halver, doubler, shave) on X and X.mrg.a, k=6..8: zero firings at deep separators (both adjacent runs <= 2^{k-2}); 12/12 firings at separators with an adjacent run >= 2^{k-1}: VERIFIED
+D counting corollary (deep sizes 2^0..2^{k-2}):
+  k=4: max deep sizes consumed by one flank pattern = 2; (2^j,2^j) covers {2^j,2^{j+1}} for j=0..k-3: yes; >= 2 patterns needed for 3 deep sizes
+  k=5: max deep sizes consumed by one flank pattern = 2; (2^j,2^j) covers {2^j,2^{j+1}} for j=0..k-3: yes; >= 2 patterns needed for 4 deep sizes
+  k=6: max deep sizes consumed by one flank pattern = 2; (2^j,2^j) covers {2^j,2^{j+1}} for j=0..k-3: yes; >= 3 patterns needed for 5 deep sizes
+  k=7: max deep sizes consumed by one flank pattern = 2; (2^j,2^j) covers {2^j,2^{j+1}} for j=0..k-3: yes; >= 3 patterns needed for 6 deep sizes
+  k=8: max deep sizes consumed by one flank pattern = 2; (2^j,2^j) covers {2^j,2^{j+1}} for j=0..k-3: yes; >= 4 patterns needed for 7 deep sizes
+D Lemma SD re-illustration: 90 multi-interior patterns on distinct-run scrutinees, max firings = 1 (<= 1: VERIFIED); single-b control 'ab' fires up to 7 times (the k-adaptive class)
+ROUND 17 MACHINE VERDICT: illustration-grade, see dichotomy.tex
+
+real	0m2.960s
+user	0m2.925s
+sys	0m0.035s
+--- invocation: /usr/bin/python3 -W ignore verify_r17_tuning.py (in
+rev-try/), 2026-09-22, ~3 s.  Instrument: the greedy (leftmost,
+non-overlapping, never rescan) re-implemented independently and
+anchored against the campaign evaluator: EVERY Part A case (per-case
+reconstruction == evaluator output) and every 50th sweep call
+(sampled anchor; the sweeps are pure string mechanics).  Part C
+summary line corrected after the first run (stale-k artifact made it
+read 11/12; the per-case deep-separator check was correct throughout
+and the corrected line reads 12/12 -- re-run confirms).  Cap observed
+in B is 2 on the powers ({p0,p1,p0+p1} has at most 2 members that are
+distinct powers; the general cap is 3).  ILLUSTRATION GRADE: Lane D
+owns the tuning lemma proof; Lane B owns the pinned schema sharp form.
+Nothing committed to git.

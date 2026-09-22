@@ -1,0 +1,21 @@
+R1 pad/strip arithmetic (h=1,2,3; grid+random): VERIFIED
+R1b V_h round trip through E_2 (h=1,3; 200 random): VERIFIED
+R3 [R/X]C(X,X) = R.R (R in {b,ab,aab,ba}; 200 random): VERIFIED
+R4 [b/X]C(a^t,X,a^u) = a^t b a^u (150 random): VERIFIED
+rev-slack calculus (d1+h+d2, d1+d2=h => rev, 7 shapes x 5 params x 60): REFUTED
+closure of the (0,0,c) stratum under one-b constant passes: VERIFIED
+E_mix: size 58 S-count 4 total depth 7
+E_{1,1}: size 40, S-count 3, total depth 6
+E_{2,1}: size 40, S-count 3, total depth 6
+E_{1,2}: size 40, S-count 3, total depth 6
+E_{3,2}: size 40, S-count 3, total depth 6
+rev-slack calculus: d1+d2=h => rev (2400 cases w/ constant bounds): VERIFIED
+E_mix: S-nodes 15, size 58, S-depth 4, AST depth 7
+E_{1,1}: S-nodes 9, size 40, S-depth 3, AST depth 6
+A7-convergence: [eps/(b.M.b)]w2 = a^{i+k} on F_{c,d} (4 families x 200): VERIFIED
+R5 rev-slack calculus FINAL: pass [a^{d1+r0} b a^{r1+h-d1} / a^{r0} b a^{r1}]
+   on a^{k+d1} b a^{j+h} b a^{i+d2}, d1+d2=h, bounds k>=r0, j>=r1+r0, i>=r1:
+   2400 cases: VERIFIED
+   NOTE: an earlier unbounded run printed REFUTED -- that run drew
+   i,j,k below the constant bounds (the analogue of c(M) in the
+   fixed-middle theorem); with bounds the calculus holds. Superseded.

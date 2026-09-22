@@ -1,0 +1,610 @@
+% ----------------------------------------------------------------------
+% dichotomy.tex -- standalone fragment (the construction lane, rounds
+% 17-18, revised per the round-18 charter: base-3 staging family, the
+% L1'' closure form, L2's proved supply side).
+% Contents: the mirror-plant reformulation; the base-2 degeneracy
+% proposition (the telescoping boundary) and the migration to base 3;
+% the merged Final-Pass Lemma (two independent proofs); the sweep
+% normal form; the restated counting-lane lemmas (site distinctness,
+% the separation budget, decomposition, the payment theorem); the
+% descent with its two escape kills (explicitly marked analysis); the
+% flank cap (proved); the proved supply lemmas (slope-pinning,
+% per-node supply); the two named assumptions (L1'' closure form with
+% term ledger -- the counting lane; L2 demand side -- the selectivity
+% lane); the conditional no-go with its effective bound; and the
+% dichotomy statement.
+% Preamble-free: theorem-family environments only; every label is
+% prefixed dich:.  Status discipline: every statement below is proved,
+% machine-verified on the stated domain, an explicitly marked
+% assumption, or explicitly marked analysis.  References to the paper's
+% other results are by name, not \ref -- Lane A wires them.
+% Integration: lands at the dichotomy theorem of the frontier
+% subsection (the hook in the paper).  Machine backdrop: the batteries
+% cited are in research/scratch/rev-try/ (verify_r17_tuning.py,
+% verify_r18_migration.py and their logs) and the lanes' records cited
+% in research/scratch/rev/REPORT.md §18 and the round-4 records.
+% ----------------------------------------------------------------------
+
+\noindent Throughout, expressions are built from string constants, the
+input variable, concatenation, and the pass $[\,A/B\,]F$ -- replacement
+$A$, pattern $B$, scrutinee $F$, all children evaluated at the original
+input; the pass replaces, in one left-to-right scan of $F$'s value,
+every non-overlapping leftmost-first occurrence of $B$'s value by
+$A$'s value, never rescanning inserted text, and is undefined when
+$B$'s value is empty.  Write $V(w)$ for the value of $V$ on input $w$,
+and $\#\mathrm{S}(E)$, $\#\mathrm{C}(E)$ for the pass and
+concatenation counts of $E$.  For a value $u$ over
+$\{\mathtt a,\mathtt b\}$, the \emph{gaps} of $u$ are the lengths of
+its maximal $\mathtt a$-blocks in order, zero entries allowed (one
+entry per $\mathtt b$ plus one); $u$ is \emph{distinct-run} when its
+gaps are positive and pairwise distinct.  The \emph{staging family} is
+$D(k;3) = \mathtt a^{3^0}\mathtt b\,\mathtt a^{3^1}\mathtt b\cdots
+\mathtt b\,\mathtt a^{3^k}$, strongly super-increasing (each run
+exceeds the sum of all earlier ones), with $a$-total
+$S = (3^{k+1}-1)/2$ and $k \ge 1$; more generally
+$D(k;B) = \mathtt a^{B^0}\mathtt b\,\mathtt a^{B^1}\mathtt b\cdots
+\mathtt b\,\mathtt a^{B^k}$ with $S = (B^{k+1}-1)/(B-1)$.
+
+\paragraph{The mirror plant.}
+For $w = \mathtt a^{i_0}\mathtt b\,\mathtt a^{i_1}\mathtt b\cdots
+\mathtt b\,\mathtt a^{i_k}$,
+\begin{equation*}
+    \mathrm{rev}(w) \;=\; \mathtt a^{i_k}\mathtt b\,
+    \mathtt a^{i_{k-1}}\mathtt b\cdots \mathtt b\,\mathtt a^{i_0}:
+\end{equation*}
+reversal preserves the gap multiset and reverses the gap sequence.
+Equivalently, in the merge $\mathrm{mrg} = \mathtt a^{S}$ -- all of
+$w$'s a-material fused -- the $m$-th separator sits at depth
+$i_m + \cdots + i_k$, the a-material to its right, and
+$\mathrm{rev}(w)$ is obtained by planting each separator at the
+mirrored depth $i_0 + \cdots + i_{m-1}$.  Every reversal mechanism in
+the calculus is a way of buying these plants: the fixed-structure
+engine of this paper buys one per box, its hand-optimized $k = 2$
+instance buys two, and the degenerate families fall to single
+purchases -- one cluster of plants is one block move, a periodic
+mirror is one phase shift.  The fragment's business is the price at
+unbounded $k$.
+
+\begin{proposition}[the base-2 degeneracy; why the staging family is
+base 3]
+    \label{dich:prop:boundary}
+    At $B = 2$ the family $D(k;2)$ is the boundary of super-increase
+    ($2^j = \sum_{i<j} 2^i + 1$) and \emph{telescopes}: with
+    $\mathrm{mrg} = \mathtt a^{S}$,
+    \begin{align*}
+        E_{\mathrm{last}} \;&\triangleq\;
+        [\,\epsilon/\mathtt b\,][\,\mathtt a/\mathtt{aa}\,]X
+        \;=\; \mathtt a^{2^k}, \\
+        [\,\epsilon/\mathtt b\,][\,\mathtt{aa}/\mathtt a\,]X
+        \;&=\; \mathtt a^{2^{k+2}-2}, \\
+        E_{\mathrm{cbox}} \;&\triangleq\;
+        [\,\mathtt b/(E_{\mathrm{last}}\mathtt b)\,]
+        (\mathrm{mrg}\,\mathtt b\,\mathrm{mrg})
+        \;=\; \mathtt a^{2^k-1}\mathtt b\,\mathtt a^{S}, \\
+        E_{\mathrm{smm}} \;&\triangleq\;
+        [\,\epsilon/(\mathtt b\,\mathrm{mrg})\,]E_{\mathrm{cbox}}
+        \;=\; \mathtt a^{2^k-1}, \\
+        E_{\mathrm{h2}} \;&\triangleq\;
+        [\,\mathtt a/\mathtt{aa}\,]E_{\mathrm{smm}}
+        \;=\; \mathtt a^{2^{k-1}}.
+    \end{align*}
+    Here $E_{\mathrm{last}}$ is the last run -- $\mathtt b$-free, at
+    pass depth $2$ -- and $E_{\mathrm{smm}}$ the $\mathtt b$-free
+    sum-minus-max.  So at base 2 single-run extraction and sum-minus-max
+    are free at depth 2, both $r_k$ and $S - r_k$ are reachable in
+    $O(1)$ depth, and no extraction-impossibility argument is
+    available on that family.  The staging family therefore migrates
+    to base 3, where
+    the gap separation holds (verified $k = 5..14$, past the
+    documented small-$k$ coincidences).  Nothing is lost:
+    $D(k;3)$ is a subfamily of $\{\mathtt a,\mathtt b\}^*$, so a no-go
+    there is a no-go on the full language.  Uniform $\mathrm{rev}$ on
+    the base-2 family itself remains open (four structured attempts
+    fail at $k = 2, 3, 4$).  (Machine: the constructions verified by
+    the selectivity lane with fresh encodings by the coordinator,
+    $k = 0..11$; re-anchored in this round's battery, base 2, along
+    with the two witnesses of Proposition~\ref{dich:L1}.)
+\end{proposition}
+
+\begin{lemma}[sweep normal form]
+    \label{dich:lem:sweep}
+    Fix a pass $[\,A/B\,]F$ and an input $w$ on which it is defined,
+    with values $A = A(w)$, $B = B(w) \ne \epsilon$, $F = F(w)$.  The
+    scan fires $t \ge 0$ times, at the greedy leftmost-disjoint
+    occurrences of $B$ in $F$ in order, and
+    \begin{equation*}
+        \mathrm{out} = q_0\,A\,q_1\,A\cdots A\,q_t, \qquad
+        F = q_0\,B\,q_1\,B\cdots B\,q_t,
+    \end{equation*}
+    the same $A$ at every firing, the remnants $q_i$ in input order.
+    One pass is a \emph{uniform interleave}: site-specific output can
+    come only from distinct pass nodes or from remnants.
+\end{lemma}
+
+\begin{proof}
+    The semantics scans $F$ once, left to right, takes the leftmost
+    match first, and never rescans inserted text; disjointness and
+    leftmost-first make the occurrence set the greedy one, and each
+    firing replaces its window by the one value $A$.  (Machine:
+    cross-checked against the campaign evaluator, $990$/$990$ random
+    passes and $765$/$765$ by direct decomposition.)
+\end{proof}
+
+\begin{lemma}[Final-Pass Lemma; two independent proofs]
+    \label{dich:lem:FP}
+    Let $w$ have single-$\mathtt b$ separators, positive pairwise
+    distinct gaps and $k \ge 1$, and let $E = [\,A/B\,]F$ satisfy
+    $E(w) = \mathrm{rev}(w)$.  Write $p_0, p_1$ for the leading and
+    trailing $\mathtt a$-runs of $B(w)$ (zero if $B(w)$ begins or ends
+    with $\mathtt b$) and $a_1, a_2$ for those of $A(w)$.
+    \begin{enumerate}[(i)]
+        \item If the pass fires $t \ge 2$ times, $A(w)$ carries at
+        most one $\mathtt b$.
+        \item If $t \ge 2$, $A(w) = \mathtt a^{a_1}\mathtt b\,
+        \mathtt a^{a_2}$ and $B(w)$ has a single $\mathtt b$: the
+        output's separator count equals the scrutinee's, and each gap
+        $g$ of $F(w)$ becomes, at the same position,
+        \begin{equation*}
+            g + \sigma, \qquad
+            \sigma \in \{\,0,\; -p_0 + a_1,\; -p_1 + a_2,\;
+            -p_0 - p_1 + a_1 + a_2\,\},
+        \end{equation*}
+        according to which adjacent separators were windowed; the two
+        end gaps take at most the single adjacent shift
+        ($\sigma \in \{0, -p_0 + a_1\}$ at the left end, $\sigma \in
+        \{0, -p_1 + a_2\}$ at the right); gaps whose image is $0$
+        vanish, and $0$-gaps may resurface positive.
+        \item If $t \ge 2$ and $A(w) = \mathtt a^{m}$ is pure: the
+        output's gaps are \emph{chain sums} -- for each maximal chain
+        of consecutive windowed separators, the sum of the gaps the
+        chain spans, minus the bites taken at its edges and interior
+        flanks, plus $jm$ for the chain's $j$ separators; interior gaps
+        survive exactly when not fully consumed.
+        \item If $t \le 1$ the output is $F(w)$ ($t = 0$) or a single
+        splice $q_0\,A\,q_1$.
+    \end{enumerate}
+    In particular, whenever $E(w) = \mathrm{rev}(w)$, the reversed gap
+    sequence $(i_k, \ldots, i_0)$ is -- up to the pass-fixed shift set
+    of (ii), the chain sums of (iii), or the one splice of (iv) -- an
+    in-order extraction from the gap sequence of $F(w)$: the reversal
+    must already pre-exist in the scrutinee.
+\end{lemma}
+
+\begin{proof}
+    (i), construction side: suppose $t \ge 2$ and $A(w)$ has at least
+    two $\mathtt b$'s.  If some interior gap of $A(w)$ were zero,
+    $A(w)$ would contain $\mathtt{bb}$ and every copy would emit it,
+    while $\mathrm{rev}(w)$ -- like $w$ -- has single separators.  So
+    every interior gap is positive, and each of the $t \ge 2$ copies
+    emits each such gap as a complete a-run of the output, protected
+    by the copy's own separators: the output's gap values would
+    repeat, while $\mathrm{rev}(w)$'s are $w$'s distinct gaps, each
+    once.  Counting side (independent): the $t$ disjoint copies sit
+    verbatim in $\mathrm{rev}(w)$; a copy's consecutive separators are
+    consecutive separators of $\mathrm{rev}(w)$, so a copy with two
+    separators and a positive interior forces its interior gap profile
+    onto the same skeleton position of $\mathrm{rev}(w)$ as any other
+    such copy -- gap distinctness permits only one -- contradicting
+    disjointness.  (ii)--(iii): window accounting under the sweep
+    normal form.  A window whose pattern has a single $\mathtt b$
+    aligns it with a separator of $F(w)$; its leading $p_0$ letters
+    are the last $p_0$ letters of the gap before that separator and its
+    trailing $p_1$ the first $p_1$ of the gap after (an occurrence
+    needs the room, so no bite can exceed its gap).  The replacement's
+    flanks weld onto exactly those bitten gaps: $a_1$ onto the left,
+    $a_2$ onto the right; the string ends have no outer bite.  With a
+    single-$\mathtt b$ replacement each windowed separator is replaced
+    by one separator, so the gap positions survive termwise, giving
+    (ii); with a pure replacement the windowed separators vanish and
+    the material on either side of a chain of them fuses with the
+    $jm$ inserted letters, giving (iii).  (iv) is immediate from the
+    normal form.  (Machine: $4{,}000$ forced multi-$\mathtt b$
+    multi-fire cases, every output differing from $\mathrm{rev}$, and
+    the same-letter engine's $343$/$343$ reversals with top pass firing
+    exactly once, replacement the single letter $\mathtt b$; plus the
+    tweak-set batteries -- $8$ distinct-run inputs $\times$ $256$
+    constant single-$\mathtt b$ passes and $384$ pure-$\mathtt a$
+    passes at base 2, and the same at base 3 on $D(k;3)$, $k = 4..6$,
+    with random distinct-gap strings both times -- every case anchored
+    by an independently re-implemented greedy whose reconstruction
+    equals the evaluator's output, and the output gap sequences
+    matching the formulas of (ii) and (iii) exactly.)
+\end{proof}
+
+\begin{lemma}[site distinctness; restated from the campaign's counting
+lane, where it is proved]
+    \label{dich:lem:SD}
+    If a scrutinee's positive gaps are pairwise distinct and the
+    pattern value has at least two $\mathtt b$'s with at least one
+    positive interior gap, the pass fires at most once.  The exception
+    class -- all interior gaps zero, $\mathtt{bb}$-type patterns --
+    fires multiply.
+\end{lemma}
+
+\begin{proof}[Proof sketch]
+    Two windows would put equal interior gap-sequences at two skeleton
+    positions of the scrutinee; positive-gap distinctness forces the
+    same position, contradicting disjointness.  (Machine: $2{,}007$
+    qualifying cases, zero multi-firings, controls firing multiply;
+    re-illustrated at base 2 on $90$ multi-interior patterns -- maximum
+    one firing on distinct-run scrutinees -- while the
+    single-$\mathtt b$ control $\mathtt{ab}$ fires at all $k$
+    separators.)
+\end{proof}
+
+\begin{lemma}[the flank cap]
+    \label{dich:lem:flankcap}
+    A flank pattern -- a pattern value with a single $\mathtt b$, say
+    $\mathtt a^{p_0}\mathtt b\,\mathtt a^{p_1}$ -- fully consumes only
+    gaps whose value is $p_0$, $p_1$, or $p_0 + p_1$, whatever its
+    firing count.  On $D(k;3)$ at most two of these three are powers
+    of $3$: a sum of two powers of $3$ is never a power of $3$
+    ($3^a + 3^b = 3^a(1 + 3^{b-a})$ with $1 + 3^d$ not divisible by
+    $3$), so \emph{one flank pattern fully consumes at most two deep
+    sizes}.
+\end{lemma}
+
+\begin{proof}
+    By the window accounting of the Final-Pass Lemma: a gap is bitten
+    only by the windows at its two adjacent separators, in the amounts
+    $p_1$ (the left window's trailing flank) and $p_0$ (the right
+    window's leading flank), each $0$ when that window does not fire
+    there; full consumption requires the total to equal the gap.
+    (Machine: exhaustive sweeps over all flank patterns with
+    $p_0 + p_1 \le B^k + 2$ at base 2, $k = 4..6$ (targeted $k = 7$),
+    and at base 3 on $D(k;3)$, $k = 4..6$ (targeted $k = 7$): the
+    fully-consumed values are always a subset of
+    $\{p_0, p_1, p_0+p_1\}$, with cap $2$ on the powers at both
+    bases.)
+\end{proof}
+
+\begin{lemma}[the separation budget; restated from the counting lane,
+where it is proved]
+    \label{dich:lem:SB}
+    Call a derivation \emph{merge-free} if every maximal a-run of
+    every value carries material from at most one input gap, and let
+    $\Phi'(V)$ count the input-adjacent pairs $(t, t+1)$ appearing as
+    reversed separations in $V(w)$ -- a separator with gap $t{+}1$'s
+    material immediately left of it, gap $t$'s immediately right.
+    Then $\Phi'(\mathrm{rev}(w)) = k$ for every $w$ with $k$
+    separators, while merge-free derivations satisfy
+    $\Phi'(E) \le 4\,\#\mathrm{S}(E) + 2\,\#\mathrm{C}(E)$ however
+    often the passes fire.  So no merge-free expression computes
+    $\mathrm{rev}$ beyond its size, and any unifier must merge
+    input-gap material into common runs on every input with more
+    separators than that.
+\end{lemma}
+
+\begin{proof}[Proof sketch]
+    At a firing, every new reversed separation is pinned by one of the
+    replacement's four boundary-adjacent gap labels, so $t$ firings
+    contribute at most four distinct pairs.  (Machine: $2{,}112$
+    random merge-free derivations, all respecting even the tighter
+    $2\,\#\mathrm{S} + 2\,\#\mathrm{C}$, plus $7{,}381$ more; the
+    tight constant is open.)  The \emph{pollution witness}
+    $[\,(\mathrm{mrg}\,\mathtt b)/\mathtt{aa}\,]\,\mathrm{mrg}$ -- one
+    pass whose every junction separation sits between merged runs
+    carrying all labels, $\Phi' = k$ from a budget of $8$ (verified at
+    $k = 9, 10$) -- shows that merging is the unbounded
+    flip-creating resource: flip-counting alone can never prove the
+    no-go, and the obstruction must live in run-length exactness.
+\end{proof}
+
+\begin{lemma}[the payment theorem; restated from the counting lane,
+where it is proved (hand), with its per-node identity
+machine-verified there]
+    \label{dich:lem:PAYMENT}
+    For every pass node,
+    $\Phi'(\mathrm{out}) \le \Phi'(F) + \Phi'(R) + 4 + MJ$, where $MJ$
+    counts the mergey junction events -- separations bearing a
+    reversed pair with a multi-label flanking run -- and the tree
+    total is $\Phi'(E) \le 4\,\#\mathrm{S} + 2\,\#\mathrm{C} +
+    \sum_v MJ(v)$.  Moreover every mergey junction flip that
+    \emph{survives} to the final output must be paid: at creation the
+    flanking runs carry foreign site terms (that is what makes them
+    multi-label); the final output's runs are exact singletons; so the
+    foreign terms must be stripped by downstream \emph{exact deep
+    cuts} at inter-term boundaries, each priced by the tuning
+    constraint.  The replication escape -- kept material re-supplied
+    by a copy -- defers the payment into the copy, and that deferral
+    is closed by Escape~A below (the copies' picks must be
+    value-stratified, forcing the deep-rich structure into the
+    replacement itself).  Consequently, conditional on the demand
+    assumption (\ref{dich:L2} below),
+    \begin{equation*}
+        k \;\le\; 4\,\#\mathrm{S}(E) + 2\,\#\mathrm{C}(E) +
+        C' \cdot \#\{\text{tuned deep cuts}\} \;=\; O(|E|).
+    \end{equation*}
+    (Machine: the per-node identity on $4{,}359 + 4{,}436$ nodes and
+    the tree totals on $2{,}686 + 2{,}668$ derivations, with the
+    pollution witness's $MJ$ values non-vacuous.)
+\end{lemma}
+
+\begin{lemma}[decomposition; restated from the counting lane, where it
+is proved]
+    \label{dich:lem:DECOMP}
+    If $E(w) = A(w) \cdot B(w) = \mathrm{rev}(w)$ then $A(w)$ is the
+    reversal of a suffix and $B(w)$ of a prefix, and inductively the
+    fixed concatenation tree's leaves reverse a partition of $w$ into
+    consecutive intervals in reverse order; by pigeonhole some leaf's
+    sub-tree reverses an interval with unboundedly many separators,
+    and its top must be a pass node -- $X$ only reverses
+    separator-free intervals, where reversal is the identity.  This
+    reduces the unification question to pass-topped trees on
+    unbounded-separator intervals, exactly where the Final-Pass
+    Lemma, site distinctness, and the budget apply.
+\end{lemma}
+
+\paragraph{The descent.}
+Suppose $E$ computes $\mathrm{rev}$ on inputs with unboundedly many
+separators.  By Lemma~\ref{dich:lem:DECOMP} some pass-topped
+sub-expression reverses such inputs; work at its top pass
+$[\,A/B\,]F$ on $D(k;3)$, $k$ large.  The Final-Pass Lemma applies:
+either the pass is a splice or single firing (a multi-$\mathtt b$
+pattern on a distinct-run scrutinee fires at most once, by
+Lemma~\ref{dich:lem:SD}) and the reversed gap sequence pre-exists in
+$F$ up to one block edit; or the pass fires multiply with a
+single-$\mathtt b$ or pure replacement, and the reversed sequence is
+an in-order extraction from $F$'s gaps up to the shift set or the
+chain sums.  Either way the descent recurses into the scrutinee
+$F = [\,A'/B'\,]F'$: the extraction's elements come from $F'$'s
+remnants, in $F'$-order, or from the copies of $A'$, in copy order.
+Two routes could let the copies carry the reversal; both die on
+analysis, and the named assumptions below are what pins each.
+
+\begin{proposition}[Escape A: stratified picks]
+    \label{dich:escapeA}
+    Copies of a multi-gap $A'$ could donate one element each, values
+    stratified across copies -- copy $c$'s picks all exceed copy
+    $c{+}1$'s, since they sit at strictly decreasing positions of the
+    output.  The kill is value-range disjointness: the kept pieces
+    from different copies occupy pairwise disjoint value ranges, so
+    $A'(D(k;3))$'s interior must contain that many distinct deep
+    values -- by Assumption~\ref{dich:L1}, site terms -- as contiguous
+    stretches; $A'$ is itself reversal-rich, and the descent recurses
+    into it unchanged.  This same stratification is what closes the
+    replication deferral in the payment theorem
+    (Lemma~\ref{dich:lem:PAYMENT}).
+    \emph{Status: analysis.}  The stratification phenomenon is real:
+    the counterexample class $[\,X/\mathtt b\,]X$ has
+    decreasing-subsequence length growing with $k$ at pass depth $2$
+    (verified at base 2), which is why the descent carries value-range
+    disjointness rather than subsequence counts -- the subsequence
+    bound alone was refuted by this very class.
+\end{proposition}
+
+\begin{proposition}[Escape B: phase carving]
+    \label{dich:escapeB}
+    The copies could be of an increasing $A'$, with the final pass's
+    windows carving a different run out of each copy, the carve depth
+    controlled by the greedy phase -- the remnant lengths between
+    firings.  The kill is tuning, in the term-unit form.  To keep the
+    run $3^j$ of a copy, the windows must consume the adjacent
+    material, whose gap sizes are the dominated powers.  By the flank
+    cap (Lemma~\ref{dich:lem:flankcap}) a flank pattern fully consumes
+    at most two deep sizes, whatever its firing count; multi-run
+    patterns fire at most once on distinct-run scrutinees
+    (Lemma~\ref{dich:lem:SD}); and by the closure form
+    (Assumption~\ref{dich:L1}) the padded flanks ($\alpha S + \beta$
+    plus terms) and product flanks (degree $\ge 2$) are top-scale --
+    they fully consume any deep run they reach and cannot partially
+    carve it -- so partial deep carving is confined to constant and
+    tweak flanks, whose slivers are off-target (a sum of two powers
+    of $3$ is never a power of $3$).  The unit of tuning is the
+    \emph{site term}: each distinct deep term demands its own tuned
+    flank, and a fixed pattern has finitely many runs, each carrying
+    at most $M_V$ site references (the term ledger): still
+    $\Omega(k)$ patterns, i.e.\ $\Omega(k)$ pass nodes.  The descent
+    also self-identifies: the phase sequence needed to walk a carve
+    from $3^k$ down to $3^0$ is the power sequence itself, so the
+    deeper level must encode the reversal as remnant lengths, and the
+    recursion terminates at $X$, whose gaps increase.
+    \emph{Status: analysis.}  The merge-catalysed deletion -- a pad
+    creating an unbounded run next to a chosen separator, then one
+    pinned flank -- is the one resource that beats the flank-size
+    bound at a chosen site, and it consumes one boundary per pass:
+    the fixed-structure engine's $\Theta(k)$ pass depth is exactly
+    this cost, and the proved supply lemmas plus the demand assumption
+    are what pin it merge-sensitively.
+\end{proposition}
+
+\begin{lemma}[slope-pinning; restated from the selectivity lane, where
+it is proved]
+    \label{dich:lem:L2.1}
+    An exact re-separation at $D(k;3)$ -- a separator whose flanking
+    runs carry, in reversed order, the material of input gaps
+    $3^u, \ldots, 3^v$ -- requires the interval sum
+    $\sum_{i \in [u..v]} 3^i = \alpha S + \mathrm{err}$ with
+    $\alpha = 3^{v-k}$ and $|\mathrm{err}| \le (3^u-1)/2$; an exact
+    cut at top-offset $d$ requires dyadic slope $3^{-d}$; the tweak
+    channel (a flank within $O(1)$ of a single gap) covers only
+    $O(1)$ offsets from an end; and the powers of $3$ are pairwise
+    distinct and power-separated.  (Hand proof in the selectivity
+    lane's round; the arithmetic independently re-checked by the
+    coordinator.)
+\end{lemma}
+
+\begin{lemma}[per-node supply; restated from the selectivity lane]
+    \label{dich:lem:L2.2}
+    Each firing cuts only at its window's two ends, with the same
+    amounts at every firing; interior pattern runs are demands (by
+    match anchoring).  So one pass supplies at most four cut values,
+    unconditionally (no family hypothesis).
+\end{lemma}
+
+\begin{proposition}[Assumption L1'': the pinned schema at varying
+separator count, closure form (the counting lane)]
+    \label{dich:L1}
+    For each fixed expression $V$ there are constants such that, on
+    $D(k;3)$ for every $k$: each a-gap of $V(D(k;3))$ is an element of
+    the closure of $\{$site terms $3^t$, the global $S$,
+    constants$\}$ under addition, subtraction, and multiplication by
+    pinned counts -- concretely
+    $Q(S) + \sum_{i \le m} \kappa_i P_i(3^{t_i})\, Q_i(S)$ -- with the
+    \emph{term ledger}: the number of distinct site references in any
+    one run is at most $M_V \le \#\mathrm{S}(V) + O(1)$.
+    Two fixed expressions refute the narrower tweak-or-affine form on
+    both staging families and are the honest history of this
+    assumption: $[\,(\mathrm{mrg}\,\mathtt b)/\mathtt b\,]X$ has runs
+    exactly $(S + 2^0, \ldots, S + 2^{k-1}, 2^k)$ at base 2 (padded
+    extractions; $(S + 3^j, \ldots, 3^k)$ at base 3) and
+    $[\,\mathrm{mrg}/\mathtt{aa}\,]X$ has runs exactly
+    $(1, S, 2S, \ldots, S\cdot 2^{k-1})$ at base 2 (site-by-global
+    products; $S(3^j-1)/2 + 1$ at base 3) -- neither class is a
+    bounded tweak of a single gap nor a pinned affine function, and
+    both live in the closure.
+    Reading of the form used below: every term carrying $S$ to degree
+    $\ge 1$ is a fixed rational multiple of $S$, hence top-scale
+    ($S > 3^k$), and the products of site terms with such factors
+    likewise; so a \emph{deep} value is a constant-coefficient
+    combination of at most $M_V$ site terms, each a ledger entry.
+    \emph{Status:} machine-supported -- a nine-expression exact battery
+    and $40{,}896$ random compositions classified completely at base
+    $2$ (bounded-output cap disclosed), the two witnesses verified at
+    base 2 and base 3; the write-out of the term ledger on base
+    $\ge 3$ is the counting lane's round in flight.
+\end{proposition}
+
+\begin{proposition}[Assumption L2: the demand side (selectivity lane,
+in flight)]
+    \label{dich:L2}
+    Reversal at unbounded $k$ on $D(k;3)$ requires exact deep cuts at
+    $\Omega(k)$ distinct offsets -- equivalently, $\Omega(k)$ distinct
+    deep site terms must be exactly produced or stripped.
+    \emph{Status:} the selectivity lane's round in flight; the supply
+    side is proved (Lemmas~\ref{dich:lem:L2.1}
+    and~\ref{dich:lem:L2.2}, the flank cap
+    Lemma~\ref{dich:lem:flankcap}), and this is the one remaining
+    assumption the descent consumes.
+\end{proposition}
+
+\begin{theorem}[the unification no-go, conditional on L1'' and L2]
+    \label{dich:thm:main}
+    Under Assumptions~\ref{dich:L1} and~\ref{dich:L2}: for every
+    expression $E$ there is $k_E$, bounded by an explicit function of
+    $E$'s pass-node count and its sub-expressions' schema constants
+    -- linear in the pass count, with $E$-fixed constants -- such that
+    $E(D(k;3)) \ne \mathrm{rev}(D(k;3))$ for all $k > k_E$.  In
+    particular no single expression computes $\mathrm{rev}$ on all of
+    $\{\mathtt a, \mathtt b\}^*$, indeed none on the
+    a-gap/separator strings with unboundedly many separators.
+\end{theorem}
+
+\begin{proof}
+    Sketch, assembling the fragment; the two marked analyses and the
+    one assumption are the only non-proved steps, each pinned by a
+    named result.  By Lemma~\ref{dich:lem:DECOMP} a unifier has a
+    pass-topped sub-expression reversing inputs with unboundedly many
+    separators; consider its top pass on $D(k;3)$, $k$ large.
+    \emph{Order.}  By the Final-Pass Lemma, either the reversed gap
+    sequence pre-exists in the scrutinee up to one splice, or the pass
+    fires multiply with a single-$\mathtt b$ or pure replacement and
+    the reversed sequence is an in-order extraction from the
+    scrutinee's gaps up to the shift set or the chain sums; descend
+    through the DAG, the extraction's elements coming from deeper
+    remnants or from copies of the replacement, with the copy route
+    either recursing (Escape A: the replacement is itself
+    reversal-rich, its deep values site terms by L1'') or a carving
+    (Escape B: priced by the flank cap and the ledger).
+    \emph{Budget.}  By Lemma~\ref{dich:lem:SB} a merge-free
+    derivation supplies at most $4\#\mathrm{S} + 2\#\mathrm{C}$
+    reversed separations while $\mathrm{rev}$ needs $k$: any unifier
+    must merge; but merging only creates flips cheaply -- by the
+    payment theorem (Lemma~\ref{dich:lem:PAYMENT}) every mergey flip
+    surviving to the output must be stripped by downstream exact deep
+    cuts at inter-term boundaries, and by L1'' those boundary values
+    are closure-class terms referencing the stripped depths, i.e.\
+    site terms.  \emph{Supply.}  The exact deep cuts are supplied at
+    at most four per pass node (Lemma~\ref{dich:lem:L2.2}); a flank
+    pattern fully consumes at most two deep sizes
+    (Lemma~\ref{dich:lem:flankcap}); and by slope-pinning
+    (Lemma~\ref{dich:lem:L2.1}) an exact cut at top-offset $d$
+    requires dyadic slope $3^{-d}$, with the tweak channel covering
+    only $O(1)$ offsets from an end -- so the supply of exact deep
+    cuts is at most $c\,\#\mathrm{S}(E)$ with $E$-fixed $c$.  The
+    chain-sum channel routes here too: by L1'' its ends and
+    intermediates are ledger-bounded site-term combinations, and by
+    power separation a combination of distinct site terms does not
+    land on a single power for free -- a chain sum producing a deep
+    power must carry deep tuned intermediates, i.e.\ exact deep cuts.
+    \emph{Demand.}  By Assumption~\ref{dich:L2} reversal at
+    unbounded $k$ requires exact deep cuts at $\Omega(k)$ distinct
+    offsets.  \emph{Count.}  Combining,
+    $k \le 4\,\#\mathrm{S}(E) + 2\,\#\mathrm{C}(E) + C' \cdot
+    c\,\#\mathrm{S}(E)$: $E$ fails beyond
+    $k > c_E\,\#\mathrm{S}(E) + c'_E$, linear in the pass count --
+    the failure is effective.  The bound is tight up to the
+    polynomial: the fixed-structure engine reverses $k$ separators
+    with $\Theta(k)$ pass depth and $\Theta(k^2)$ size.
+\end{proof}
+
+\begin{theorem}[the reversal dichotomy]
+    \label{dich:thm:dichotomy}
+    Fix a finite alphabet $\Sigma$ with $|\Sigma| \ge 2$.
+    \begin{enumerate}[(i)]
+        \item For every fixed separator structure -- any fixed
+        separator word, any length, repeats allowed -- some expression
+        computes $\mathrm{rev}$ on that family exactly, with empty
+        provenance (the fixed-structure theorem of this paper: the
+        engine, and the letter-laundering that restores content with
+        every atom sourced from constants).
+        \item Conditional on Assumptions~\ref{dich:L1}
+        and~\ref{dich:L2}: no single expression computes
+        $\mathrm{rev}$ on all of $\Sigma^*$ -- indeed none on the
+        a-gap/separator strings with unboundedly many separators.  The
+        failure is effective: each $E$ fails on the super-increasing
+        inputs $D(k;3)$ beyond separator count $k > f(|E|)$, $f$
+        linear in the pass-node count (Theorem~\ref{dich:thm:main}).
+        \item Over unbounded alphabets, reversal is not computable at
+        all, at any depth (the paper's unbounded-alphabet rigidity
+        theorem).
+    \end{enumerate}
+    So an obstruction can hide nowhere at any fixed structure, and at
+    varying structure it can hide only behind the two named lemmas --
+    whichever way they resolve, the full-alphabet reversal question
+    is now two lemmas wide.
+\end{theorem}
+
+\begin{remark}[machine backdrop; illustration-grade items marked]
+    \label{dich:rem:machine}
+    Every run under $60$ s, invocations logged first in each log;
+    scripts and logs in the research record's construction-lane
+    directory, the lanes' batteries in theirs.  The sweep normal form:
+    $990$/$990$ against the campaign evaluator, $765$/$765$ by direct
+    decomposition.  The Final-Pass Lemma: $4{,}000$ forced
+    multi-$\mathtt b$ multi-fire cases; the engine's $343$/$343$
+    reversals with top pass firing exactly once; the tweak-set
+    batteries at base 2 and base 3 ($8$ distinct-run inputs each,
+    $256$ single-$\mathtt b$ and $48$ pure-$\mathtt a$ constant
+    passes per input, every case anchored by an independently
+    re-implemented greedy, gap sequences matched exactly).  Site
+    distinctness: $2{,}007$ qualifying cases, zero multi-firings;
+    re-illustrated on $90$ multi-interior patterns (maximum one
+    firing) against the single-$\mathtt b$ control $\mathtt{ab}$
+    firing at all $k$ separators.  The budget: $2{,}112$ plus
+    $7{,}381$ merge-free derivations; the pollution witness at
+    $k = 9, 10$; the payment identity on $4{,}359 + 4{,}436$ nodes
+    and $2{,}686 + 2{,}668$ trees.  The tuning illustration (for the
+    supply lemmas; illustration-grade): exhaustive sweeps over all
+    flank patterns $(p_0, p_1)$ with $p_0 + p_1 \le B^k + 2$ at
+    $k = 4..6$, targeted at $k = 7$, at both bases -- the
+    fully-consumed gap values always lie in
+    $\{p_0, p_1, p_0+p_1\}$, with cap $2$ on the powers at both
+    bases; the computed pinned flanks (the merge $\mathtt a^{S}$, the
+    halver, the doubler, the shave flank $\mathtt a^{S+1}$) on the
+    input and the merge-flanked scrutinee
+    $X \cdot \mathrm{mrg} \cdot \mathtt a$, at base 3 for
+    $k = 6..8$: zero firings at deep separators (both adjacent runs
+    at most $3^{k-2}$), all firings at the top, merge-flanked
+    separator; and the counting at base 3: the pattern
+    $(3^j, 3^{j+1})$ consumes exactly $\{3^j, 3^{j+1}\}$, so the
+    $k - 1$ deep sizes need at least $\lceil (k-1)/2 \rceil$
+    patterns at $k = 4..8$ (exhaustive at $k = 4..6$, targeted at
+    $7, 8$) -- the $\Omega(k)$ pass-node price, tight against the
+    engine's $\Theta(k)$.  The base-2 degeneracy constructions and
+    the two L1'' refutation witnesses are re-anchored in the same
+    battery (base 2, $k$ ranges as in the lanes' records).
+    (Research record: \texttt{research/scratch/rev/REPORT.md} \S 18
+    and the round-4 records of the counting and selectivity lanes
+    cited there.)
+\end{remark}

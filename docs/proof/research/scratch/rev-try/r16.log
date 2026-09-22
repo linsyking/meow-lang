@@ -1,0 +1,27 @@
+P1 block swap {a^i b^k}: grid 13^2 (boundaries incl.): VERIFIED
+P1 block swap: random 400 to 200: VERIFIED
+P1 intermediates B=b^k, mrg=a^i, X.b: 10^2 grid: VERIFIED
+P2 alternating {(ab)^k aa}, k=1..44: VERIFIED
+P2 intermediates R=(ab)^k, P=(ba)^k, k=1..14: VERIFIED
+L1 [b/X](X.mrg)=b.mrg and L2 [B/X](mrg.X.mrg)=mrg.B.mrg, 7^3 W2 grid: VERIFIED
+L3 schema illustration (tweak-or-affine-in-S), k=1..6: VERIFIED
+ROUND 16 MACHINE VERDICT: see report for the impossibility architecture
+--- round 16 think-pass outcome (before machine work, per charter) ---
+REFORMULATION: rev on {a,b}* = plant w's separators into the merge a^S at
+the MIRROR positions (each b at depth = its right-a-count in w); on the
+block family the mirror is trivial (cluster -> cluster = B.mrg, P1).
+OBSTRUCTION (architectural proof, final-pass lemma PROVED, descent
+formulated; see round report): the last sweep of any candidate E must be
+a single-b-R pass whose remnant stretches, concatenated in scrutinee
+order with uniform-bite tweaks, EXACTLY equal the reversed run list;
+multi-fire replacements cannot carry deep distinct runs (value
+repetition vs distinct output runs); hence the reversal must pre-exist
+in the scrutinee, and the descent through the DAG reduces to value-
+stratified decreasing blocks, killing both escape routes (stratified
+picks across copies need disjoint value-ranges in R's interior; phase
+carving needs ~k tuned deletions = the size lower bound).
+First attempt (LDS bounded by 2^depth) REFUTED by own counterexample:
+[X/'b']X has LDS ~ k at depth 2 (stratified picks across copies) - the
+stratification refinement is what the correct descent needs. Full
+formalization = Lane B's pinned-schema at varying k + deletion-rate lemma.
+timing: verify_r16.py runs in ~7 s. Nothing committed to git.

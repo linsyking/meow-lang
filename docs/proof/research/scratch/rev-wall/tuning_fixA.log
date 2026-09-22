@@ -1,0 +1,26 @@
+== A (corrected): the B=2 telescoping degeneracy ==
+  A1 [e/b][a/aa]X = a^{2^k}: the LAST RUN as a b-free value on w^(k)
+     12 checks, 0 failures -> VERIFIED
+  A2 del_last = runs 0..k-2, then glued run 2^{k-1}+2^k (last b consumed)
+     10 checks, 0 failures -> VERIFIED
+  A3 [b/(E_last.b)](mrg.b.mrg) = a^{2^k-1} b a^S (sum-minus-max as HEAD run)
+     11 checks, 0 failures -> VERIFIED
+  A4 [e/(b.mrg)]E_cbox = a^{2^k-1}: B-FREE SUM-MINUS-MAX
+     11 checks, 0 failures -> VERIFIED
+  A5 [a/aa]E_smm = a^{2^{k-1}}: the 2nd-from-top run, b-free (fixed offset)
+     11 checks, 0 failures -> VERIFIED
+  A6 [e/b][aa/a]X = a^{2^{k+2}-2}: tweak at depth k+2, b-free
+     10 checks, 0 failures -> VERIFIED
+  [2.2s] A done
+== A7 (corrected, a-counts): contrast on B=3 -- supply values stay in gaps ==
+  k=1: E_last a=3 (dist 0 to 3^1); E_smm a=1 (dist 0 to 3^0); E_h2 a=1 (dist 0 to 3^0)
+  k=2: E_last a=8 (dist 1 to 3^1); E_smm a=5 (dist 2 to 3^1); E_h2 a=3 (dist 0 to 3^1)
+  k=3: E_last a=22 (dist 5 to 3^2); E_smm a=18 (dist 9 to 3^2); E_h2 a=9 (dist 0 to 3^2)
+  k=4: E_last a=63 (dist 18 to 3^3); E_smm a=58 (dist 23 to 3^3); E_h2 a=29 (dist 2 to 3^3)
+  k=5: E_last a=185 (dist 58 to 3^4); E_smm a=179 (dist 64 to 3^4); E_h2 a=90 (dist 9 to 3^4)
+  k=6: E_last a=550 (dist 179 to 3^5); E_smm a=543 (dist 186 to 3^5); E_h2 a=272 (dist 29 to 3^5)
+  k=7: E_last a=1644 (dist 543 to 3^6); E_smm a=1636 (dist 551 to 3^6); E_h2 a=818 (dist 89 to 3^6)
+  k=8: E_last a=4925 (dist 1636 to 3^7); E_smm a=4916 (dist 1645 to 3^7); E_h2 a=2458 (dist 271 to 3^7)
+  min relative power-distance for k>=3: 0.000 at ('E_h2', 3)
+  (B=2 gives distance 0 -- the telescoping; B=3 stays bounded away)
+  [10.2s] A7 done

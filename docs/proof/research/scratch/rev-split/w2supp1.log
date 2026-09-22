@@ -1,0 +1,27 @@
+[w2-ctl] merge a-content on slices / junction shave
+  S=10: merge support 1 (S-consistent:yes) | [e/ab] support 1
+  S=12: merge support 1 (S-consistent:yes) | [e/ab] support 1
+  S=14: merge support 1 (S-consistent:yes) | [e/ab] support 1
+  BIG idx=1521 max=14
+  BIG idx=4790 max=14
+  BIG idx=4893 max=16
+  BIG idx=5065 max=13
+  BIG idx=6663 max=17
+  BIG idx=7197 max=13
+  BIG idx=7375 max=16
+  BIG idx=7556 max=26
+[w2-supp] random 8000: computed 6410, skipped 1590, max support 26, big 8, hits 0
+[w2-supp] adversarial
+  [mrg/bb]expl QUADRATIC   max support 1
+  [mrg/aaa]expl            max support 1
+  [b/a]w2                  max support 1
+  merge                    max support 1
+  dbl                      max support 1
+  half                     max support 2
+  halfmerge                max support 1
+  [X/merge]w2              max support 1
+  [X/halfmrg]w2            max support 2
+  big2                     max support 1
+  swap2                    max support 1
+  C(expl,w2)               max support 1
+  [X/bb]expl               max support 1

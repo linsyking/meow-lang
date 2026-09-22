@@ -1,0 +1,114 @@
+INVOCATION: ./po_rec all 271828 1000   [mode=all seed=271828 trials=1000]
+=== [po1] window anatomy + fired-set checks (Lemma PO) ===
+  (A) greedy == max-disjoint: 602 cases, 0 mismatches
+  (B) pat=abaaab                 k=4: 4 windows == expected (copies fired: all, offset 0)
+  (B) pat=abaaab                 k=5: 5 windows == expected (copies fired: all, offset 0)
+  (B) pat=abaaab                 k=6: 6 windows == expected (copies fired: all, offset 0)
+  (B) pat=abaaab                 k=7: 7 windows == expected (copies fired: all, offset 0)
+  (B) pat=aabaaab                k=4: 4 windows == expected (copies fired: all, offset -1)
+  (B) pat=aabaaab                k=5: 5 windows == expected (copies fired: all, offset -1)
+  (B) pat=aabaaab                k=6: 6 windows == expected (copies fired: all, offset -1)
+  (B) pat=aabaaab                k=7: 7 windows == expected (copies fired: all, offset -1)
+  (B) pat=abaaaba                k=4: 4 windows == expected (copies fired: all, offset 0)
+  (B) pat=abaaaba                k=5: 5 windows == expected (copies fired: all, offset 0)
+  (B) pat=abaaaba                k=6: 6 windows == expected (copies fired: all, offset 0)
+  (B) pat=abaaaba                k=7: 7 windows == expected (copies fired: all, offset 0)
+  (B) pat=aaabaaab               k=4: 3 windows == expected (copies fired: threshold, offset 126)
+  (B) pat=aaabaaab               k=5: 4 windows == expected (copies fired: threshold, offset 370)
+  (B) pat=aaabaaab               k=6: 5 windows == expected (copies fired: threshold, offset 1100)
+  (B) pat=aaabaaab               k=7: 6 windows == expected (copies fired: threshold, offset 3288)
+  (B) pat=aaabaaaaaaaaab         k=4: 4 windows == expected (copies fired: all, offset 2)
+  (B) pat=aaabaaaaaaaaab         k=5: 5 windows == expected (copies fired: all, offset 2)
+  (B) pat=aaabaaaaaaaaab         k=6: 6 windows == expected (copies fired: all, offset 2)
+  (B) pat=aaabaaaaaaaaab         k=7: 7 windows == expected (copies fired: all, offset 2)
+  (B) pat=aaaabaaab              k=4: 3 windows == expected (copies fired: threshold, offset 125)
+  (B) pat=aaaabaaab              k=5: 4 windows == expected (copies fired: threshold, offset 369)
+  (B) pat=aaaabaaab              k=6: 5 windows == expected (copies fired: threshold, offset 1099)
+  (B) pat=aaaabaaab              k=7: 6 windows == expected (copies fired: threshold, offset 3287)
+  (B) replica-translate pinning: 24 cases, 0 failures
+=== [rec] cross-k recurrence battery on D(k;3) ===
+  family: 8481 char polys, max order 14
+  mrg: 9 slots (unlab 10 ks, lab 7 ks), leads: 0 sig + 0 LR; loose-only: 0 sig + 0 LR; max order 2
+  half: 64 slots (unlab 11 ks, lab 7 ks), leads: 0 sig + 0 LR; loose-only: 0 sig + 0 LR; max order 2
+  third: 36 slots (unlab 11 ks, lab 7 ks), leads: 0 sig + 0 LR; loose-only: 0 sig + 1 LR; max order 2
+  dbl: 36 slots (unlab 10 ks, lab 7 ks), leads: 0 sig + 0 LR; loose-only: 0 sig + 0 LR; max order 2
+    shave SIG slot (key 3000000003, idx 0): LOOSE-ONLY, vals: 27 26 26 26 26 26 26
+    shave SIG slot (key 3000000003, idx 0): LOOSE-ONLY, vals: 27 26 26 26 26 26 26
+  shave: 50 slots (unlab 10 ks, lab 7 ks), leads: 0 sig + 0 LR; loose-only: 7 sig + 1 LR; max order 2
+  dropab: 9 slots (unlab 10 ks, lab 7 ks), leads: 0 sig + 0 LR; loose-only: 0 sig + 0 LR; max order 3
+  Eleak: 28 slots (unlab 8 ks, lab 5 ks), leads: 0 sig + 0 LR; loose-only: 0 sig + 1 LR; max order 2
+  Eprod: 20 slots (unlab 4 ks, lab 3 ks), leads: 0 sig + 0 LR; loose-only: 0 sig + 0 LR; max order 3
+  dlast: 41 slots (unlab 10 ks, lab 7 ks), leads: 0 sig + 0 LR; loose-only: 0 sig + 1 LR; max order 2
+    dfirst SIG slot (key 2000000002, idx 0): LOOSE-ONLY, vals: 4 9 27 81 243 729 2187
+    dfirst SIG slot (key 2000000002, idx 0): LOOSE-ONLY, vals: 4 9 27 81 243 729 2187
+  dfirst: 48 slots (unlab 10 ks, lab 7 ks), leads: 0 sig + 0 LR; loose-only: 7 sig + 1 LR; max order 2
+  Elast: 9 slots (unlab 11 ks, lab 7 ks), leads: 0 sig + 0 LR; loose-only: 0 sig + 0 LR; max order 3
+  Ecbox: 16 slots (unlab 6 ks, lab 6 ks), leads: 0 sig + 0 LR; loose-only: 0 sig + 0 LR; max order 3
+  Esmm: 8 slots (unlab 6 ks, lab 6 ks), leads: 0 sig + 0 LR; loose-only: 0 sig + 0 LR; max order 3
+  Eh2: 2 slots (unlab 6 ks, lab 6 ks), leads: 0 sig + 0 LR; loose-only: 0 sig + 0 LR; max order 5
+  dblmerge: 9 slots (unlab 10 ks, lab 7 ks), leads: 0 sig + 0 LR; loose-only: 0 sig + 0 LR; max order 2
+    decb slot L9: NO RECURRENCE, vals: 54 3 81 27 9 3 19687 19683
+    decb SIG slot (key 3000000003, idx 0): LOOSE-ONLY, vals: 2 3 9 27 81
+    decb SIG slot (key 3000000003, idx 0): LOOSE-ONLY, vals: 2 3 9 27 81
+  decb: 172 slots (unlab 8 ks, lab 5 ks), leads: 0 sig + 1 LR; loose-only: 23 sig + 13 LR; max order 2
+  battery: 0 sig-slot leads (theory: 0), 1 LR-index leads (alignment artifacts, dispositioned in report)
+  adv  2^k                          order none-1
+  adv  5^k                          order none-1
+  adv  6^k                          order none-1
+  adv  3^k+k^2                      order none-1
+  adv  3^k+k^3                      order none-1
+  adv  fib                          order none-1
+  adv  walk                         order none-1
+  adv  3^k+999*(k mod 7)            order none-1
+  ctrl 3^k                          order 2 [ 3 -4 1 ]
+  ctrl 3^k+k                        order 3 [ -3 7 -5 1 ]
+  ctrl (3^k-1)/2                    order 2 [ 3 -4 1 ]
+  ctrl 3^k+3^(2k)                   order 3 [ -27 39 -13 1 ]
+  ctrl 3^k*((k mod 4)+1)            order 5 [ 81 -81 0 0 -1 1 ]
+  ctrl 3^k+700*(k mod 5)            order 6 [ 3 -1 0 0 0 -3 1 ]
+  ctrl 3^k*2^{k mod 3}              order 4 [ 27 -27 0 -1 1 ]
+  bnd  k^2+7 (boundary)             order -1 (expected: none -- closure junk is affine)
+  adversarial strict (mineq=3): 0/8 spurious; controls: 7/7; k^2-junk admitted: 0
+  adversarial loose (any suffix, mineq=3): 0/8 spurious
+  teeth at comps' regime (R=6, mineq=2): strict 0/8, loose 0/8 spurious
+  random comp SIG-LEAD:
+    rand-lead slot L6: NO RECURRENCE, vals: 31 9 3 731 729 729
+    rand-lead slot L7: NO RECURRENCE, vals: 3 27 9 3 2189 2187
+    rand-lead slot L8: NO RECURRENCE, vals: 9 85 27 9 3 6563
+    rand-lead SIG slot (key 3000000003, idx 0): LOOSE-ONLY, vals: 55 27 27 27 27
+    rand-lead SIG slot (key 3000000003, idx 0): LOOSE-ONLY, vals: 55 27 27 27 27
+    rand-lead SIG slot (key 0, idx 4): NO RECURRENCE, vals: 31 164 325 811 2269
+    rand-lead SIG slot (key 0, idx 5): NO RECURRENCE, vals: 37 85 488 973 2431
+    rand-lead SIG slot (key 0, idx 4): NO RECURRENCE, vals: 31 164 325 811 2269
+  rand-lead: 462 slots (unlab 6 ks, lab 5 ks), leads: 50 sig + 33 LR; loose-only: 41 sig + 6 LR; max order 2
+  random comp SIG-LEAD:
+    rand-lead slot L6: NO RECURRENCE, vals: 31 9 3 730 729 729
+    rand-lead slot L7: NO RECURRENCE, vals: 3 27 9 3 2188 2187
+    rand-lead slot L8: NO RECURRENCE, vals: 9 85 27 9 3 6562
+    rand-lead SIG slot (key 3000000003, idx 0): NO RECURRENCE, vals: 2 3 9 27
+    rand-lead SIG slot (key 3000000003, idx 0): NO RECURRENCE, vals: 2 3 9 27
+    rand-lead SIG slot (key 3000000003, idx 0): NO RECURRENCE, vals: 2 3 9 27
+  rand-lead: 544 slots (unlab 6 ks, lab 4 ks), leads: 70 sig + 62 LR; loose-only: 0 sig + 6 LR; max order 2
+  random comp SIG-LEAD:
+    rand-lead slot L6: NO RECURRENCE, vals: 36 9 3 732 729 729
+    rand-lead slot L7: NO RECURRENCE, vals: 3 27 9 3 2190 2187
+    rand-lead slot L8: NO RECURRENCE, vals: 9 90 27 9 3 6564
+    rand-lead SIG slot (key 0, idx 2): LOOSE-ONLY, vals: 55 108 270 756 2214
+    rand-lead SIG slot (key 0, idx 3): NO RECURRENCE, vals: 28 163 324 810 2268
+    rand-lead SIG slot (key 0, idx 2): LOOSE-ONLY, vals: 55 108 270 756 2214
+    rand-lead SIG slot (key 0, idx 3): NO RECURRENCE, vals: 28 163 324 810 2268
+    rand-lead SIG slot (key 0, idx 3): NO RECURRENCE, vals: 28 163 324 810 2268
+  rand-lead: 258 slots (unlab 6 ks, lab 5 ks), leads: 16 sig + 20 LR; loose-only: 16 sig + 6 LR; max order 2
+  random comp SIG-LEAD:
+    rand-lead slot L6: NO RECURRENCE, vals: 28 9 3 729 726 726
+    rand-lead slot L7: NO RECURRENCE, vals: 3 27 9 3 2187 2184
+    rand-lead slot L8: NO RECURRENCE, vals: 9 82 27 9 3 6561
+    rand-lead SIG slot (key 3000000003, idx 0): LOOSE-ONLY, vals: 27 24 24 24 24
+    rand-lead SIG slot (key 3000000003, idx 0): LOOSE-ONLY, vals: 27 24 24 24 24
+    rand-lead SIG slot (key 3000000003, idx 0): NO RECURRENCE, vals: 1 1 6 24 78
+    rand-lead SIG slot (key 3000000003, idx 0): NO RECURRENCE, vals: 1 1 6 24 78
+    rand-lead SIG slot (key 3000000003, idx 0): NO RECURRENCE, vals: 1 1 6 24 78
+  rand-lead: 536 slots (unlab 6 ks, lab 5 ks), leads: 18 sig + 44 LR; loose-only: 31 sig + 6 LR; max order 2
+  random calm comps: 417 evaluated, 6 with sig-slot leads, 87 with LR-index leads
+== total: 22 checks, 0 failures ==
+elapsed 1.7s

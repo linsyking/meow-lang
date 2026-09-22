@@ -1,0 +1,50 @@
+INVOCATION: /usr/bin/python3 -W ignore /home/cc/projects/meow-lang/docs/proof/research/scratch/rev-wall/ol2_check.py  (cwd: /home/cc/projects/meow-lang/docs/proof/research/scratch/rev-wall)
+== A: THE FIRED-SET LEMMA on D(4;3) (selectivity: suffix / all / one-exact) ==
+  [0.0s] start
+  A1 single-b patterns (i=0..40, both orientations): 82 checks, 0 non-suffix
+  A2 multi-b patterns (i,i2<=9, j in [0, 1, 2, 3, 4, 5, 9, 10, 12, 26, 27, 28, 81, 243]): 1400 checks, 0 violations, 160 firings (all single-window, interior-exact)
+  A: FIRED-SET LEMMA: VERIFIED
+  [0.0s] A done
+== B: interior BLOCK deletion is not one pass; the staged walk ==
+  B1 interior-block-by-one-pass search (i=0..121 both orientations, strict-interior blocks size>=2): 0 hits
+  B2 staging step 1 [e/a^27.b]X: runs [1, 3, 9, 81] (run 3 = 27 EATEN + b_4 deleted: the threshold always eats its preceding run)
+  B2 staging step 2 [e/a^9.b]: runs [1, 3, 81] (run 2 = 9 EATEN + b_3 deleted — suffix staging consumes the tail; interior blocks need the boost walk or the two-sided box)
+  B3 the box patterns L_m: value runs (prefix_m, suffix_m) and S-depth:
+     L_0: runs [1, 120]  S-depth 4
+     L_1: runs [4, 117]  S-depth 4
+     L_2: runs [13, 108]  S-depth 4
+     L_3: runs [40, 81]  S-depth 4
+  [0.0s] B done
+== C: the threshold-supply walk (psi-chain scale descent) ==
+  k=5, S=364; the [a/aaa]-chain values and their scale-distance from the top power 3^5=243:
+     depth 0: value a^364  (scale-distance -0.37)
+     depth 1: value a^122  (scale-distance 0.63)
+     depth 2: value a^42  (scale-distance 1.60)
+     depth 3: value a^14  (scale-distance 2.60)
+     depth 4: value a^6  (scale-distance 3.37)
+     depth 5: value a^2  (scale-distance 4.37)
+     depth 6: value a^2  (scale-distance 4.37)
+  (each step multiplies by ~1/3: the threshold at scale-distance delta needs depth ~delta; no jump)
+  chain values that are exact powers: none (expect: none — the gap phenomenon)
+  [0.0s] C done
+== D: the T1-trace arithmetic (mod-3 lemma) ==
+  TopSum(t) (output plant a-masses): [81, 108, 117, 120]  (mod 3: [0, 0, 0, 0])
+  BotSum(sigma) (input b a-masses):  [1, 4, 13, 40]  (mod 3: [1, 1, 1, 1])
+  intersection: EMPTY -> every surviving input b at a plant position is DISPLACED (Delta != 0)
+  [0.0s] D done
+== E: D1''-strong directed attempts at k=2 (the selectivity wall) ==
+  E1 [a^9 b a^3 b / a b a^3 b a^8]X = 'aaaaaaaaabaaaba'  rev? True
+  E2 [a^9 b / a b]X = 'aaaaaaaaabaaaaaaaaaaabaaaaaaaaa' (double firing: the second window at b_1 eats run 1's last atom and glues: runs [9, 11, 9])
+  E3 selectors a^i b on D(2;3) (junction indices fired): {0: [0, 1], 1: [0, 1], 2: [1], 3: [1], 4: [], 5: [], 6: [], 7: [], 8: [], 9: []}
+  (fired sets are suffixes {1} or {0,1} or {}: b_0 cannot be selected alone without eating run 1 — the wall behind the failed multi-label constructions)
+  [0.0s] E done
+== F: the END-anchored contrast — [e/b][aa/aaa]X = a^{3^k} (depth 2) ==
+     k=1: inner runs [1, 2] -> merged a^3 (want 3^k = 3): OK
+     k=2: inner runs [1, 2, 6] -> merged a^9 (want 3^k = 9): OK
+     k=3: inner runs [1, 2, 6, 18] -> merged a^27 (want 3^k = 27): OK
+     k=4: inner runs [1, 2, 6, 18, 54] -> merged a^81 (want 3^k = 81): OK
+     k=5: inner runs [1, 2, 6, 18, 54, 162] -> merged a^243 (want 3^k = 243): OK
+     k=6: inner runs [1, 2, 6, 18, 54, 162, 486] -> merged a^729 (want 3^k = 729): OK
+  F TOP-RUN EXTRACTION AT DEPTH 2: VERIFIED (6/6)
+  (end-anchored single-run values cost O(1); contrast the interior anchored sums: the Omega(min(m, k-m)) walk)
+ROUND 5 BATTERY COMPLETE

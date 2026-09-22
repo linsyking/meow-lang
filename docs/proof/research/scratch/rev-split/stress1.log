@@ -1,0 +1,33 @@
+[supp] random ensemble: 30000 exprs, S-depth <= 5, S in {14,15,20,21,26,27}
+  computed 19853, all-capped/undef 10147, max support 11, big(>12) 0, split hits 0
+[supp] adversarial ensemble (labels aligned)
+  swap                     max support 1
+  diff                     max support 2
+  halft                    max support 1
+  [e/aa]diff               max support 1
+  [e/aaa]diff              max support 2
+  [diff/a]w explode        max support 2
+  [e/aa][diff/a]w          max support 1
+  [e/aaa][diff/a]w         max support 2
+  [e/merge]dbl2            max support 2
+  [e/merge]^2 dbl2         max support 2
+  [e/[e/aa]merge]w         max support 1
+  [e/[e/aaa]merge]w        max support 2
+  [e/bb][ab/a]w            max support 1
+  [e/abba][ab/a]w          max support 1
+  [e/aab]diff              max support 2
+  [swap/a]w explode        max support 1
+  [e/swap][swap/a]w        max support 1
+  [e/ab][diff/a]w          max support 2
+  self-collapse            max support 1
+  two-b-engine             max support 1
+  triple-cat               max support 1
+  swap-again               max support 1
+  [halft/w]w               max support 1
+  [e/halft]w               max support 2
+  mixed                    max support 2
+  nested-expl              max support ALL-UNDEF -1
+  adversarial big(>12): 0
+[box] bi-affine box + alpha==beta check (aggregate a-content)
+  VIOLATION idx=455 base=(35,12) ai=2 aj=4
+  boxes tried 43578, bi-affine: 43078, non-affine: 500, alpha!=beta violations: 1

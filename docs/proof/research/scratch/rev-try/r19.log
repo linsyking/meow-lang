@@ -1,0 +1,61 @@
+/usr/bin/time -v python3 -W ignore ../rev-try/verify_r19_b2rev.py   (cwd=rev/, evaluator prov.py+lcore.py; wall-clock below)
+  File [35m"/home/cc/projects/meow-lang/docs/proof/research/scratch/rev/../rev-try/verify_r19_b2rev.py"[0m, line [35m181[0m
+    rot = [k for k in range(0, 8) if rev(sup(k)) in sup(k) + sup(k)[1;31m)[0m]
+                                                                   [1;31m^[0m
+[1;35mSyntaxError[0m: [35mclosing parenthesis ')' does not match opening parenthesis '['[0m
+Command exited with non-zero status 1
+WALL 0.12 s  MAXRSS 33368 KB  EXIT 1
+--- first run above: syntax error (doubled paren on the T2a line), fixed; re-run:
+RE-RUN after fix: /usr/bin/time -v python3 -W ignore ../rev-try/verify_r19_b2rev.py   (cwd=rev/)
+T1 the B=2 tool identities (halver/doubler self-similarity, E_last/E_smm/E_h2/E_h4/E_grow, STEPDOWN + chains, JUMPDOWN i=1..3, SCALER k<=7, DIVIDER, LADDER, E_leak/E_leak-mirror/E_prod k<=8, +/-S round trips, split pass, recursion facts, plant-depth mirror): REFUTED
+T2a rev(w^k) is a rotation of w^k exactly for k in [0, 1, 2] (dies at k=3; k<=2 are the documented coincidences)
+T2b the [ba/a]-split values are mutual rotations exactly for k in [1, 2] (same threshold: the split maps the reversal to itself)
+T2 the phase/rotation route: FALSIFIED beyond k=2, and the split buys nothing (problem-preserving)
+T3 offset-cost census on w^(7): lone near-power gaps (value with <= 2 gaps, an entry within 8 of some 2^j) vs pass depth:
+   E_last         depth 2: lone near-power, best end-distance 0
+   E_smm          depth 4: lone near-power, best end-distance 0
+   E_h2           depth 5: lone near-power, best end-distance 1
+   E_h4           depth 6: lone near-power, best end-distance 2
+   jumpdown_i1    depth 1: lone near-power, best end-distance 0
+   E_cbox         depth 3: lone near-power, best end-distance 0
+   max best end-distance over the battery: 2
+T3 census (illustration-grade): CONSISTENT with the offset-cost ceiling (no lone MIDDLE power at depth <= 6; each halving level buys one end-distance)
+T4 periodic planting [ab/a^{2^j}] on the merge: plants exactly S//2^j >= 3 separators at every scale j <= k-1 (rev needs the SINGLE maximal odd multiple per scale): VERIFIED (indiscriminate)
+ROUND 19 MACHINE VERDICT: tools VERIFIED; shortcut classes falsified; obstruction = offset-cost ceiling (ROUND19_REPORT.md)
+WALL 2.05 s  MAXRSS 13616 KB  EXIT 0
+--- second run above: T1 REFUTED by the battery itself (my jumpdown hand-derivation wrong for k>=i+3); re-derived closed form T = 2^{k+1} - 2^i - (k-i)2^{i+1}, matches all 18 machine cases; third run:
+RE-RUN 2 after jumpdown correction: /usr/bin/time -v python3 -W ignore ../rev-try/verify_r19_b2rev.py   (cwd=rev/)
+T1 the B=2 tool identities (halver/doubler self-similarity, E_last/E_smm/E_h2/E_h4/E_grow, STEPDOWN + chains, JUMPDOWN i=1..3, SCALER k<=7, DIVIDER, LADDER, E_leak/E_leak-mirror/E_prod k<=8, +/-S round trips, split pass, recursion facts, plant-depth mirror): REFUTED
+T2a rev(w^k) is a rotation of w^k exactly for k in [0, 1, 2] (dies at k=3; k<=2 are the documented coincidences)
+T2b the [ba/a]-split values are mutual rotations exactly for k in [1, 2] (same threshold: the split maps the reversal to itself)
+T2 the phase/rotation route: FALSIFIED beyond k=2, and the split buys nothing (problem-preserving)
+T3 offset-cost census on w^(7): lone near-power gaps (value with <= 2 gaps, an entry within 8 of some 2^j) vs pass depth:
+   E_last         depth 2: lone near-power, best end-distance 0
+   E_smm          depth 4: lone near-power, best end-distance 0
+   E_h2           depth 5: lone near-power, best end-distance 1
+   E_h4           depth 6: lone near-power, best end-distance 2
+   jumpdown_i1    depth 1: lone near-power, best end-distance 0
+   E_cbox         depth 3: lone near-power, best end-distance 0
+   max best end-distance over the battery: 2
+T3 census (illustration-grade): CONSISTENT with the offset-cost ceiling (no lone MIDDLE power at depth <= 6; each halving level buys one end-distance)
+T4 periodic planting [ab/a^{2^j}] on the merge: plants exactly S//2^j >= 3 separators at every scale j <= k-1 (rev needs the SINGLE maximal odd multiple per scale): VERIFIED (indiscriminate)
+ROUND 19 MACHINE VERDICT: tools VERIFIED; shortcut classes falsified; obstruction = offset-cost ceiling (ROUND19_REPORT.md)
+WALL 2.04 s  MAXRSS 13672 KB  EXIT 0
+--- third run above: the plant-depth check compared the depth lists directly; the mirror is ORDER-REVERSING (rev's separator j at right-depth 2^{k-j}-1 = left-depth of w's separator k-1-j), fixed to rd_r == ld_w[::-1]; fourth run:
+RE-RUN 3 after mirror fix: /usr/bin/time -v python3 -W ignore ../rev-try/verify_r19_b2rev.py   (cwd=rev/)
+T1 the B=2 tool identities (halver/doubler self-similarity, E_last/E_smm/E_h2/E_h4/E_grow, STEPDOWN + chains, JUMPDOWN i=1..3, SCALER k<=7, DIVIDER, LADDER, E_leak/E_leak-mirror/E_prod k<=8, +/-S round trips, split pass, recursion facts, plant-depth mirror): VERIFIED
+T2a rev(w^k) is a rotation of w^k exactly for k in [0, 1, 2] (dies at k=3; k<=2 are the documented coincidences)
+T2b the [ba/a]-split values are mutual rotations exactly for k in [1, 2] (same threshold: the split maps the reversal to itself)
+T2 the phase/rotation route: FALSIFIED beyond k=2, and the split buys nothing (problem-preserving)
+T3 offset-cost census on w^(7): lone near-power gaps (value with <= 2 gaps, an entry within 8 of some 2^j) vs pass depth:
+   E_last         depth 2: lone near-power, best end-distance 0
+   E_smm          depth 4: lone near-power, best end-distance 0
+   E_h2           depth 5: lone near-power, best end-distance 1
+   E_h4           depth 6: lone near-power, best end-distance 2
+   jumpdown_i1    depth 1: lone near-power, best end-distance 0
+   E_cbox         depth 3: lone near-power, best end-distance 0
+   max best end-distance over the battery: 2
+T3 census (illustration-grade): CONSISTENT with the offset-cost ceiling (no lone MIDDLE power at depth <= 6; each halving level buys one end-distance)
+T4 periodic planting [ab/a^{2^j}] on the merge: plants exactly S//2^j >= 3 separators at every scale j <= k-1 (rev needs the SINGLE maximal odd multiple per scale): VERIFIED (indiscriminate)
+ROUND 19 MACHINE VERDICT: tools VERIFIED; shortcut classes falsified; obstruction = offset-cost ceiling (ROUND19_REPORT.md)
+WALL 2.05 s  MAXRSS 13408 KB  EXIT 0

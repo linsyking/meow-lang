@@ -1,0 +1,22 @@
+INVOCATION: ./gram7 gram   [mode=gram kforce=0]
+=== [gram] INV4 line-by-line: hand grammars vs evaluator ===
+  mrg       :  1 directives, k=3..12, expansion 1 runs at k=12
+  half      :  1 directives, k=3..13, expansion 14 runs at k=13
+  third     :  2 directives, k=3..13, expansion 14 runs at k=13
+  dbl       :  1 directives, k=3..12, expansion 13 runs at k=12
+  shave     :  2 directives, k=3..12, expansion 13 runs at k=12
+  dropab    :  1 directives, k=3..12, expansion 1 runs at k=12
+  Eleak     :  2 directives, k=3..10, expansion 11 runs at k=10
+  Eprod     :  2 directives, k=3..6, expansion 7 runs at k=6
+  dlast     :  2 directives, k=3..12, expansion 12 runs at k=12
+  dfirst    :  2 directives, k=3..12, expansion 12 runs at k=12
+  Elast     :  1 directives, k=3..13, expansion 1 runs at k=13
+  Ecbox     :  2 directives, k=3..8, expansion 2 runs at k=8
+  Esmm      :  1 directives, k=3..8, expansion 1 runs at k=8
+  Eh2       :  1 directives, k=3..8, expansion 1 runs at k=8
+  dblmerge  :  1 directives, k=3..12, expansion 1 runs at k=12
+  decb      :  6 directives, k=3..10, expansion 101 runs at k=10
+  thresh    :  9 directives, k=3..10, expansion 92 runs at k=10
+  total: 17 expressions, 0 with mismatches; directive counts are k-independent by construction
+== total: 150 checks, 0 failures ==
+elapsed 0.4s

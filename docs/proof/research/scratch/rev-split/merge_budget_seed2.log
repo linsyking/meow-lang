@@ -1,0 +1,31 @@
+INVOCATION: ./merge_budget all 314159 3000   [mode=all seed=314159 trials=3000]
+=== [leak] L1 refutation: exact forms on w^(k) ===
+  E_leak k=2: 3 runs = (S+2^j, 2^k) verified
+  E_leak k=3: 4 runs = (S+2^j, 2^k) verified
+  E_leak k=4: 5 runs = (S+2^j, 2^k) verified
+  E_leak k=5: 6 runs = (S+2^j, 2^k) verified
+  E_leak k=6: 7 runs = (S+2^j, 2^k) verified
+  E_leak k=13: 14 runs = (S+2^j, 2^k) verified
+  E_prod k=2: 3 runs = (1, S*2^{j-1}) verified
+  E_prod k=3: 4 runs = (1, S*2^{j-1}) verified
+  E_prod k=4: 5 runs = (1, S*2^{j-1}) verified
+  E_prod k=5: 6 runs = (1, S*2^{j-1}) verified
+  E_prod k=6: 7 runs = (1, S*2^{j-1}) verified
+  E_prod k=9: 10 runs = (1, S*2^{j-1}) verified
+=== [class] repaired-schema battery on w^(k) ===
+  exact battery done (all runs must classify)
+  random compositions: 2667/2667 fully classified
+=== [msb] two-stratum budget on w^(k) ===
+  per-node identity: 4436/4436 hold; tree total: 2668/2668
+  E_poll k=5: Phi'(out)=5 MJ=20460 (identity: 5 <= 0+0+4+20460)
+  E_poll k=6: Phi'(out)=6 MJ=169260 (identity: 6 <= 0+0+4+169260)
+  E_poll k=7: Phi'(out)=7 MJ=1376172 (identity: 7 <= 0+0+4+1376172)
+=== [sb2] SB tight-constant hunt (general inputs) ===
+  merge-free: 1577; 2#S+2#C violations: 0; max Phi'-excess under 2/2: -44
+== total: 104 checks, 0 failures ==
+elapsed 0.1s
+INVOCATION: ./merge_budget sb2 314159 8000   [mode=sb2 seed=314159 trials=8000]
+=== [sb2] SB tight-constant hunt (general inputs) ===
+  merge-free: 4231; 2#S+2#C violations: 0; max Phi'-excess under 2/2: -44
+== total: 0 checks, 0 failures ==
+elapsed 0.0s

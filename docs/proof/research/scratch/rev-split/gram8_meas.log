@@ -1,0 +1,8 @@
+INVOCATION: ./gram8 meas   [mode=meas kforce=0]
+=== [meas] INV3 measure form: closed forms vs grammar sums vs text counts ===
+  decb    : closed forms (per cell) == grammar sums == text counts, k=3..10
+  thresh  : closed forms (per cell) == grammar sums == text counts, k=3..10
+  tile4   : closed forms (per cell) == grammar sums == text counts, k=3..12
+  mod2    : closed forms (per cell) == grammar sums == text counts, k=3..12
+== total: 144 checks, 0 failures ==
+elapsed 0.1s

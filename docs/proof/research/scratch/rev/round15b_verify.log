@@ -1,0 +1,10 @@
+k=1  (round-14 complement engine shape) 13x13: VERIFIED
+k=2  (= T1 / E_mix shape) 10^3: VERIFIED
+k=3  {a^i b a^j c a^k d a^l} 9^4 grid + 400 random: VERIFIED
+k=4  {a^i b a^j c a^k d a^l e a^m} 7^5 grid + 300 random: VERIFIED
+     E_1: tree nodes 14, S-nodes 3, S-depth 2
+     E_2: tree nodes 58, S-nodes 15, S-depth 4
+     E_3: tree nodes 126, S-nodes 35, S-depth 6
+     E_4: tree nodes 218, S-nodes 63, S-depth 8
+
+ROUND-15B GENERAL DISTINCT-SEPARATOR THEOREM: ALL VERIFIED

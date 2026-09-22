@@ -1,0 +1,720 @@
+%% =====================================================================
+%%  ROUNDS 10-11 -- the descending-bijection invariant, parts I-II:
+%%  the two-pass bound, then depth-2 finiteness.  Paper-voice draft of
+%%  what is PROVED, what is machine-verified-but-unproved, and exactly
+%%  what remains for the finiteness program ("for every fixed E, {w :
+%%  prov = reverse} is finite => rev not in L").
+%%
+%%  Status of every claim is marked: proved statements carry proofs;
+%%  machine-checked statements carry the exact domain in an
+%%  \emph{Verified} parenthetical; conjectures are labeled.
+%%
+%%  Round-9 context (see phase_leftmove_fragment.tex): the mult-1
+%%  program (Conjectures A/B, the base case) is dead -- the period-3
+%%  family realizes mult 1 with LDS ~ |w|/3.  The surviving invariant
+%%  is the one rev itself has: prov is a descending bijection.  Round
+%%  10: the copy-identity transport gives n <= beta + 2 rho + nu at
+%%  depth 2 (Theorem 2), leaving the residual regime (final pattern
+%%  containing w).  Round 11 closes it: frames + breaks force w
+%%  uniform at large n, three kills shape the final pattern,
+%%  B-rigidity fixes each pick's sigma-run exactly, and a mod-n
+%%  residue count bounds n outright -- Theorem 3: depth-2 finiteness,
+%%  unconditional.  Corrections applied per the coordinator's review:
+%%  Theorem 2 case (ii) repaired (labeled final replacements are
+%%  impossible in chain2/deepP2 by Lemma elimination; deepR2 has no
+%%  copies), Pinch's deviation-location clause replaced by the proved
+%%  statement, Transport widened to any label-free replacement.
+%%
+%%
+%%  ROUND 12 (repairs + the alphabet-scope theorem): (1) the rev payoff
+%%  of finiteness is now stated honestly -- DB is forced on
+%%  distinct-character inputs avoiding E's constants over UNBOUNDED
+%%  alphabets (Lemma forcing below), and over FIXED finite alphabets
+%%  nothing prov-level can be forced at all (Theorem laundering below:
+%%  [s/ss][ss/s] is a text-level identity killing every s-label, so any
+%%  rev-correct E over Sigma rewrites to one with prov = () on all of
+%%  Sigma*).  (2) The depth-2 corner analysis now covers the MIXED
+%%  shapes [R2/P2](g1.[Y/Z]f.g2) explicitly: junction gaps bounded,
+%%  C(E) restated.  (3) The part-1 control is live (mode 1c).
+%%
+%%  Machine verification (re-runnable, each run < 60 s):
+%%    docs/proof/research/scratch/rev/verify_round10_lemmas.py
+%%  (v2, t-index tracking: pick/slice/sandwich/mirror/transport on
+%%   59,300 FDI depth-2 outputs over 70 inputs, 0 violations.)
+%%    docs/proof/research/scratch/rev/verify_round11.py [1|1c|2|3|4|all]
+%%  (elimination: 6.8M sims; the LIVE CONTROL 1c: 16.1M sims, 673,290
+%%   label-free c=1 FDI vs 0 labeled; frames: 83 firings; B-rigidity:
+%%   41; step-2 kills: 41; all 0 violations.)
+%%    docs/proof/research/scratch/rev/round10b_db.c  (./round10b_db 1..4)
+%%  (DB/FDI hunter: depth-<=1: 162 inputs, 9.95M sims; depth 2: 379
+%%   inputs, 772,939,671 sims; depth 3: 130 inputs, 389,533,280 sims;
+%%   depth 4: 136 inputs, 537,476,912 sims.  Logs round10_mode*.log.)
+%%    docs/proof/research/scratch/rev/round11_hunt.c  (./round11_hunt)
+%%  (residual-corner hunt, PHASE 1: 232 inputs, 22.3M sims, the four
+%%   n=2 DB witnesses, nothing at n >= 3; PHASE 2 mixed shapes: 39
+%%   inputs, 39.6M sims, 36 DB hits all at n=2, each re-verified by
+%%   verify_round12_mixed.py 36/36 with the independent evaluator.)
+%%    docs/proof/research/scratch/rev/verify_round12.py
+%%  (round 12: the laundering identity, 440,000 trials 0 failures; the
+%%   dead-prov rev witnesses on {b a^j}, {a^i b}, {(ab)^k}, and the
+%%   fixed-side one-b families {a^i b a^j} (i or j fixed), including
+%%   the reduction construction -- 111 member checks 0 failures;
+%%   non-Gamma output atoms always labeled, 1,397,644 atoms,
+%%   0 exceptions.)
+%%
+%%  ROUND 13 (the one-b family, directly): Match Anchoring lemma, the
+%%  one-b pass calculus, and THE CONSTRUCTION -- E_swap = [b/w]([e/b]w
+%%  . b . [e/b]w) computes rev on the FULL one-b language {a^i b a^j}
+%%  over Sigma = {a,b} (S-depth 2; laundered: rev with prov = ()).
+%%  Consequence: no one-separator family can exclude rev in L at any
+%%  level; the fixed-alphabet content question moves to >= 2
+%%  separators (interior-exactness wall).  Machine:
+%%    docs/proof/research/scratch/rev/verify_round13.py
+%%  (A: anchoring/calculus, 40,000 random trials 0 violations; B: the
+%%   construction catalogue; C: E_swap in prov.py -- rev on grid +
+%%   random, prov = ascending-minus-the-b, laundered dead prov,
+%%   involution, two-b lift dead) and
+%%    docs/proof/research/scratch/rev/round13_sweep.c
+%%  (depth-<=2 falsification sweeps over the enriched one-b library:
+%%   the unique non-circular swap hit is the construction itself,
+%%   split 0 everywhere; the two-b frontier clean: no rev, no splits,
+%%   no flank-progress, 143,388 sims).
+%% =====================================================================
+
+\subsection{The Descending-Bijection Invariant}
+
+\paragraph{Provenance.}
+Label the input positions: $w = w_0 \cdots w_{n-1}$ carries the label
+$i$ at position $i$.  Substitution is label-blind -- it matches and
+copies characters -- so we may run any expression $E$ on the labeled
+input and read off the output's labels, left to right; the resulting
+sequence $\mathrm{prov}(E,w)$ is the \emph{provenance} of the output,
+and it is independent of the labeling convention (only the multiset of
+positions matters).  Constants carry no label.  Write $\mathrm{mult}$
+for the maximal multiplicity of a label in $\mathrm{prov}$.  Say $E$
+\emph{realizes a descending bijection} on $w$ (DB$(w)$) if
+\[
+\mathrm{prov}(E,w) \;=\; (n-1,\; n-2,\; \ldots,\; 0),
+\]
+i.e.\ $\mathrm{mult} = 1$, $|\mathrm{prov}| = n$, and the labels
+descend -- a strictly decreasing permutation of all of them; and say
+the prov is \emph{FDI} (fully decreasing, injective) if it is strictly
+decreasing with $\mathrm{mult} = 1$.  Passes compose right to
+left throughout: in $[\,R/P\,]\,E$ the sub-expression $E$ is
+evaluated first, as usual.
+
+\paragraph{What DB can and cannot exclude.}
+DB is a necessary condition for a $\mathrm{rev}$-computing expression
+only on inputs where the output atoms cannot be faked by constants,
+and that depends on the alphabet regime.  Write $\Gamma(E)$ for the
+finite set of letters occurring in $E$'s constants.
+
+\begin{lemma}[forcing]
+    \label{lem:forcing}
+    Let $E$ compute reversal on $w$, $|w| = n \geq 1$.  If $w$'s
+    characters are pairwise distinct and disjoint from $\Gamma(E)$,
+    then $E$ realizes $\mathrm{DB}(w)$.
+\end{lemma}
+
+\begin{proof}
+    Every atom of $E$'s output is either a constant of $E$ or a copy
+    of a $w$-atom; a constant atom carries a letter of $\Gamma(E)$.
+    The output is $\mathrm{rev}(w)$, whose letters are exactly $w$'s,
+    none of which lies in $\Gamma(E)$; so every output atom carrying
+    the output's letters is a copy.  Within one copy of $w$ there is
+    exactly one atom per $w$-offset (distinct characters identify
+    unique offsets), and the output's $j$-th atom carries
+    $w[n-1-j]$, hence is its copy's atom at offset $n-1-j$.  Reading
+    the labels left to right gives $(n-1, n-2, \ldots, 0)$.
+\end{proof}
+
+Over an \emph{unbounded} alphabet this is all the finiteness program
+needs: for every fixed $E$, distinct-character inputs avoiding
+$\Gamma(E)$ exist at every length, so if $\{w : E \text{ realizes }
+\mathrm{DB}(w)\}$ is finite then $E$ does not compute reversal.
+Over a \emph{fixed finite} alphabet $\Sigma$ the implication
+collapses, and not merely for lack of a proof:
+
+\begin{theorem}[laundering]
+    \label{thm:laundering}
+    For a letter $\sigma$ let $L_\sigma$ be the chain
+    $[\,\sigma/\sigma\sigma\,]\,[\,\sigma\sigma/\sigma\,]$ (doubling
+    then halving).  $L_\sigma$ is the identity on every text, and
+    every $\sigma$-atom of its output is a constant.  Consequently,
+    for every expression $E$ and every finite alphabet $\Sigma$,
+    the composition $L_\Sigma \circ E$ (one $L_\sigma$ per letter of
+    $\Sigma$) computes the same function as $E$ on all of
+    $\Sigma^{*}$ and satisfies $\mathrm{prov}(L_\Sigma \circ E, w) =
+    ()$ for every $w \in \Sigma^{*}$.
+\end{theorem}
+
+\begin{proof}
+    The pass $[\,\sigma\sigma/\sigma\,]$ matches every $\sigma$ atom
+    and replaces it by the constant pair $\sigma\sigma$: a maximal
+    $\sigma$-run of length $L$ becomes one of length $2L$, all of it
+    constant.  The pass $[\,\sigma/\sigma\sigma\,]$ then matches
+    $\sigma\sigma$ greedily left to right; the doubled runs have even
+    length, so the tiling is exact and the run returns to length $L$
+    with every atom a constant.  Non-$\sigma$ atoms are matched by
+    neither pattern and pass through untouched, with their labels.  So
+    the text is unchanged and every surviving $\sigma$-atom is a
+    constant.  Composing over $\sigma \in \Sigma$ preserves the text
+    (each $L_\sigma$ is the identity on every text) and, since the
+    patterns of $L_\sigma$ mention only $\sigma$, each composition
+    step leaves the earlier letters' atoms untouched; after all
+    $|\Sigma|$ steps every atom carrying a letter of $\Sigma$ is a
+    constant.  On inputs from $\Sigma^{*}$ that is every atom of the
+    output: $\mathrm{prov} = ()$.
+\end{proof}
+
+\noindent So over a fixed finite alphabet \emph{no} nontrivial
+property of $\mathrm{prov}$ is forced by rev-correctness: any
+expression computing reversal on any set of inputs within
+$\Sigma^{*}$ can be rewritten, at a cost of $2|\Sigma|$ passes, to
+compute reversal on the same inputs with empty provenance
+everywhere.  (This is the atoms-level sharpening of the content-level
+negative result of round 2: the minimal longest-decreasing-subsequence
+of a content-consistent relabeling of $\mathrm{prov}$ is at most
+$n/\mathrm{LPS}(w)$, and binary words have longest palindromic
+subsequences of length at least $n/2$, so content-level relabeling
+invariants cannot exclude reversal over fixed alphabets either.)  The
+descending-bijection program below is therefore an \emph{unbounded
+alphabet} program throughout; its fixed-alphabet residue is purely
+content-level (which inputs a fixed expression can even match in
+text), not provenance-level.
+
+\paragraph{Round-13 addendum (the content residue, positive side).}
+The content residue is nonvacuous in both directions.  Over
+$\Sigma = \{\mathtt a, \mathtt b\}$, \emph{reversal is computable on
+the one-b language} $\{\mathtt a^{i}\,\mathtt b\,\mathtt a^{j} :
+i, j \geq 0\}$, by
+\[
+E_{\mathrm{swap}} \;=\; [\,\mathtt b/w\,]\,
+\bigl([\epsilon/\mathtt b\,]w \cdot \mathtt b \cdot
+[\epsilon/\mathtt b\,]w\bigr),
+\]
+an expression of S-depth $2$: the scrutinee is $w$'s symmetrization
+(the b-deleted merge, duplicated around a constant $\mathtt b$),
+the pattern is $w$ itself, and a one-b pattern matches only at the
+text's unique $\mathtt b$, where its leading/trailing runs are
+consumed from the merge runs $\mathtt a^{i+j}$ -- leaving remnants
+exactly $\mathtt a^{j}$ and $\mathtt a^{i}$, so replacing the match
+by the constant $\mathtt b$ outputs $\mathrm{rev}(w)$.  Composed
+with $L_\Sigma$ this computes reversal on the whole one-b language
+with empty provenance.  Consequently \emph{no one-separator family
+can exclude $\mathrm{rev} \in L$ at any level} (provenance:
+Theorem~\ref{thm:laundering}; content: $E_{\mathrm{swap}}$), and the
+fixed-alphabet content question lives at inputs with at
+least two separators and \emph{varying} interior runs, where a match
+must consume interior runs exactly and the symmetrization engine
+dies.  (Round-14 sharpening of this boundary, positive side: fixing
+the interior — the family $\{\mathtt a^{i} M \,\mathtt a^{k}\}$ for
+any fixed $M$ containing a non-$\mathtt a$ letter, at every separator
+count — falls to the same symmetrization engine with boundary
+constant $c = 0$: $E_M = [M^{R}/w]\cdot
+([\epsilon/M\,]w \cdot M \cdot [\epsilon/M\,]w)$ computes
+$\mathrm{rev}$ on the full family $\{i, k \geq 0\}$; only the
+varying-interior two-b family $\{\mathtt a^{i}\mathtt b\,\mathtt
+a^{j}\mathtt b\,\mathtt a^{k}\}$ and its letter-blinded relatives
+remain, and its total-type analysis shows the split — middle-run
+isolation — is impossible there while leaving reversal itself
+unresolved.  Round-15 correction, further: the ``letter-blinded
+relatives'' clause is refuted — \emph{distinct} separators are an
+advantage, not a neutral fact, since unique-letter projections
+($[\epsilon/\text{other }s]$ fires once) feed the complement boxes:
+$\mathrm{rev}$ is computable on the full mixed-letter all-varying
+family $\{\mathtt a^{i}\mathtt b\,\mathtt a^{j}\mathtt c\,\mathtt
+a^{k}\}$ by $E_{\mathrm{mix}}$, and indeed on
+$\{\mathtt a^{r_0} s_1 \mathtt a^{r_1} \cdots s_k \mathtt a^{r_k}\}$
+for every $k$ and all distinct $s_m$.  The obstruction lives only
+where separators \emph{collide} — the same-letter family alone,
+reduced to the constructibility of $V_h = \mathtt a^{k}\mathtt b\,
+\mathtt a^{j+h}\mathtt b\,\mathtt a^{i+h}$ for a constant $h$; see
+the research record, rounds 15--15B.)
+
+\begin{lemma}
+    \label{lem:lastpass}
+    Let $t = \llbracket F \rrbracket w$, $y = \llbracket R
+    \rrbracket w$, $X = \llbracket P \rrbracket w \neq \epsilon$,
+    and let $c$ be the number of sites of $X$ in $t$.
+    \emph{(a)} If $c \geq 2$ and $y$ carries a label, then
+    $\mathrm{mult}(\mathrm{prov}([\,R/P\,]F)) \geq 2$.
+    \emph{(b)} If $c = 1$, the output is $t^- \, y \, t^+$ with
+    $t^-$, $t^+$ the text before and after the site; if its prov is
+    FDI then $\mathrm{prov}(t^-)$, $\mathrm{prov}(y)$,
+    $\mathrm{prov}(t^+)$ are each FDI, pairwise disjoint, and
+    chained (every label of $t^-$ exceeds every label of $y$, which
+    exceeds every label of $t^+$).
+    \emph{(c)} If $c = 0$ the pass is vacuous.
+\end{lemma}
+
+\begin{proof}
+    (a) Each of the $c \geq 2$ disjoint sites receives a full copy
+    of $y$; any label of $y$ then occurs twice.
+    (b) The textual decomposition is immediate; a contiguous block of
+    a strictly decreasing sequence is strictly decreasing, and
+    disjointness follows since a repeat would contradict
+    injectivity.
+    (c) Nothing matches.
+\end{proof}
+
+\begin{theorem}
+    \label{thm:depth1}
+    If $\mathrm{Sdepth}(E) \leq 1$, $n \geq 2$, and
+    $\mathrm{prov}(E,w)$ is FDI, then $|\mathrm{prov}(E,w)| \leq
+    \#V(E)$; in particular $E$ realizes $\mathrm{DB}(w)$ only for
+    $n \leq \#V(E)$.
+\end{theorem}
+
+\begin{proof}
+    By Lemma~\ref{lem:lastpass}(c) reduce to $c \geq 1$.  If $c = 1$
+    and $y$ is labeled, then $y$ is pass-free, so $\mathrm{prov}(y) =
+    R^{\rho}$ with $R = (0,\ldots,n-1)$ and $\rho$ the number of
+    variable leaves of $R$; $R^{2}$ is not decreasing for $n \geq 2$,
+    so $\rho \leq 1$, and the block chain of
+    Lemma~\ref{lem:lastpass}(b) then pins $t^-$ and $t^+$ to be
+    label-free (their labels would have to exceed or fall below all
+    of $R$), leaving $\mathrm{prov} = R$: increasing, not FDI.
+    Otherwise $y$ is label-free, and the output's labeled atoms are a
+    subsequence of $t$'s, which are $\#V(F)$ interleaved copies of
+    $R$; an FDI subsequence takes at most one atom per copy (labels
+    ascend within a copy), giving the bound.  Concatenation nodes
+    compose the per-branch budgets.
+\end{proof}
+
+\paragraph{The depth-2 setting.}
+Now let the final pass act on $t = \llbracket F_2 \rrbracket w$ with
+$\mathrm{Sdepth}(F_2) = 1$: $t$ is the one-pass output $[\,Y/X'\,]F_1$
+with $F_1, X', Y$ pass-free, $X' \neq \epsilon$, and $F_1$'s value
+$u_0 w u_1 w \cdots$ having $\rho = \#V(F_1)$ \emph{runs}.  The
+labeled atoms of $t$ form \emph{instances}: the inserted copies of
+$Y$ (whose runs are full copies of $w$), and the surviving
+\emph{slices} of $F_1$'s runs cut out by the sites.  A survivor
+carrying a label is a \emph{pick}; within an instance, labels ascend
+with text order and equal $w$-offsets.  If $E$ realizes DB$(w)$,
+pick $k$ (the $(k{+}1)$-st surviving labeled atom, in text order)
+carries label $o_k = n-1-k$.
+
+\begin{lemma}[pick]
+    \label{lem:pick}
+    If $\mathrm{prov}(E,w)$ is FDI, at most one pick lies in each
+    instance: two would put an ascending pair into a strictly
+    decreasing sequence.
+\end{lemma}
+
+\begin{lemma}[slice]
+    \label{lem:slice}
+    If $\mathrm{prov}(E,w)$ is FDI, at most one pick lies among the
+    slices of each original run of $F_1$; hence the slice-picks
+    number at most $\rho = \#V(F_1)$, an expression constant.  No
+    periodicity assumption is involved.
+\end{lemma}
+
+\begin{proof}
+    The surviving pieces of one run appear in $t$ in the same
+    left-to-right order as in the run, so their $w$-offset ranges
+    ascend along the text; two picks among them would need descending
+    labels but sit at ascending offsets.
+\end{proof}
+
+\begin{lemma}[sandwich]
+    \label{lem:sandwich}
+    Let $p$ be a pick whose immediate text predecessor is a labeled
+    atom of the same instance.  That predecessor is not a pick
+    (Lemma~\ref{lem:pick}), hence is covered by the final pass -- the
+    inner pass is already applied, and slice and copy atoms alike
+    can only be covered now.  The covering match cannot contain $p$,
+    so it ends exactly at $p$: the $\beta = |X|$ atoms preceding $p$
+    spell $X$.  If the window lies inside the instance, $X =
+    w[o-\beta : o]$; in every case $X$'s last character is the
+    predecessor's character.
+\end{lemma}
+
+\noindent \emph{Verified}: all three lemmas, plus the mirror form of
+the sandwich and the transport pairs, were checked on $59{,}300$ FDI
+depth-2 outputs over $70$ inputs (all $|w| \leq 5$ plus periodic
+families; $F$ among $w$, $aw$, $wa$, $bw$, $wb$, $awb$, $ww$; $Y$ in
+the labeled pass-free library; both patterns from the pass-free
+pattern pool), with each output atom's $t$-index tracked through the
+final pass: zero violations
+(\texttt{verify\_round10\_lemmas.py}, v2; sandwich firings
+$22{,}938$, mirror $21{,}498$, transport pairs $0$).
+
+\begin{lemma}[transport]
+    \label{lem:transport}
+    Suppose $E$ realizes $\mathrm{DB}(w)$ and the final pass's
+    replacement is \emph{label-free} (any label-free replacement, not
+    only $\epsilon$: the proof never uses that the inserted text is
+    empty, only that it carries no labels, so the survivors are exactly
+    the atoms not covered by a match).  This is the WLOG form whenever
+    $c \geq 2$, by Lemma~\ref{lem:lastpass}(a), and — see
+    Lemma~\ref{lem:elimination} below — also when $c = 1$.  If the
+    picks $k$ and $k - \beta$ both lie in full copies, then pick $k$
+    cannot exist.
+\end{lemma}
+
+\begin{proof}
+    $o_{k-\beta} = o_k + \beta$, so pick $k{-}\beta$'s sandwich
+    window is its copy's offsets $[o_k, o_k + \beta)$, inside the run
+    because $o_k + \beta \leq n - 1$.  By
+    Lemma~\ref{lem:sandwich}, $X = w[o_k : o_k+\beta]$.  But pick $k$
+    lies in a full copy at offset $o_k$, so the text at $[P_k, P_k +
+    \beta)$ is exactly $w[o_k : o_k+\beta] = X$: all copies are
+    identical.  The greedy scan visits every position not inside a
+    match; $P_k$ is a pick, hence not inside a match, hence visited --
+    and at that visit it sees $X$ and matches.  Contradiction.
+\end{proof}
+
+\begin{theorem}
+    \label{thm:depth2}
+    Let $\mathrm{Sdepth}(E) \leq 2$, $n \geq 2$, and suppose $E$
+    realizes $\mathrm{DB}(w)$.  Write $\beta$ for the length of the
+    final pass's pattern value, $\rho = \#V(F_1)$ for the innermost
+    scrutinee's variable count, and $\nu$ for the variable count of
+    the final pass's replacement.  Then
+    \[
+    n \;\leq\; \beta \;+\; 2\rho \;+\; \nu .
+    \]
+\end{theorem}
+
+\begin{proof}
+    Cases on the final pass.  \emph{Label-free replacement}
+    (Lemma~\ref{lem:lastpass}(a) forces this whenever $c \geq 2$):
+    by Lemma~\ref{lem:transport} a copy-pick at index $k \geq
+    \beta$ survives only if pick $k-\beta$ is a slice-pick, so the
+    copy-picks number at most $\beta + G$ with $G$ the slice-picks;
+    Lemma~\ref{lem:slice} gives $G \leq \rho$; hence $n \leq \beta +
+    2\rho$.  \emph{Labeled replacement, $c = 1$}: by
+    Lemma~\ref{lem:lastpass}(b) each block of
+    $\mathrm{prov}(t^-)\,\mathrm{prov}(y)\,\mathrm{prov}(t^+)$ is FDI.
+    In the two-pass chain and in the deep-pattern shape the final
+    replacement is pass-free, so $\mathrm{prov}(y) = R^{\nu}$ with
+    $\nu \geq 1$ — increasing for $\nu = 1$, repeating for $\nu \geq
+    2$ — never FDI at $n \geq 2$: the case is
+    \emph{impossible} (Lemma~\ref{lem:elimination}).  In the
+    deep-replacement shape the scrutinee $F_1$ is pass-free, so $t$
+    is a pass-free value containing \emph{no copies at all}: $t^-$
+    and $t^+$ are run-pieces, at most $\rho$ picks each by
+    Lemma~\ref{lem:slice}, and the middle block is an FDI prov of a
+    depth-$1$ expression, bounded by $\nu$ via
+    Theorem~\ref{thm:depth1}: $n \leq 2\rho + \nu$.
+    \emph{$c = 0$}: vacuous, drop the pass.  \emph{Concatenation}:
+    compose the branch bounds.  \emph{Pass-free inner replacement}
+    ($Y$ label-free): $\mathrm{prov}$ is a subsequence of $R^{\rho}$,
+    so $n \leq \rho$ outright.
+\end{proof}
+
+\begin{corollary}
+    \label{cor:finiteness}
+    If the final pattern of $E$ is a constant and
+    $\mathrm{Sdepth}(E) \leq 2$, then $E$ realizes
+    $\mathrm{DB}(w)$ only for $|w| \leq |E| + 2\,\#V(E)$: the set
+    $\{w : \mathrm{DB}(w)\}$ is finite.  More generally, a DB
+    realization at depth $2$ forces the final pattern's value to have
+    length at least $n - 2\rho - \nu$ -- the final pattern must
+    essentially contain $w$.
+\end{corollary}
+
+\begin{lemma}[pinch]
+    \label{lem:pinch}
+    In the escaping regime $\beta \geq n$ of
+    Corollary~\ref{cor:finiteness}: $X$'s last character equals
+    $w[o_k - 1]$ for every copy-pick $k$ with $o_k \geq 1$, and $X$'s
+    first character equals $w[o_k + 1]$ for every copy-pick $k$ with
+    $o_k \leq n-2$ (Lemma~\ref{lem:sandwich}).  The map $k \mapsto
+    o_k - 1$ is a bijection from the picks $k \leq n-2$ onto
+    $[0, n-2]$, and $k \mapsto o_k + 1$ from the picks $k \geq 1$ onto
+    $[1, n-1]$, so a position $j$ escapes both pins only if one of its
+    two neighboring picks is a slice-pick: the deviation set is
+    contained in $\{0, n-1\} \cup \{o_k \pm 1 : \text{$k$ a
+    slice-pick}\}$ -- every deviation sits at distance exactly $1$
+    from a slice-pick's offset or at a string endpoint, at most
+    $2\rho + 2$ positions in all.  For $n \geq 2\rho + 6$ some
+    position is pinned from both sides, the two constants coincide,
+    and $w$ differs from a single letter $\sigma$ on at most
+    $2\rho + 2$ positions.
+\end{lemma}
+
+\begin{remark}
+    \label{rem:residual}
+    (\emph{The residual endgame; closed in round 11.})  What remained
+    at depth $2$ was the nearly-constant regime of
+    Lemma~\ref{lem:pinch}: a final pattern containing $w$ over a word
+    $w$ that is one letter on all but $O(\rho)$ positions, with the
+    final pass's matches tiling the $\sigma$-runs in arbitrary greedy
+    chains.  This is closed unconditionally by
+    Theorem~\ref{thm:depth2finite} below, whose residue count is
+    agnostic to the match configuration.  The machine record:
+    round 10's sweep (\texttt{round10b\_db.c} mode 2: $379$ inputs,
+    $772{,}939{,}671$ simulated depth-$2$ pipelines) found no DB at
+    any $n \geq 2$ \emph{on its pattern pool}; round 11's targeted
+    hunt over the residual corner found four depth-$2$ chain DBs at
+    exactly $n = 2$ (Remark~\ref{rem:witnesses2}) and nothing at
+    $n \geq 3$; round 12's phase-2 sweep of the MIXED shapes
+    $[\,\epsilon/X\,]\,(g_1\,[\,Y/Z\,]f\,g_2)$ -- run-bearing or
+    constant flanks, swept by neither of the first two hunts --
+    found $36$ further DBs, again all at $n = 2$ and each re-verified
+    by the independent evaluator (\texttt{verify\_round12\_mixed.py},
+    $36/36$) -- consistent with Theorem~\ref{thm:depth2finite},
+    whose explicit bound contains $n = 2$.  The period-$3$ family
+    that refuted the mult-$1$ program lives in the same regime
+    qualitatively: its survivor labels form one phase class of the
+    period, which is why it realizes multiplicity $1$ with
+    $\mathrm{LDS} \sim |w|/3$ but not a bijection; it is not FDI
+    and its computed final pattern is a proper substring of $w$
+    ($\beta = n - 4 < n$), so it is outside the corner both ways.
+\end{remark}
+
+\paragraph{Round 11: the depth-2 finiteness theorem.}
+The following lemmas close the residual regime.  Fix a two-pass chain
+$[\,\epsilon/X\,]\,[\,Y/Z\,]F_1$ with everything pass-free, $n \geq 2$,
+$\mathrm{prov}$ FDI, and $\beta = |X| \geq n$ (the residual corner;
+every other configuration is bounded by
+Theorem~\ref{thm:depth2} and the reductions of its proof).  A pick at
+$w$-offset $o$ is \emph{interior} if $1 \leq o \leq n - 2$, so its
+in-copy predecessor and successor share its instance and
+Lemma~\ref{lem:sandwich} applies on both sides.
+
+\begin{lemma}[elimination]
+    \label{lem:elimination}
+    In a two-pass chain, and in the deep-pattern shape, no FDI output
+    with $n \geq 2$ has a labeled final replacement.
+\end{lemma}
+
+\begin{proof}
+    The final replacement is pass-free there, so its value $y$
+    satisfies $\mathrm{prov}(y) = R^{\nu}$, $\nu = \#V \geq 1$: strictly
+    increasing for $\nu = 1$, with a repeated label for $\nu \geq 2$
+    -- never FDI.  But $c \geq 2$ gives multiplicity $\geq 2$
+    (Lemma~\ref{lem:lastpass}(a)) and $c = 1$ makes
+    $\mathrm{prov}(y)$ a contiguous block of the FDI output
+    (Lemma~\ref{lem:lastpass}(b)), hence FDI.
+\end{proof}
+
+\begin{lemma}[frames]
+    \label{lem:frames}
+    Let $p$ be an interior copy-pick at text position $q$,
+    $w$-offset $o$.  Then $X$'s last $o$ characters are
+    $w[:o]$, and $X$'s first $n-1-o$ characters are $w[o+1:]$.
+\end{lemma}
+
+\begin{proof}
+    The in-copy predecessor (position $q-1$) is not a pick
+    (Lemma~\ref{lem:pick}), so it is covered by the final pass, and
+    the covering match cannot contain $q$, hence ends exactly at $q$:
+    it is $[q-\beta, q)$ and spells $X$.  The copy's offsets
+    $0, \ldots, o-1$ sit at the window's right end (as $o < n \leq
+    \beta$), so $X$ ends with $w[:o]$.  Symmetrically the successor's
+    covering match must start at $q+1$ and is $[q+1, q+1+\beta)$,
+    whose left end spells the copy's offsets $o+1, \ldots, n-1$.
+\end{proof}
+
+\begin{lemma}[break]
+    \label{lem:break}
+    If interior copy-picks exist at offsets $o$ and $o+1$, then $w$ is
+    constant on $[0, o]$ and on $[o+1, n-1]$.  If they exist at two
+    pairs of adjacent offsets at different positions, then $w =
+    \sigma^{n}$ for a single letter $\sigma$.
+\end{lemma}
+
+\begin{proof}
+    Both picks read the same $X$: by Lemma~\ref{lem:frames},
+    $w[:o] = X[-o:]$ is the last $o$ characters of $X[-(o+1):] =
+    w[:o+1]$, i.e.\ $w[:o] = w[1:o+1]$, so $w$ is constant on $[0,o]$;
+    likewise $w[o+2:]$ is a prefix of $w[o+1:]$, so $w$ is constant on
+    $[o+1, n-1]$.  A second pair at $o' \neq o$, say $o' > o$, makes
+    $w$ constant on $[0, o']$ and, by the first pair, on $[o+1,
+    n-1]$; the two constants agree on the overlap $[o+1, o']$, so $w$
+    is constant throughout.
+\end{proof}
+
+\begin{theorem}
+    \label{thm:depth2finite}
+    For every expression $E$ with $\mathrm{Sdepth}(E) \leq 2$ there is
+    an explicit constant $C(E)$, depending only on $E$'s pass-free
+    skeleton, such that $E$ realizes $\mathrm{DB}(w)$ only for
+    $|w| \leq C(E)$.  In particular $\{w : E \text{ realizes }
+    \mathrm{DB}(w)\}$ is finite for every expression of S-depth at
+    most $2$.
+\end{theorem}
+
+\begin{proof}
+    The proof runs on the stronger statement that a \emph{block} prov
+    -- consecutive descending labels $(j+k-1, \ldots, j)$, of which
+    $\mathrm{DB}$ is the case $j = 0$, $k = n$ -- has $k \leq C(E)$,
+    by structural induction; the block structure is what makes the
+    picks' offsets consecutive, and concatenation nodes split a block
+    into a top and a bottom block.  All cases except the residual
+    corner are bounded by constants of $E$: a vacuous final pass
+    reduces the depth (Theorem~\ref{thm:depth1}); a label-free inner
+    replacement leaves $k \leq \rho$; a constant final pattern gives
+    $k \leq \beta + 2\rho$ (Theorem~\ref{thm:depth2}); an inner
+    pattern containing $w$ has sites of length $\geq n$, so at most
+    $\rho + 1$ copies are inserted and $k \leq (\rho+1)\nu + \rho$;
+    the deep shapes have no copies in $t$ at all ($t$ pass-free) and
+    give $k \leq 2\rho + \nu$.  In the corner, since at most $\rho$
+    picks are slice-picks, the interior copy-picks miss at most
+    $\rho$ values of an interval of at least $k - 2$ consecutive
+    offsets; once $k \geq 2\rho + 5$ two adjacent pairs at distinct
+    positions exist, and Lemma~\ref{lem:break} forces $w =
+    \sigma^{n}$.  Otherwise $k \leq 2\rho + 4$.
+
+    So assume $w = \sigma^{n}$.  \emph{Mixed scrutinees.}  The corner
+    is stated for the pure chain; the general S-depth-$2$ shape
+    $[\,\epsilon/X\,]\,(g_1\,[\,Y/Z\,]f\,g_2)$ with pass-free flanks
+    (chain2 = empty flanks) has the final pass scan
+    $t = g_1(w)\,[\,Y/Z\,]f(w)\,g_2(w)$: the inner pass scans only
+    $f$'s value, so the runs of $t$ can span the junctions --
+    ``chain2 after flattening'' is not an equality, and the junctions
+    are handled explicitly.  Take $\rho$ and $c_F$ over the whole
+    pass-free skeleton ($g$'s included); the reductions above are
+    unchanged (the sites of a $w$-containing inner pattern lie in
+    $f$'s value).  If the inner pattern $Z$ contains a
+    letter $c \neq \sigma$, each of its $m$ sites places $c$ at one
+    of $f$'s constant positions (the $w$-runs contribute only
+    $\sigma$'s), so $m \leq c_F$ and $k \leq c_F \nu + \rho$.  Hence
+    $Z = \sigma^{\beta'}$: the inner pass tiles each maximal
+    $\sigma$-run of $f$'s value from its left end in chunks of
+    $\beta'$, leaving a tail of $L \bmod \beta' < \beta'$ per run;
+    $f$'s non-$\sigma$ characters survive and separate.  Each maximal
+    $\sigma$-run of $t$ then meets at most the last run of $g_1(w)$,
+    one run of the inner value, and the first run of $g_2(w)$, and is
+    built from whole $w$-copies ($\sigma^{n}$ each; a maximal run
+    never cuts a $w$-copy), within-copy $\sigma$-gaps each inside
+    $Y$'s constants and of length at most $c_Y$, flanking
+    $\sigma$-constants of the $g$'s (together at most $c_F$), and at
+    most one leftover tail of length $< \beta'$ -- interior to the
+    run of $t$ exactly when $g_2(w)$ begins with $\sigma$.  Now
+    decompose $X$ by its maximal $\sigma$-runs:
+    $X = E_0\, \sigma^{\lambda_1} E_1 \cdots
+    \sigma^{\lambda_{\pi'}} E_{\pi'}$.  If an interior copy-pick
+    exists (else $k \leq \rho + 4$), three kills apply:
+    $E_0 \neq \epsilon$ contradicts Lemma~\ref{lem:frames}
+    ($X[0] = w[o+1] = \sigma$); $E_{\pi'} \neq \epsilon$ contradicts
+    it on the other side; and $\pi' = 1$ (an all-$\sigma$ pattern) is
+    impossible because the match covering the successor makes
+    $t[q+1..q+\beta]$ all $\sigma$ while $t[q] = w[o] = \sigma$, so
+    the greedy scan -- which visits every position outside a match,
+    and $q$ is a survivor -- would match at $q$ and delete the pick.
+    So $X$ starts and ends with $\sigma$-runs and $\pi' \geq 2$.
+
+    \emph{Rigidity.}  The $\alpha$-match ends with $X$'s last run:
+    $[q - \lambda_{\pi'}, q)$ is all $\sigma$ and
+    $t[q-\lambda_{\pi'}-1] = X[\beta - \lambda_{\pi'} - 1] \neq
+    \sigma$ (an index $\geq 0$ since $\lambda_{\pi'} \leq \beta-1$);
+    symmetrically on the right.  So the maximal $\sigma$-run of $t$
+    containing the pick is exactly $[q - \lambda_{\pi'},\, q +
+    \lambda_1 + 1)$, of one common length $L^{*} = \lambda_{\pi'} +
+    \lambda_1 + 1$; the pick's whole $w$-copy lies inside it (it is a
+    $\sigma$-block containing $q$), so $\lambda_{\pi'} \geq o$;
+    distinct interior picks get distinct runs.
+
+    \emph{Residue count.}  For each interior copy-pick $p$, the part
+    $A_p$ of its run before its own $w$-copy has length
+    $\lambda_{\pi'} - o_p = j'_p n + s_p$, where $j'_p$ counts the
+    whole $w$-copies inside $A_p$ and $s_p$ the remaining
+    $\sigma$-material: the within-copy gaps around the at most
+    $j'_p$ inner copies (at most $j'_p + 1$ of them, each $\leq
+    c_Y$), the flanking constants of the $g$'s lying in this run
+    (together $\leq c_F$), and the leftover tail if it precedes the
+    pick's $w$-copy ($\leq \beta' - 1$; possible only when that copy
+    lies in $g_2$'s material, since in the pure shape a tail only
+    ends a run).  Uniformly in pure and mixed shapes,
+    \[
+    s_p \;\leq\; (j'_p + 1) c_Y + c_F + \beta' - 1 ;
+    \]
+    and $j'_p n \leq
+    L^{*} \leq 2\beta - 1 \leq 2\pi n + 2c_X - 1$, so $j'_p \leq
+    J := 2\pi + 2c_X$.  The $\lambda_{\pi'} - o_p$ are distinct
+    integers in a window of $n - 2$ consecutive values, hence have
+    distinct residues mod $n$; therefore
+    \[
+    \tfrac{1}{2} |O| (|O| - 1) \;\leq\; \sum_{p \in O}
+    \bigl( (\lambda_{\pi'} - o_p) \bmod n \bigr) \;\leq\; \sum_{p \in
+    O} s_p \;\leq\; \bigl((J+1) c_Y + c_F + \beta' - 1\bigr)\, |O|,
+    \]
+    so $|O| \leq 2(J+1) c_Y + 2c_F + 2\beta' - 1$ and $k \leq |O| +
+    \rho + 2$.  This bounds the corner; assembling the constants of
+    all cases gives
+    $C(E)$, e.g.\ $C \geq 2(2\pi + 2c_X + 1) c_Y + 2c_F + 2\beta' +
+    \rho + 1$.
+\end{proof}
+
+\begin{remark}
+    \label{rem:witnesses2}
+    (\emph{The depth-2 witnesses, at $n = 2$.})  Depth-$2$ chains do
+    realize DB at $n = 2$ -- four witnesses, found by round 11's
+    targeted hunt over the residual corner and verified with the
+    independent evaluator; e.g.\ $w = \mathtt{aa}$,
+    $E = [\epsilon/(w\mathtt{b}w)]\,
+    [(\mathtt{ab}w\mathtt{ba})/\mathtt{b}]\,
+    (\mathtt{b}w\mathtt{a}w\mathtt{b})$, whose final pass deletes
+    $w\mathtt{b}w = \mathtt{aabaa}$ in two matches that each straddle
+    a copy boundary, consuming one copy's $w$-run plus one flanking
+    atom of $F_1$'s runs, leaving prov $(1, 0)$.  Nothing realizes DB
+    at any $n \geq 3$ at depth $2$ (round 10's sweep, round 11's
+    hunt), and Theorem~\ref{thm:depth2finite} now proves it: $n = 2$
+    sits below every threshold of the proof -- the interval of
+    interior offsets $[1, n-2]$ is empty, so frames, breaks and the
+    residue count are all vacuous there.
+\end{remark}
+
+\begin{remark}
+    \label{rem:depth3}
+    (\emph{Depth 3: the first bijections, at the boundary.})  At
+    depth $3$ pure chains do realize DB, for the first time, at $n =
+    3$: with $w = \mathtt{bab}$,
+    $E = [\epsilon/\mathtt{aba}]\,[\epsilon/\mathtt{abbab}]\,
+    [\,w/\mathtt{b}\,](\mathtt{a}w\mathtt{b})$, whose intermediate
+    texts are
+    $\mathtt{a}\,w\,\mathtt{a}\,w\,w$ (three instances after one
+    duplicating pass), then
+    $[\epsilon/\mathtt{abbab}]$ leaves
+    $\mathtt{a}\,[\,b_0\,a_1\,b_2\,]\,[\,a_1\,]\,[\,b_0\,]$
+    (subscripts = labels), and the final deletion leaves prov
+    $(2,1,0)$.  The mirror witness at $w = \mathtt{abb}$ is
+    $[\epsilon/\mathtt{bbb}]\,[\epsilon/\mathtt{bab}]\,
+    [\,\mathtt{ab}w/\mathtt{a}\,](w\,\mathtt{ab})$.
+    Both sit exactly on the boundary of
+    Theorem~\ref{thm:depth2}: the final pattern has $\beta = 3 = n$,
+    every pick has $k < \beta$, the transport kill is vacuous, and
+    the pick structure (two copy-picks at descending offsets $2, 0$,
+    one slice-pick at offset $1$) is the extremal configuration the
+    lemmas permit.  Nothing realizes DB at $n = 4$ up to
+    S-depth $4$ on the swept domains ($389{,}533{,}280$ simulated
+    depth-$3$ and $537{,}476{,}912$ depth-$4$ pipelines;
+    \texttt{round10b\_db.c} modes 3--4), which motivates the
+    following.
+\end{remark}
+
+\begin{conjecture}[budget]
+    \label{conj:budget}
+    A pure chain of S-depth $d$ realizes $\mathrm{DB}(w)$ only for
+    $|w| \leq d + 1$; a concatenation of $p$ chains, only for $|w|
+    \leq p + 1$.  Each pass buys at most one descent step.
+\end{conjecture}
+
+\noindent Together, Theorem~\ref{thm:depth1}, Theorem~\ref{thm:depth2}
+and Theorem~\ref{thm:depth2finite} settle the first two levels of the
+finiteness program: depth $\leq 1$ unconditionally; depth $2$
+unconditionally and completely, pure chains and mixed scrutinees
+alike -- constant final patterns (Theorem~\ref{thm:depth2}) and the
+residual regime of patterns containing $w$
+(Theorem~\ref{thm:depth2finite}, via frames, breaks, rigidity and
+the residue count with its junction-gap term) -- so for every fixed
+expression of S-depth at most $2$, $\{w : E \text{ realizes }
+\mathrm{DB}(w)\}$ is finite.  Combined with
+Lemma~\ref{lem:forcing}: over unbounded alphabets no such expression
+computes reversal, on the distinct-character family avoiding its
+constants, at any length beyond its bound.  Over a fixed finite
+alphabet this exclusion is not available and cannot be, at the
+provenance level, by Theorem~\ref{thm:laundering}.  Depth $\geq 3$
+remains open, with the
+budget conjecture as the candidate mechanism and the depth-$3$
+witnesses of Remark~\ref{rem:depth3} as its extremal cases.
+Confirming the conjecture would give, for every fixed expression $E$
+whatever its depth, a bound $|w| \leq \mathrm{Sdepth}(E) + \#C(E) +
+1$ on DB realizations, excluding $\mathrm{rev} \in L$ over unbounded
+alphabets: reversal demands a descending bijection on every
+distinct-character input avoiding the expression's constants, and no
+fixed expression can supply one beyond its budget.

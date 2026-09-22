@@ -1,0 +1,31 @@
+=== mode t5: crafted chains vs hand-derived forms ===
+CH1 [merge/bb].[b/a]X quadratic exhibit: done
+CH1ctl wrong-formula control: FLAGGED (harness works)
+CH2 [merge/bb].[bb/aa]X rule + P4 run specimen: done
+CH3 T5^3 explosive nesting a^(S+2S^3): done
+CH4-CH8 anchored/U^g count formulas: done
+CH9 [a/merge].CH2 degree collapse: done
+CH10 modulus-(S+1) jitter pinning: done
+mode t5: 4192 checks, 0 failures
+elapsed 0.0s
+====
+=== mode cells: random chains, within-(S,residue) equality ===
+  (cut-explained) m=2 S=5: (1,1,3) vs (1,3,1)
+  (cut-explained) m=2 S=5: (1,1,3) vs (3,1,1)
+  (cut-explained) m=2 S=6: (2,1,3) vs (2,3,1)
+mode cells: 765 exprs computed; cells tested 293507; viol(m=1) 50782; viol(m>1) 71239; unexplained 0
+elapsed 0.9s
+====
+=== mode cells: random chains, within-(S,residue) equality ===
+  (cut-explained) m=2 S=5: (1,1,3) vs (1,3,1)
+  (cut-explained) m=2 S=5: (1,1,3) vs (3,1,1)
+  (cut-explained) m=2 S=6: (2,1,3) vs (2,3,1)
+mode cells: 604 exprs computed; cells tested 231930; viol(m=1) 37302; viol(m>1) 53116; unexplained 0
+elapsed 0.7s
+====
+=== mode cells: random chains, within-(S,residue) equality ===
+  (cut-explained) m=2 S=5: (1,1,3) vs (1,3,1)
+  (cut-explained) m=2 S=5: (1,1,3) vs (3,1,1)
+  (cut-explained) m=2 S=6: (2,1,3) vs (2,3,1)
+mode cells: 695 exprs computed; cells tested 266872; viol(m=1) 45722; viol(m>1) 65320; unexplained 0
+elapsed 0.8s

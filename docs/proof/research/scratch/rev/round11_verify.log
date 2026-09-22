@@ -1,0 +1,29 @@
+=== ROUND 11 verify re-run (round 12: mode 1c added, part 1 unchanged) ===
+--- verify_round11.py all (parts 1, 2-4; 47 s) ---
+PART 1 (replacement elimination, labeled library): 6831200 sims over 33 inputs
+  FDI outputs with c=1 and labeled final replacement: 0
+  [cross-checks] FDI with c>=2, labeled: 0 (T1(a)); DB hits: 0
+  (the c=1 check is shown LIVE by mode 1c: the same sweep with the final replacement drawn from the FULL pass-free library yields many c=1 label-free FDI outputs and still 0 labeled ones)
+  verdict: VERIFIED
+PART 2 (frame alpha/beta): FDI outputs with beta>=n: 3545
+  interior copy-picks checked: 83; adjacent-offset pairs: 0
+  violations: 0 -- VERIFIED
+PART 3 (B-rigidity, uniform w): eligible FDI outputs: 1184
+  interior copy-picks checked: 41
+  violations: 0 -- VERIFIED
+PART 4 (step-D kills, uniform w): FDI outputs with beta>=n: 5665
+  outputs with an interior copy-pick: 41
+  violations: 0 -- VERIFIED
+  (mode 1c, the live control, runs as a separate invocation: verify_round11.py 1c)
+ROUND 11 spot-checks: ALL VERIFIED
+--- verify_round11.py 1c (live control, full replacement library; 53 s) ---
+PART 1c (live control, FULL library incl. label-free): 16147500 sims over 14 inputs
+  FDI outputs with c=1 and LABELED final replacement: 0
+  FDI outputs with c=1 and LABEL-FREE final replacement: 673290  <- the c=1 channel is live
+  [cross-checks] FDI with c>=2, labeled: 0 (T1(a)); DB hits: 0
+  verdict: VERIFIED
+ROUND 11 spot-checks: ALL VERIFIED
+--- round11_hunt phase-2 hit re-verification (round 12) ---
+verify_round12_mixed: 36 MIXED DB HIT lines parsed from round11_hunt.log
+  prov.py re-verification of mixed hits: 36/36 match DB
+  verdict: VERIFIED

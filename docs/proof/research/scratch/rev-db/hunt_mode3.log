@@ -1,0 +1,204 @@
+CROSS deepp 2 9 9 22 9 2 0 19 | # 0 0
+CROSS deepp 3 21 9 4 5 4 19 19 | # 0 0
+CROSS deepp 4 4 9 9 22 22 22 19 | 0 1 2 3 # 4 20
+CROSS deepp 2 20 1 0 0 16 22 19 | # 0 0
+CROSS deepp 3 2 4 1 2 5 1 19 | 0 1 2 # 3 8
+CROSS deepp 4 16 9 5 1 1 4 19 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS deepp 2 1 16 16 0 19 5 19 | 0 1 # 2 2
+CROSS deepp 3 13 1 19 9 2 5 19 | # 0 0
+CROSS deepp 4 22 9 1 4 4 2 19 | # 0 0
+CROSS deepp 2 9 9 2 19 22 9 19 | 0 1 # 2 2
+CROSS deepp 3 21 16 16 9 9 9 19 | # 0 0
+CROSS deepp 4 4 4 22 5 5 16 19 | 0 1 2 3 # 4 20
+CROSS deepp 2 20 1 4 1 1 0 22 | # 0 0
+CROSS deepp 3 2 4 9 19 19 19 22 | 0 1 2 0 1 2 # 6 25
+CROSS deepp 4 16 9 0 9 2 19 22 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS deepp 2 1 1 1 5 4 22 22 | 0 1 # 2 2
+CROSS deepp 3 13 1 5 22 22 1 22 | 0 1 2 0 1 2 # 6 25
+CROSS deepp 4 22 4 9 16 9 1 22 | # 0 0
+CROSS deepp 2 9 16 19 5 5 4 22 | 0 1 # 2 2
+CROSS deepp 3 21 1 1 1 1 5 22 | # 0 0
+CROSS deepp 4 4 4 2 0 19 2 22 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS deepp 2 20 4 16 2 2 2 22 | # 0 0
+CROSS deepp 3 2 1 22 4 4 9 22 | # 0 0
+CROSS deepp 4 16 1 4 19 22 16 22 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS deepp 2 1 4 9 9 9 16 22 | 0 1 # 2 2
+CROSS deepp 3 13 4 0 1 9 0 1 | 0 1 2 0 1 2 # 6 25
+CROSS deepp 4 22 1 22 5 5 19 1 | # 0 0
+CROSS deepp 2 9 4 5 22 1 22 1 | 0 1 # 2 2
+CROSS deepp 3 21 9 9 16 16 22 1 | # 0 0
+CROSS deepp 4 4 16 19 5 2 1 1 | 0 1 2 3 # 4 20
+CROSS deepp 2 20 4 1 1 4 4 1 | # 0 0
+CROSS deepp 3 2 4 2 0 22 5 1 | 0 1 2 0 1 2 # 6 25
+CROSS deepp 4 16 9 16 2 9 5 1 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS deepp 2 1 1 22 4 5 2 1 | 0 1 # 2 2
+CROSS deepp 3 13 4 4 19 1 9 1 | 0 1 2 0 1 2 # 6 25
+CROSS deepp 4 22 9 2 9 16 9 1 | # 0 0
+CROSS deepp 2 9 16 0 4 2 16 1 | 0 1 # 2 2
+CROSS deepp 3 21 16 22 5 4 0 4 | # 0 0
+CROSS deepp 4 4 16 5 1 1 19 4 | 0 1 2 3 # 4 20
+CROSS deepp 2 20 1 9 19 19 22 4 | # 0 0
+CROSS deepp 3 2 4 19 9 2 22 4 | 0 1 2 0 1 2 # 6 25
+CROSS deepp 4 16 16 1 4 4 1 4 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS deepp 2 1 16 2 19 22 4 4 | 0 1 # 2 2
+CROSS deepp 3 13 1 16 16 9 4 4 | 0 1 2 0 1 2 0 1 2 0 1 2 # 12 86
+CROSS deepp 4 22 9 19 5 5 5 4 | # 0 0
+CROSS deepp 2 9 16 4 22 1 2 4 | 0 1 # 2 2
+CROSS deepp 3 21 1 2 0 19 9 4 | # 0 0
+CROSS deepp 4 4 4 0 2 2 9 4 | 0 1 2 3 # 4 20
+CROSS deepp 2 20 16 22 1 4 16 4 | # 0 0
+CROSS deepp 3 2 16 5 0 22 0 5 | 0 1 2 0 1 2 # 6 25
+CROSS deepp 4 16 1 9 16 9 0 5 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS deepp 2 1 16 19 5 5 19 5 | 0 1 # 2 2
+CROSS deepp 3 13 1 1 1 1 22 5 | 0 1 2 0 1 2 # 6 25
+CROSS deepp 4 22 4 5 0 19 1 5 | # 0 0
+CROSS deepp 2 9 4 16 2 2 1 5 | 0 1 0 1 # 4 6
+CROSS deepp 3 21 1 19 4 4 4 5 | # 0 0
+CROSS deepp 4 4 1 4 19 22 5 5 | 0 1 2 3 # 4 20
+CROSS deepp 2 20 4 2 9 9 5 5 | # 0 0
+CROSS deepp 3 2 16 0 4 5 2 5 | 0 1 2 0 1 2 # 6 25
+CROSS deepp 4 16 1 22 22 1 9 5 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS deepp 2 1 4 5 16 16 9 5 | 0 1 # 2 2
+CROSS deepp 3 13 4 9 5 2 16 5 | 0 1 2 0 1 2 # 6 25
+CROSS deepp 4 22 4 0 4 4 0 2 | # 0 0
+CROSS deepp 2 9 4 1 22 22 19 2 | 0 1 # 2 2
+CROSS deepp 3 21 9 5 16 9 19 2 | # 0 0
+CROSS deepp 4 4 16 16 5 5 22 2 | 0 1 2 3 # 4 20
+CROSS deepp 2 20 4 19 1 1 1 2 | # 0 0
+CROSS deepp 3 2 9 4 0 19 4 2 | 0 1 2 0 1 2 # 6 25
+CROSS deepp 4 16 9 2 2 2 4 2 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS deepp 2 1 4 0 4 4 5 2 | 0 1 # 2 2
+CROSS deepp 3 13 4 22 19 22 2 2 | 0 1 2 # 3 8
+CROSS deepp 4 22 9 4 9 9 2 2 | # 0 0
+CROSS deepp 2 9 16 9 4 5 9 2 | 0 1 # 2 2
+CROSS deepp 3 21 4 0 22 1 16 2 | # 0 0
+CROSS deepp 4 4 9 1 16 16 16 2 | 0 1 2 3 # 4 20
+CROSS deepp 2 20 16 5 4 9 0 9 | # 0 0
+CROSS deepp 3 2 16 16 4 5 19 9 | 0 1 2 0 1 2 # 6 25
+CROSS deepp 4 16 4 19 22 1 22 9 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS deepp 2 1 9 4 16 16 22 9 | 0 1 # 2 2
+CROSS deepp 3 13 9 2 5 2 1 9 | 0 1 2 0 1 2 0 1 2 0 1 2 # 12 86
+CROSS deepp 4 22 1 16 1 4 4 9 | # 0 0
+CROSS deepp 2 9 4 22 0 22 5 9 | # 0 0
+CROSS deepp 3 21 9 4 2 9 5 9 | # 0 0
+CROSS deepp 4 4 16 9 1 5 2 9 | 0 1 2 3 # 4 20
+CROSS deepp 2 20 4 0 19 1 9 9 | # 0 0
+CROSS deepp 3 2 9 1 9 16 9 9 | 0 1 2 0 1 2 # 6 25
+CROSS deepp 4 16 9 5 4 2 16 9 | 0 1 2 3 # 4 20
+CROSS deepp 2 1 9 16 5 4 0 16 | 0 1 # 2 2
+CROSS deepp 3 13 4 19 16 22 19 16 | 0 1 2 # 3 8
+CROSS deepp 4 22 16 1 5 16 19 16 | # 0 0
+CROSS deepp 2 9 16 2 22 2 22 16 | 0 1 # 2 2
+CROSS deepp 3 21 1 16 0 4 1 16 | # 0 0
+CROSS deepp 4 4 9 22 2 19 4 16 | 0 1 2 3 # 4 20
+CROSS deepp 2 20 16 4 1 9 4 16 | # 0 0
+CROSS deepp 3 2 1 9 19 5 5 16 | 0 1 2 0 1 2 # 6 25
+CROSS deepp 4 16 4 0 9 22 2 16 | 0 1 2 3 # 4 20
+CROSS deepp 2 1 16 1 4 16 2 16 | 0 1 # 2 2
+CROSS deepp 3 13 16 5 19 2 9 16 | 0 1 2 0 1 2 # 6 25
+CROSS deepp 4 22 1 9 16 1 16 16 | # 0 0
+[deepP3 done] sims 6546420
+CROSS deepr 2 9 1 16 2 19 0 19 | 0 1 # 2 2
+CROSS deepr 3 21 1 4 0 16 0 19 | # 0 0
+CROSS deepr 4 4 1 19 1 2 19 19 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS deepr 2 20 16 5 5 4 22 19 | # 0 0
+CROSS deepr 3 2 16 22 16 22 1 19 | 0 1 2 0 1 2 # 6 25
+CROSS deepr 4 16 9 2 22 19 4 19 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS deepr 2 1 9 1 5 9 4 19 | 0 1 0 1 # 4 6
+CROSS deepr 3 13 4 9 16 5 5 19 | 0 1 2 0 1 2 # 6 25
+CROSS deepr 4 22 4 1 22 4 2 19 | # 0 0
+CROSS deepr 2 9 1 16 5 22 9 19 | 0 1 # 2 2
+CROSS deepr 3 21 1 4 16 16 9 19 | # 0 0
+CROSS deepr 4 4 1 19 22 9 16 19 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS deepr 2 20 16 5 4 5 0 22 | # 0 0
+CROSS deepr 3 2 16 22 9 1 19 22 | 0 1 2 0 1 2 # 6 25
+CROSS deepr 4 16 9 2 19 22 22 22 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS deepr 2 1 9 1 4 16 22 22 | 0 1 # 2 2
+CROSS deepr 3 13 4 9 9 2 1 22 | 0 1 2 0 1 2 # 6 25
+CROSS deepr 4 22 4 1 19 5 4 22 | # 0 0
+CROSS deepr 2 9 1 16 4 1 5 22 | 0 1 # 2 2
+CROSS deepr 3 21 1 4 9 19 2 22 | # 0 0
+CROSS deepr 4 4 1 19 19 16 2 22 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS deepr 2 20 16 5 1 2 9 22 | # 0 0
+CROSS deepr 3 2 16 22 2 4 16 22 | 0 1 2 0 1 2 # 6 25
+CROSS deepr 4 16 9 2 0 1 0 1 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS deepr 2 1 9 1 1 19 19 1 | # 0 0
+CROSS deepr 3 13 4 9 2 9 19 1 | 0 1 2 0 1 2 # 6 25
+CROSS deepr 4 22 4 1 0 2 22 1 | # 0 0
+CROSS deepr 2 9 1 16 1 4 1 1 | 0 1 # 2 2
+CROSS deepr 3 21 1 4 2 22 4 1 | # 0 0
+CROSS deepr 4 4 1 19 0 19 5 1 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS deepr 2 20 16 5 22 9 5 1 | # 0 0
+CROSS deepr 3 2 16 22 5 5 2 1 | 0 1 2 0 1 2 # 6 25
+CROSS deepr 4 16 9 2 16 1 9 1 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS deepr 2 1 9 1 22 22 16 1 | 0 1 0 1 # 4 6
+CROSS deepr 3 13 4 9 5 16 16 1 | 0 1 2 0 1 2 # 6 25
+CROSS deepr 4 22 4 1 16 2 0 4 | # 0 0
+CROSS deepr 2 9 1 16 22 5 19 4 | 0 1 # 2 2
+CROSS deepr 3 21 1 4 5 1 22 4 | # 0 0
+CROSS deepr 4 4 1 19 16 19 1 4 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS deepr 2 20 16 5 19 16 1 4 | # 0 0
+CROSS deepr 3 2 16 22 4 2 4 4 | 0 1 2 0 1 2 # 6 25
+CROSS deepr 4 16 9 2 9 4 5 4 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS deepr 2 1 9 1 19 1 2 4 | # 0 0
+CROSS deepr 3 13 4 9 4 19 9 4 | 0 1 2 0 1 2 # 6 25
+CROSS deepr 4 22 4 1 9 9 9 4 | # 0 0
+CROSS deepr 2 9 1 16 19 2 16 4 | 0 1 # 2 2
+CROSS deepr 3 21 1 4 4 4 0 5 | # 0 0
+CROSS deepr 4 4 1 19 9 22 19 5 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS deepr 2 20 16 5 0 19 22 5 | # 0 0
+CROSS deepr 3 2 16 22 1 9 22 5 | 0 1 2 0 1 2 # 6 25
+CROSS deepr 4 16 9 2 2 5 1 5 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS deepr 2 1 9 1 0 4 4 5 | # 0 0
+CROSS deepr 3 13 4 9 1 22 5 5 | 0 1 2 0 1 2 # 6 25
+CROSS deepr 4 22 4 1 2 16 5 5 | # 0 0
+CROSS deepr 2 9 1 16 0 9 2 5 | 0 1 # 2 2
+CROSS deepr 3 21 1 4 1 5 9 5 | # 0 0
+CROSS deepr 4 4 1 19 2 1 16 5 | 0 1 2 3 0 1 2 3 0 1 2 3 # 12 132
+CROSS deepr 2 20 16 5 16 19 0 2 | # 0 0
+CROSS deepr 3 2 16 22 22 16 0 2 | 0 1 2 0 1 2 # 6 25
+CROSS deepr 4 16 9 2 5 2 19 2 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS deepr 2 1 9 1 16 4 22 2 | 0 1 0 1 # 4 6
+CROSS deepr 3 13 4 9 22 1 1 2 | 0 1 2 0 1 2 # 6 25
+CROSS deepr 4 22 4 1 5 19 4 2 | # 0 0
+CROSS deepr 2 9 1 16 16 9 4 2 | 0 1 # 2 2
+CROSS deepr 3 21 1 4 22 2 5 2 | # 0 0
+CROSS deepr 4 4 1 19 5 4 2 2 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS deepr 2 20 16 5 9 22 9 2 | # 0 0
+CROSS deepr 3 2 16 22 19 19 16 2 | 0 1 2 0 1 2 # 6 25
+CROSS deepr 4 16 9 2 4 9 16 2 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS deepr 2 1 9 1 9 5 0 9 | # 0 0
+CROSS deepr 3 13 4 9 19 4 19 9 | 0 1 2 0 1 2 # 6 25
+CROSS deepr 4 22 4 1 4 22 22 9 | # 0 0
+CROSS deepr 2 9 1 16 9 16 22 9 | 0 1 # 2 2
+CROSS deepr 3 21 1 4 19 9 1 9 | # 0 0
+CROSS deepr 4 4 1 19 4 5 4 9 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS deepr 2 20 16 5 2 1 5 9 | # 0 0
+CROSS deepr 3 2 16 22 0 22 2 9 | 0 1 2 0 1 2 # 6 25
+CROSS deepr 4 16 9 2 1 16 2 9 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS deepr 2 1 9 1 2 2 9 9 | 0 1 # 2 2
+CROSS deepr 3 13 4 9 0 5 16 9 | 0 1 2 0 1 2 # 6 25
+CROSS deepr 4 22 4 1 1 1 0 16 | # 0 0
+CROSS deepr 2 9 1 16 2 19 19 16 | 0 1 # 2 2
+CROSS deepr 3 21 1 4 0 16 19 16 | # 0 0
+CROSS deepr 4 4 1 19 1 2 22 16 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS deepr 2 20 16 5 5 4 1 16 | # 0 0
+CROSS deepr 3 2 16 22 16 22 4 16 | 0 1 2 0 1 2 # 6 25
+CROSS deepr 4 16 9 2 22 19 5 16 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS deepr 2 1 9 1 5 9 5 16 | 0 1 # 2 2
+CROSS deepr 3 13 4 9 16 5 2 16 | 0 1 2 0 1 2 # 6 25
+CROSS deepr 4 22 4 1 22 4 9 16 | # 0 0
+CROSS deepr 2 9 1 16 5 22 16 16 | 0 1 # 2 2
+CROSS deepr 3 21 1 4 16 16 16 16 | # 0 0
+[deepR3 done] sims 12518388
+
+=== SEPARABLE HUNT (mode 3) SUMMARY ===
+pipelines evaluated : 12518388 (undef 3741228, capped 746496)
+cut windows (instances) : 0
+split/bad instances     : 0 / 0
+bad prov block form     : 0
+bad content form        : 0
+DB hits (n>=2)          : 0
+FDI hits (len>=2)      : 0
+rev hits                : 0
+TOTAL VIOLATIONS: 0 -> SEPARABLE RIGIDITY CONFIRMED ON THIS DOMAIN

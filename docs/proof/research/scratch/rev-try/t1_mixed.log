@@ -1,0 +1,6 @@
+T1 grid 11^3 (i,j,k in [0,10], boundaries incl.): VERIFIED
+T1 random 400 to 200: VERIFIED
+T1 intermediates mrg/Lb/Lc/Cc/Bb/T/mrg.b, 8^3 grid: VERIFIED
+T1 prov never DB + injective (300 random): VERIFIED
+T1 laundered L_a.L_b.L_c.E_mix: rev with prov == (): VERIFIED
+T1 THEOREM: ALL VERIFIED

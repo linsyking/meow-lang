@@ -1,0 +1,134 @@
+/usr/bin/time -v python3 -W ignore ../rev-try/verify_r21_deltaclosure.py   (cwd=rev/, evaluator prov.py+lcore.py; wall-clock below)
+CONTEXT: round 21 = CHARTER_deltaclosure.md: (1) the Delta!=0 multi-hit closure,
+(2) the inherited-loophole write-out (Lemma INH), (3) the three report-text fixes
+(done in ROUND20_REPORT.md before this run).  Development runs that preceded this
+final battery (all arithmetic, each well under 60 s, each with the shared
+evaluator where strings were involved): the flag-2 exhibit hand-verification,
+the census aggregations, the firing-set DP for max real hits, and the
+cross-validation heredoc at k=6 — their content is covered by T5/T6d below.
+T5 coordinator flag-2 exhibit: P=b.a^81, R=a^35.b.a^46 on D(7;3)
+  firing set [3, 4, 5, 6]  real anchored hits: 0  idealized hits: [(0, (4, 2)), (1, (4, 1))]
+T5 real channel with zero real hits whose IDEALIZATION is a cross-pair (35 > 3^{0+1} = 3 census-ghosts it): VERIFIED
+T6a EXHIBIT E1: [a^2 b a^4 / b] on D(k;3), k=4..7 (Delta=6, c=2)
+  anchored hits exactly (sigma, target I(b,a-1), depth) = [(0, (2, 1), 3), (1, (3, 1), 12), (2, (4, 3), 27)] at every k=4..7: VERIFIED
+T6b EXHIBIT E2: [a^2 b a^112 / b] on D(5;3) (Delta=114, c=2)
+  hits: [(0, (2, 1), 3), (1, (5, 1), 120), (2, (6, 5), 243)]  mirror I(5,5)=243 at sigma=2; debt (t+1)*D= 342 >= (3^5+1)/2 = 122 ; output mass 934 = S + 5*114
+T6b the debt branch of Lemma D1 + the MR mass bookkeeping: VERIFIED
+T6c Lemma D1 arithmetic: W(u,sigma) - 3^{sigma+1} >= (3^k+1)/2
+T6c for all u<=k, sigma<=k-2 (k=6..9): VERIFIED
+T6d census claims (C enumeration outputs, cross-validated at k=6)
+  /home/cc/projects/meow-lang/docs/proof/research/scratch/rev-try/d6.txt: 80 records, 57 channels: D1 holds, D<0 has no early mirror, max real hits <= 4
+  /home/cc/projects/meow-lang/docs/proof/research/scratch/rev-try/d8.txt: 364 records, 221 channels: D1 holds, D<0 has no early mirror, max real hits <= 4
+  /home/cc/projects/meow-lang/docs/proof/research/scratch/rev-try/d9.txt: 667 records, 372 channels: D1 holds, D<0 has no early mirror, max real hits <= 4
+T6d census D1/no-early-negative-mirror/hit-count<=4: VERIFIED
+T7 Lemma INH: the supply bound + mod-3 + exhibits
+  (a) I(t+1,k)-BotSum(j) >= (3^k+1)/2 and (b) mod-3 separation: VERIFIED
+  k=2: output=aaaaaaaaabaaaaaaaaa survivor1 depth=9=I(2,2) (mirror), inserted mass 9 >= (3^k+1)/2 = 5
+  k=3: output=aaaaaaaaaaaaaaaaaaaa... survivor1 depth=27=I(3,3) (mirror), inserted mass 27 >= (3^k+1)/2 = 14
+T7 the inherited-at-mirror-depth survivor with top-scale inserted mass (Lemma INH exhibit): VERIFIED
+ROUND 21 MACHINE VERDICT: see per-test lines above (T5 coverage note; T6a/b drifting-channel and debt exhibits; T6c/d Lemma D1 + census; T7 Lemma INH)
+  (a) I(t+1,k)-BotSum(j) >= (3^k+1)/2 and (b) mod-3 separation: VERIFIED
+	Command being timed: "python3 -W ignore ../rev-try/verify_r21_deltaclosure.py" KB
+
+================ CENSUS RUNS (the enumeration; cwd=rev-try/) =================
+gcc -O2 -o round21_delta round21_delta.c
+/usr/bin/time -f 'k=%k wall=%es maxrss=%MKB' ./round21_delta K > dK.txt   (K=5,6,8,9)
+Output summaries (stderr):
+  k=5: collinear-signed candidate triples=33486  surviving records=29
+  k=6: collinear-signed candidate triples=166995 surviving records=80
+  k=8: collinear-signed candidate triples=2062928 surviving records=364  (wall 0.21s)
+  k=9: collinear-signed candidate triples=5761734 surviving records=667  (wall 0.61s)
+PROCESS (honest): census v1 (before the tightened early-firing window) gave
+81/384/721 records at k=6/8/9.  Hand analysis of the v1 record for (Delta=-3,
+c=8) — round 20's T3d anomaly channel — showed it passed v1's constraints via
+t1=3 early firings, but the early firings force the FIRST firing at
+tau0 <= sigma1 - t1, where the trailing flank must fit (p1 <= 3^{tau0+1}),
+hence the NECESSARY tightened window c <= Delta + 3^{sigma1-t1+1}; under it
+(-3,8) at t1=3 needs p1 >= 11 at firing 0 but p1 <= 3: killed as a ghost.
+Census v2 (the committed d*.txt) applies the tightening: 80/364/667.  Both
+versions satisfy Lemma D1 (0 violations); the tightening removes spurious
+configurations only, so all census claims are stated at v2 = the stronger
+filter.  The v1 numbers are preserved here for the record.
+
+================ CROSS-VALIDATION (independent re-implementation) ==========
+python3 crossval_r21.py K   (cwd=rev-try/, K=5,6; slow Python re-implementation
+of the same necessary constraints, compared record-set-identical to the C
+output):
+  crossval k=5: python=29 C=29 identical=True   (wall 0.08s)
+  crossval k=6: python=80 C=80 identical=True  (wall 0.30s)
+(plus the pre-tightening heredoc cross-check at k=6 during development:
+81 = 81 identical, matching v1.)
+
+================ ARTIFACTS ==========================================
+round21_delta.c (the census; necessary constraints only = a SUPERSET of real
+channels: collinearity of (t_i, W_i) with integer slope Delta != 0, t-spacings
+within sigma-spacings, FIT at the first hit with the tightened early-firing
+window, output-depth monotonicity), d5/d6/d8/d9.txt (the census records),
+crossval_r21.py, verify_r21_deltaclosure.py (this battery), ROUND21_REPORT.md.
+WALL 0.20 s for the battery; every recorded run individually well under the 1-minute rule; battery exit 0.
+
+================ ROUND 21b (the two-sided census window) ============
+/usr/bin/time -v python3 -W ignore ../rev-try/verify_r21_deltaclosure.py   (cwd=rev/, evaluator prov.py+lcore.py; wall-clock below)
+CONTEXT: the coordinator's round-21 verification flagged that my v1->v2 census
+tightening (the early-firing pigeonhole tau0 <= sigma1 - t1) was applied ONE-
+SIDEDLY (upper bound c <= Delta + 3^{sigma1-t1+1} only).  It is TWO-SIDED by
+the same pigeonhole: c >= -p0 >= -3^{tau0} >= -3^{sigma1-t1} (the leading
+flank p0 <= 3^{tau0} at the first firing).  FIX: round21_delta.c and
+crossval_r21.py now apply both sides.
+
+Re-run: gcc -O2 -o round21_delta round21_delta.c ; ./round21_delta K > dK.txt  (K=5,6,8,9, /usr/bin/time):
+  k=5: collinear-signed candidate triples=33486  surviving records=29
+  k=6: collinear-signed candidate triples=166995 surviving records=80
+  k=8: collinear-signed candidate triples=2062928 surviving records=361  (wall 0.21s; was 364 in v2: 3 ghosts removed)
+  k=9: collinear-signed candidate triples=5761734 surviving records=651  (wall 0.60s; was 667 in v2: 16 ghosts removed)
+  = the coordinator's corrected numbers 29/80/361/651 exactly.  Distinct
+  (Delta,c) channels: 23/57/218/365.
+Cross-validation (two-sided, slow Python re-implementation):
+  crossval k=5: python=29 C=29 identical=True   (wall 0.09s)
+  crossval k=6: python=80 C=80 identical=True  (wall 0.29s)
+Mirror-branch populations UNCHANGED from v2 (all 19 removed ghosts are
+non-mirror): d6: 18 debt + 29 window; d8: 78 debt + 74 window; d9: 124 debt
++ 108 window — the window/debt dichotomy stands in exactly the same shape.
+The <= 4-hit DP bound only tightens (a fortiori on a smaller census).
+The example ghost (coordinator's): (sigma=(3,6,7), targets
+((4,3),(7,2),(8,1)), t1=1, Delta=3, c=-16): needs p0 >= 16 > 9 = 3^2.
+
+Battery re-run on the corrected census (this section's output):
+T5 coordinator flag-2 exhibit: P=b.a^81, R=a^35.b.a^46 on D(7;3)
+  firing set [3, 4, 5, 6]  real anchored hits: 0  idealized hits: [(0, (4, 2)), (1, (4, 1))]
+T5 real channel with zero real hits whose IDEALIZATION is a cross-pair (35 > 3^{0+1} = 3 census-ghosts it): VERIFIED
+T6a EXHIBIT E1: [a^2 b a^4 / b] on D(k;3), k=4..7 (Delta=6, c=2)
+  anchored hits exactly (sigma, target I(b,a-1), depth) = [(0, (2, 1), 3), (1, (3, 1), 12), (2, (4, 3), 27)] at every k=4..7: VERIFIED
+T6b EXHIBIT E2: [a^2 b a^112 / b] on D(5;3) (Delta=114, c=2)
+  hits: [(0, (2, 1), 3), (1, (5, 1), 120), (2, (6, 5), 243)]  mirror I(5,5)=243 at sigma=2; debt (t+1)*D= 342 >= (3^5+1)/2 = 122 ; output mass 934 = S + 5*114
+T6b the debt branch of Lemma D1 + the MR mass bookkeeping: VERIFIED
+T6c Lemma D1 arithmetic: W(u,sigma) - 3^{sigma+1} >= (3^k+1)/2
+T6c for all u<=k, sigma<=k-2 (k=6..9): VERIFIED
+T6d census claims (C enumeration outputs, cross-validated at k=6)
+  /home/cc/projects/meow-lang/docs/proof/research/scratch/rev-try/d6.txt: 80 records, 57 channels: D1 holds, D<0 has no early mirror, max real hits <= 4
+  /home/cc/projects/meow-lang/docs/proof/research/scratch/rev-try/d8.txt: 361 records, 218 channels: D1 holds, D<0 has no early mirror, max real hits <= 4
+  /home/cc/projects/meow-lang/docs/proof/research/scratch/rev-try/d9.txt: 651 records, 365 channels: D1 holds, D<0 has no early mirror, max real hits <= 4
+T6d census D1/no-early-negative-mirror/hit-count<=4: VERIFIED
+T7 Lemma INH: the supply bound + mod-3 + exhibits
+  (a) I(t+1,k)-BotSum(j) >= (3^k+1)/2 and (b) mod-3 separation: VERIFIED
+  k=2: output=aaaaaaaaabaaaaaaaaa survivor1 depth=9=I(2,2) (mirror), inserted mass 9 >= (3^k+1)/2 = 5
+  k=3: output=aaaaaaaaaaaaaaaaaaaa... survivor1 depth=27=I(3,3) (mirror), inserted mass 27 >= (3^k+1)/2 = 14
+T7 the inherited-at-mirror-depth survivor with top-scale inserted mass (Lemma INH exhibit): VERIFIED
+ROUND 21 MACHINE VERDICT: see per-test lines above (T5 coverage note; T6a/b drifting-channel and debt exhibits; T6c/d Lemma D1 + census; T7 Lemma INH)
+WALL 0.19 s  (battery, round 21b re-run on the corrected census)
+ROUND21_REPORT.md updated: sec 2 numbers (29/80/361/651;
+23/57/218/365), the three-version process record, the E3 side remark fixed
+(a-mass depth 35, not the character position 36; 35 is not an interval sum
+and the copy plants nothing), the ledger census line annotated.
+NOTHING HAND-PROVED MOVES: D1/D2/D3/MR/INH were proved at the real-pass
+level and never used the census; the census is corroboration + the
+hit-count bound.
+
+================ 21b addendum (text-only; coordinator's one-liner) =====
+The k=5 distinct-(Delta,c) channel count in sec 2 and this log was 13 —
+STALE: my counting one-liner never matched the D field (compared the token
+'D' against the field 'D=6'), so it counted distinct c values only.  The
+correct count is 23 (29 records / 23 channels, re-verified with a proper
+parse).  Fixed in ROUND21_REPORT.md sec 2 and both log occurrences; the
+k=6/8/9 counts (57/218/365) were computed correctly and stand.  No
+re-run needed; everything else stands as verified.

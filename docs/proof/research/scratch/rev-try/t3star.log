@@ -1,0 +1,26 @@
+=== T3* rational correlation family ===
+  (c,d)=(0,1) family j=c(i+k)/d, 351 grid + 300 random + intermediates: VERIFIED
+  (c,d)=(1,1) family j=c(i+k)/d, 351 grid + 300 random + intermediates: VERIFIED
+  (c,d)=(2,1) family j=c(i+k)/d, 351 grid + 300 random + intermediates: VERIFIED
+  (c,d)=(3,1) family j=c(i+k)/d, 351 grid + 300 random + intermediates: VERIFIED
+  (c,d)=(1,2) family j=c(i+k)/d, 676 grid + 300 random + intermediates: VERIFIED
+  (c,d)=(3,2) family j=c(i+k)/d, 676 grid + 300 random + intermediates: VERIFIED
+  (c,d)=(2,3) family j=c(i+k)/d, 1001 grid + 300 random + intermediates: VERIFIED
+  (c,d)=(5,2) family j=c(i+k)/d, 676 grid + 300 random + intermediates: VERIFIED
+  (c,d)=(4,3) family j=c(i+k)/d, 1001 grid + 300 random + intermediates: VERIFIED
+  (c,d)=(1,3) family j=c(i+k)/d, 1001 grid + 300 random + intermediates: VERIFIED
+  T3* prov never DB + injective (200 random x2): VERIFIED
+T3*: ALL VERIFIED
+=== Lemma-S stress tests (cross-lane, same-letter w2) ===
+  ST1 [merge/bb].[b/a]X total = S*floor((S+2)/2) (quadratic): REFUTED
+  ST2 [aa/a]X totals (S=5: (2,2,1)->3 vs (3,1,1)->4): unexpected
+  -> Lemma S must be stated as f(S) + O(1) jitter (or on cells);
+     S-exact and affine forms are both refuted.
+  (c,d)=(1,3) family j=c(i+k)/d, 1001 grid + 300 random + intermediates: VERIFIED
+  T3* prov never DB + injective (200 random x2): VERIFIED
+T3*: ALL VERIFIED
+=== Lemma-S stress tests (cross-lane, same-letter w2) ===
+  ST1 [merge/bb].[b/a]X a-count = S*floor((S+2)/2) (quadratic): VERIFIED
+  ST2 [aa/a]X a-counts (S=5: (2,2,1)->3 vs (3,1,1)->4): CONFIRMED (not an S-function)
+  -> Lemma S must be stated as f(S) + O(1) jitter (or on cells);
+     S-exact and affine forms are both refuted.

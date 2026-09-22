@@ -1,0 +1,5 @@
+E_rev == rev, 11^3 grid incl. zero boundaries: VERIFIED
+E_rev == rev, 600 random to 250: VERIFIED
+intermediates + S-functional totals, 8^3 grid: VERIFIED
+E_rev run structure = (k, j, i) affine, 200 random: VERIFIED
+13.5s

@@ -1,0 +1,8 @@
+[A] random (depth 0-4): 4000 trials, defined 3675, undef 325, bad_prov 0, bad_form 0, DB 0, rev 0, FDI(len>=2) 0
+[A2] random (depth 5-8): 1500 trials, defined 1241, undef 259, bad_prov 0, bad_form 0, DB 0, rev 0
+[A3] random (Gamma={a,b,z}, depth 0-6): 1200 trials, defined 1057, undef 143, bad_prov 0, bad_form 0, DB 0, rev 0
+[B] adversarial: 21 expressions x 5 lengths = 105 trials; cumulative bad_prov 0, bad_form 0, DB 0, rev 0
+[C] instrumented: 2500 trials, 1170 match windows fired, cut_instances 0, split_instances 0, bad_instances 0, bad_const_label 0, cross_mismatch 0 (+0 undef-mismatches)
+
+TOTAL VIOLATIONS: 0
+VERDICT: ALL CLEAN -- theorem (a),(b),(c) and the copy-alignment engine hold on this domain

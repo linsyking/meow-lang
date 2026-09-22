@@ -1,0 +1,7 @@
+1  E_block on {a^i b^k}, 15^2 grid + 500 random: VERIFIED
+2  E_alt on {(ab)^k aa}, k=1..69 + uniqueness: VERIFIED
+3  L1 [b/X](X.mrg)=b.mrg, L2 [B/X](mrg.X.mrg)=mrg.B.mrg, 8^3: VERIFIED
+4  stratified-picks counterexamples [X/b]X and [X/a]X: dec >= k (k=1..6, S-depth 2): VERIFIED (naive dec/LDS bound FALSE)
+5  FP spot-check [bab/aa]X uniform-bite structure: VERIFIED
+
+COORDINATOR BATTERY (rev-try round 16): ALL VERIFIED

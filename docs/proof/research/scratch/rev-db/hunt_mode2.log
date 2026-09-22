@@ -1,0 +1,456 @@
+CROSS chain 2 9 1 2 0 19 1 19 0 19 | 0 1 # 2 2
+CROSS chain 3 21 2 1 19 19 2 19 0 19 | 0 1 2 0 1 2 0 1 2 0 1 2 # 12 86
+CROSS chain 4 4 19 19 1 19 0 1 0 19 | # 0 0
+CROSS chain 2 20 4 2 1 19 1 1 0 19 | # 0 0
+CROSS chain 3 2 0 4 4 19 2 1 0 19 | 0 1 2 0 1 2 0 1 2 0 1 2 # 12 86
+CROSS chain 4 16 1 19 2 19 0 4 0 19 | 0 1 2 3 0 1 2 3 0 1 2 3 # 12 132
+CROSS chain 2 1 9 2 2 19 1 4 0 19 | 0 1 # 2 2
+CROSS chain 3 13 19 4 9 19 2 4 0 19 | 0 1 2 0 1 2 0 1 2 # 9 51
+CROSS chain 4 22 4 19 0 1 0 2 0 19 | # 0 0
+CROSS chain 2 9 0 9 0 1 1 2 0 19 | # 0 0
+CROSS chain 3 21 1 4 19 1 2 2 0 19 | # 0 0
+CROSS chain 4 4 9 19 1 1 0 9 0 19 | 0 1 2 3 # 4 20
+CROSS chain 2 20 19 9 1 1 1 9 0 19 | # 0 0
+CROSS chain 3 2 2 4 4 1 2 9 0 19 | 0 1 2 0 1 2 # 6 25
+CROSS chain 4 16 0 1 2 1 0 19 19 19 | # 0 0
+CROSS chain 2 1 4 9 2 1 1 19 19 19 | 0 1 0 1 # 4 6
+CROSS chain 3 13 9 4 9 1 2 19 19 19 | 0 1 2 0 1 2 0 1 2 0 1 2 0 1 2 0 1 2 0 1 2 0 1 2 # 24 316
+CROSS chain 4 22 19 1 0 4 0 1 19 19 | # 0 0
+CROSS chain 2 9 2 9 0 4 1 1 19 19 | 0 1 0 1 # 4 6
+CROSS chain 3 21 0 2 19 4 2 1 19 19 | # 0 0
+CROSS chain 4 4 4 1 1 4 0 4 19 19 | # 0 0
+CROSS chain 2 20 9 9 1 4 1 4 19 19 | # 0 0
+CROSS chain 3 2 1 2 4 4 2 4 19 19 | 0 1 2 # 3 8
+CROSS chain 4 16 2 1 2 4 0 2 19 19 | 0 1 2 3 # 4 20
+CROSS chain 2 1 19 19 9 4 1 2 19 19 | 0 1 # 2 2
+CROSS chain 3 13 4 2 9 4 2 2 19 19 | 0 1 2 # 3 8
+CROSS chain 4 22 9 1 0 2 0 9 19 19 | # 0 0
+CROSS chain 2 9 1 19 19 2 1 9 19 19 | # 0 0
+CROSS chain 3 21 2 2 19 2 2 9 19 19 | # 0 0
+CROSS chain 4 4 19 4 1 2 0 19 1 19 | # 0 0
+CROSS chain 2 20 4 19 4 2 1 19 1 19 | # 0 0
+CROSS chain 3 2 0 9 4 2 2 19 1 19 | 0 1 2 0 1 2 0 1 2 # 9 51
+CROSS chain 4 16 1 4 2 2 0 1 1 19 | # 0 0
+CROSS chain 2 1 9 19 9 2 1 1 1 19 | 0 1 # 2 2
+CROSS chain 3 13 19 9 9 2 2 1 1 19 | 0 1 2 0 1 2 0 1 2 0 1 2 # 12 86
+CROSS chain 4 22 4 4 0 9 0 4 1 19 | 0 1 2 3 # 4 20
+CROSS chain 2 9 0 1 19 9 1 4 1 19 | 0 1 # 2 2
+CROSS chain 3 21 1 9 19 9 2 4 1 19 | 0 1 2 0 1 2 # 6 25
+CROSS chain 4 4 9 4 1 9 0 2 1 19 | 0 1 2 3 # 4 20
+CROSS chain 2 20 19 1 4 9 1 2 1 19 | # 0 0
+CROSS chain 3 2 2 9 4 9 2 2 1 19 | 0 1 2 0 1 2 # 6 25
+CROSS chain 4 16 0 2 2 9 0 9 1 19 | 0 1 2 3 0 1 2 3 0 1 2 3 # 12 132
+CROSS chain 2 1 4 1 9 9 1 9 1 19 | 0 1 0 1 # 4 6
+CROSS chain 3 13 9 9 9 9 2 9 1 19 | 0 1 2 0 1 2 0 1 2 # 9 51
+CROSS chain 4 22 19 2 0 19 19 19 4 19 | # 0 0
+CROSS chain 2 9 2 1 19 19 4 19 4 19 | 0 1 0 1 0 1 0 1 # 8 20
+CROSS chain 3 21 0 19 1 19 9 19 4 19 | # 0 0
+CROSS chain 4 4 4 2 1 19 19 1 4 19 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS chain 2 20 9 1 4 19 4 1 4 19 | # 0 0
+CROSS chain 3 2 1 19 2 19 9 1 4 19 | 0 1 2 0 1 2 0 1 2 0 1 2 # 12 86
+CROSS chain 4 16 2 2 2 19 19 4 4 19 | 0 1 2 3 0 1 2 3 0 1 2 3 0 1 2 3 # 16 224
+CROSS chain 2 1 19 4 9 19 4 4 4 19 | 0 1 # 2 2
+CROSS chain 3 13 4 19 0 1 9 4 4 19 | 0 1 2 # 3 8
+CROSS chain 4 22 9 2 0 1 19 2 4 19 | 0 1 2 3 # 4 20
+CROSS chain 2 9 1 4 19 1 4 2 4 19 | 0 1 # 2 2
+CROSS chain 3 21 2 19 1 1 9 2 4 19 | 0 1 2 0 1 2 0 1 2 0 1 2 # 12 86
+CROSS chain 4 4 19 9 1 1 19 9 4 19 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS chain 2 20 4 4 4 1 4 9 4 19 | # 0 0
+CROSS chain 3 2 0 1 2 1 9 9 4 19 | # 0 0
+CROSS chain 4 16 1 9 2 1 19 19 2 19 | 0 1 2 3 0 1 2 3 0 1 2 3 0 1 2 3 0 1 2 3 0 1 2 3 # 24 480
+CROSS chain 2 1 9 4 9 1 4 19 2 19 | 0 1 0 1 0 1 0 1 # 8 20
+CROSS chain 3 13 19 1 0 4 9 19 2 19 | 0 1 2 0 1 2 0 1 2 0 1 2 0 1 2 0 1 2 0 1 2 0 1 2 0 1 2 # 27 396
+CROSS chain 4 22 4 9 0 4 19 1 2 19 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS chain 2 9 0 2 19 4 4 1 2 19 | 0 1 0 1 # 4 6
+CROSS chain 3 21 1 1 1 4 9 1 2 19 | 0 1 2 0 1 2 0 1 2 0 1 2 # 12 86
+CROSS chain 4 4 9 9 1 4 19 4 2 19 | 0 1 2 3 # 4 20
+CROSS chain 2 20 19 2 4 4 4 4 2 19 | # 0 0
+CROSS chain 3 2 2 1 2 4 9 4 2 19 | 0 1 2 0 1 2 0 1 2 0 1 2 # 12 86
+CROSS chain 4 16 0 19 9 4 19 2 2 19 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS chain 2 1 4 2 9 4 4 2 2 19 | 0 1 # 2 2
+CROSS chain 3 13 9 1 0 2 9 2 2 19 | 0 1 2 0 1 2 0 1 2 0 1 2 0 1 2 0 1 2 0 1 2 0 1 2 # 24 316
+CROSS chain 4 22 19 19 19 2 19 9 2 19 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS chain 2 9 2 2 19 2 4 9 2 19 | 0 1 0 1 0 1 # 6 12
+CROSS chain 3 21 0 4 1 2 9 9 2 19 | 0 1 2 0 1 2 0 1 2 0 1 2 # 12 86
+CROSS chain 4 4 4 19 4 2 19 19 9 19 | 0 1 2 3 0 1 2 3 0 1 2 3 # 12 132
+CROSS chain 2 20 9 2 4 2 4 19 9 19 | # 0 0
+CROSS chain 3 2 1 4 2 2 9 19 9 19 | 0 1 2 0 1 2 # 6 25
+CROSS chain 4 16 2 19 9 2 19 1 9 19 | 0 1 2 3 0 1 2 3 0 1 2 3 0 1 2 3 # 16 224
+CROSS chain 2 1 19 9 9 2 4 1 9 19 | 0 1 0 1 # 4 6
+CROSS chain 3 13 4 4 0 9 9 1 9 19 | 0 1 2 0 1 2 0 1 2 0 1 2 0 1 2 # 15 130
+CROSS chain 4 22 9 19 19 9 19 4 9 19 | 0 1 2 3 # 4 20
+CROSS chain 2 9 1 9 19 9 4 4 9 19 | 0 1 # 2 2
+CROSS chain 3 21 2 4 1 9 9 4 9 19 | 0 1 2 0 1 2 # 6 25
+CROSS chain 4 4 19 1 4 9 19 2 9 19 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS chain 2 20 4 9 4 9 4 2 9 19 | # 0 0
+CROSS chain 3 2 0 2 2 9 9 2 9 19 | # 0 0
+CROSS chain 4 16 1 1 9 9 19 9 9 19 | 0 1 2 3 0 1 2 3 0 1 2 3 # 12 132
+CROSS chain 2 1 9 9 9 9 4 9 9 19 | 0 1 # 2 2
+CROSS chain 3 13 19 2 0 19 0 19 0 1 | # 0 0
+CROSS chain 4 22 4 1 19 19 1 19 0 1 | # 0 0
+CROSS chain 2 9 0 19 1 19 2 19 0 1 | # 0 0
+CROSS chain 3 21 1 2 1 19 0 1 0 1 | # 0 0
+CROSS chain 4 4 9 1 4 19 1 1 0 1 | # 0 0
+CROSS chain 2 20 19 19 2 19 2 1 0 1 | # 0 0
+CROSS chain 3 2 2 2 2 19 0 4 0 1 | # 0 0
+CROSS chain 4 16 0 4 9 19 1 4 0 1 | # 0 0
+CROSS chain 2 1 4 19 0 1 2 4 0 1 | # 0 0
+CROSS chain 3 13 9 2 0 1 0 2 0 1 | # 0 0
+CROSS chain 4 22 19 4 19 1 1 2 0 1 | # 0 0
+CROSS chain 2 9 2 19 1 1 2 2 0 1 | # 0 0
+CROSS chain 3 21 0 9 1 1 0 9 0 1 | # 0 0
+CROSS chain 4 4 4 4 4 1 1 9 0 1 | # 0 0
+CROSS chain 2 20 9 19 2 1 2 9 0 1 | # 0 0
+CROSS chain 3 2 1 9 2 1 0 19 19 1 | # 0 0
+CROSS chain 4 16 2 4 9 1 1 19 19 1 | # 0 0
+CROSS chain 2 1 19 1 0 4 2 19 19 1 | # 0 0
+CROSS chain 3 13 4 9 0 4 0 1 19 1 | # 0 0
+CROSS chain 4 22 9 4 19 4 1 1 19 1 | # 0 0
+CROSS chain 2 9 1 1 1 4 2 1 19 1 | # 0 0
+CROSS chain 3 21 2 9 1 4 0 4 19 1 | # 0 0
+CROSS chain 4 4 19 2 4 4 1 4 19 1 | # 0 0
+CROSS chain 2 20 4 1 2 4 2 4 19 1 | # 0 0
+CROSS chain 3 2 0 19 9 4 0 2 19 1 | # 0 0
+CROSS chain 4 16 1 2 9 4 1 2 19 1 | # 0 0
+CROSS chain 2 1 9 1 0 2 2 2 19 1 | # 0 0
+CROSS chain 3 13 19 19 19 2 0 9 19 1 | # 0 0
+CROSS chain 4 22 4 2 19 2 1 9 19 1 | # 0 0
+CROSS chain 2 9 0 4 1 2 2 9 19 1 | # 0 0
+CROSS chain 3 21 1 19 4 2 0 19 1 1 | 0 1 2 # 3 8
+CROSS chain 4 4 9 2 4 2 1 19 1 1 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS chain 2 20 19 4 2 2 2 19 1 1 | # 0 0
+CROSS chain 3 2 2 19 9 2 0 1 1 1 | # 0 0
+CROSS chain 4 16 0 9 9 2 1 1 1 1 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS chain 2 1 4 4 0 9 2 1 1 1 | 0 1 0 1 # 4 6
+CROSS chain 3 13 9 19 19 9 0 4 1 1 | 0 1 2 # 3 8
+CROSS chain 4 22 19 9 19 9 1 4 1 1 | # 0 0
+CROSS chain 2 9 2 4 1 9 2 4 1 1 | 0 1 0 1 # 4 6
+CROSS chain 3 21 0 1 4 9 0 2 1 1 | # 0 0
+CROSS chain 4 4 4 9 4 9 1 2 1 1 | 0 1 2 3 # 4 20
+CROSS chain 2 20 9 4 2 9 2 2 1 1 | # 0 0
+CROSS chain 3 2 1 1 9 9 0 9 1 1 | 0 1 2 0 1 2 # 6 25
+CROSS chain 4 16 2 9 9 9 1 9 1 1 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS chain 2 1 19 2 0 19 9 9 1 1 | 0 1 # 2 2
+CROSS chain 3 13 4 1 19 19 19 19 4 1 | 0 1 2 0 1 2 # 6 25
+CROSS chain 4 22 9 9 19 19 4 19 4 1 | 0 1 2 3 # 4 20
+CROSS chain 2 9 1 2 1 19 9 19 4 1 | 0 1 0 1 # 4 6
+CROSS chain 3 21 2 1 4 19 19 1 4 1 | # 0 0
+CROSS chain 4 4 19 19 2 19 4 1 4 1 | 0 1 2 3 0 1 2 3 0 1 2 3 # 12 132
+CROSS chain 2 20 4 2 2 19 9 1 4 1 | # 0 0
+CROSS chain 3 2 0 4 9 19 19 4 4 1 | 0 1 2 0 1 2 # 6 25
+CROSS chain 4 16 1 19 0 1 4 4 4 1 | # 0 0
+CROSS chain 2 1 9 2 0 1 9 4 4 1 | # 0 0
+CROSS chain 3 13 19 4 19 1 19 2 4 1 | # 0 0
+CROSS chain 4 22 4 19 1 1 4 2 4 1 | 0 1 2 3 # 4 20
+CROSS chain 2 9 0 9 1 1 9 2 4 1 | # 0 0
+CROSS chain 3 21 1 4 4 1 19 9 4 1 | # 0 0
+CROSS chain 4 4 9 19 2 1 4 9 4 1 | 0 1 2 3 0 1 2 3 0 1 2 3 0 1 2 3 # 16 224
+CROSS chain 2 20 19 9 2 1 9 9 4 1 | # 0 0
+CROSS chain 3 2 2 4 9 1 19 19 2 1 | 0 1 2 0 1 2 0 1 2 0 1 2 # 12 86
+CROSS chain 4 16 0 1 0 4 4 19 2 1 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS chain 2 1 4 9 0 4 9 19 2 1 | 0 1 0 1 # 4 6
+CROSS chain 3 13 9 4 19 4 19 1 2 1 | # 0 0
+CROSS chain 4 22 19 1 1 4 4 1 2 1 | # 0 0
+CROSS chain 2 9 2 9 1 4 9 1 2 1 | 0 1 0 1 0 1 0 1 # 8 20
+CROSS chain 3 21 0 2 4 4 19 4 2 1 | # 0 0
+CROSS chain 4 4 4 1 2 4 4 4 2 1 | 0 1 2 3 0 1 2 3 0 1 2 3 0 1 2 3 # 16 224
+CROSS chain 2 20 9 9 2 4 9 4 2 1 | # 0 0
+CROSS chain 3 2 1 2 9 4 19 2 2 1 | 0 1 2 0 1 2 # 6 25
+CROSS chain 4 16 2 1 0 2 4 2 2 1 | # 0 0
+CROSS chain 2 1 19 19 19 2 9 2 2 1 | 0 1 0 1 # 4 6
+CROSS chain 3 13 4 2 19 2 19 9 2 1 | 0 1 2 0 1 2 # 6 25
+CROSS chain 4 22 9 1 1 2 4 9 2 1 | # 0 0
+CROSS chain 2 9 1 19 4 2 9 9 2 1 | 0 1 0 1 # 4 6
+CROSS chain 3 21 2 2 4 2 19 19 9 1 | # 0 0
+CROSS chain 4 4 19 4 2 2 4 19 9 1 | 0 1 2 3 # 4 20
+CROSS chain 2 20 4 19 9 2 9 19 9 1 | # 0 0
+CROSS chain 3 2 0 9 9 2 19 1 9 1 | # 0 0
+CROSS chain 4 16 1 4 0 9 4 1 9 1 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS chain 2 1 9 19 19 9 9 1 9 1 | 0 1 # 2 2
+CROSS chain 3 13 19 9 19 9 19 4 9 1 | 0 1 2 # 3 8
+CROSS chain 4 22 4 4 1 9 4 4 9 1 | # 0 0
+CROSS chain 2 9 0 1 4 9 9 4 9 1 | # 0 0
+CROSS chain 3 21 1 9 4 9 19 2 9 1 | # 0 0
+CROSS chain 4 4 9 4 2 9 4 2 9 1 | 0 1 2 3 # 4 20
+CROSS chain 2 20 19 1 9 9 9 2 9 1 | # 0 0
+CROSS chain 3 2 2 9 9 9 19 9 9 1 | 0 1 2 0 1 2 # 6 25
+CROSS chain 4 16 0 2 0 19 2 9 9 1 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS chain 2 1 4 1 19 19 0 19 0 4 | 0 1 # 2 2
+CROSS chain 3 13 9 9 19 19 1 19 0 4 | 0 1 2 0 1 2 0 1 2 # 9 51
+CROSS chain 4 22 19 2 1 19 2 19 0 4 | 0 1 2 3 # 4 20
+CROSS chain 2 9 2 1 4 19 0 1 0 4 | # 0 0
+CROSS chain 3 21 0 19 2 19 1 1 0 4 | # 0 0
+CROSS chain 4 4 4 2 2 19 2 1 0 4 | 0 1 2 3 0 1 2 3 0 1 2 3 0 1 2 3 0 1 2 3 0 1 2 3 # 24 480
+CROSS chain 2 20 9 1 9 19 0 4 0 4 | # 0 0
+CROSS chain 3 2 1 19 0 1 1 4 0 4 | # 0 0
+CROSS chain 4 16 2 2 0 1 2 4 0 4 | # 0 0
+CROSS chain 2 1 19 4 19 1 0 2 0 4 | # 0 0
+CROSS chain 3 13 4 19 1 1 1 2 0 4 | 0 1 2 # 3 8
+CROSS chain 4 22 9 2 1 1 2 2 0 4 | # 0 0
+CROSS chain 2 9 1 4 4 1 0 9 0 4 | # 0 0
+CROSS chain 3 21 2 19 2 1 1 9 0 4 | 0 1 2 0 1 2 0 1 2 0 1 2 0 1 2 0 1 2 0 1 2 0 1 2 # 24 316
+CROSS chain 4 4 19 9 2 1 2 9 0 4 | 0 1 2 3 # 4 20
+CROSS chain 2 20 4 4 9 1 0 19 19 4 | # 0 0
+CROSS chain 3 2 0 1 0 4 1 19 19 4 | # 0 0
+CROSS chain 4 16 1 9 0 4 2 19 19 4 | 0 1 2 3 # 4 20
+CROSS chain 2 1 9 4 19 4 0 1 19 4 | # 0 0
+CROSS chain 3 13 19 1 1 4 1 1 19 4 | # 0 0
+CROSS chain 4 22 4 9 1 4 2 1 19 4 | # 0 0
+CROSS chain 2 9 0 2 4 4 0 4 19 4 | # 0 0
+CROSS chain 3 21 1 1 2 4 1 4 19 4 | # 0 0
+CROSS chain 4 4 9 9 2 4 2 4 19 4 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS chain 2 20 19 2 9 4 0 2 19 4 | # 0 0
+CROSS chain 3 2 2 1 0 2 1 2 19 4 | # 0 0
+CROSS chain 4 16 0 19 19 2 2 2 19 4 | # 0 0
+CROSS chain 2 1 4 2 19 2 0 9 19 4 | 0 1 # 2 2
+CROSS chain 3 13 9 1 1 2 1 9 19 4 | 0 1 2 # 3 8
+CROSS chain 4 22 19 19 4 2 2 9 19 4 | # 0 0
+CROSS chain 2 9 2 2 4 2 0 19 1 4 | 0 1 # 2 2
+CROSS chain 3 21 0 4 2 2 1 19 1 4 | 0 1 2 0 1 2 # 6 25
+CROSS chain 4 4 4 19 9 2 2 19 1 4 | 0 1 2 3 0 1 2 3 0 1 2 3 0 1 2 3 0 1 2 3 # 20 340
+CROSS chain 2 20 9 2 9 2 0 1 1 4 | # 0 0
+CROSS chain 3 2 1 4 0 9 1 1 1 4 | 0 1 2 0 1 2 # 6 25
+CROSS chain 4 16 2 19 19 9 2 1 1 4 | 0 1 2 3 0 1 2 3 0 1 2 3 0 1 2 3 0 1 2 3 0 1 2 3 0 1 2 3 0 1 2 3 # 32 832
+CROSS chain 2 1 19 9 19 9 0 4 1 4 | 0 1 # 2 2
+CROSS chain 3 13 4 4 1 9 1 4 1 4 | 0 1 2 0 1 2 # 6 25
+CROSS chain 4 22 9 19 4 9 2 4 1 4 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS chain 2 9 1 9 4 9 0 2 1 4 | 0 1 # 2 2
+CROSS chain 3 21 2 4 2 9 1 2 1 4 | # 0 0
+CROSS chain 4 4 19 1 9 9 2 2 1 4 | # 0 0
+CROSS chain 2 20 4 9 9 9 0 9 1 4 | # 0 0
+CROSS chain 3 2 0 2 0 19 4 9 1 4 | # 0 0
+CROSS chain 4 16 1 1 19 19 9 9 1 4 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS chain 2 1 9 9 19 19 19 19 4 4 | 0 1 # 2 2
+CROSS chain 3 13 19 2 1 19 4 19 4 4 | 0 1 2 0 1 2 # 6 25
+CROSS chain 4 22 4 1 4 19 9 19 4 4 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS chain 2 9 0 19 2 19 19 1 4 4 | # 0 0
+CROSS chain 3 21 1 2 2 19 4 1 4 4 | 0 1 2 0 1 2 0 1 2 0 1 2 # 12 86
+CROSS chain 4 4 9 1 9 19 9 1 4 4 | 0 1 2 3 0 1 2 3 0 1 2 3 # 12 132
+CROSS chain 2 20 19 19 0 1 19 4 4 4 | # 0 0
+CROSS chain 3 2 2 2 0 1 4 4 4 4 | # 0 0
+CROSS chain 4 16 0 4 19 1 9 4 4 4 | # 0 0
+CROSS chain 2 1 4 19 1 1 19 2 4 4 | 0 1 # 2 2
+CROSS chain 3 13 9 2 1 1 4 2 4 4 | 0 1 2 # 3 8
+CROSS chain 4 22 19 4 4 1 9 2 4 4 | # 0 0
+CROSS chain 2 9 2 19 2 1 19 9 4 4 | 0 1 0 1 0 1 0 1 0 1 0 1 # 12 42
+CROSS chain 3 21 0 9 2 1 4 9 4 4 | # 0 0
+CROSS chain 4 4 4 4 9 1 9 9 4 4 | 0 1 2 3 # 4 20
+CROSS chain 2 20 9 19 0 4 19 19 2 4 | # 0 0
+CROSS chain 3 2 1 9 0 4 4 19 2 4 | 0 1 2 0 1 2 # 6 25
+CROSS chain 4 16 2 4 19 4 9 19 2 4 | 0 1 2 3 0 1 2 3 0 1 2 3 # 12 132
+CROSS chain 2 1 19 1 1 4 19 1 2 4 | # 0 0
+CROSS chain 3 13 4 9 1 4 4 1 2 4 | 0 1 2 0 1 2 0 1 2 0 1 2 # 12 86
+CROSS chain 4 22 9 4 4 4 9 1 2 4 | # 0 0
+CROSS chain 2 9 1 1 2 4 19 4 2 4 | 0 1 0 1 # 4 6
+CROSS chain 3 21 2 9 2 4 4 4 2 4 | # 0 0
+CROSS chain 4 4 19 2 9 4 9 4 2 4 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS chain 2 20 4 1 0 2 19 2 2 4 | # 0 0
+CROSS chain 3 2 0 19 19 2 4 2 2 4 | # 0 0
+CROSS chain 4 16 1 2 19 2 9 2 2 4 | 0 1 2 3 0 1 2 3 0 1 2 3 # 12 132
+CROSS chain 2 1 9 1 1 2 19 9 2 4 | # 0 0
+CROSS chain 3 13 19 19 4 2 4 9 2 4 | 0 1 2 0 1 2 # 6 25
+CROSS chain 4 22 4 2 4 2 9 9 2 4 | # 0 0
+CROSS chain 2 9 0 4 2 2 19 19 9 4 | # 0 0
+CROSS chain 3 21 1 19 9 2 4 19 9 4 | 0 1 2 0 1 2 # 6 25
+CROSS chain 4 4 9 2 9 2 9 19 9 4 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS chain 2 20 19 4 0 9 19 1 9 4 | # 0 0
+CROSS chain 3 2 2 19 19 9 4 1 9 4 | 0 1 2 0 1 2 # 6 25
+CROSS chain 4 16 0 9 19 9 9 1 9 4 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS chain 2 1 4 4 1 9 19 4 9 4 | 0 1 # 2 2
+CROSS chain 3 13 9 19 4 9 4 4 9 4 | 0 1 2 0 1 2 0 1 2 # 9 51
+CROSS chain 4 22 19 9 4 9 9 4 9 4 | # 0 0
+CROSS chain 2 9 2 4 2 9 19 2 9 4 | # 0 0
+CROSS chain 3 21 0 1 9 9 4 2 9 4 | # 0 0
+CROSS chain 4 4 4 9 9 9 9 2 9 4 | 0 1 2 3 # 4 20
+CROSS chain 2 20 9 4 0 19 1 9 9 4 | # 0 0
+CROSS chain 3 2 1 1 19 19 2 9 9 4 | 0 1 2 0 1 2 # 6 25
+CROSS chain 4 16 2 9 19 19 0 19 0 2 | # 0 0
+CROSS chain 2 1 19 2 1 19 1 19 0 2 | 0 1 # 2 2
+CROSS chain 3 13 4 1 4 19 2 19 0 2 | 0 1 2 # 3 8
+CROSS chain 4 22 9 9 4 19 0 1 0 2 | # 0 0
+CROSS chain 2 9 1 2 2 19 1 1 0 2 | 0 1 # 2 2
+CROSS chain 3 21 2 1 9 19 2 1 0 2 | # 0 0
+CROSS chain 4 4 19 19 0 1 0 4 0 2 | # 0 0
+CROSS chain 2 20 4 2 0 1 1 4 0 2 | # 0 0
+CROSS chain 3 2 0 4 19 1 2 4 0 2 | # 0 0
+CROSS chain 4 16 1 19 1 1 0 2 0 2 | 0 1 2 3 # 4 20
+CROSS chain 2 1 9 2 1 1 1 2 0 2 | 0 1 # 2 2
+CROSS chain 3 13 19 4 4 1 2 2 0 2 | 0 1 2 # 3 8
+CROSS chain 4 22 4 19 2 1 0 9 0 2 | # 0 0
+CROSS chain 2 9 0 9 2 1 1 9 0 2 | # 0 0
+CROSS chain 3 21 1 4 9 1 2 9 0 2 | # 0 0
+CROSS chain 4 4 9 19 0 4 0 19 19 2 | 0 1 2 3 # 4 20
+CROSS chain 2 20 19 9 0 4 1 19 19 2 | # 0 0
+CROSS chain 3 2 2 4 19 4 2 19 19 2 | # 0 0
+CROSS chain 4 16 0 1 1 4 0 1 19 2 | # 0 0
+CROSS chain 2 1 4 9 1 4 1 1 19 2 | 0 1 # 2 2
+CROSS chain 3 13 9 4 4 4 2 1 19 2 | # 0 0
+CROSS chain 4 22 19 1 2 4 0 4 19 2 | # 0 0
+CROSS chain 2 9 2 9 2 4 1 4 19 2 | # 0 0
+CROSS chain 3 21 0 2 9 4 2 4 19 2 | # 0 0
+CROSS chain 4 4 4 1 0 2 0 2 19 2 | 0 1 2 3 # 4 20
+CROSS chain 2 20 9 9 0 2 1 2 19 2 | # 0 0
+CROSS chain 3 2 1 2 19 2 2 2 19 2 | 0 1 2 # 3 8
+CROSS chain 4 16 2 1 1 2 0 9 19 2 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS chain 2 1 19 19 4 2 1 9 19 2 | 0 1 # 2 2
+CROSS chain 3 13 4 2 4 2 2 9 19 2 | 0 1 2 # 3 8
+CROSS chain 4 22 9 1 2 2 0 19 1 2 | # 0 0
+CROSS chain 2 9 1 19 9 2 1 19 1 2 | 0 1 # 2 2
+CROSS chain 3 21 2 2 9 2 2 19 1 2 | 0 1 2 0 1 2 # 6 25
+CROSS chain 4 4 19 4 0 9 0 1 1 2 | # 0 0
+CROSS chain 2 20 4 19 19 9 1 1 1 2 | # 0 0
+CROSS chain 3 2 0 9 19 9 2 1 1 2 | 0 1 2 0 1 2 # 6 25
+CROSS chain 4 16 1 4 1 9 0 4 1 2 | 0 1 2 3 # 4 20
+CROSS chain 2 1 9 19 4 9 1 4 1 2 | 0 1 # 2 2
+CROSS chain 3 13 19 9 4 9 2 4 1 2 | 0 1 2 0 1 2 # 6 25
+CROSS chain 4 22 4 4 2 9 0 2 1 2 | # 0 0
+CROSS chain 2 9 0 1 9 9 1 2 1 2 | # 0 0
+CROSS chain 3 21 1 9 9 9 2 2 1 2 | # 0 0
+CROSS chain 4 4 9 4 0 19 19 9 1 2 | 0 1 2 3 # 4 20
+CROSS chain 2 20 19 1 19 19 4 9 1 2 | # 0 0
+CROSS chain 3 2 2 9 19 19 9 9 1 2 | 0 1 2 # 3 8
+CROSS chain 4 16 0 2 1 19 19 19 4 2 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS chain 2 1 4 1 4 19 4 19 4 2 | 0 1 0 1 # 4 6
+CROSS chain 3 13 9 9 4 19 9 19 4 2 | 0 1 2 0 1 2 0 1 2 # 9 51
+CROSS chain 4 22 19 2 2 19 19 1 4 2 | # 0 0
+CROSS chain 2 9 2 1 9 19 4 1 4 2 | 0 1 0 1 0 1 # 6 12
+CROSS chain 3 21 0 19 0 1 9 1 4 2 | # 0 0
+CROSS chain 4 4 4 2 0 1 19 4 4 2 | # 0 0
+CROSS chain 2 20 9 1 19 1 4 4 4 2 | # 0 0
+CROSS chain 3 2 1 19 1 1 9 4 4 2 | 0 1 2 # 3 8
+CROSS chain 4 16 2 2 1 1 19 2 4 2 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS chain 2 1 19 4 4 1 4 2 4 2 | 0 1 # 2 2
+CROSS chain 3 13 4 19 2 1 9 2 4 2 | 0 1 2 0 1 2 0 1 2 # 9 51
+CROSS chain 4 22 9 2 2 1 19 9 4 2 | # 0 0
+CROSS chain 2 9 1 4 9 1 4 9 4 2 | 0 1 # 2 2
+CROSS chain 3 21 2 19 0 4 9 9 4 2 | 0 1 2 0 1 2 # 6 25
+CROSS chain 4 4 19 9 0 4 19 19 2 2 | # 0 0
+CROSS chain 2 20 4 4 19 4 4 19 2 2 | # 0 0
+CROSS chain 3 2 0 1 1 4 9 19 2 2 | # 0 0
+CROSS chain 4 16 1 9 1 4 19 1 2 2 | # 0 0
+CROSS chain 2 1 9 4 4 4 4 1 2 2 | 0 1 # 2 2
+CROSS chain 3 13 19 1 2 4 9 1 2 2 | # 0 0
+CROSS chain 4 22 4 9 2 4 19 4 2 2 | # 0 0
+CROSS chain 2 9 0 2 9 4 4 4 2 2 | 0 1 # 2 2
+CROSS chain 3 21 1 1 0 2 9 4 2 2 | # 0 0
+CROSS chain 4 4 9 9 0 2 19 2 2 2 | 0 1 2 3 # 4 20
+CROSS chain 2 20 19 2 19 2 4 2 2 2 | # 0 0
+CROSS chain 3 2 2 1 1 2 9 2 2 2 | 0 1 2 # 3 8
+CROSS chain 4 16 0 19 4 2 19 9 2 2 | 0 1 2 3 # 4 20
+CROSS chain 2 1 4 2 4 2 4 9 2 2 | 0 1 # 2 2
+CROSS chain 3 13 9 1 2 2 9 9 2 2 | 0 1 2 0 1 2 # 6 25
+CROSS chain 4 22 19 19 9 2 19 19 9 2 | # 0 0
+CROSS chain 2 9 2 2 9 2 4 19 9 2 | 0 1 # 2 2
+CROSS chain 3 21 0 4 0 9 9 19 9 2 | 0 1 2 0 1 2 # 6 25
+CROSS chain 4 4 4 19 19 9 19 1 9 2 | # 0 0
+CROSS chain 2 20 9 2 19 9 4 1 9 2 | # 0 0
+CROSS chain 3 2 1 4 1 9 9 1 9 2 | 0 1 2 0 1 2 # 6 25
+CROSS chain 4 16 2 19 4 9 19 4 9 2 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS chain 2 1 19 9 4 9 4 4 9 2 | 0 1 # 2 2
+CROSS chain 3 13 4 4 2 9 9 4 9 2 | 0 1 2 0 1 2 # 6 25
+CROSS chain 4 22 9 19 9 9 19 2 9 2 | 0 1 2 3 # 4 20
+CROSS chain 2 9 1 9 9 9 4 2 9 2 | 0 1 # 2 2
+CROSS chain 3 21 2 4 0 19 0 9 9 2 | # 0 0
+CROSS chain 4 4 19 1 19 19 1 9 9 2 | # 0 0
+CROSS chain 2 20 4 9 19 19 2 9 9 2 | # 0 0
+CROSS chain 3 2 0 2 1 19 0 19 0 9 | # 0 0
+CROSS chain 4 16 1 1 4 19 1 19 0 9 | 0 1 2 3 0 1 2 3 0 1 2 3 0 1 2 3 # 16 224
+CROSS chain 2 1 9 9 4 19 2 19 0 9 | 0 1 # 2 2
+CROSS chain 3 13 19 2 2 19 0 1 0 9 | # 0 0
+CROSS chain 4 22 4 1 9 19 1 1 0 9 | # 0 0
+CROSS chain 2 9 0 19 0 1 2 1 0 9 | # 0 0
+CROSS chain 3 21 1 2 0 1 0 4 0 9 | # 0 0
+CROSS chain 4 4 9 1 19 1 1 4 0 9 | # 0 0
+CROSS chain 2 20 19 19 1 1 2 4 0 9 | # 0 0
+CROSS chain 3 2 2 2 1 1 0 2 0 9 | # 0 0
+CROSS chain 4 16 0 4 4 1 1 2 0 9 | 0 1 2 3 # 4 20
+CROSS chain 2 1 4 19 2 1 2 2 0 9 | 0 1 0 1 # 4 6
+CROSS chain 3 13 9 2 2 1 0 9 0 9 | 0 1 2 0 1 2 # 6 25
+CROSS chain 4 22 19 4 9 1 1 9 0 9 | # 0 0
+CROSS chain 2 9 2 19 0 4 2 9 0 9 | 0 1 0 1 0 1 # 6 12
+CROSS chain 3 21 0 9 0 4 0 19 19 9 | # 0 0
+CROSS chain 4 4 4 4 19 4 1 19 19 9 | 0 1 2 3 # 4 20
+CROSS chain 2 20 9 19 1 4 2 19 19 9 | # 0 0
+CROSS chain 3 2 1 9 1 4 0 1 19 9 | # 0 0
+CROSS chain 4 16 2 4 4 4 1 1 19 9 | 0 1 2 3 0 1 2 3 0 1 2 3 # 12 132
+CROSS chain 2 1 19 1 2 4 2 1 19 9 | # 0 0
+CROSS chain 3 13 4 9 2 4 0 4 19 9 | 0 1 2 0 1 2 0 1 2 # 9 51
+CROSS chain 4 22 9 4 9 4 1 4 19 9 | # 0 0
+CROSS chain 2 9 1 1 0 2 2 4 19 9 | 0 1 0 1 # 4 6
+CROSS chain 3 21 2 9 0 2 0 2 19 9 | # 0 0
+CROSS chain 4 4 19 2 19 2 1 2 19 9 | 0 1 2 3 # 4 20
+CROSS chain 2 20 4 1 1 2 2 2 19 9 | # 0 0
+CROSS chain 3 2 0 19 4 2 0 9 19 9 | 0 1 2 # 3 8
+CROSS chain 4 16 1 2 4 2 1 9 19 9 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS chain 2 1 9 1 2 2 2 9 19 9 | 0 1 0 1 # 4 6
+CROSS chain 3 13 19 19 9 2 0 19 1 9 | 0 1 2 # 3 8
+CROSS chain 4 22 4 2 9 2 1 19 1 9 | 0 1 2 3 # 4 20
+CROSS chain 2 9 0 4 0 9 2 19 1 9 | # 0 0
+CROSS chain 3 21 1 19 19 9 0 1 1 9 | # 0 0
+CROSS chain 4 4 9 2 19 9 1 1 1 9 | 0 1 2 3 # 4 20
+CROSS chain 2 20 19 4 1 9 2 1 1 9 | # 0 0
+CROSS chain 3 2 2 19 4 9 0 4 1 9 | 0 1 2 0 1 2 # 6 25
+CROSS chain 4 16 0 9 4 9 1 4 1 9 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS chain 2 1 4 4 2 9 2 4 1 9 | 0 1 # 2 2
+CROSS chain 3 13 9 19 9 9 0 2 1 9 | 0 1 2 # 3 8
+CROSS chain 4 22 19 9 9 9 1 2 1 9 | # 0 0
+CROSS chain 2 9 2 4 0 19 9 2 1 9 | 0 1 # 2 2
+CROSS chain 3 21 0 1 19 19 19 9 1 9 | # 0 0
+CROSS chain 4 4 4 9 19 19 4 9 1 9 | 0 1 2 3 # 4 20
+CROSS chain 2 20 9 4 1 19 9 9 1 9 | # 0 0
+CROSS chain 3 2 1 1 4 19 19 19 4 9 | 0 1 2 0 1 2 # 6 25
+CROSS chain 4 16 2 9 4 19 4 19 4 9 | 0 1 2 3 0 1 2 3 0 1 2 3 0 1 2 3 # 16 224
+CROSS chain 2 1 19 2 2 19 9 19 4 9 | 0 1 # 2 2
+CROSS chain 3 13 4 1 9 19 19 1 4 9 | # 0 0
+CROSS chain 4 22 9 9 9 19 4 1 4 9 | 0 1 2 3 # 4 20
+CROSS chain 2 9 1 2 0 1 9 1 4 9 | # 0 0
+CROSS chain 3 21 2 1 19 1 19 4 4 9 | # 0 0
+CROSS chain 4 4 19 19 1 1 4 4 4 9 | 0 1 2 3 # 4 20
+CROSS chain 2 20 4 2 1 1 9 4 4 9 | # 0 0
+CROSS chain 3 2 0 4 4 1 19 2 4 9 | 0 1 2 0 1 2 # 6 25
+CROSS chain 4 16 1 19 2 1 4 2 4 9 | 0 1 2 3 0 1 2 3 0 1 2 3 # 12 132
+CROSS chain 2 1 9 2 2 1 9 2 4 9 | 0 1 # 2 2
+CROSS chain 3 13 19 4 9 1 19 9 4 9 | # 0 0
+CROSS chain 4 22 4 19 0 4 4 9 4 9 | # 0 0
+CROSS chain 2 9 0 9 0 4 9 9 4 9 | # 0 0
+CROSS chain 3 21 1 4 19 4 19 19 2 9 | # 0 0
+CROSS chain 4 4 9 19 1 4 4 19 2 9 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS chain 2 20 19 9 1 4 9 19 2 9 | # 0 0
+CROSS chain 3 2 2 4 4 4 19 1 2 9 | # 0 0
+CROSS chain 4 16 0 1 2 4 4 1 2 9 | # 0 0
+CROSS chain 2 1 4 9 2 4 9 1 2 9 | 0 1 0 1 # 4 6
+CROSS chain 3 13 9 4 9 4 19 4 2 9 | 0 1 2 # 3 8
+CROSS chain 4 22 19 1 0 2 4 4 2 9 | # 0 0
+CROSS chain 2 9 2 9 0 2 9 4 2 9 | # 0 0
+CROSS chain 3 21 0 2 19 2 19 2 2 9 | # 0 0
+CROSS chain 4 4 4 1 1 2 4 2 2 9 | 0 1 2 3 # 4 20
+CROSS chain 2 20 9 9 1 2 9 2 2 9 | # 0 0
+CROSS chain 3 2 1 2 4 2 19 9 2 9 | 0 1 2 # 3 8
+CROSS chain 4 16 2 1 2 2 4 9 2 9 | 0 1 2 3 0 1 2 3 0 1 2 3 0 1 2 3 # 16 224
+CROSS chain 2 1 19 19 9 2 9 9 2 9 | 0 1 # 2 2
+CROSS chain 3 13 4 2 9 2 19 19 9 9 | 0 1 2 # 3 8
+CROSS chain 4 22 9 1 0 9 4 19 9 9 | 0 1 2 3 # 4 20
+CROSS chain 2 9 1 19 19 9 9 19 9 9 | 0 1 0 1 # 4 6
+CROSS chain 3 21 2 2 19 9 19 1 9 9 | # 0 0
+CROSS chain 4 4 19 4 1 9 4 1 9 9 | # 0 0
+CROSS chain 2 20 4 19 4 9 9 1 9 9 | # 0 0
+CROSS chain 3 2 0 9 4 9 19 4 9 9 | 0 1 2 0 1 2 # 6 25
+CROSS chain 4 16 1 4 2 9 4 4 9 9 | 0 1 2 3 0 1 2 3 # 8 64
+CROSS chain 2 1 9 19 9 9 9 4 9 9 | 0 1 # 2 2
+CROSS chain 3 13 19 9 9 9 19 2 9 9 | # 0 0
+CROSS chain 4 22 4 4 0 19 2 2 9 9 | # 0 0
+CROSS chain 2 9 0 1 19 19 0 9 9 9 | # 0 0
+CROSS chain 3 21 1 9 19 19 1 9 9 9 | # 0 0
+CROSS chain 4 4 9 4 1 19 2 9 9 9 | 0 1 2 3 0 1 2 3 # 8 64
+[chain4 done] sims 29160000
+
+=== SEPARABLE HUNT (mode 2) SUMMARY ===
+pipelines evaluated : 29160000 (undef 31306176, capped 0)
+cut windows (instances) : 0
+split/bad instances     : 0 / 0
+bad prov block form     : 0
+bad content form        : 0
+DB hits (n>=2)          : 0
+FDI hits (len>=2)      : 0
+rev hits                : 0
+TOTAL VIOLATIONS: 0 -> SEPARABLE RIGIDITY CONFIRMED ON THIS DOMAIN

@@ -1,0 +1,5 @@
+1. replication chain k^2+1 -> k^4+1 -> k^8+1 (the recursion A+B(Rw-2)); the decb^2 k=3 value table matches my full hand derivation (head 4=2+2, 31=27+3+1, 59=54+3+2, 87=54+31+2, 108=54+54)
+2. tile7: Lambda_j = 3^j mod 7 (period 6 = ord_7(3)), profile [Lambda_j / 1+floor(3^{j+1}/7)] k=3..13 OK; the a-run-only view is again exponential ((S-Sum Lambda)/7+k+1)
+3. mod7: fired set {j: 6|j} cap [1..k-1], #fired = floor((k-1)/6); the surviving family = the COMPLEMENT class (the Boolean-closure mask); merged b before j ~ 1 (mod 6): k=3..13 OK (417 = 104+1+312 at k=13, two full mask periods)
+4. C-R9-3 closing arithmetic (|S| >= |F|+3 => |S|^2-|F|^2 >= 6|F|+9): OK
+FAILS: 0

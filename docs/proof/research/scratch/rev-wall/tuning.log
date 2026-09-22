@@ -1,0 +1,126 @@
+== A: the B=2 telescoping degeneracy (hand-derived this round) ==
+  [0.0s] start
+  A1 FAIL k=1
+  A1 FAIL k=2
+  A1 FAIL k=3
+  A1 FAIL k=4
+  A1 FAIL k=5
+  A1 FAIL k=6
+  A1 FAIL k=7
+  A1 FAIL k=8
+  A1 FAIL k=9
+  A1 FAIL k=10
+  A1 FAIL k=11
+  A1 FAIL k=12
+  A1 [a/aa]X = a^{2^k}: the LAST RUN as a b-free value (telescoping)
+     12 checks, 12 failures -> REFUTED
+  A2 FAIL k=1
+  A2 FAIL k=2
+  A2 FAIL k=3
+  A2 FAIL k=4
+  A2 FAIL k=5
+  A2 FAIL k=6
+  A2 FAIL k=7
+  A2 FAIL k=8
+  A2 FAIL k=9
+  A2 FAIL k=10
+  A2 del_last = runs 0..k-1, then glued run 2^{k-1}+2^k (Lane C L3)
+     10 checks, 10 failures -> REFUTED
+  A3 FAIL k=1
+  A3 FAIL k=2
+  A3 FAIL k=3
+  A3 FAIL k=4
+  A3 FAIL k=5
+  A3 FAIL k=6
+  A3 FAIL k=7
+  A3 FAIL k=8
+  A3 FAIL k=9
+  A3 FAIL k=10
+  A3 FAIL k=11
+  A3 FAIL k=12
+  A3 [b/(half.b)](mrg.b.mrg) = a^{2^k-1} b a^S (sum-minus-max as HEAD)
+     12 checks, 12 failures -> REFUTED
+  A4 FAIL k=1
+  A4 FAIL k=2
+  A4 FAIL k=3
+  A4 FAIL k=4
+  A4 FAIL k=5
+  A4 FAIL k=6
+  A4 FAIL k=7
+  A4 FAIL k=8
+  A4 FAIL k=9
+  A4 FAIL k=10
+  A4 FAIL k=11
+  A4 FAIL k=12
+  A4 [e/(b.mrg)]E_cbox = a^{2^k-1}: B-FREE SUM-MINUS-MAX
+     12 checks, 12 failures -> REFUTED
+  A5 FAIL k=1
+  A5 FAIL k=2
+  A5 FAIL k=3
+  A5 FAIL k=4
+  A5 FAIL k=5
+  A5 FAIL k=6
+  A5 FAIL k=7
+  A5 FAIL k=8
+  A5 FAIL k=9
+  A5 FAIL k=10
+  A5 FAIL k=11
+  A5 FAIL k=12
+  A5 [a/aa]E_smm = a^{2^{k-1}}: the 2nd-from-top run, b-free (fixed offset)
+     12 checks, 12 failures -> REFUTED
+  A6 FAIL k=1
+  A6 FAIL k=2
+  A6 FAIL k=3
+  A6 FAIL k=4
+  A6 FAIL k=5
+  A6 FAIL k=6
+  A6 FAIL k=7
+  A6 FAIL k=8
+  A6 FAIL k=9
+  A6 FAIL k=10
+  A6 [aa/a]X = a^{2^{k+2}-2}: tweak at depth k+2
+     10 checks, 10 failures -> REFUTED
+  [13.3s] A done
+== A7: contrast on B=3 (the supply class stays in the gaps) ==
+  k=1 halver  len=4  dist to nearest power=1
+  k=1 E_smm   len=4  dist to nearest power=1
+  k=1 E_h2    len=2  dist to nearest power=1
+  k=2 halver  len=10  dist to nearest power=1
+  k=2 E_smm   len=13  dist to nearest power=4
+  k=2 E_h2    len=7  dist to nearest power=2
+  k=3 halver  len=25  dist to nearest power=2
+  k=3 E_smm   len=40  dist to nearest power=13
+  k=3 E_h2    len=20  dist to nearest power=7
+  k=4 halver  len=67  dist to nearest power=14
+  k=4 E_smm   len=121  dist to nearest power=40
+  k=4 E_h2    len=61  dist to nearest power=20
+  k=5 halver  len=190  dist to nearest power=53
+  k=5 E_smm   len=364  dist to nearest power=121
+  k=5 E_h2    len=182  dist to nearest power=61
+  k=6 halver  len=556  dist to nearest power=173
+  k=6 E_smm   len=1093  dist to nearest power=364
+  k=6 E_h2    len=547  dist to nearest power=182
+  k=7 halver  len=1651  dist to nearest power=536
+  k=7 E_smm   len=3280  dist to nearest power=1093
+  k=7 E_h2    len=1640  dist to nearest power=547
+  k=8 halver  len=4933  dist to nearest power=1628
+  k=8 E_smm   len=9841  dist to nearest power=3280
+  k=8 E_h2    len=4921  dist to nearest power=1640
+  -> min relative distance to any 3^j: 0.080 (B=2 gives 0: the telescoping)
+  [27.0s] A7 done
+== B: the dec-refutation class (recorded per charter) ==
+  [X/a]X   (dec, |out|) at k=1..6: [(2, 13), (3, 65), (5, 273), (6, 1089), (7, 4289), (8, 16897)]
+  [X/'b']X (dec, |out|) at k=1..6: [(1, 7), (2, 25), (3, 69), (4, 171), (5, 403), (6, 925)]
+  [27.1s] B done
+== C: tuned-bite dichotomy on D(k;3), k=2..5 (random depth-<=3 battery) ==
+  168 expressions instrumented (matches campaign evaluator)
+  exactness-event bite classification (survivor within 8 of a power):
+    tweak            56
+  MIDDLE-INTERVAL bites at exactness events (u>=1, v<=k-1): 0
+  [27.6s] C done
+== D: structured uniform-rev-on-B=2 attempts (hand-motivated, expected fail) ==
+  h.b.(E_smm-ish tail)   reverses w^(k) for k=2,3,4: [False, False, False]
+  complement-box head    reverses w^(k) for k=2,3,4: [False, False, False]
+  E_poll-style+b         reverses w^(k) for k=2,3,4: [False, False, False]
+  block-swap analog      reverses w^(k) for k=2,3,4: [False, False, False]
+  [27.6s] D done

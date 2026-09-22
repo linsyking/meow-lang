@@ -1,0 +1,15 @@
+REV grid 11^3 (i,j,k in [0,10], boundaries incl.): VERIFIED
+REV random 600 to 250: VERIFIED
+intermediates mrg/P1/P2/Cc/Bb/T/pattern, 8^3 grid: VERIFIED
+prov never DB + injective (300 random): VERIFIED
+laundered L_a.L_b.E_rev: rev with prov == (): VERIFIED
+E_rev THEOREM: ALL VERIFIED
+
+--- addendum (same round) ---
+adversarial scales (one run tiny 0-4, another huge to 150, mixed orderings),
+360 cases: VERIFIED (separate run; first 4500-case attempt was killed by its
+own 55s timeout - case count too high, superseded by this slim run).
+timings: verify_t5_rev.py 13.2 s, verify_t6_general.py 18.3 s (both <= 60 s).
+independent confirmation: rev-split lane rebuilt E_rev from the mechanism
+description and re-verified with its own battery (rev-split/verify_lc_rev.py,
+grids + randoms + hand greedy-position checks) - CONFIRMED.

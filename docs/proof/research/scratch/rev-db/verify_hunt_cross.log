@@ -1,0 +1,3 @@
+cross-verified 1874 CROSS lines from 5 logs
+  ok                 1874
+VERDICT: ALL CLEAN (simulator agrees with lden; theorem claims hold)

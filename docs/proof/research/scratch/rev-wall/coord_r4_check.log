@@ -1,0 +1,20 @@
+== I: replay of Lane D part A (same seed), skip classification ==
+  I: 300 exprs, 1594 node-checks, 98 skips ({'undef': 98, 'bail': 0, 'topmis': 0}), 0 per-node mismatches
+  I: skips all Undefined-class as claimed: True
+  [1.0s] I done
+== II: D1'' probe (fresh evaluator) ==
+  IIa k=2: rev True; F-pure single-label run labels [2] (count 2)
+  IIa k=3: rev True; F-pure single-label run labels [3] (count 3)
+  IIa k=4: rev True; F-pure single-label run labels [4] (count 4)
+  IIb: engine mutations at k=2 (filter rev) ...
+  IIb: 4000 mutants tried, 537 rev-true, 0 multi-label
+  [1.8s] IIb done
+  IIc: random vocabulary compositions at k=2 (filter rev) ...
+  IIc: 20000 compositions tried, 0 rev-true, 0 multi-label
+  [2.3s] IIc done
+== III: structural constants recomputed ==
+  III k=4: tree S-nodes 50 (report: 50); walks [9, 9, 9, 9] (report: [9, 9, 9, 9])
+  III k=5: tree S-nodes 77 (report: 77); walks [12, 12, 12, 12, 12] (report: [12, 12, 12, 12, 12])
+  III k=4 plants [81, 108, 117, 120] vs top-anchored sums [81, 108, 117, 120]: MATCH
+  [2.3s] III done
+COORD R4 CHECK COMPLETE

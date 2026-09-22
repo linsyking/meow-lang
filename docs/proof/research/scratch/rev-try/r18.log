@@ -1,0 +1,28 @@
+invocation (first line, per discipline): cd docs/proof/research/scratch/rev-try && /usr/bin/python3 -W ignore verify_r18_migration.py   [2026-09-22, 37.4 s]
+A3 single-b FP tweak set, 8 inputs (D(k;3), k=4..6, + randoms) x 256 passes: VERIFIED
+A3 pure-a chain-sum gaps, 8 inputs x 48 passes: VERIFIED
+B3 exact tuning on D(k;3): fully-consumed subset of {p0,p1,p0+p1}, full sweeps k=4..6, targeted k=7 (caps: sizes 2, power-sizes 2): VERIFIED
+C3 pinned flanks on X and X.mrg.a at base 3, k=6..8: zero firings at deep separators (both adjacent runs <= 3^{k-2}); 12/12 firings with an adjacent run >= 3^{k-1}: VERIFIED
+D3 counting corollary (deep sizes 3^0..3^{k-2}):
+  k=4: max deep sizes consumed by one flank pattern = 2 (exhaustive sweep); (3^j,3^{j+1}) covers {3^j,3^{j+1}} for j=0..k-3: yes; >= 2 patterns needed for 3 deep sizes
+  k=5: max deep sizes consumed by one flank pattern = 2 (exhaustive sweep); (3^j,3^{j+1}) covers {3^j,3^{j+1}} for j=0..k-3: yes; >= 2 patterns needed for 4 deep sizes
+  k=6: max deep sizes consumed by one flank pattern = 2 (exhaustive sweep); (3^j,3^{j+1}) covers {3^j,3^{j+1}} for j=0..k-3: yes; >= 3 patterns needed for 5 deep sizes
+  k=7: max deep sizes consumed by one flank pattern = 2 (targeted); (3^j,3^{j+1}) covers {3^j,3^{j+1}} for j=0..k-3: yes; >= 3 patterns needed for 6 deep sizes
+  k=8: max deep sizes consumed by one flank pattern = 2 (targeted); (3^j,3^{j+1}) covers {3^j,3^{j+1}} for j=0..k-3: yes; >= 4 patterns needed for 7 deep sizes
+E2 the B=2 boundary witnesses (E_last, E_grow, E_cbox, E_smm, E_h2, E_leak, E_prod) re-anchored on base 2 (k ranges as in the record): VERIFIED
+ROUND 18 MACHINE VERDICT: migration backing in place; see the revised dichotomy.tex
+real	0m37.426s
+user	0m37.334s
+sys	0m0.080s
+--- notes
+Migration battery for the round-18 revision (CHARTER_revision.md):
+the fragment's machine backing moved to D(k;3) (base 3).  The
+input-dependent context (b-positions, run values) is hoisted out of
+the sweeps -- the first run re-scanned per pattern and exceeded the
+60 s budget (killed); the hoisted re-run is 37.4 s.  The
+greedy-vs-evaluator anchor is per-case in part A3 and sampled every
+200th sweep call in B3/D3 (stated in the log line).  Part D3's
+max-coverage is exhaustive at k=4..6 and targeted near the deep
+powers at k=7,8 (stated per line).  E2 re-anchors the seven B=2
+witnesses (Lane D round 3 + Lane B round 4, coordinator-verified;
+cited in dich:prop:boundary).  Nothing committed to git.

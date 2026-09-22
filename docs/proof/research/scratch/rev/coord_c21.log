@@ -1,0 +1,10 @@
+0. E1 [a^2ba^4/b]: depths BotSum(s)+6s+2, hits exactly I(1,1), I(1,2), I(3,3) at s=0,1,2, k=4..7 OK -- 3 real hits, refuting round-20 |hits|<=2
+1. E2 [a^2ba^112/b] on D(5;3): depths [3,120,243,384,579], mirror I(5,5) at sigma=2<=k-2, debt 342>=122, mass 934; family Delta=(3^k-15)/2 OK
+2. E3: survivor at mirror depth with top-scale inserted mass, never-inserted 0 (the bites ate the prefix); 2nd copy at I(2,3) OK
+3. D1 (W-3^{s+1} >= (3^k+1)/2, W >= (5*3^{k-1}+1)/2), D2 identity, INH supply bound, mod-3 separation: swept OK
+4. tightened FIT window: t_1 firings occupy distinct junctions in [0,sigma_1), so tau_0 <= sigma_1 - t_1 (all subsets, s1<7) OK
+5. MY census at k=5: 29 survivors (their d5.txt: 29)
+6. all d6/d8/d9 records re-validated (collinearity, integrality, t-feasibility, tightened UPPER window, monotonicity): OK
+   v3 confirmed: 29/80/361/651 records, all passing my TWO-SIDED tightened window (v2 had 19 lower-bound ghosts: d8: 3, d9: 16; my flag, fixed in round 21b). Distinct (D,c) channels: 23/57/218/365 -- their report says 13 at k=5, a stale number (the file has 23).
+7. T5 (my round-20 exhibit re-encoded): the idealized cross-pair {I(2,3),I(1,3)} is census-ghosted, real channel has zero hits OK
+FAILS: 0

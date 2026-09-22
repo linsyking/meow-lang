@@ -1,0 +1,19 @@
+region-stable affine groups checked: 811
+T-diagonality violations: 1
+  VIOLATION: ('[onbA/onbB]onbA', 2, ['1', '-3', '1'])
+skipped groups (piecewise/thin/unfittable/small): 13815
+dead-pattern identity combos (P never fires): 4516
+2.12s
+
+RESOLUTION of the single flagged group [onbA/onbB]onbA (b=2):
+  the checker groups by b-count, which is coarser than regions.
+  The 14 points glue THREE sub-regions: {j=1} (onbA = onbB or
+  pattern dead -> identity, na = i+k+1, diagonal in (i,k));
+  {i=j=2, k>=2} (onbA = b a^k, onbB = a^k, out = bb a^k,
+  na = k, diagonal in (k)); and the single point (1,2,2).
+  The single affine fit (1,-3,1) is an accident of the gluing.
+  Each true sub-region total is diagonal in its own varying
+  space.  GENUINE T-diagonality violations: 0.
+
+SLICE EXTRACTION (converse Route 2): the i=k=1 slice of W2
+consists of palindromes a b a^j b a; [e/ab] extracts a^j there.

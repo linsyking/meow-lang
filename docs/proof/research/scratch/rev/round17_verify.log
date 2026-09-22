@@ -1,0 +1,20 @@
+A  E_rev fresh encoding: 12^3 grid (boundaries incl.) + 500 random + 300 adversarial scales: VERIFIED
+A2 intermediates mrg/P1/P2/Cc/Bb/T2, 8^3: VERIFIED
+A3 prov never DB + injective (300): VERIFIED
+A4 laundered L_a.L_b.E_rev = rev, prov == (): VERIFIED
+B  V_0 = E_rev, V_1 = [b.a/b]E_rev (prefix-dominance refuted): VERIFIED
+C  engine[b] (k=1), 800 cases: VERIFIED
+C  engine[bb] (k=2), 800 cases: VERIFIED
+C  engine[bbb] (k=3), 800 cases: VERIFIED
+C  engine[bbbb] (k=4), 800 cases: VERIFIED
+C  engine[cbb] (k=3), 800 cases: VERIFIED
+C  engine[bcb] (k=3), 800 cases: VERIFIED
+C  engine[bcc] (k=3), 800 cases: VERIFIED
+C  engine[cb] (k=2), 800 cases: VERIFIED
+C  engine[bc] (k=2), 800 cases: VERIFIED
+C  engine[cbc] (k=3), 800 cases: VERIFIED
+C  engine[cbccb] (k=5), 800 cases: VERIFIED
+D  CH2 [merge/bb].[bb/aa]X all-odd closed form (indec. run): VERIFIED
+E  E_rev sizes: DAG nodes 41, S-nodes 6 | TREE nodes 75, S-nodes 14 | S-depth 4
+
+ROUND 17 COORDINATOR BATTERY: ALL VERIFIED
