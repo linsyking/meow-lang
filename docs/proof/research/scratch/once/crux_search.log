@@ -1,0 +1,4 @@
+pass types: 36 (R<={2} chars, P in 1..2 chars)
+search: pipelines of depth <= 5 on 4 battery texts
+nodes explored: 1500624, battery-matching pipelines: 0
+elapsed: 2.6 s

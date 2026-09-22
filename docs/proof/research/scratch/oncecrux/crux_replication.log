@@ -1,0 +1,7 @@
+mode crux class W (36 passes, maxrl 2) depth <= 5  battery 4 texts  full-battery 876  active 0 deepmatch 0 threads 1
+  in baabbba          tgt babbabbba
+  in babbbaa          tgt babbbabba
+  in babaababaa       tgt bababbababaa
+  in babb             tgt babb
+nodes explored (admitted children): 1501884
+battery-matching pipelines: 0   elapsed: 1.35 s   completed

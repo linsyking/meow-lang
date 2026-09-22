@@ -1,0 +1,3136 @@
+CLASS W npass 36 maxrl 2
+PASS <e> a
+PASS <e> b
+PASS <e> aa
+PASS <e> ab
+PASS <e> ba
+PASS <e> bb
+PASS a b
+PASS a aa
+PASS a ab
+PASS a ba
+PASS a bb
+PASS b a
+PASS b aa
+PASS b ab
+PASS b ba
+PASS b bb
+PASS aa a
+PASS aa b
+PASS aa ab
+PASS aa ba
+PASS aa bb
+PASS ab a
+PASS ab b
+PASS ab aa
+PASS ab ba
+PASS ab bb
+PASS ba a
+PASS ba b
+PASS ba aa
+PASS ba ab
+PASS ba bb
+PASS bb a
+PASS bb b
+PASS bb aa
+PASS bb ab
+PASS bb ba
+APPLY <e> a baabbba bbbb
+APPLY <e> a babbbaa bbbb
+APPLY <e> a babaababaa bbbb
+APPLY <e> a babb bbb
+APPLY <e> a baa b
+APPLY <e> a baabaaba bbb
+APPLY <e> a <e> <e>
+APPLY <e> a a <e>
+APPLY <e> a b b
+APPLY <e> a aa <e>
+APPLY <e> a ab b
+APPLY <e> a ba b
+APPLY <e> a bb bb
+APPLY <e> a aab b
+APPLY <e> a aba b
+APPLY <e> a abb bb
+APPLY <e> a baa b
+APPLY <e> a bab bb
+APPLY <e> a bba bb
+APPLY <e> a bbb bbb
+APPLY <e> a aaa <e>
+APPLY <e> a abab bb
+APPLY <e> a babaab bbb
+APPLY <e> a bbabaa bbb
+APPLY <e> a abaab bb
+APPLY <e> b baabbba aaa
+APPLY <e> b babbbaa aaa
+APPLY <e> b babaababaa aaaaaa
+APPLY <e> b babb a
+APPLY <e> b baa aa
+APPLY <e> b baabaaba aaaaa
+APPLY <e> b <e> <e>
+APPLY <e> b a a
+APPLY <e> b b <e>
+APPLY <e> b aa aa
+APPLY <e> b ab a
+APPLY <e> b ba a
+APPLY <e> b bb <e>
+APPLY <e> b aab aa
+APPLY <e> b aba aa
+APPLY <e> b abb a
+APPLY <e> b baa aa
+APPLY <e> b bab a
+APPLY <e> b bba a
+APPLY <e> b bbb <e>
+APPLY <e> b aaa aaa
+APPLY <e> b abab aa
+APPLY <e> b babaab aaa
+APPLY <e> b bbabaa aaa
+APPLY <e> b abaab aaa
+APPLY <e> aa baabbba bbbba
+APPLY <e> aa babbbaa babbb
+APPLY <e> aa babaababaa babbab
+APPLY <e> aa babb babb
+APPLY <e> aa baa b
+APPLY <e> aa baabaaba bbba
+APPLY <e> aa <e> <e>
+APPLY <e> aa a a
+APPLY <e> aa b b
+APPLY <e> aa aa <e>
+APPLY <e> aa ab ab
+APPLY <e> aa ba ba
+APPLY <e> aa bb bb
+APPLY <e> aa aab b
+APPLY <e> aa aba aba
+APPLY <e> aa abb abb
+APPLY <e> aa baa b
+APPLY <e> aa bab bab
+APPLY <e> aa bba bba
+APPLY <e> aa bbb bbb
+APPLY <e> aa aaa a
+APPLY <e> aa abab abab
+APPLY <e> aa babaab babb
+APPLY <e> aa bbabaa bbab
+APPLY <e> aa abaab abb
+APPLY <e> ab baabbba babba
+APPLY <e> ab babbbaa bbbaa
+APPLY <e> ab babaababaa baaa
+APPLY <e> ab babb bb
+APPLY <e> ab baa baa
+APPLY <e> ab baabaaba baaa
+APPLY <e> ab <e> <e>
+APPLY <e> ab a a
+APPLY <e> ab b b
+APPLY <e> ab aa aa
+APPLY <e> ab ab <e>
+APPLY <e> ab ba ba
+APPLY <e> ab bb bb
+APPLY <e> ab aab a
+APPLY <e> ab aba a
+APPLY <e> ab abb b
+APPLY <e> ab baa baa
+APPLY <e> ab bab b
+APPLY <e> ab bba bba
+APPLY <e> ab bbb bbb
+APPLY <e> ab aaa aaa
+APPLY <e> ab abab <e>
+APPLY <e> ab babaab ba
+APPLY <e> ab bbabaa bbaa
+APPLY <e> ab abaab a
+APPLY <e> ba baabbba abb
+APPLY <e> ba babbbaa bba
+APPLY <e> ba babaababaa aa
+APPLY <e> ba babb bb
+APPLY <e> ba baa a
+APPLY <e> ba baabaaba aa
+APPLY <e> ba <e> <e>
+APPLY <e> ba a a
+APPLY <e> ba b b
+APPLY <e> ba aa aa
+APPLY <e> ba ab ab
+APPLY <e> ba ba <e>
+APPLY <e> ba bb bb
+APPLY <e> ba aab aab
+APPLY <e> ba aba a
+APPLY <e> ba abb abb
+APPLY <e> ba baa a
+APPLY <e> ba bab b
+APPLY <e> ba bba b
+APPLY <e> ba bbb bbb
+APPLY <e> ba aaa aaa
+APPLY <e> ba abab ab
+APPLY <e> ba babaab ab
+APPLY <e> ba bbabaa ba
+APPLY <e> ba abaab aab
+APPLY <e> bb baabbba baaba
+APPLY <e> bb babbbaa babaa
+APPLY <e> bb babaababaa babaababaa
+APPLY <e> bb babb ba
+APPLY <e> bb baa baa
+APPLY <e> bb baabaaba baabaaba
+APPLY <e> bb <e> <e>
+APPLY <e> bb a a
+APPLY <e> bb b b
+APPLY <e> bb aa aa
+APPLY <e> bb ab ab
+APPLY <e> bb ba ba
+APPLY <e> bb bb <e>
+APPLY <e> bb aab aab
+APPLY <e> bb aba aba
+APPLY <e> bb abb a
+APPLY <e> bb baa baa
+APPLY <e> bb bab bab
+APPLY <e> bb bba a
+APPLY <e> bb bbb b
+APPLY <e> bb aaa aaa
+APPLY <e> bb abab abab
+APPLY <e> bb babaab babaab
+APPLY <e> bb bbabaa abaa
+APPLY <e> bb abaab abaab
+APPLY a b baabbba aaaaaaa
+APPLY a b babbbaa aaaaaaa
+APPLY a b babaababaa aaaaaaaaaa
+APPLY a b babb aaaa
+APPLY a b baa aaa
+APPLY a b baabaaba aaaaaaaa
+APPLY a b <e> <e>
+APPLY a b a a
+APPLY a b b a
+APPLY a b aa aa
+APPLY a b ab aa
+APPLY a b ba aa
+APPLY a b bb aa
+APPLY a b aab aaa
+APPLY a b aba aaa
+APPLY a b abb aaa
+APPLY a b baa aaa
+APPLY a b bab aaa
+APPLY a b bba aaa
+APPLY a b bbb aaa
+APPLY a b aaa aaa
+APPLY a b abab aaaa
+APPLY a b babaab aaaaaa
+APPLY a b bbabaa aaaaaa
+APPLY a b abaab aaaaa
+APPLY a aa baabbba babbba
+APPLY a aa babbbaa babbba
+APPLY a aa babaababaa babababa
+APPLY a aa babb babb
+APPLY a aa baa ba
+APPLY a aa baabaaba bababa
+APPLY a aa <e> <e>
+APPLY a aa a a
+APPLY a aa b b
+APPLY a aa aa a
+APPLY a aa ab ab
+APPLY a aa ba ba
+APPLY a aa bb bb
+APPLY a aa aab ab
+APPLY a aa aba aba
+APPLY a aa abb abb
+APPLY a aa baa ba
+APPLY a aa bab bab
+APPLY a aa bba bba
+APPLY a aa bbb bbb
+APPLY a aa aaa aa
+APPLY a aa abab abab
+APPLY a aa babaab babab
+APPLY a aa bbabaa bbaba
+APPLY a aa abaab abab
+APPLY a ab baabbba baabba
+APPLY a ab babbbaa babbaa
+APPLY a ab babaababaa baaaaaa
+APPLY a ab babb bab
+APPLY a ab baa baa
+APPLY a ab baabaaba baaaaa
+APPLY a ab <e> <e>
+APPLY a ab a a
+APPLY a ab b b
+APPLY a ab aa aa
+APPLY a ab ab a
+APPLY a ab ba ba
+APPLY a ab bb bb
+APPLY a ab aab aa
+APPLY a ab aba aa
+APPLY a ab abb ab
+APPLY a ab baa baa
+APPLY a ab bab ba
+APPLY a ab bba bba
+APPLY a ab bbb bbb
+APPLY a ab aaa aaa
+APPLY a ab abab aa
+APPLY a ab babaab baaa
+APPLY a ab bbabaa bbaaa
+APPLY a ab abaab aaa
+APPLY a ba baabbba aabba
+APPLY a ba babbbaa abbaa
+APPLY a ba babaababaa aaaaaa
+APPLY a ba babb abb
+APPLY a ba baa aa
+APPLY a ba baabaaba aaaaa
+APPLY a ba <e> <e>
+APPLY a ba a a
+APPLY a ba b b
+APPLY a ba aa aa
+APPLY a ba ab ab
+APPLY a ba ba a
+APPLY a ba bb bb
+APPLY a ba aab aab
+APPLY a ba aba aa
+APPLY a ba abb abb
+APPLY a ba baa aa
+APPLY a ba bab ab
+APPLY a ba bba ba
+APPLY a ba bbb bbb
+APPLY a ba aaa aaa
+APPLY a ba abab aab
+APPLY a ba babaab aaab
+APPLY a ba bbabaa baaa
+APPLY a ba abaab aaab
+APPLY a bb baabbba baaaba
+APPLY a bb babbbaa baabaa
+APPLY a bb babaababaa babaababaa
+APPLY a bb babb baa
+APPLY a bb baa baa
+APPLY a bb baabaaba baabaaba
+APPLY a bb <e> <e>
+APPLY a bb a a
+APPLY a bb b b
+APPLY a bb aa aa
+APPLY a bb ab ab
+APPLY a bb ba ba
+APPLY a bb bb a
+APPLY a bb aab aab
+APPLY a bb aba aba
+APPLY a bb abb aa
+APPLY a bb baa baa
+APPLY a bb bab bab
+APPLY a bb bba aa
+APPLY a bb bbb ab
+APPLY a bb aaa aaa
+APPLY a bb abab abab
+APPLY a bb babaab babaab
+APPLY a bb bbabaa aabaa
+APPLY a bb abaab abaab
+APPLY b a baabbba bbbbbbb
+APPLY b a babbbaa bbbbbbb
+APPLY b a babaababaa bbbbbbbbbb
+APPLY b a babb bbbb
+APPLY b a baa bbb
+APPLY b a baabaaba bbbbbbbb
+APPLY b a <e> <e>
+APPLY b a a b
+APPLY b a b b
+APPLY b a aa bb
+APPLY b a ab bb
+APPLY b a ba bb
+APPLY b a bb bb
+APPLY b a aab bbb
+APPLY b a aba bbb
+APPLY b a abb bbb
+APPLY b a baa bbb
+APPLY b a bab bbb
+APPLY b a bba bbb
+APPLY b a bbb bbb
+APPLY b a aaa bbb
+APPLY b a abab bbbb
+APPLY b a babaab bbbbbb
+APPLY b a bbabaa bbbbbb
+APPLY b a abaab bbbbb
+APPLY b aa baabbba bbbbba
+APPLY b aa babbbaa babbbb
+APPLY b aa babaababaa babbbabb
+APPLY b aa babb babb
+APPLY b aa baa bb
+APPLY b aa baabaaba bbbbba
+APPLY b aa <e> <e>
+APPLY b aa a a
+APPLY b aa b b
+APPLY b aa aa b
+APPLY b aa ab ab
+APPLY b aa ba ba
+APPLY b aa bb bb
+APPLY b aa aab bb
+APPLY b aa aba aba
+APPLY b aa abb abb
+APPLY b aa baa bb
+APPLY b aa bab bab
+APPLY b aa bba bba
+APPLY b aa bbb bbb
+APPLY b aa aaa ba
+APPLY b aa abab abab
+APPLY b aa babaab babbb
+APPLY b aa bbabaa bbabb
+APPLY b aa abaab abbb
+APPLY b ab baabbba babbba
+APPLY b ab babbbaa bbbbaa
+APPLY b ab babaababaa bbabbaa
+APPLY b ab babb bbb
+APPLY b ab baa baa
+APPLY b ab baabaaba bababa
+APPLY b ab <e> <e>
+APPLY b ab a a
+APPLY b ab b b
+APPLY b ab aa aa
+APPLY b ab ab b
+APPLY b ab ba ba
+APPLY b ab bb bb
+APPLY b ab aab ab
+APPLY b ab aba ba
+APPLY b ab abb bb
+APPLY b ab baa baa
+APPLY b ab bab bb
+APPLY b ab bba bba
+APPLY b ab bbb bbb
+APPLY b ab aaa aaa
+APPLY b ab abab bb
+APPLY b ab babaab bbab
+APPLY b ab bbabaa bbbaa
+APPLY b ab abaab bab
+APPLY b ba baabbba babbb
+APPLY b ba babbbaa bbbba
+APPLY b ba babaababaa bbabba
+APPLY b ba babb bbb
+APPLY b ba baa ba
+APPLY b ba baabaaba babab
+APPLY b ba <e> <e>
+APPLY b ba a a
+APPLY b ba b b
+APPLY b ba aa aa
+APPLY b ba ab ab
+APPLY b ba ba b
+APPLY b ba bb bb
+APPLY b ba aab aab
+APPLY b ba aba ab
+APPLY b ba abb abb
+APPLY b ba baa ba
+APPLY b ba bab bb
+APPLY b ba bba bb
+APPLY b ba bbb bbb
+APPLY b ba aaa aaa
+APPLY b ba abab abb
+APPLY b ba babaab bbab
+APPLY b ba bbabaa bbba
+APPLY b ba abaab abab
+APPLY b bb baabbba baabba
+APPLY b bb babbbaa babbaa
+APPLY b bb babaababaa babaababaa
+APPLY b bb babb bab
+APPLY b bb baa baa
+APPLY b bb baabaaba baabaaba
+APPLY b bb <e> <e>
+APPLY b bb a a
+APPLY b bb b b
+APPLY b bb aa aa
+APPLY b bb ab ab
+APPLY b bb ba ba
+APPLY b bb bb b
+APPLY b bb aab aab
+APPLY b bb aba aba
+APPLY b bb abb ab
+APPLY b bb baa baa
+APPLY b bb bab bab
+APPLY b bb bba ba
+APPLY b bb bbb bb
+APPLY b bb aaa aaa
+APPLY b bb abab abab
+APPLY b bb babaab babaab
+APPLY b bb bbabaa babaa
+APPLY b bb abaab abaab
+APPLY aa a baabbba baaaabbbaa
+APPLY aa a babbbaa baabbbaaaa
+APPLY aa a babaababaa baabaaaabaabaaaa
+APPLY aa a babb baabb
+APPLY aa a baa baaaa
+APPLY aa a baabaaba baaaabaaaabaa
+APPLY aa a <e> <e>
+APPLY aa a a aa
+APPLY aa a b b
+APPLY aa a aa aaaa
+APPLY aa a ab aab
+APPLY aa a ba baa
+APPLY aa a bb bb
+APPLY aa a aab aaaab
+APPLY aa a aba aabaa
+APPLY aa a abb aabb
+APPLY aa a baa baaaa
+APPLY aa a bab baab
+APPLY aa a bba bbaa
+APPLY aa a bbb bbb
+APPLY aa a aaa aaaaaa
+APPLY aa a abab aabaab
+APPLY aa a babaab baabaaaab
+APPLY aa a bbabaa bbaabaaaa
+APPLY aa a abaab aabaaaab
+APPLY aa b baabbba aaaaaaaaaaa
+APPLY aa b babbbaa aaaaaaaaaaa
+APPLY aa b babaababaa aaaaaaaaaaaaaa
+APPLY aa b babb aaaaaaa
+APPLY aa b baa aaaa
+APPLY aa b baabaaba aaaaaaaaaaa
+APPLY aa b <e> <e>
+APPLY aa b a a
+APPLY aa b b aa
+APPLY aa b aa aa
+APPLY aa b ab aaa
+APPLY aa b ba aaa
+APPLY aa b bb aaaa
+APPLY aa b aab aaaa
+APPLY aa b aba aaaa
+APPLY aa b abb aaaaa
+APPLY aa b baa aaaa
+APPLY aa b bab aaaaa
+APPLY aa b bba aaaaa
+APPLY aa b bbb aaaaaa
+APPLY aa b aaa aaa
+APPLY aa b abab aaaaaa
+APPLY aa b babaab aaaaaaaaa
+APPLY aa b bbabaa aaaaaaaaa
+APPLY aa b abaab aaaaaaa
+APPLY aa ab baabbba baaabba
+APPLY aa ab babbbaa baabbaa
+APPLY aa ab babaababaa baaaaaaaaa
+APPLY aa ab babb baab
+APPLY aa ab baa baa
+APPLY aa ab baabaaba baaaaaaa
+APPLY aa ab <e> <e>
+APPLY aa ab a a
+APPLY aa ab b b
+APPLY aa ab aa aa
+APPLY aa ab ab aa
+APPLY aa ab ba ba
+APPLY aa ab bb bb
+APPLY aa ab aab aaa
+APPLY aa ab aba aaa
+APPLY aa ab abb aab
+APPLY aa ab baa baa
+APPLY aa ab bab baa
+APPLY aa ab bba bba
+APPLY aa ab bbb bbb
+APPLY aa ab aaa aaa
+APPLY aa ab abab aaaa
+APPLY aa ab babaab baaaaa
+APPLY aa ab bbabaa bbaaaa
+APPLY aa ab abaab aaaaa
+APPLY aa ba baabbba aaabbaa
+APPLY aa ba babbbaa aabbaaa
+APPLY aa ba babaababaa aaaaaaaaaa
+APPLY aa ba babb aabb
+APPLY aa ba baa aaa
+APPLY aa ba baabaaba aaaaaaaa
+APPLY aa ba <e> <e>
+APPLY aa ba a a
+APPLY aa ba b b
+APPLY aa ba aa aa
+APPLY aa ba ab ab
+APPLY aa ba ba aa
+APPLY aa ba bb bb
+APPLY aa ba aab aab
+APPLY aa ba aba aaa
+APPLY aa ba abb abb
+APPLY aa ba baa aaa
+APPLY aa ba bab aab
+APPLY aa ba bba baa
+APPLY aa ba bbb bbb
+APPLY aa ba aaa aaa
+APPLY aa ba abab aaab
+APPLY aa ba babaab aaaaab
+APPLY aa ba bbabaa baaaaa
+APPLY aa ba abaab aaaab
+APPLY aa bb baabbba baaaaba
+APPLY aa bb babbbaa baaabaa
+APPLY aa bb babaababaa babaababaa
+APPLY aa bb babb baaa
+APPLY aa bb baa baa
+APPLY aa bb baabaaba baabaaba
+APPLY aa bb <e> <e>
+APPLY aa bb a a
+APPLY aa bb b b
+APPLY aa bb aa aa
+APPLY aa bb ab ab
+APPLY aa bb ba ba
+APPLY aa bb bb aa
+APPLY aa bb aab aab
+APPLY aa bb aba aba
+APPLY aa bb abb aaa
+APPLY aa bb baa baa
+APPLY aa bb bab bab
+APPLY aa bb bba aaa
+APPLY aa bb bbb aab
+APPLY aa bb aaa aaa
+APPLY aa bb abab abab
+APPLY aa bb babaab babaab
+APPLY aa bb bbabaa aaabaa
+APPLY aa bb abaab abaab
+APPLY ab a baabbba bababbbbab
+APPLY ab a babbbaa babbbbabab
+APPLY ab a babaababaa babbababbabbabab
+APPLY ab a babb babbb
+APPLY ab a baa babab
+APPLY ab a baabaaba bababbababbab
+APPLY ab a <e> <e>
+APPLY ab a a ab
+APPLY ab a b b
+APPLY ab a aa abab
+APPLY ab a ab abb
+APPLY ab a ba bab
+APPLY ab a bb bb
+APPLY ab a aab ababb
+APPLY ab a aba abbab
+APPLY ab a abb abbb
+APPLY ab a baa babab
+APPLY ab a bab babb
+APPLY ab a bba bbab
+APPLY ab a bbb bbb
+APPLY ab a aaa ababab
+APPLY ab a abab abbabb
+APPLY ab a babaab babbababb
+APPLY ab a bbabaa bbabbabab
+APPLY ab a abaab abbababb
+APPLY ab b baabbba abaaabababa
+APPLY ab b babbbaa abaabababaa
+APPLY ab b babaababaa abaabaaabaabaa
+APPLY ab b babb abaabab
+APPLY ab b baa abaa
+APPLY ab b baabaaba abaaabaaaba
+APPLY ab b <e> <e>
+APPLY ab b a a
+APPLY ab b b ab
+APPLY ab b aa aa
+APPLY ab b ab aab
+APPLY ab b ba aba
+APPLY ab b bb abab
+APPLY ab b aab aaab
+APPLY ab b aba aaba
+APPLY ab b abb aabab
+APPLY ab b baa abaa
+APPLY ab b bab abaab
+APPLY ab b bba ababa
+APPLY ab b bbb ababab
+APPLY ab b aaa aaa
+APPLY ab b abab aabaab
+APPLY ab b babaab abaabaaab
+APPLY ab b bbabaa ababaabaa
+APPLY ab b abaab aabaaab
+APPLY ab aa baabbba babbbba
+APPLY ab aa babbbaa babbbab
+APPLY ab aa babaababaa bababbabab
+APPLY ab aa babb babb
+APPLY ab aa baa bab
+APPLY ab aa baabaaba babbabba
+APPLY ab aa <e> <e>
+APPLY ab aa a a
+APPLY ab aa b b
+APPLY ab aa aa ab
+APPLY ab aa ab ab
+APPLY ab aa ba ba
+APPLY ab aa bb bb
+APPLY ab aa aab abb
+APPLY ab aa aba aba
+APPLY ab aa abb abb
+APPLY ab aa baa bab
+APPLY ab aa bab bab
+APPLY ab aa bba bba
+APPLY ab aa bbb bbb
+APPLY ab aa aaa aba
+APPLY ab aa abab abab
+APPLY ab aa babaab bababb
+APPLY ab aa bbabaa bbabab
+APPLY ab aa abaab ababb
+APPLY ab ba baabbba ababbab
+APPLY ab ba babbbaa abbbaba
+APPLY ab ba babaababaa ababaababa
+APPLY ab ba babb abbb
+APPLY ab ba baa aba
+APPLY ab ba baabaaba abaabaab
+APPLY ab ba <e> <e>
+APPLY ab ba a a
+APPLY ab ba b b
+APPLY ab ba aa aa
+APPLY ab ba ab ab
+APPLY ab ba ba ab
+APPLY ab ba bb bb
+APPLY ab ba aab aab
+APPLY ab ba aba aab
+APPLY ab ba abb abb
+APPLY ab ba baa aba
+APPLY ab ba bab abb
+APPLY ab ba bba bab
+APPLY ab ba bbb bbb
+APPLY ab ba aaa aaa
+APPLY ab ba abab aabb
+APPLY ab ba babaab ababab
+APPLY ab ba bbabaa bababa
+APPLY ab ba abaab aabab
+APPLY ab bb baabbba baaabba
+APPLY ab bb babbbaa baabbaa
+APPLY ab bb babaababaa babaababaa
+APPLY ab bb babb baab
+APPLY ab bb baa baa
+APPLY ab bb baabaaba baabaaba
+APPLY ab bb <e> <e>
+APPLY ab bb a a
+APPLY ab bb b b
+APPLY ab bb aa aa
+APPLY ab bb ab ab
+APPLY ab bb ba ba
+APPLY ab bb bb ab
+APPLY ab bb aab aab
+APPLY ab bb aba aba
+APPLY ab bb abb aab
+APPLY ab bb baa baa
+APPLY ab bb bab bab
+APPLY ab bb bba aba
+APPLY ab bb bbb abb
+APPLY ab bb aaa aaa
+APPLY ab bb abab abab
+APPLY ab bb babaab babaab
+APPLY ab bb bbabaa ababaa
+APPLY ab bb abaab abaab
+APPLY ba a baabbba bbababbbba
+APPLY ba a babbbaa bbabbbbaba
+APPLY ba a babaababaa bbabbababbabbaba
+APPLY ba a babb bbabb
+APPLY ba a baa bbaba
+APPLY ba a baabaaba bbababbababba
+APPLY ba a <e> <e>
+APPLY ba a a ba
+APPLY ba a b b
+APPLY ba a aa baba
+APPLY ba a ab bab
+APPLY ba a ba bba
+APPLY ba a bb bb
+APPLY ba a aab babab
+APPLY ba a aba babba
+APPLY ba a abb babb
+APPLY ba a baa bbaba
+APPLY ba a bab bbab
+APPLY ba a bba bbba
+APPLY ba a bbb bbb
+APPLY ba a aaa bababa
+APPLY ba a abab babbab
+APPLY ba a babaab bbabbabab
+APPLY ba a bbabaa bbbabbaba
+APPLY ba a abaab babbabab
+APPLY ba b baabbba baaabababaa
+APPLY ba b babbbaa baabababaaa
+APPLY ba b babaababaa baabaaabaabaaa
+APPLY ba b babb baababa
+APPLY ba b baa baaa
+APPLY ba b baabaaba baaabaaabaa
+APPLY ba b <e> <e>
+APPLY ba b a a
+APPLY ba b b ba
+APPLY ba b aa aa
+APPLY ba b ab aba
+APPLY ba b ba baa
+APPLY ba b bb baba
+APPLY ba b aab aaba
+APPLY ba b aba abaa
+APPLY ba b abb ababa
+APPLY ba b baa baaa
+APPLY ba b bab baaba
+APPLY ba b bba babaa
+APPLY ba b bbb bababa
+APPLY ba b aaa aaa
+APPLY ba b abab abaaba
+APPLY ba b babaab baabaaaba
+APPLY ba b bbabaa babaabaaa
+APPLY ba b abaab abaaaba
+APPLY ba aa baabbba bbabbba
+APPLY ba aa babbbaa babbbba
+APPLY ba aa babaababaa babbababba
+APPLY ba aa babb babb
+APPLY ba aa baa bba
+APPLY ba aa baabaaba bbabbaba
+APPLY ba aa <e> <e>
+APPLY ba aa a a
+APPLY ba aa b b
+APPLY ba aa aa ba
+APPLY ba aa ab ab
+APPLY ba aa ba ba
+APPLY ba aa bb bb
+APPLY ba aa aab bab
+APPLY ba aa aba aba
+APPLY ba aa abb abb
+APPLY ba aa baa bba
+APPLY ba aa bab bab
+APPLY ba aa bba bba
+APPLY ba aa bbb bbb
+APPLY ba aa aaa baa
+APPLY ba aa abab abab
+APPLY ba aa babaab babbab
+APPLY ba aa bbabaa bbabba
+APPLY ba aa abaab abbab
+APPLY ba ab baabbba bababba
+APPLY ba ab babbbaa bbabbaa
+APPLY ba ab babaababaa bbaababaaa
+APPLY ba ab babb bbab
+APPLY ba ab baa baa
+APPLY ba ab baabaaba babaabaa
+APPLY ba ab <e> <e>
+APPLY ba ab a a
+APPLY ba ab b b
+APPLY ba ab aa aa
+APPLY ba ab ab ba
+APPLY ba ab ba ba
+APPLY ba ab bb bb
+APPLY ba ab aab aba
+APPLY ba ab aba baa
+APPLY ba ab abb bab
+APPLY ba ab baa baa
+APPLY ba ab bab bba
+APPLY ba ab bba bba
+APPLY ba ab bbb bbb
+APPLY ba ab aaa aaa
+APPLY ba ab abab baba
+APPLY ba ab babaab bbaaba
+APPLY ba ab bbabaa bbbaaa
+APPLY ba ab abaab baaba
+APPLY ba bb baabbba baababa
+APPLY ba bb babbbaa bababaa
+APPLY ba bb babaababaa babaababaa
+APPLY ba bb babb baba
+APPLY ba bb baa baa
+APPLY ba bb baabaaba baabaaba
+APPLY ba bb <e> <e>
+APPLY ba bb a a
+APPLY ba bb b b
+APPLY ba bb aa aa
+APPLY ba bb ab ab
+APPLY ba bb ba ba
+APPLY ba bb bb ba
+APPLY ba bb aab aab
+APPLY ba bb aba aba
+APPLY ba bb abb aba
+APPLY ba bb baa baa
+APPLY ba bb bab bab
+APPLY ba bb bba baa
+APPLY ba bb bbb bab
+APPLY ba bb aaa aaa
+APPLY ba bb abab abab
+APPLY ba bb babaab babaab
+APPLY ba bb bbabaa baabaa
+APPLY ba bb abaab abaab
+APPLY bb a baabbba bbbbbbbbbb
+APPLY bb a babbbaa bbbbbbbbbb
+APPLY bb a babaababaa bbbbbbbbbbbbbbbb
+APPLY bb a babb bbbbb
+APPLY bb a baa bbbbb
+APPLY bb a baabaaba bbbbbbbbbbbbb
+APPLY bb a <e> <e>
+APPLY bb a a bb
+APPLY bb a b b
+APPLY bb a aa bbbb
+APPLY bb a ab bbb
+APPLY bb a ba bbb
+APPLY bb a bb bb
+APPLY bb a aab bbbbb
+APPLY bb a aba bbbbb
+APPLY bb a abb bbbb
+APPLY bb a baa bbbbb
+APPLY bb a bab bbbb
+APPLY bb a bba bbbb
+APPLY bb a bbb bbb
+APPLY bb a aaa bbbbbb
+APPLY bb a abab bbbbbb
+APPLY bb a babaab bbbbbbbbb
+APPLY bb a bbabaa bbbbbbbbb
+APPLY bb a abaab bbbbbbbb
+APPLY bb b baabbba bbaabbbbbba
+APPLY bb b babbbaa bbabbbbbbaa
+APPLY bb b babaababaa bbabbaabbabbaa
+APPLY bb b babb bbabbbb
+APPLY bb b baa bbaa
+APPLY bb b baabaaba bbaabbaabba
+APPLY bb b <e> <e>
+APPLY bb b a a
+APPLY bb b b bb
+APPLY bb b aa aa
+APPLY bb b ab abb
+APPLY bb b ba bba
+APPLY bb b bb bbbb
+APPLY bb b aab aabb
+APPLY bb b aba abba
+APPLY bb b abb abbbb
+APPLY bb b baa bbaa
+APPLY bb b bab bbabb
+APPLY bb b bba bbbba
+APPLY bb b bbb bbbbbb
+APPLY bb b aaa aaa
+APPLY bb b abab abbabb
+APPLY bb b babaab bbabbaabb
+APPLY bb b bbabaa bbbbabbaa
+APPLY bb b abaab abbaabb
+APPLY bb aa baabbba bbbbbba
+APPLY bb aa babbbaa babbbbb
+APPLY bb aa babaababaa babbbbabbb
+APPLY bb aa babb babb
+APPLY bb aa baa bbb
+APPLY bb aa baabaaba bbbbbbba
+APPLY bb aa <e> <e>
+APPLY bb aa a a
+APPLY bb aa b b
+APPLY bb aa aa bb
+APPLY bb aa ab ab
+APPLY bb aa ba ba
+APPLY bb aa bb bb
+APPLY bb aa aab bbb
+APPLY bb aa aba aba
+APPLY bb aa abb abb
+APPLY bb aa baa bbb
+APPLY bb aa bab bab
+APPLY bb aa bba bba
+APPLY bb aa bbb bbb
+APPLY bb aa aaa bba
+APPLY bb aa abab abab
+APPLY bb aa babaab babbbb
+APPLY bb aa bbabaa bbabbb
+APPLY bb aa abaab abbbb
+APPLY bb ab baabbba babbbba
+APPLY bb ab babbbaa bbbbbaa
+APPLY bb ab babaababaa bbbabbbbaa
+APPLY bb ab babb bbbb
+APPLY bb ab baa baa
+APPLY bb ab baabaaba babbabba
+APPLY bb ab <e> <e>
+APPLY bb ab a a
+APPLY bb ab b b
+APPLY bb ab aa aa
+APPLY bb ab ab bb
+APPLY bb ab ba ba
+APPLY bb ab bb bb
+APPLY bb ab aab abb
+APPLY bb ab aba bba
+APPLY bb ab abb bbb
+APPLY bb ab baa baa
+APPLY bb ab bab bbb
+APPLY bb ab bba bba
+APPLY bb ab bbb bbb
+APPLY bb ab aaa aaa
+APPLY bb ab abab bbbb
+APPLY bb ab babaab bbbabb
+APPLY bb ab bbabaa bbbbaa
+APPLY bb ab abaab bbabb
+APPLY bb ba baabbba bbabbbb
+APPLY bb ba babbbaa bbbbbba
+APPLY bb ba babaababaa bbbbabbbba
+APPLY bb ba babb bbbb
+APPLY bb ba baa bba
+APPLY bb ba baabaaba bbabbabb
+APPLY bb ba <e> <e>
+APPLY bb ba a a
+APPLY bb ba b b
+APPLY bb ba aa aa
+APPLY bb ba ab ab
+APPLY bb ba ba bb
+APPLY bb ba bb bb
+APPLY bb ba aab aab
+APPLY bb ba aba abb
+APPLY bb ba abb abb
+APPLY bb ba baa bba
+APPLY bb ba bab bbb
+APPLY bb ba bba bbb
+APPLY bb ba bbb bbb
+APPLY bb ba aaa aaa
+APPLY bb ba abab abbb
+APPLY bb ba babaab bbbbab
+APPLY bb ba bbabaa bbbbba
+APPLY bb ba abaab abbab
+PAIRS 1288
+PAIR baa babba
+PAIR baaa baab
+PAIR baaa baaba
+PAIR baaa babba
+PAIR baaa bbaab
+PAIR baaa baabb
+PAIR baaa babbaa
+PAIR baaa bbaaba
+PAIR baaa abbaba
+PAIR baaa baabba
+PAIR baaa babaab
+PAIR baaa bbbaab
+PAIR baaa baabab
+PAIR baaa abaabb
+PAIR baaa bbaabb
+PAIR baaa baabbb
+PAIR bbaa babaa
+PAIR bbaa babaaa
+PAIR bbaa bbabaa
+PAIR bbaa babaab
+PAIR aaba aabb
+PAIR aaba aabba
+PAIR aaba aaabb
+PAIR aaba baabb
+PAIR aaba aabbb
+PAIR aaba abbaba
+PAIR aaba aaabba
+PAIR aaba baabba
+PAIR aaba aabbba
+PAIR aaba aabbab
+PAIR aaba aaaabb
+PAIR aaba baaabb
+PAIR aaba bbaabb
+PAIR aaba aaabbb
+PAIR aaba baabbb
+PAIR aaba aabbbb
+PAIR aaab baab
+PAIR aaab baaba
+PAIR aaab bbaab
+PAIR aaab baabb
+PAIR aaab bbaaba
+PAIR aaab baabba
+PAIR aaab babaab
+PAIR aaab bbbaab
+PAIR aaab baabab
+PAIR aaab abaabb
+PAIR aaab bbaabb
+PAIR aaab baabbb
+PAIR baab baaa
+PAIR baab aaab
+PAIR baab baaaa
+PAIR baab bbaaa
+PAIR baab aaaba
+PAIR baab babba
+PAIR baab aaaab
+PAIR baab baaab
+PAIR baab aaabb
+PAIR baab baaaaa
+PAIR baab bbaaaa
+PAIR baab babaaa
+PAIR baab bbbaaa
+PAIR baab aaaaba
+PAIR baab baaaba
+PAIR baab aaabba
+PAIR baab aaaaab
+PAIR baab baaaab
+PAIR baab bbaaab
+PAIR baab aaabab
+PAIR baab aaaabb
+PAIR baab baaabb
+PAIR baab aaabbb
+PAIR aabb aaba
+PAIR aabb aaaba
+PAIR aabb baaba
+PAIR aabb aabab
+PAIR aabb aaaaba
+PAIR aabb baaaba
+PAIR aabb bbaaba
+PAIR aabb aababa
+PAIR aabb aaabab
+PAIR aabb baabab
+PAIR aabb aababb
+PAIR baaaa baab
+PAIR baaaa abbaa
+PAIR baaaa baaba
+PAIR baaaa babba
+PAIR baaaa baaab
+PAIR baaaa bbaab
+PAIR baaaa baabb
+PAIR baaaa babbaa
+PAIR baaaa baaaba
+PAIR baaaa bbaaba
+PAIR baaaa abbaba
+PAIR baaaa baabba
+PAIR baaaa abaaab
+PAIR baaaa bbaaab
+PAIR baaaa babaab
+PAIR baaaa bbbaab
+PAIR baaaa baabab
+PAIR baaaa aabbab
+PAIR baaaa baaabb
+PAIR baaaa abaabb
+PAIR baaaa bbaabb
+PAIR baaaa baabbb
+PAIR abaaa bbaaa
+PAIR abaaa abbaa
+PAIR abaaa baabb
+PAIR abaaa bbaaaa
+PAIR abaaa abbaaa
+PAIR abaaa bbbaaa
+PAIR abaaa babbaa
+PAIR abaaa baabba
+PAIR abaaa bbaaab
+PAIR abaaa baabab
+PAIR abaaa abaabb
+PAIR abaaa bbaabb
+PAIR abaaa baabbb
+PAIR bbaaa baab
+PAIR bbaaa abaaa
+PAIR bbaaa babaa
+PAIR bbaaa baaba
+PAIR bbaaa bbaab
+PAIR bbaaa baabb
+PAIR bbaaa abaaaa
+PAIR bbaaa babaaa
+PAIR bbaaa bbabaa
+PAIR bbaaa bbaaba
+PAIR bbaaa abbaba
+PAIR bbaaa baabba
+PAIR bbaaa abaaab
+PAIR bbaaa babaab
+PAIR bbaaa bbbaab
+PAIR bbaaa baabab
+PAIR bbaaa abaabb
+PAIR bbaaa bbaabb
+PAIR bbaaa baabbb
+PAIR babaa bbaa
+PAIR babaa bbaaa
+PAIR babaa bbbaa
+PAIR babaa babba
+PAIR babaa bbaab
+PAIR babaa bbaaaa
+PAIR babaa bbbaaa
+PAIR babaa babbaa
+PAIR babaa bbbbaa
+PAIR babaa bbaaba
+PAIR babaa bbaaab
+PAIR babaa bbbaab
+PAIR babaa bbaabb
+PAIR abbaa baaaa
+PAIR abbaa abaaa
+PAIR abbaa baaaaa
+PAIR abbaa abaaaa
+PAIR abbaa babaaa
+PAIR abbaa bbbaaa
+PAIR abbaa baaaba
+PAIR abbaa abbaba
+PAIR bbbaa babaa
+PAIR bbbaa babba
+PAIR bbbaa babaaa
+PAIR bbbaa bbabaa
+PAIR bbbaa babbaa
+PAIR bbbaa babaab
+PAIR aaaba baab
+PAIR aaaba aabb
+PAIR aaaba baaba
+PAIR aaaba aabba
+PAIR aaaba bbaab
+PAIR aaaba aaabb
+PAIR aaaba baabb
+PAIR aaaba aabbb
+PAIR aaaba bbaaba
+PAIR aaaba abbaba
+PAIR aaaba aaabba
+PAIR aaaba baabba
+PAIR aaaba aabbba
+PAIR aaaba babaab
+PAIR aaaba bbbaab
+PAIR aaaba baabab
+PAIR aaaba aabbab
+PAIR aaaba aaaabb
+PAIR aaaba baaabb
+PAIR aaaba abaabb
+PAIR aaaba bbaabb
+PAIR aaaba aaabbb
+PAIR aaaba baabbb
+PAIR aaaba aabbbb
+PAIR baaba baaa
+PAIR baaba aaab
+PAIR baaba aabb
+PAIR baaba baaaa
+PAIR baaba bbaaa
+PAIR baaba aaaba
+PAIR baaba aabba
+PAIR baaba babba
+PAIR baaba aaaab
+PAIR baaba baaab
+PAIR baaba aaabb
+PAIR baaba baabb
+PAIR baaba aabbb
+PAIR baaba baaaaa
+PAIR baaba bbaaaa
+PAIR baaba babaaa
+PAIR baaba abbaaa
+PAIR baaba bbbaaa
+PAIR baaba aaaaba
+PAIR baaba baaaba
+PAIR baaba abbaba
+PAIR baaba aaabba
+PAIR baaba baabba
+PAIR baaba aabbba
+PAIR baaba aaaaab
+PAIR baaba baaaab
+PAIR baaba bbaaab
+PAIR baaba aaabab
+PAIR baaba aabbab
+PAIR baaba aaaabb
+PAIR baaba baaabb
+PAIR baaba bbaabb
+PAIR baaba aaabbb
+PAIR baaba baabbb
+PAIR baaba aabbbb
+PAIR aabba aaba
+PAIR aabba aaaba
+PAIR aabba baaba
+PAIR aabba aabab
+PAIR aabba aabbb
+PAIR aabba aaaaba
+PAIR aabba baaaba
+PAIR aabba bbaaba
+PAIR aabba aababa
+PAIR aabba aabbba
+PAIR aabba aaabab
+PAIR aabba baabab
+PAIR aabba aababb
+PAIR aabba aaabbb
+PAIR aabba baabbb
+PAIR aabba aabbbb
+PAIR babba baa
+PAIR babba baaa
+PAIR babba baab
+PAIR babba baaaa
+PAIR babba babaa
+PAIR babba bbbaa
+PAIR babba baaba
+PAIR babba baaab
+PAIR babba baabb
+PAIR babba baaaaa
+PAIR babba babaaa
+PAIR babba bbbaaa
+PAIR babba bbbbaa
+PAIR babba baaaba
+PAIR babba baabba
+PAIR babba baaaab
+PAIR babba babaab
+PAIR babba bbbaab
+PAIR babba baaabb
+PAIR babba baabbb
+PAIR aaaab baab
+PAIR aaaab baaba
+PAIR aaaab baaab
+PAIR aaaab bbaab
+PAIR aaaab aabab
+PAIR aaaab baabb
+PAIR aaaab baaaba
+PAIR aaaab bbaaba
+PAIR aaaab aababa
+PAIR aaaab baabba
+PAIR aaaab abaaab
+PAIR aaaab bbaaab
+PAIR aaaab babaab
+PAIR aaaab bbbaab
+PAIR aaaab baabab
+PAIR aaaab baaabb
+PAIR aaaab abaabb
+PAIR aaaab bbaabb
+PAIR aaaab aababb
+PAIR aaaab baabbb
+PAIR baaab baab
+PAIR baaab baaaa
+PAIR baaab baaba
+PAIR baaab babba
+PAIR baaab aaaab
+PAIR baaab bbaab
+PAIR baaab baabb
+PAIR baaab baaaaa
+PAIR baaab abaaaa
+PAIR baaab bbaaaa
+PAIR baaab babbaa
+PAIR baaab aaaaba
+PAIR baaab bbaaba
+PAIR baaab baabba
+PAIR baaab aaaaab
+PAIR baaab baaaab
+PAIR baaab babaab
+PAIR baaab bbbaab
+PAIR baaab baabab
+PAIR baaab aaaabb
+PAIR baaab abaabb
+PAIR baaab bbaabb
+PAIR baaab baabbb
+PAIR bbaab baaa
+PAIR bbaab aaab
+PAIR bbaab baaaa
+PAIR bbaab bbaaa
+PAIR bbaab babaa
+PAIR bbaab aaaba
+PAIR bbaab aaaab
+PAIR bbaab baaab
+PAIR bbaab aaabb
+PAIR bbaab baaaaa
+PAIR bbaab bbaaaa
+PAIR bbaab babaaa
+PAIR bbaab bbbaaa
+PAIR bbaab aaabaa
+PAIR bbaab bbabaa
+PAIR bbaab aaaaba
+PAIR bbaab baaaba
+PAIR bbaab aaabba
+PAIR bbaab aaaaab
+PAIR bbaab baaaab
+PAIR bbaab bbaaab
+PAIR bbaab babaab
+PAIR bbaab aaabab
+PAIR bbaab aaaabb
+PAIR bbaab baaabb
+PAIR bbaab aaabbb
+PAIR aabab aabb
+PAIR aabab aabba
+PAIR aabab aaaab
+PAIR aabab aaabb
+PAIR aabab baabb
+PAIR aabab aabbb
+PAIR aabab aaabba
+PAIR aabab baabba
+PAIR aabab aabbba
+PAIR aabab aaaaab
+PAIR aabab baaaab
+PAIR aabab aabbab
+PAIR aabab aaaabb
+PAIR aabab baaabb
+PAIR aabab abaabb
+PAIR aabab bbaabb
+PAIR aabab aaabbb
+PAIR aabab baabbb
+PAIR aabab aabbbb
+PAIR aaabb aaba
+PAIR aaabb baab
+PAIR aaabb aaaba
+PAIR aaabb baaba
+PAIR aaabb bbaab
+PAIR aaabb aabab
+PAIR aaabb baabb
+PAIR aaabb aaabaa
+PAIR aaabb aaaaba
+PAIR aaabb baaaba
+PAIR aaabb bbaaba
+PAIR aaabb aababa
+PAIR aaabb abbaba
+PAIR aaabb baabba
+PAIR aaabb babaab
+PAIR aaabb bbbaab
+PAIR aaabb aaabab
+PAIR aaabb baabab
+PAIR aaabb abaabb
+PAIR aaabb bbaabb
+PAIR aaabb aababb
+PAIR aaabb baabbb
+PAIR baabb baaa
+PAIR baabb aaba
+PAIR baabb aaab
+PAIR baabb baaaa
+PAIR baabb abaaa
+PAIR baabb bbaaa
+PAIR baabb aaaba
+PAIR baabb baaba
+PAIR baabb babba
+PAIR baabb aaaab
+PAIR baabb baaab
+PAIR baabb aabab
+PAIR baabb aaabb
+PAIR baabb baaaaa
+PAIR baabb abaaaa
+PAIR baabb bbaaaa
+PAIR baabb babaaa
+PAIR baabb bbbaaa
+PAIR baabb aaaaba
+PAIR baabb baaaba
+PAIR baabb bbaaba
+PAIR baabb aababa
+PAIR baabb aaabba
+PAIR baabb aaaaab
+PAIR baabb baaaab
+PAIR baabb abaaab
+PAIR baabb bbaaab
+PAIR baabb aaabab
+PAIR baabb baabab
+PAIR baabb aaaabb
+PAIR baabb baaabb
+PAIR baabb aababb
+PAIR baabb aaabbb
+PAIR aabbb aaba
+PAIR aabbb aaaba
+PAIR aabbb baaba
+PAIR aabbb aabba
+PAIR aabbb aabab
+PAIR aabbb aaaaba
+PAIR aabbb baaaba
+PAIR aabbb bbaaba
+PAIR aabbb aababa
+PAIR aabbb abbaba
+PAIR aabbb aaabba
+PAIR aabbb baabba
+PAIR aabbb aaabab
+PAIR aabbb baabab
+PAIR aabbb aabbab
+PAIR aabbb aababb
+PAIR baaaaa baab
+PAIR baaaaa abbaa
+PAIR baaaaa baaba
+PAIR baaaaa babba
+PAIR baaaaa baaab
+PAIR baaaaa bbaab
+PAIR baaaaa baabb
+PAIR baaaaa abbaaa
+PAIR baaaaa babbaa
+PAIR baaaaa baaaba
+PAIR baaaaa bbaaba
+PAIR baaaaa abbaba
+PAIR baaaaa baabba
+PAIR baaaaa baaaab
+PAIR baaaaa abaaab
+PAIR baaaaa bbaaab
+PAIR baaaaa babaab
+PAIR baaaaa bbbaab
+PAIR baaaaa baabab
+PAIR baaaaa aabbab
+PAIR baaaaa baaabb
+PAIR baaaaa abaabb
+PAIR baaaaa bbaabb
+PAIR baaaaa baabbb
+PAIR abaaaa bbaaa
+PAIR abaaaa abbaa
+PAIR abaaaa baaab
+PAIR abaaaa baabb
+PAIR abaaaa bbaaaa
+PAIR abaaaa abbaaa
+PAIR abaaaa bbbaaa
+PAIR abaaaa babbaa
+PAIR abaaaa baaaba
+PAIR abaaaa baabba
+PAIR abaaaa abaaab
+PAIR abaaaa bbaaab
+PAIR abaaaa baabab
+PAIR abaaaa baaabb
+PAIR abaaaa abaabb
+PAIR abaaaa bbaabb
+PAIR abaaaa baabbb
+PAIR bbaaaa baab
+PAIR bbaaaa abaaa
+PAIR bbaaaa babaa
+PAIR bbaaaa baaba
+PAIR bbaaaa baaab
+PAIR bbaaaa bbaab
+PAIR bbaaaa baabb
+PAIR bbaaaa abaaaa
+PAIR bbaaaa babaaa
+PAIR bbaaaa bbabaa
+PAIR bbaaaa baaaba
+PAIR bbaaaa bbaaba
+PAIR bbaaaa abbaba
+PAIR bbaaaa baabba
+PAIR bbaaaa abaaab
+PAIR bbaaaa bbaaab
+PAIR bbaaaa babaab
+PAIR bbaaaa bbbaab
+PAIR bbaaaa baabab
+PAIR bbaaaa aabbab
+PAIR bbaaaa baaabb
+PAIR bbaaaa abaabb
+PAIR bbaaaa bbaabb
+PAIR bbaaaa baabbb
+PAIR babaaa bbaa
+PAIR babaaa baab
+PAIR babaaa bbaaa
+PAIR babaaa abbaa
+PAIR babaaa bbbaa
+PAIR babaaa baaba
+PAIR babaaa babba
+PAIR babaaa bbaab
+PAIR babaaa baabb
+PAIR babaaa bbaaaa
+PAIR babaaa abbaaa
+PAIR babaaa bbbaaa
+PAIR babaaa babbaa
+PAIR babaaa bbbbaa
+PAIR babaaa bbaaba
+PAIR babaaa abbaba
+PAIR babaaa baabba
+PAIR babaaa bbaaab
+PAIR babaaa babaab
+PAIR babaaa bbbaab
+PAIR babaaa baabab
+PAIR babaaa abaabb
+PAIR babaaa bbaabb
+PAIR babaaa baabbb
+PAIR abbaaa abaaa
+PAIR abbaaa baaba
+PAIR abbaaa baaaaa
+PAIR abbaaa abaaaa
+PAIR abbaaa babaaa
+PAIR abbaaa bbbaaa
+PAIR abbaaa bbaaba
+PAIR abbaaa abbaba
+PAIR abbaaa abaaab
+PAIR abbaaa baabab
+PAIR abbaaa baabbb
+PAIR bbbaaa baab
+PAIR bbbaaa abaaa
+PAIR bbbaaa babaa
+PAIR bbbaaa abbaa
+PAIR bbbaaa baaba
+PAIR bbbaaa babba
+PAIR bbbaaa bbaab
+PAIR bbbaaa baabb
+PAIR bbbaaa abaaaa
+PAIR bbbaaa babaaa
+PAIR bbbaaa abbaaa
+PAIR bbbaaa bbabaa
+PAIR bbbaaa babbaa
+PAIR bbbaaa bbaaba
+PAIR bbbaaa abbaba
+PAIR bbbaaa baabba
+PAIR bbbaaa abaaab
+PAIR bbbaaa babaab
+PAIR bbbaaa bbbaab
+PAIR bbbaaa baabab
+PAIR bbbaaa abaabb
+PAIR bbbaaa bbaabb
+PAIR bbbaaa baabbb
+PAIR aaabaa bbaab
+PAIR aaabaa aaabb
+PAIR aaabaa bbaaba
+PAIR aaabaa abbaba
+PAIR aaabaa aaabba
+PAIR aaabaa babaab
+PAIR aaabaa bbbaab
+PAIR aaabaa aaabab
+PAIR aaabaa aabbab
+PAIR aaabaa aaaabb
+PAIR aaabaa baaabb
+PAIR aaabaa bbaabb
+PAIR aaabaa aaabbb
+PAIR bbabaa bbaa
+PAIR bbabaa bbaaa
+PAIR bbabaa bbbaa
+PAIR bbabaa bbaab
+PAIR bbabaa bbaaaa
+PAIR bbabaa bbbaaa
+PAIR bbabaa babbaa
+PAIR bbabaa bbbbaa
+PAIR bbabaa bbaaba
+PAIR bbabaa bbaaab
+PAIR bbabaa bbbaab
+PAIR bbabaa bbaabb
+PAIR babbaa baaa
+PAIR babbaa baaaa
+PAIR babbaa abaaa
+PAIR babbaa babaa
+PAIR babbaa bbbaa
+PAIR babbaa baaab
+PAIR babbaa baaaaa
+PAIR babbaa abaaaa
+PAIR babbaa babaaa
+PAIR babbaa bbbaaa
+PAIR babbaa bbabaa
+PAIR babbaa bbbbaa
+PAIR babbaa baaaba
+PAIR babbaa abbaba
+PAIR babbaa baabba
+PAIR babbaa baaaab
+PAIR babbaa abaaab
+PAIR babbaa babaab
+PAIR babbaa bbbaab
+PAIR babbaa baaabb
+PAIR babbaa abaabb
+PAIR bbbbaa babaa
+PAIR bbbbaa babba
+PAIR bbbbaa babaaa
+PAIR bbbbaa bbabaa
+PAIR bbbbaa babbaa
+PAIR bbbbaa babaab
+PAIR aaaaba baab
+PAIR aaaaba aabb
+PAIR aaaaba baaba
+PAIR aaaaba aabba
+PAIR aaaaba baaab
+PAIR aaaaba bbaab
+PAIR aaaaba aaabb
+PAIR aaaaba baabb
+PAIR aaaaba aabbb
+PAIR aaaaba baaaba
+PAIR aaaaba bbaaba
+PAIR aaaaba abbaba
+PAIR aaaaba aaabba
+PAIR aaaaba baabba
+PAIR aaaaba aabbba
+PAIR aaaaba abaaab
+PAIR aaaaba bbaaab
+PAIR aaaaba babaab
+PAIR aaaaba bbbaab
+PAIR aaaaba baabab
+PAIR aaaaba aabbab
+PAIR aaaaba aaaabb
+PAIR aaaaba baaabb
+PAIR aaaaba abaabb
+PAIR aaaaba bbaabb
+PAIR aaaaba aaabbb
+PAIR aaaaba baabbb
+PAIR aaaaba aabbbb
+PAIR baaaba baab
+PAIR baaaba aabb
+PAIR baaaba baaaa
+PAIR baaaba abbaa
+PAIR baaaba baaba
+PAIR baaaba aabba
+PAIR baaaba babba
+PAIR baaaba aaaab
+PAIR baaaba bbaab
+PAIR baaaba aaabb
+PAIR baaaba baabb
+PAIR baaaba aabbb
+PAIR baaaba baaaaa
+PAIR baaaba abaaaa
+PAIR baaaba bbaaaa
+PAIR baaaba babbaa
+PAIR baaaba aaaaba
+PAIR baaaba bbaaba
+PAIR baaaba abbaba
+PAIR baaaba aaabba
+PAIR baaaba baabba
+PAIR baaaba aabbba
+PAIR baaaba aaaaab
+PAIR baaaba baaaab
+PAIR baaaba babaab
+PAIR baaaba bbbaab
+PAIR baaaba baabab
+PAIR baaaba aabbab
+PAIR baaaba aaaabb
+PAIR baaaba baaabb
+PAIR baaaba abaabb
+PAIR baaaba bbaabb
+PAIR baaaba aaabbb
+PAIR baaaba baabbb
+PAIR baaaba aabbbb
+PAIR bbaaba baaa
+PAIR bbaaba aaab
+PAIR bbaaba aabb
+PAIR bbaaba baaaa
+PAIR bbaaba bbaaa
+PAIR bbaaba babaa
+PAIR bbaaba aaaba
+PAIR bbaaba aabba
+PAIR bbaaba aaaab
+PAIR bbaaba baaab
+PAIR bbaaba aaabb
+PAIR bbaaba baabb
+PAIR bbaaba aabbb
+PAIR bbaaba baaaaa
+PAIR bbaaba bbaaaa
+PAIR bbaaba babaaa
+PAIR bbaaba abbaaa
+PAIR bbaaba bbbaaa
+PAIR bbaaba aaabaa
+PAIR bbaaba bbabaa
+PAIR bbaaba aaaaba
+PAIR bbaaba baaaba
+PAIR bbaaba abbaba
+PAIR bbaaba aaabba
+PAIR bbaaba baabba
+PAIR bbaaba aabbba
+PAIR bbaaba aaaaab
+PAIR bbaaba baaaab
+PAIR bbaaba bbaaab
+PAIR bbaaba babaab
+PAIR bbaaba aaabab
+PAIR bbaaba aabbab
+PAIR bbaaba aaaabb
+PAIR bbaaba baaabb
+PAIR bbaaba bbaabb
+PAIR bbaaba aaabbb
+PAIR bbaaba baabbb
+PAIR bbaaba aabbbb
+PAIR aababa aabb
+PAIR aababa aabba
+PAIR aababa aaaab
+PAIR aababa aaabb
+PAIR aababa baabb
+PAIR aababa aabbb
+PAIR aababa abbaba
+PAIR aababa aaabba
+PAIR aababa baabba
+PAIR aababa aabbba
+PAIR aababa aaaaab
+PAIR aababa baaaab
+PAIR aababa babaab
+PAIR aababa aabbab
+PAIR aababa aaaabb
+PAIR aababa baaabb
+PAIR aababa abaabb
+PAIR aababa bbaabb
+PAIR aababa aababb
+PAIR aababa aaabbb
+PAIR aababa baabbb
+PAIR aababa aabbbb
+PAIR abbaba baaa
+PAIR abbaba aaba
+PAIR abbaba baaaa
+PAIR abbaba bbaaa
+PAIR abbaba abbaa
+PAIR abbaba aaaba
+PAIR abbaba baaba
+PAIR abbaba aaabb
+PAIR abbaba aabbb
+PAIR abbaba baaaaa
+PAIR abbaba bbaaaa
+PAIR abbaba babaaa
+PAIR abbaba abbaaa
+PAIR abbaba bbbaaa
+PAIR abbaba aaabaa
+PAIR abbaba babbaa
+PAIR abbaba aaaaba
+PAIR abbaba baaaba
+PAIR abbaba bbaaba
+PAIR abbaba aababa
+PAIR abbaba aabbba
+PAIR abbaba aaaabb
+PAIR abbaba baaabb
+PAIR abbaba aababb
+PAIR abbaba aaabbb
+PAIR abbaba baabbb
+PAIR abbaba aabbbb
+PAIR aaabba aaba
+PAIR aaabba baab
+PAIR aaabba aaaba
+PAIR aaabba baaba
+PAIR aaabba bbaab
+PAIR aaabba aabab
+PAIR aaabba baabb
+PAIR aaabba aabbb
+PAIR aaabba aaabaa
+PAIR aaabba aaaaba
+PAIR aaabba baaaba
+PAIR aaabba bbaaba
+PAIR aaabba aababa
+PAIR aaabba baabba
+PAIR aaabba aabbba
+PAIR aaabba babaab
+PAIR aaabba bbbaab
+PAIR aaabba aaabab
+PAIR aaabba baabab
+PAIR aaabba abaabb
+PAIR aaabba bbaabb
+PAIR aaabba aababb
+PAIR aaabba aaabbb
+PAIR aaabba baabbb
+PAIR aaabba aabbbb
+PAIR baabba baaa
+PAIR baabba aaba
+PAIR baabba aaab
+PAIR baabba baaaa
+PAIR baabba abaaa
+PAIR baabba bbaaa
+PAIR baabba aaaba
+PAIR baabba baaba
+PAIR baabba babba
+PAIR baabba aaaab
+PAIR baabba baaab
+PAIR baabba aabab
+PAIR baabba aaabb
+PAIR baabba aabbb
+PAIR baabba baaaaa
+PAIR baabba abaaaa
+PAIR baabba bbaaaa
+PAIR baabba babaaa
+PAIR baabba bbbaaa
+PAIR baabba babbaa
+PAIR baabba aaaaba
+PAIR baabba baaaba
+PAIR baabba bbaaba
+PAIR baabba aababa
+PAIR baabba aaabba
+PAIR baabba aabbba
+PAIR baabba aaaaab
+PAIR baabba baaaab
+PAIR baabba abaaab
+PAIR baabba bbaaab
+PAIR baabba aaabab
+PAIR baabba baabab
+PAIR baabba aaaabb
+PAIR baabba baaabb
+PAIR baabba aababb
+PAIR baabba aaabbb
+PAIR baabba baabbb
+PAIR baabba aabbbb
+PAIR aabbba aaba
+PAIR aabbba aaaba
+PAIR aabbba baaba
+PAIR aabbba aabba
+PAIR aabbba aabab
+PAIR aabbba aaaaba
+PAIR aabbba baaaba
+PAIR aabbba bbaaba
+PAIR aabbba aababa
+PAIR aabbba abbaba
+PAIR aabbba aaabba
+PAIR aabbba baabba
+PAIR aabbba aaabab
+PAIR aabbba baabab
+PAIR aabbba aabbab
+PAIR aabbba aababb
+PAIR aabbba aabbbb
+PAIR aaaaab baab
+PAIR aaaaab baaba
+PAIR aaaaab baaab
+PAIR aaaaab bbaab
+PAIR aaaaab aabab
+PAIR aaaaab baabb
+PAIR aaaaab baaaba
+PAIR aaaaab bbaaba
+PAIR aaaaab aababa
+PAIR aaaaab baabba
+PAIR aaaaab baaaab
+PAIR aaaaab abaaab
+PAIR aaaaab bbaaab
+PAIR aaaaab babaab
+PAIR aaaaab bbbaab
+PAIR aaaaab aaabab
+PAIR aaaaab baabab
+PAIR aaaaab baaabb
+PAIR aaaaab abaabb
+PAIR aaaaab bbaabb
+PAIR aaaaab aababb
+PAIR aaaaab baabbb
+PAIR baaaab baab
+PAIR baaaab baaba
+PAIR baaaab babba
+PAIR baaaab baaab
+PAIR baaaab bbaab
+PAIR baaaab aabab
+PAIR baaaab baabb
+PAIR baaaab baaaaa
+PAIR baaaab babbaa
+PAIR baaaab baaaba
+PAIR baaaab bbaaba
+PAIR baaaab aababa
+PAIR baaaab baabba
+PAIR baaaab aaaaab
+PAIR baaaab abaaab
+PAIR baaaab bbaaab
+PAIR baaaab babaab
+PAIR baaaab bbbaab
+PAIR baaaab baabab
+PAIR baaaab baaabb
+PAIR baaaab abaabb
+PAIR baaaab bbaabb
+PAIR baaaab aababb
+PAIR baaaab baabbb
+PAIR abaaab baaaa
+PAIR abaaab bbaaa
+PAIR abaaab aaaab
+PAIR abaaab baabb
+PAIR abaaab baaaaa
+PAIR abaaab abaaaa
+PAIR abaaab bbaaaa
+PAIR abaaab abbaaa
+PAIR abaaab bbbaaa
+PAIR abaaab babbaa
+PAIR abaaab aaaaba
+PAIR abaaab baabba
+PAIR abaaab aaaaab
+PAIR abaaab baaaab
+PAIR abaaab bbaaab
+PAIR abaaab baabab
+PAIR abaaab aaaabb
+PAIR abaaab abaabb
+PAIR abaaab bbaabb
+PAIR abaaab baabbb
+PAIR bbaaab baab
+PAIR bbaaab baaaa
+PAIR bbaaab abaaa
+PAIR bbaaab babaa
+PAIR bbaaab baaba
+PAIR bbaaab aaaab
+PAIR bbaaab bbaab
+PAIR bbaaab baabb
+PAIR bbaaab baaaaa
+PAIR bbaaab abaaaa
+PAIR bbaaab bbaaaa
+PAIR bbaaab babaaa
+PAIR bbaaab bbabaa
+PAIR bbaaab aaaaba
+PAIR bbaaab bbaaba
+PAIR bbaaab baabba
+PAIR bbaaab aaaaab
+PAIR bbaaab baaaab
+PAIR bbaaab abaaab
+PAIR bbaaab babaab
+PAIR bbaaab bbbaab
+PAIR bbaaab baabab
+PAIR bbaaab aaaabb
+PAIR bbaaab abaabb
+PAIR bbaaab bbaabb
+PAIR bbaaab baabbb
+PAIR babaab baaa
+PAIR babaab bbaa
+PAIR babaab aaab
+PAIR babaab baaaa
+PAIR babaab bbaaa
+PAIR babaab bbbaa
+PAIR babaab aaaba
+PAIR babaab babba
+PAIR babaab aaaab
+PAIR babaab baaab
+PAIR babaab bbaab
+PAIR babaab aaabb
+PAIR babaab baaaaa
+PAIR babaab bbaaaa
+PAIR babaab babaaa
+PAIR babaab bbbaaa
+PAIR babaab aaabaa
+PAIR babaab babbaa
+PAIR babaab bbbbaa
+PAIR babaab aaaaba
+PAIR babaab baaaba
+PAIR babaab bbaaba
+PAIR babaab aababa
+PAIR babaab aaabba
+PAIR babaab aaaaab
+PAIR babaab baaaab
+PAIR babaab bbaaab
+PAIR babaab bbbaab
+PAIR babaab aaabab
+PAIR babaab aaaabb
+PAIR babaab baaabb
+PAIR babaab bbaabb
+PAIR babaab aababb
+PAIR babaab aaabbb
+PAIR bbbaab baaa
+PAIR bbbaab aaab
+PAIR bbbaab baaaa
+PAIR bbbaab bbaaa
+PAIR bbbaab babaa
+PAIR bbbaab aaaba
+PAIR bbbaab babba
+PAIR bbbaab aaaab
+PAIR bbbaab baaab
+PAIR bbbaab aaabb
+PAIR bbbaab baaaaa
+PAIR bbbaab bbaaaa
+PAIR bbbaab babaaa
+PAIR bbbaab bbbaaa
+PAIR bbbaab aaabaa
+PAIR bbbaab bbabaa
+PAIR bbbaab babbaa
+PAIR bbbaab aaaaba
+PAIR bbbaab baaaba
+PAIR bbbaab aaabba
+PAIR bbbaab aaaaab
+PAIR bbbaab baaaab
+PAIR bbbaab bbaaab
+PAIR bbbaab babaab
+PAIR bbbaab aaabab
+PAIR bbbaab aaaabb
+PAIR bbbaab baaabb
+PAIR bbbaab aaabbb
+PAIR aaabab baab
+PAIR aaabab aabb
+PAIR aaabab baaba
+PAIR aaabab aabba
+PAIR aaabab bbaab
+PAIR aaabab aaabb
+PAIR aaabab baabb
+PAIR aaabab aabbb
+PAIR aaabab aaabaa
+PAIR aaabab bbaaba
+PAIR aaabab aaabba
+PAIR aaabab baabba
+PAIR aaabab aabbba
+PAIR aaabab aaaaab
+PAIR aaabab babaab
+PAIR aaabab bbbaab
+PAIR aaabab baabab
+PAIR aaabab aabbab
+PAIR aaabab aaaabb
+PAIR aaabab baaabb
+PAIR aaabab abaabb
+PAIR aaabab bbaabb
+PAIR aaabab aaabbb
+PAIR aaabab baabbb
+PAIR aaabab aabbbb
+PAIR baabab baaa
+PAIR baabab aaab
+PAIR baabab aabb
+PAIR baabab baaaa
+PAIR baabab abaaa
+PAIR baabab bbaaa
+PAIR baabab aaaba
+PAIR baabab aabba
+PAIR baabab aaaab
+PAIR baabab baaab
+PAIR baabab aaabb
+PAIR baabab baabb
+PAIR baabab aabbb
+PAIR baabab baaaaa
+PAIR baabab abaaaa
+PAIR baabab bbaaaa
+PAIR baabab babaaa
+PAIR baabab abbaaa
+PAIR baabab bbbaaa
+PAIR baabab aaaaba
+PAIR baabab baaaba
+PAIR baabab aaabba
+PAIR baabab baabba
+PAIR baabab aabbba
+PAIR baabab aaaaab
+PAIR baabab baaaab
+PAIR baabab abaaab
+PAIR baabab bbaaab
+PAIR baabab aaabab
+PAIR baabab aabbab
+PAIR baabab aaaabb
+PAIR baabab baaabb
+PAIR baabab abaabb
+PAIR baabab bbaabb
+PAIR baabab aaabbb
+PAIR baabab baabbb
+PAIR baabab aabbbb
+PAIR aabbab aaba
+PAIR aabbab baaaa
+PAIR aabbab aaaba
+PAIR aabbab baaba
+PAIR aabbab aabab
+PAIR aabbab aabbb
+PAIR aabbab baaaaa
+PAIR aabbab bbaaaa
+PAIR aabbab aaabaa
+PAIR aabbab aaaaba
+PAIR aabbab baaaba
+PAIR aabbab bbaaba
+PAIR aabbab aababa
+PAIR aabbab aabbba
+PAIR aabbab aaabab
+PAIR aabbab baabab
+PAIR aabbab aaaabb
+PAIR aabbab aababb
+PAIR aabbab aaabbb
+PAIR aabbab baabbb
+PAIR aabbab aabbbb
+PAIR aaaabb aaba
+PAIR aaaabb baab
+PAIR aaaabb aaaba
+PAIR aaaabb baaba
+PAIR aaaabb baaab
+PAIR aaaabb bbaab
+PAIR aaaabb aabab
+PAIR aaaabb baabb
+PAIR aaaabb aaabaa
+PAIR aaaabb aaaaba
+PAIR aaaabb baaaba
+PAIR aaaabb bbaaba
+PAIR aaaabb aababa
+PAIR aaaabb abbaba
+PAIR aaaabb baabba
+PAIR aaaabb abaaab
+PAIR aaaabb bbaaab
+PAIR aaaabb babaab
+PAIR aaaabb bbbaab
+PAIR aaaabb aaabab
+PAIR aaaabb baabab
+PAIR aaaabb aabbab
+PAIR aaaabb baaabb
+PAIR aaaabb abaabb
+PAIR aaaabb bbaabb
+PAIR aaaabb aababb
+PAIR aaaabb baabbb
+PAIR baaabb aaba
+PAIR baaabb baab
+PAIR baaabb baaaa
+PAIR baaabb aaaba
+PAIR baaabb baaba
+PAIR baaabb babba
+PAIR baaabb aaaab
+PAIR baaabb bbaab
+PAIR baaabb aabab
+PAIR baaabb baabb
+PAIR baaabb baaaaa
+PAIR baaabb abaaaa
+PAIR baaabb bbaaaa
+PAIR baaabb aaabaa
+PAIR baaabb babbaa
+PAIR baaabb aaaaba
+PAIR baaabb baaaba
+PAIR baaabb bbaaba
+PAIR baaabb aababa
+PAIR baaabb abbaba
+PAIR baaabb baabba
+PAIR baaabb aaaaab
+PAIR baaabb baaaab
+PAIR baaabb babaab
+PAIR baaabb bbbaab
+PAIR baaabb aaabab
+PAIR baaabb baabab
+PAIR baaabb aaaabb
+PAIR baaabb abaabb
+PAIR baaabb bbaabb
+PAIR baaabb aababb
+PAIR baaabb baabbb
+PAIR abaabb baaa
+PAIR abaabb aaab
+PAIR abaabb baaaa
+PAIR abaabb abaaa
+PAIR abaabb bbaaa
+PAIR abaabb aaaba
+PAIR abaabb aaaab
+PAIR abaabb baaab
+PAIR abaabb aabab
+PAIR abaabb aaabb
+PAIR abaabb baaaaa
+PAIR abaabb abaaaa
+PAIR abaabb bbaaaa
+PAIR abaabb babaaa
+PAIR abaabb bbbaaa
+PAIR abaabb babbaa
+PAIR abaabb aaaaba
+PAIR abaabb baaaba
+PAIR abaabb aababa
+PAIR abaabb aaabba
+PAIR abaabb aaaaab
+PAIR abaabb baaaab
+PAIR abaabb abaaab
+PAIR abaabb bbaaab
+PAIR abaabb aaabab
+PAIR abaabb baabab
+PAIR abaabb aaaabb
+PAIR abaabb baaabb
+PAIR abaabb bbaabb
+PAIR abaabb aababb
+PAIR abaabb aaabbb
+PAIR bbaabb baaa
+PAIR bbaabb aaba
+PAIR bbaabb aaab
+PAIR bbaabb baaaa
+PAIR bbaabb abaaa
+PAIR bbaabb bbaaa
+PAIR bbaabb babaa
+PAIR bbaabb aaaba
+PAIR bbaabb baaba
+PAIR bbaabb aaaab
+PAIR bbaabb baaab
+PAIR bbaabb aabab
+PAIR bbaabb aaabb
+PAIR bbaabb baaaaa
+PAIR bbaabb abaaaa
+PAIR bbaabb bbaaaa
+PAIR bbaabb babaaa
+PAIR bbaabb bbbaaa
+PAIR bbaabb aaabaa
+PAIR bbaabb bbabaa
+PAIR bbaabb aaaaba
+PAIR bbaabb baaaba
+PAIR bbaabb bbaaba
+PAIR bbaabb aababa
+PAIR bbaabb aaabba
+PAIR bbaabb aaaaab
+PAIR bbaabb baaaab
+PAIR bbaabb abaaab
+PAIR bbaabb bbaaab
+PAIR bbaabb babaab
+PAIR bbaabb aaabab
+PAIR bbaabb baabab
+PAIR bbaabb aaaabb
+PAIR bbaabb baaabb
+PAIR bbaabb abaabb
+PAIR bbaabb aababb
+PAIR bbaabb aaabbb
+PAIR aababb aabb
+PAIR aababb aabba
+PAIR aababb aaaab
+PAIR aababb aaabb
+PAIR aababb baabb
+PAIR aababb aabbb
+PAIR aababb aababa
+PAIR aababb abbaba
+PAIR aababb aaabba
+PAIR aababb baabba
+PAIR aababb aabbba
+PAIR aababb aaaaab
+PAIR aababb baaaab
+PAIR aababb babaab
+PAIR aababb aabbab
+PAIR aababb aaaabb
+PAIR aababb baaabb
+PAIR aababb abaabb
+PAIR aababb bbaabb
+PAIR aababb aaabbb
+PAIR aababb baabbb
+PAIR aababb aabbbb
+PAIR aaabbb aaba
+PAIR aaabbb baab
+PAIR aaabbb aaaba
+PAIR aaabbb baaba
+PAIR aaabbb aabba
+PAIR aaabbb bbaab
+PAIR aaabbb aabab
+PAIR aaabbb baabb
+PAIR aaabbb aaabaa
+PAIR aaabbb aaaaba
+PAIR aaabbb baaaba
+PAIR aaabbb bbaaba
+PAIR aaabbb aababa
+PAIR aaabbb abbaba
+PAIR aaabbb aaabba
+PAIR aaabbb baabba
+PAIR aaabbb babaab
+PAIR aaabbb bbbaab
+PAIR aaabbb aaabab
+PAIR aaabbb baabab
+PAIR aaabbb aabbab
+PAIR aaabbb abaabb
+PAIR aaabbb bbaabb
+PAIR aaabbb aababb
+PAIR aaabbb baabbb
+PAIR baabbb baaa
+PAIR baabbb aaba
+PAIR baabbb aaab
+PAIR baabbb baaaa
+PAIR baabbb abaaa
+PAIR baabbb bbaaa
+PAIR baabbb aaaba
+PAIR baabbb baaba
+PAIR baabbb aabba
+PAIR baabbb babba
+PAIR baabbb aaaab
+PAIR baabbb baaab
+PAIR baabbb aabab
+PAIR baabbb aaabb
+PAIR baabbb baaaaa
+PAIR baabbb abaaaa
+PAIR baabbb bbaaaa
+PAIR baabbb babaaa
+PAIR baabbb abbaaa
+PAIR baabbb bbbaaa
+PAIR baabbb aaaaba
+PAIR baabbb baaaba
+PAIR baabbb bbaaba
+PAIR baabbb aababa
+PAIR baabbb abbaba
+PAIR baabbb aaabba
+PAIR baabbb baabba
+PAIR baabbb aaaaab
+PAIR baabbb baaaab
+PAIR baabbb abaaab
+PAIR baabbb bbaaab
+PAIR baabbb aaabab
+PAIR baabbb baabab
+PAIR baabbb aabbab
+PAIR baabbb aaaabb
+PAIR baabbb baaabb
+PAIR baabbb aababb
+PAIR baabbb aaabbb
+PAIR aabbbb aaba
+PAIR aabbbb aaaba
+PAIR aabbbb baaba
+PAIR aabbbb aabba
+PAIR aabbbb aabab
+PAIR aabbbb aaaaba
+PAIR aabbbb baaaba
+PAIR aabbbb bbaaba
+PAIR aabbbb aababa
+PAIR aabbbb abbaba
+PAIR aabbbb aaabba
+PAIR aabbbb baabba
+PAIR aabbbb aabbba
+PAIR aabbbb aaabab
+PAIR aabbbb baabab
+PAIR aabbbb aabbab
+PAIR aabbbb aababb
+BATW sanity   n 6
+BAT abaab aaaab
+BAT bab aab
+BAT aabbaab aaabaab
+BAT bba aba
+BAT a a
+BAT ab aa
+FBW sanity   n 2559
+FB <e> <e>
+FB aaa aaa
+FB bbb abb
+FB abba aaba
+FB babb aabb
+FB aabaa aaaaa
+FB bbaba ababa
+FB abaab aaaab
+FB baabb aaabb
+FB aaaaaa aaaaaa
+FB bbbaaa abbaaa
+FB abbbaa aabbaa
+FB bababa aababa
+FB aabbba aaabba
+FB bbaaab abaaab
+FB ababab aaabab
+FB baaabb aaaabb
+FB aaabbb aaaabb
+FB bbbbbb abbbbb
+FB abbaaaa aabaaaa
+FB babbaaa aabbaaa
+FB aababaa aaaabaa
+FB bbabbaa ababbaa
+FB abaaaba aaaaaba
+FB baababa aaababa
+FB aaaabba aaaaaba
+FB bbbabba abbabba
+FB abbbbba aabbbba
+FB babaaab aabaaab
+FB aabbaab aaabaab
+FB bbaabab abaabab
+FB ababbab aaabbab
+FB baaaabb aaaaabb
+FB aaababb aaaaabb
+FB bbbbabb abbbabb
+FB abbabbb aababbb
+FB babbbbb aabbbbb
+FB aabaaaaa aaaaaaaa
+FB bbabaaaa ababaaaa
+FB abaabaaa aaaabaaa
+FB baabbaaa aaabbaaa
+FB aaaaabaa aaaaaaaa
+FB bbbaabaa abbaabaa
+FB abbbabaa aabbabaa
+FB bababbaa aababbaa
+FB aabbbbaa aaabbbaa
+FB bbaaaaba abaaaaba
+FB ababaaba aaabaaba
+FB baaababa aaaababa
+FB aaabbaba aaaababa
+FB bbbbbaba abbbbaba
+FB abbaabba aabaabba
+FB babbabba aabbabba
+FB aababbba aaaabbba
+FB bbabbbba ababbbba
+FB abaaaaab aaaaaaab
+FB baabaaab aaabaaab
+FB aaaabaab aaaaaaab
+FB bbbabaab abbabaab
+FB abbbbaab aabbbaab
+FB babaabab aabaabab
+FB aabbabab aaababab
+FB bbaabbab abaabbab
+FB ababbbab aaabbbab
+FB baaaaabb aaaaaabb
+FB aaabaabb aaaaaabb
+FB bbbbaabb abbbaabb
+FB abbababb aabababb
+FB babbbabb aabbbabb
+FB aabaabbb aaaaabbb
+FB bbababbb abababbb
+FB abaabbbb aaaabbbb
+FB baabbbbb aaabbbbb
+FB aaaaaaaaa aaaaaaaaa
+FB bbbaaaaaa abbaaaaaa
+FB abbbaaaaa aabbaaaaa
+FB bababaaaa aababaaaa
+FB aabbbaaaa aaabbaaaa
+FB bbaaabaaa abaaabaaa
+FB abababaaa aaababaaa
+FB baaabbaaa aaaabbaaa
+FB aaabbbaaa aaaabbaaa
+FB bbbbbbaaa abbbbbaaa
+FB abbaaabaa aabaaabaa
+FB babbaabaa aabbaabaa
+FB aabababaa aaaababaa
+FB bbabbabaa ababbabaa
+FB abaaabbaa aaaaabbaa
+FB baababbaa aaababbaa
+FB aaaabbbaa aaaaabbaa
+FB bbbabbbaa abbabbbaa
+FB abbbbbbaa aabbbbbaa
+FB babaaaaba aabaaaaba
+FB aabbaaaba aaabaaaba
+FB bbaabaaba abaabaaba
+FB ababbaaba aaabbaaba
+FB baaaababa aaaaababa
+FB aaabababa aaaaababa
+FB bbbbababa abbbababa
+FB abbabbaba aababbaba
+FB babbbbaba aabbbbaba
+FB aabaaabba aaaaaabba
+FB bbabaabba ababaabba
+FB abaababba aaaababba
+FB baabbabba aaabbabba
+FB aaaaabbba aaaaaabba
+FB bbbaabbba abbaabbba
+FB abbbabbba aabbabbba
+FB bababbbba aababbbba
+FB aabbbbbba aaabbbbba
+FB bbaaaaaab abaaaaaab
+FB ababaaaab aaabaaaab
+FB baaabaaab aaaabaaab
+FB aaabbaaab aaaabaaab
+FB bbbbbaaab abbbbaaab
+FB abbaabaab aabaabaab
+FB babbabaab aabbabaab
+FB aababbaab aaaabbaab
+FB bbabbbaab ababbbaab
+FB abaaaabab aaaaaabab
+FB baabaabab aaabaabab
+FB aaaababab aaaaaabab
+FB bbbababab abbababab
+FB abbbbabab aabbbabab
+FB babaabbab aabaabbab
+FB aabbabbab aaababbab
+FB bbaabbbab abaabbbab
+FB ababbbbab aaabbbbab
+FB baaaaaabb aaaaaaabb
+FB aaabaaabb aaaaaaabb
+FB bbbbaaabb abbbaaabb
+FB abbabaabb aababaabb
+FB babbbaabb aabbbaabb
+FB aabaababb aaaaababb
+FB bbabababb ababababb
+FB abaabbabb aaaabbabb
+FB baabbbabb aaabbbabb
+FB aaaaaabbb aaaaaaabb
+FB bbbaaabbb abbaaabbb
+FB abbbaabbb aabbaabbb
+FB babababbb aabababbb
+FB aabbbabbb aaabbabbb
+FB bbaaabbbb abaaabbbb
+FB abababbbb aaababbbb
+FB baaabbbbb aaaabbbbb
+FB aaabbbbbb aaaabbbbb
+FB bbbbbbbbb abbbbbbbb
+FB abbaaaaaaa aabaaaaaaa
+FB babbaaaaaa aabbaaaaaa
+FB aababaaaaa aaaabaaaaa
+FB bbabbaaaaa ababbaaaaa
+FB abaaabaaaa aaaaabaaaa
+FB baababaaaa aaababaaaa
+FB aaaabbaaaa aaaaabaaaa
+FB bbbabbaaaa abbabbaaaa
+FB abbbbbaaaa aabbbbaaaa
+FB babaaabaaa aabaaabaaa
+FB aabbaabaaa aaabaabaaa
+FB bbaababaaa abaababaaa
+FB ababbabaaa aaabbabaaa
+FB baaaabbaaa aaaaabbaaa
+FB aaababbaaa aaaaabbaaa
+FB bbbbabbaaa abbbabbaaa
+FB abbabbbaaa aababbbaaa
+FB babbbbbaaa aabbbbbaaa
+FB aabaaaabaa aaaaaaabaa
+FB bbabaaabaa ababaaabaa
+FB abaabaabaa aaaabaabaa
+FB baabbaabaa aaabbaabaa
+FB aaaaababaa aaaaaaabaa
+FB bbbaababaa abbaababaa
+FB abbbababaa aabbababaa
+FB bababbabaa aababbabaa
+FB aabbbbabaa aaabbbabaa
+FB bbaaaabbaa abaaaabbaa
+FB ababaabbaa aaabaabbaa
+FB baaababbaa aaaababbaa
+FB aaabbabbaa aaaababbaa
+FB bbbbbabbaa abbbbabbaa
+FB abbaabbbaa aabaabbbaa
+FB babbabbbaa aabbabbbaa
+FB aababbbbaa aaaabbbbaa
+FB bbabbbbbaa ababbbbbaa
+FB abaaaaaaba aaaaaaaaba
+FB baabaaaaba aaabaaaaba
+FB aaaabaaaba aaaaaaaaba
+FB bbbabaaaba abbabaaaba
+FB abbbbaaaba aabbbaaaba
+FB babaabaaba aabaabaaba
+FB aabbabaaba aaababaaba
+FB bbaabbaaba abaabbaaba
+FB ababbbaaba aaabbbaaba
+FB baaaaababa aaaaaababa
+FB aaabaababa aaaaaababa
+FB bbbbaababa abbbaababa
+FB abbabababa aababababa
+FB babbbababa aabbbababa
+FB aabaabbaba aaaaabbaba
+FB bbababbaba abababbaba
+FB abaabbbaba aaaabbbaba
+FB baabbbbaba aaabbbbaba
+FB aaaaaaabba aaaaaaaaba
+FB bbbaaaabba abbaaaabba
+FB abbbaaabba aabbaaabba
+FB bababaabba aababaabba
+FB aabbbaabba aaabbaabba
+FB bbaaababba abaaababba
+FB ababababba aaabababba
+FB baaabbabba aaaabbabba
+FB aaabbbabba aaaabbabba
+FB bbbbbbabba abbbbbabba
+FB abbaaabbba aabaaabbba
+FB babbaabbba aabbaabbba
+FB aabababbba aaaababbba
+FB bbabbabbba ababbabbba
+FB abaaabbbba aaaaabbbba
+FB baababbbba aaababbbba
+FB aaaabbbbba aaaaabbbba
+FB bbbabbbbba abbabbbbba
+FB abbbbbbbba aabbbbbbba
+FB babaaaaaab aabaaaaaab
+FB aabbaaaaab aaabaaaaab
+FB bbaabaaaab abaabaaaab
+FB ababbaaaab aaabbaaaab
+FB baaaabaaab aaaaabaaab
+FB aaababaaab aaaaabaaab
+FB bbbbabaaab abbbabaaab
+FB abbabbaaab aababbaaab
+FB babbbbaaab aabbbbaaab
+FB aabaaabaab aaaaaabaab
+FB bbabaabaab ababaabaab
+FB abaababaab aaaababaab
+FB baabbabaab aaabbabaab
+FB aaaaabbaab aaaaaabaab
+FB bbbaabbaab abbaabbaab
+FB abbbabbaab aabbabbaab
+FB bababbbaab aababbbaab
+FB aabbbbbaab aaabbbbaab
+FB bbaaaaabab abaaaaabab
+FB ababaaabab aaabaaabab
+FB baaabaabab aaaabaabab
+FB aaabbaabab aaaabaabab
+FB bbbbbaabab abbbbaabab
+FB abbaababab aabaababab
+FB babbababab aabbababab
+FB aababbabab aaaabbabab
+FB bbabbbabab ababbbabab
+FB abaaaabbab aaaaaabbab
+FB baabaabbab aaabaabbab
+FB aaaababbab aaaaaabbab
+FB bbbababbab abbababbab
+FB abbbbabbab aabbbabbab
+FB babaabbbab aabaabbbab
+FB aabbabbbab aaababbbab
+FB bbaabbbbab abaabbbbab
+FB ababbbbbab aaabbbbbab
+FB baaaaaaabb aaaaaaaabb
+FB aaabaaaabb aaaaaaaabb
+FB bbbbaaaabb abbbaaaabb
+FB abbabaaabb aababaaabb
+FB babbbaaabb aabbbaaabb
+FB aabaabaabb aaaaabaabb
+FB bbababaabb abababaabb
+FB abaabbaabb aaaabbaabb
+FB baabbbaabb aaabbbaabb
+FB aaaaaababb aaaaaaaabb
+FB bbbaaababb abbaaababb
+FB abbbaababb aabbaababb
+FB bababababb aababababb
+FB aabbbababb aaabbababb
+FB bbaaabbabb abaaabbabb
+FB abababbabb aaababbabb
+FB baaabbbabb aaaabbbabb
+FB aaabbbbabb aaaabbbabb
+FB bbbbbbbabb abbbbbbabb
+FB abbaaaabbb aabaaaabbb
+FB babbaaabbb aabbaaabbb
+FB aababaabbb aaaabaabbb
+FB bbabbaabbb ababbaabbb
+FB abaaababbb aaaaababbb
+FB baabababbb aaabababbb
+FB aaaabbabbb aaaaababbb
+FB bbbabbabbb abbabbabbb
+FB abbbbbabbb aabbbbabbb
+FB babaaabbbb aabaaabbbb
+FB aabbaabbbb aaabaabbbb
+FB bbaababbbb abaababbbb
+FB ababbabbbb aaabbabbbb
+FB baaaabbbbb aaaaabbbbb
+FB aaababbbbb aaaaabbbbb
+FB bbbbabbbbb abbbabbbbb
+FB abbabbbbbb aababbbbbb
+FB babbbbbbbb aabbbbbbbb
+FB bbbbab abbbab
+FB bbababb abababb
+FB aaaabaaaa aaaaaaaaa
+FB aaaaababbbaaaa aaaaaaabbbaaaa
+FB aaaaaabbaaa aaaaaaabaaa
+FB bbbabaabaaabaaa abbabaabaaabaaa
+FB abaaaba aaaaaba
+FB abbbaaabbbb aabbaaabbbb
+FB aaaabaabb aaaaaaabb
+FB aaabb aaaab
+FB aabaaababbbbbabbab aaaaaababbbbbabbab
+FB bbaaabaaaaabaabaaabbab abaaabaaaaabaabaaabbab
+FB abbaabbaaababb aabaabbaaababb
+FB ba aa
+FB aaaaabbbbbb aaaaaabbbbb
+FB babbabaabbabbaaba aabbabaabbabbaaba
+FB bbbabaaababb abbabaaababb
+FB abaaababababbbababbb aaaaababababbbababbb
+FB aaabbaaaabbbbba aaaabaaaabbbbba
+FB abbbbb aabbbb
+FB abababbabbaababb aaababbabbaababb
+FB bbbbabaaaa abbbabaaaa
+FB baa aaa
+FB bbbaaaabababb abbaaaabababb
+FB babaabababbaabbbbbba aabaabababbaabbbbbba
+FB ababaaabaabb aaabaaabaabb
+FB baaaaabbbbbabaabababaa aaaaaabbbbbabaabababaa
+FB bbbbbabbaabb abbbbabbaabb
+FB bbaaaaaa abaaaaaa
+FB abaa aaaa
+FB bb ab
+FB babbbaababbaaaa aabbbaababbaaaa
+FB aabaab aaaaab
+FB aba aaa
+FB bbbbbbababbaa abbbbbababbaa
+FB abbabaabababbab aababaabababbab
+FB ababbaabbaab aaabbaabbaab
+FB babab aabab
+FB abbbbaaaaabaaabbbbbbabb aabbbaaaaabaaabbbbbbabb
+FB bababbbbbbbaaaab aababbbbbbbaaaab
+FB aabbaaaabbabaabaaaaab aaabaaaabbabaabaaaaab
+FB aaabaaabaaaaaabaababb aaaaaaabaaaaaabaababb
+FB aabba aaaba
+FB baaababaaabbba aaaababaaabbba
+FB bb ab
+FB ababbbbaabb aaabbbbaabb
+FB aabaababbaabaaaabbbb aaaaababbaabaaaabbbb
+FB aaabbbabbaababbbabbbaabb aaaabbabbaababbbabbbaabb
+FB ababaa aaabaa
+FB ababaabababaabaaabbbbbaa aaabaabababaabaaabbbbbaa
+FB abaaa aaaaa
+FB aaaaaaaababaabababa aaaaaaaaaabaabababa
+FB aaabaabaababbaabb aaaaaabaababbaabb
+FB babaabbabbaaabba aabaabbabbaaabba
+FB babaa aabaa
+FB aababbbbabbbbba aaaabbbbabbbbba
+FB baabaabbabaaaab aaabaabbabaaaab
+FB baabbabbbbaaba aaabbabbbbaaba
+FB baaabab aaaabab
+FB aaababababaabaaba aaaaabababaabaaba
+FB babbbba aabbbba
+FB aaba aaaa
+FB aabbabbaabbbbbabbb aaababbaabbbbbabbb
+FB abbabbba aababbba
+FB ba aa
+FB babababaaabaabaabbab aabababaaabaabaabbab
+FB abbaaaabbbabababaabbbb aabaaaabbbabababaabbbb
+FB bbaabbbbbb abaabbbbbb
+FB abbbbabababbbaaaaaab aabbbabababbbaaaaaab
+FB aaba aaaa
+FB babaaaaabbabbabba aabaaaaabbabbabba
+FB bbbababa abbababa
+FB bbabbbb ababbbb
+BATW crux baa babba n 6
+BAT baabbba babbabbba
+BAT babbbaa babbbabba
+BAT babaababaa bababbababaa
+BAT babb babb
+BAT baa babba
+BAT baabaaba babbabaaba
+FBW crux baa babba n 876
+FB <e> <e>
+FB babb babb
+FB bbbaba bbbaba
+FB baabaaba babbabaaba
+FB babaabb bababbabb
+FB bbbbbaa bbbbbabba
+FB baabababa babbabababa
+FB bababbba bababbba
+FB bbbaabbba bbbabbabbba
+FB baabbbaaba babbabbbaaba
+FB babbbabb babbbabb
+FB bbbabbbb bbbabbbb
+FB baabaabbbb babbabaabbbb
+FB babaabaabb bababbabaabb
+FB bbbbbabaa bbbbbababba
+FB baababbbaa babbababbbaa
+FB bababaabaa babababbabaa
+FB bbbaabaabaa bbbabbabaabaa
+FB baabbbababa babbabbbababa
+FB babbbbbaba babbbbbaba
+FB bbbabaababa bbbababbababa
+FB baabaabaababa babbabaabaababa
+FB babaababbba bababbababbba
+FB bbbbbbbbba bbbbbbbbba
+FB baababaabbba babbababaabbba
+FB babababaaba bababababbaba
+FB bbbaababaaba bbbabbababaaba
+FB baabbbbbaaba babbabbbbbaaba
+FB babbbaabaaba babbbabbabaaba
+FB bbbabababb bbbabababb
+FB baabaabababb babbabaabababb
+FB babaabbbabb bababbabbbabb
+FB bbbbbaababb bbbbbabbababb
+FB baabababbbb babbabababbbb
+FB bababbbbbb bababbbbbb
+FB bbbaabbbbbb bbbabbabbbbbb
+FB baabbbaabbbb babbabbbaabbbb
+FB babbbabaabb babbbababbabb
+FB bbbabbbaabb bbbabbbabbabb
+FB baabaabbbaabb babbabaabbbaabb
+FB babaabaabaabb bababbabaabaabb
+FB bbbbbababaa bbbbbabababba
+FB baababbbabaa babbababbbabaa
+FB bababaababaa babababbababaa
+FB bbbaabaababaa bbbabbabaababaa
+FB baabbbabbbaa babbabbbabbbaa
+FB babbbbbbbaa babbbbbbbabba
+FB bbbabaabbbaa bbbababbabbbaa
+FB baabaabaabbbaa babbabaabaabbbaa
+FB babaababaabaa bababbababaabaa
+FB bbbbbbbaabaa bbbbbbbabbabaa
+FB baababaabaabaa babbababaabaabaa
+FB baabaabaababb babbabaabaababb
+FB babaabaabaabbbaababaa bababbabaabaabbbaababaa
+FB bbbabb bbbabb
+FB bbbababaabaabbbabaabb bbbabababbabaabbbabaabb
+FB baabbbabbbbbbbabbbaabb babbabbbabbbbbbbabbbaabb
+FB bbbaabbbb bbbabbabbbb
+FB bbbabbbaabaabaa bbbabbbabbabaabaa
+FB baabbbaabaababbbaabbbbbaa babbabbbaabaababbbaabbbbbaa
+FB babbbbbaabbbabbbabaabb babbbbbabbabbbabbbabaabb
+FB baabbbaabbbabaabbbbbbbbba babbabbbaabbbabaabbbbbbbbba
+FB bbbbbbbabaabaababaababaabb bbbbbbbababbabaababaababaabb
+FB bbbbbb bbbbbb
+FB baababbbbbbbbbabb babbababbbbbbbbbabb
+FB baabaabbbababa babbabaabbbababa
+FB baabaabbbbbaababbbbbaa babbabaabbbbbaababbbbbaa
+FB baa babba
+FB baabaa babbabaa
+FB babaabbbababaabbbbbaabaababb bababbabbbababaabbbbbaabaababb
+FB baabbbababbbabbbababbbbbaa babbabbbababbbabbbababbbbbaa
+FB baabaabbbabbbbbaabaabbbbbaabb babbabaabbbabbbbbaabaabbbbbaabb
+FB ba ba
+FB babaabaabababaabaabaa bababbabaabababaabaabaa
+FB bb bb
+FB baabbbbbaabbbaabbba babbabbbbbaabbbaabbba
+FB bbbaa bbbabba
+FB baabbbbbb babbabbbbbb
+FB bbbb bbbb
+FB babaababbbaabaabb bababbababbbaabaabb
+FB bbbb bbbb
+FB babaababaaba bababbababaaba
+FB ba ba
+FB bbbababaabaabb bbbabababbabaabb
+FB baabbbaabbbaa babbabbbaabbbaa
+FB bbbbbabaababbbabababbbaa bbbbbababbababbbabababbbaa
+FB baabaaba babbabaaba
+FB bbbbbb bbbbbb
+FB bbbbbaabbbaabbbabbbaababaaba bbbbbabbabbbaabbbabbbaababaaba
+FB babbbaababbbaababbbababaa babbbabbababbbaababbbababaa
+FB babbbabaababaa babbbababbababaa
+FB babaababbbbbaabbbaababbba bababbababbbbbaabbbaababbba
+FB baabaabaa babbabaabaa
+FB babaa bababba
+FB baabbbabbbbbaa babbabbbabbbbbaa
+FB baabbbaa babbabbbaa
+FB baabbbaa babbabbbaa
+FB bbbaabaabababaabb bbbabbabaabababaabb
+FB ba ba
+FB bbbaabbbbbaabbbabaababb bbbabbabbbbbaabbbabaababb
+FB baababbbbbaa babbababbbbbaa
+FB babbbabaabbbbba babbbababbabbbbba
+FB bbbaabbbaabbbaabababaababaa bbbabbabbbaabbbaabababaababaa
+FB bababaababaabbba babababbababaabbba
+FB ba ba
+FB babaabaabaabbbabbbbbb bababbabaabaabbbabbbbbb
+FB baba baba
+FB babbbbbbbb babbbbbbbb
+FB baabaaba babbabaaba
+FB baababaabb babbababaabb
+FB baabbbabaabbbbbbbababaa babbabbbabaabbbbbbbababaa
+FB baabaabaabaaba babbabaabaabaaba
+FB baabaabbbbbbbaabbbb babbabaabbbbbbbaabbbb
+FB baababbbbbabbbaababbbabaaba babbababbbbbabbbaababbbabaaba
+FB baabb babbabb
+FB baabbbbbaababbbbbbbbbbbaa babbabbbbbaababbbbbbbbbbbaa
+FB babaababbbaabaabababbbb bababbababbbaabaabababbbb
+FB bbbabbbaababbbbbb bbbabbbabbababbbbbb
+FB bbbabbbaa bbbabbbabba
+FB bbbaabaababbbbbaababbbabaa bbbabbabaababbbbbaababbbabaa
+FB babaabbbabb bababbabbbabb
+FB bb bb
+FB babaababababaabbbaba bababbababababaabbbaba
+FB bbbbbabbbbbaabb bbbbbabbbbbabbabb
+FB baabbbabaabaababaabaabb babbabbbabaabaababaabaabb
+FB bbbaabaababbbbbbbabb bbbabbabaababbbbbbbabb
+BATW trunc baa babba n 6
+BAT baabbba b
+BAT babbbaa babbb
+BAT babaababaa bab
+BAT babb babb
+BAT baa b
+BAT baabaaba b
+FBW trunc baa babba n 876
+FB <e> <e>
+FB babb babb
+FB bbbaba bbbaba
+FB baabaaba b
+FB babaabb bab
+FB bbbbbaa bbbbb
+FB baabababa b
+FB bababbba bababbba
+FB bbbaabbba bbb
+FB baabbbaaba b
+FB babbbabb babbbabb
+FB bbbabbbb bbbabbbb
+FB baabaabbbb b
+FB babaabaabb bab
+FB bbbbbabaa bbbbbab
+FB baababbbaa b
+FB bababaabaa babab
+FB bbbaabaabaa bbb
+FB baabbbababa b
+FB babbbbbaba babbbbbaba
+FB bbbabaababa bbbab
+FB baabaabaababa b
+FB babaababbba bab
+FB bbbbbbbbba bbbbbbbbba
+FB baababaabbba b
+FB babababaaba bababab
+FB bbbaababaaba bbb
+FB baabbbbbaaba b
+FB babbbaabaaba babbb
+FB bbbabababb bbbabababb
+FB baabaabababb b
+FB babaabbbabb bab
+FB bbbbbaababb bbbbb
+FB baabababbbb b
+FB bababbbbbb bababbbbbb
+FB bbbaabbbbbb bbb
+FB baabbbaabbbb b
+FB babbbabaabb babbbab
+FB bbbabbbaabb bbbabbb
+FB baabaabbbaabb b
+FB babaabaabaabb bab
+FB bbbbbababaa bbbbbabab
+FB baababbbabaa b
+FB bababaababaa babab
+FB bbbaabaababaa bbb
+FB baabbbabbbaa b
+FB babbbbbbbaa babbbbbbb
+FB bbbabaabbbaa bbbab
+FB baabaabaabbbaa b
+FB babaababaabaa bab
+FB bbbbbbbaabaa bbbbbbb
+FB baababaabaabaa b
+FB baabaabaababb b
+FB babaabaabaabbbaababaa bab
+FB bbbabb bbbabb
+FB bbbababaabaabbbabaabb bbbabab
+FB baabbbabbbbbbbabbbaabb b
+FB bbbaabbbb bbb
+FB bbbabbbaabaabaa bbbabbb
+FB baabbbaabaababbbaabbbbbaa b
+FB babbbbbaabbbabbbabaabb babbbbb
+FB baabbbaabbbabaabbbbbbbbba b
+FB bbbbbbbabaabaababaababaabb bbbbbbbab
+FB bbbbbb bbbbbb
+FB baababbbbbbbbbabb b
+FB baabaabbbababa b
+FB baabaabbbbbaababbbbbaa b
+FB baa b
+FB baabaa b
+FB babaabbbababaabbbbbaabaababb bab
+FB baabbbababbbabbbababbbbbaa b
+FB baabaabbbabbbbbaabaabbbbbaabb b
+FB ba ba
+FB babaabaabababaabaabaa bab
+FB bb bb
+FB baabbbbbaabbbaabbba b
+FB bbbaa bbb
+FB baabbbbbb b
+FB bbbb bbbb
+FB babaababbbaabaabb bab
+FB bbbb bbbb
+FB babaababaaba bab
+FB ba ba
+FB bbbababaabaabb bbbabab
+FB baabbbaabbbaa b
+FB bbbbbabaababbbabababbbaa bbbbbab
+FB baabaaba b
+FB bbbbbb bbbbbb
+FB bbbbbaabbbaabbbabbbaababaaba bbbbb
+FB babbbaababbbaababbbababaa babbb
+FB babbbabaababaa babbbab
+FB babaababbbbbaabbbaababbba bab
+FB baabaabaa b
+FB babaa bab
+FB baabbbabbbbbaa b
+FB baabbbaa b
+FB baabbbaa b
+FB bbbaabaabababaabb bbb
+FB ba ba
+FB bbbaabbbbbaabbbabaababb bbb
+FB baababbbbbaa b
+FB babbbabaabbbbba babbbab
+FB bbbaabbbaabbbaabababaababaa bbb
+FB bababaababaabbba babab
+FB ba ba
+FB babaabaabaabbbabbbbbb bab
+FB baba baba
+FB babbbbbbbb babbbbbbbb
+FB baabaaba b
+FB baababaabb b
+FB baabbbabaabbbbbbbababaa b
+FB baabaabaabaaba b
+FB baabaabbbbbbbaabbbb b
+FB baababbbbbabbbaababbbabaaba b
+FB baabb b
+FB baabbbbbaababbbbbbbbbbbaa b
+FB babaababbbaabaabababbbb bab
+FB bbbabbbaababbbbbb bbbabbb
+FB bbbabbbaa bbbabbb
+FB bbbaabaababbbbbaababbbabaa bbb
+FB babaabbbabb bab
+FB bb bb
+FB babaababababaabbbaba bab
+FB bbbbbabbbbbaabb bbbbbabbbbb
+FB baabbbabaabaababaabaabb b
+FB bbbaabaababbbbbbbabb bbb
+BATW pair baa babba n 6
+BAT baabbba babbabbba
+BAT babbbaa babbbabba
+BAT babaababaa bababbababaa
+BAT babb babb
+BAT baa babba
+BAT baabaaba babbabaaba
+FBW pair baa babba n 876
+FB <e> <e>
+FB babb babb
+FB bbbaba bbbaba
+FB baabaaba babbabaaba
+FB babaabb bababbabb
+FB bbbbbaa bbbbbabba
+FB baabababa babbabababa
+FB bababbba bababbba
+FB bbbaabbba bbbabbabbba
+FB baabbbaaba babbabbbaaba
+FB babbbabb babbbabb
+FB bbbabbbb bbbabbbb
+FB baabaabbbb babbabaabbbb
+FB babaabaabb bababbabaabb
+FB bbbbbabaa bbbbbababba
+FB baababbbaa babbababbbaa
+FB bababaabaa babababbabaa
+FB bbbaabaabaa bbbabbabaabaa
+FB baabbbababa babbabbbababa
+FB babbbbbaba babbbbbaba
+FB bbbabaababa bbbababbababa
+FB baabaabaababa babbabaabaababa
+FB babaababbba bababbababbba
+FB bbbbbbbbba bbbbbbbbba
+FB baababaabbba babbababaabbba
+FB babababaaba bababababbaba
+FB bbbaababaaba bbbabbababaaba
+FB baabbbbbaaba babbabbbbbaaba
+FB babbbaabaaba babbbabbabaaba
+FB bbbabababb bbbabababb
+FB baabaabababb babbabaabababb
+FB babaabbbabb bababbabbbabb
+FB bbbbbaababb bbbbbabbababb
+FB baabababbbb babbabababbbb
+FB bababbbbbb bababbbbbb
+FB bbbaabbbbbb bbbabbabbbbbb
+FB baabbbaabbbb babbabbbaabbbb
+FB babbbabaabb babbbababbabb
+FB bbbabbbaabb bbbabbbabbabb
+FB baabaabbbaabb babbabaabbbaabb
+FB babaabaabaabb bababbabaabaabb
+FB bbbbbababaa bbbbbabababba
+FB baababbbabaa babbababbbabaa
+FB bababaababaa babababbababaa
+FB bbbaabaababaa bbbabbabaababaa
+FB baabbbabbbaa babbabbbabbbaa
+FB babbbbbbbaa babbbbbbbabba
+FB bbbabaabbbaa bbbababbabbbaa
+FB baabaabaabbbaa babbabaabaabbbaa
+FB babaababaabaa bababbababaabaa
+FB bbbbbbbaabaa bbbbbbbabbabaa
+FB baababaabaabaa babbababaabaabaa
+FB baabaabaababb babbabaabaababb
+FB babaabaabaabbbaababaa bababbabaabaabbbaababaa
+FB bbbabb bbbabb
+FB bbbababaabaabbbabaabb bbbabababbabaabbbabaabb
+FB baabbbabbbbbbbabbbaabb babbabbbabbbbbbbabbbaabb
+FB bbbaabbbb bbbabbabbbb
+FB bbbabbbaabaabaa bbbabbbabbabaabaa
+FB baabbbaabaababbbaabbbbbaa babbabbbaabaababbbaabbbbbaa
+FB babbbbbaabbbabbbabaabb babbbbbabbabbbabbbabaabb
+FB baabbbaabbbabaabbbbbbbbba babbabbbaabbbabaabbbbbbbbba
+FB bbbbbbbabaabaababaababaabb bbbbbbbababbabaababaababaabb
+FB bbbbbb bbbbbb
+FB baababbbbbbbbbabb babbababbbbbbbbbabb
+FB baabaabbbababa babbabaabbbababa
+FB baabaabbbbbaababbbbbaa babbabaabbbbbaababbbbbaa
+FB baa babba
+FB baabaa babbabaa
+FB babaabbbababaabbbbbaabaababb bababbabbbababaabbbbbaabaababb
+FB baabbbababbbabbbababbbbbaa babbabbbababbbabbbababbbbbaa
+FB baabaabbbabbbbbaabaabbbbbaabb babbabaabbbabbbbbaabaabbbbbaabb
+FB ba ba
+FB babaabaabababaabaabaa bababbabaabababaabaabaa
+FB bb bb
+FB baabbbbbaabbbaabbba babbabbbbbaabbbaabbba
+FB bbbaa bbbabba
+FB baabbbbbb babbabbbbbb
+FB bbbb bbbb
+FB babaababbbaabaabb bababbababbbaabaabb
+FB bbbb bbbb
+FB babaababaaba bababbababaaba
+FB ba ba
+FB bbbababaabaabb bbbabababbabaabb
+FB baabbbaabbbaa babbabbbaabbbaa
+FB bbbbbabaababbbabababbbaa bbbbbababbababbbabababbbaa
+FB baabaaba babbabaaba
+FB bbbbbb bbbbbb
+FB bbbbbaabbbaabbbabbbaababaaba bbbbbabbabbbaabbbabbbaababaaba
+FB babbbaababbbaababbbababaa babbbabbababbbaababbbababaa
+FB babbbabaababaa babbbababbababaa
+FB babaababbbbbaabbbaababbba bababbababbbbbaabbbaababbba
+FB baabaabaa babbabaabaa
+FB babaa bababba
+FB baabbbabbbbbaa babbabbbabbbbbaa
+FB baabbbaa babbabbbaa
+FB baabbbaa babbabbbaa
+FB bbbaabaabababaabb bbbabbabaabababaabb
+FB ba ba
+FB bbbaabbbbbaabbbabaababb bbbabbabbbbbaabbbabaababb
+FB baababbbbbaa babbababbbbbaa
+FB babbbabaabbbbba babbbababbabbbbba
+FB bbbaabbbaabbbaabababaababaa bbbabbabbbaabbbaabababaababaa
+FB bababaababaabbba babababbababaabbba
+FB ba ba
+FB babaabaabaabbbabbbbbb bababbabaabaabbbabbbbbb
+FB baba baba
+FB babbbbbbbb babbbbbbbb
+FB baabaaba babbabaaba
+FB baababaabb babbababaabb
+FB baabbbabaabbbbbbbababaa babbabbbabaabbbbbbbababaa
+FB baabaabaabaaba babbabaabaabaaba
+FB baabaabbbbbbbaabbbb babbabaabbbbbbbaabbbb
+FB baababbbbbabbbaababbbabaaba babbababbbbbabbbaababbbabaaba
+FB baabb babbabb
+FB baabbbbbaababbbbbbbbbbbaa babbabbbbbaababbbbbbbbbbbaa
+FB babaababbbaabaabababbbb bababbababbbaabaabababbbb
+FB bbbabbbaababbbbbb bbbabbbabbababbbbbb
+FB bbbabbbaa bbbabbbabba
+FB bbbaabaababbbbbaababbbabaa bbbabbabaababbbbbaababbbabaa
+FB babaabbbabb bababbabbbabb
+FB bb bb
+FB babaababababaabbbaba bababbababababaabbbaba
+FB bbbbbabbbbbaabb bbbbbabbbbbabbabb
+FB baabbbabaabaababaabaabb babbabbbabaabaababaabaabb
+FB bbbaabaababbbbbbbabb bbbabbabaababbbbbbbabb
+BATW pair baaa baab n 6
+BAT baaabbba baabbbba
+BAT babbbaaa babbbaab
+BAT babaaababaaa babaabbabaaa
+BAT babb babb
+BAT baaa baab
+BAT baaabaaaba baabbaaaba
+FBW pair baaa baab n 876
+FB <e> <e>
+FB babb babb
+FB bbbaba bbbaba
+FB baaabaaaba baabbaaaba
+FB babaaabb babaabbb
+FB bbbbbaaa bbbbbaab
+FB baaabababa baabbababa
+FB bababbba bababbba
+FB bbbaaabbba bbbaabbbba
+FB baaabbbaaaba baabbbbaaaba
+FB babbbabb babbbabb
+FB bbbabbbb bbbabbbb
+FB baaabaaabbbb baabbaaabbbb
+FB babaaabaaabb babaabbaaabb
+FB bbbbbabaaa bbbbbabaab
+FB baaababbbaaa baabbabbbaaa
+FB bababaaabaaa bababaabbaaa
+FB bbbaaabaaabaaa bbbaabbaaabaaa
+FB baaabbbababa baabbbbababa
+FB babbbbbaba babbbbbaba
+FB bbbabaaababa bbbabaabbaba
+FB baaabaaabaaababa baabbaaabaaababa
+FB babaaababbba babaabbabbba
+FB bbbbbbbbba bbbbbbbbba
+FB baaababaaabbba baabbabaaabbba
+FB babababaaaba babababaabba
+FB bbbaaababaaaba bbbaabbabaaaba
+FB baaabbbbbaaaba baabbbbbbaaaba
+FB babbbaaabaaaba babbbaabbaaaba
+FB bbbabababb bbbabababb
+FB baaabaaabababb baabbaaabababb
+FB babaaabbbabb babaabbbbabb
+FB bbbbbaaababb bbbbbaabbabb
+FB baaabababbbb baabbababbbb
+FB bababbbbbb bababbbbbb
+FB bbbaaabbbbbb bbbaabbbbbbb
+FB baaabbbaaabbbb baabbbbaaabbbb
+FB babbbabaaabb babbbabaabbb
+FB bbbabbbaaabb bbbabbbaabbb
+FB baaabaaabbbaaabb baabbaaabbbaaabb
+FB babaaabaaabaaabb babaabbaaabaaabb
+FB bbbbbababaaa bbbbbababaab
+FB baaababbbabaaa baabbabbbabaaa
+FB bababaaababaaa bababaabbabaaa
+FB bbbaaabaaababaaa bbbaabbaaababaaa
+FB baaabbbabbbaaa baabbbbabbbaaa
+FB babbbbbbbaaa babbbbbbbaab
+FB bbbabaaabbbaaa bbbabaabbbbaaa
+FB baaabaaabaaabbbaaa baabbaaabaaabbbaaa
+FB babaaababaaabaaa babaabbabaaabaaa
+FB bbbbbbbaaabaaa bbbbbbbaabbaaa
+FB baaababaaabaaabaaa baabbabaaabaaabaaa
+FB baaabaaabaaababb baabbaaabaaababb
+FB babaaabaaabaaabbbaaababaaa babaabbaaabaaabbbaaababaaa
+FB bbbabb bbbabb
+FB bbbababaaabaaabbbabaaabb bbbababaabbaaabbbabaaabb
+FB baaabbbabbbbbbbabbbaaabb baabbbbabbbbbbbabbbaaabb
+FB bbbaaabbbb bbbaabbbbb
+FB bbbabbbaaabaaabaaa bbbabbbaabbaaabaaa
+FB baaabbbaaabaaababbbaaabbbbbaaa baabbbbaaabaaababbbaaabbbbbaaa
+FB babbbbbaaabbbabbbabaaabb babbbbbaabbbbabbbabaaabb
+FB baaabbbaaabbbabaaabbbbbbbbba baabbbbaaabbbabaaabbbbbbbbba
+FB bbbbbbbabaaabaaababaaababaaabb bbbbbbbabaabbaaababaaababaaabb
+FB bbbbbb bbbbbb
+FB baaababbbbbbbbbabb baabbabbbbbbbbbabb
+FB baaabaaabbbababa baabbaaabbbababa
+FB baaabaaabbbbbaaababbbbbaaa baabbaaabbbbbaaababbbbbaaa
+FB baaa baab
+FB baaabaaa baabbaaa
+FB babaaabbbababaaabbbbbaaabaaababb babaabbbbababaaabbbbbaaabaaababb
+FB baaabbbababbbabbbababbbbbaaa baabbbbababbbabbbababbbbbaaa
+FB baaabaaabbbabbbbbaaabaaabbbbbaaabb baabbaaabbbabbbbbaaabaaabbbbbaaabb
+FB ba ba
+FB babaaabaaabababaaabaaabaaa babaabbaaabababaaabaaabaaa
+FB bb bb
+FB baaabbbbbaaabbbaaabbba baabbbbbbaaabbbaaabbba
+FB bbbaaa bbbaab
+FB baaabbbbbb baabbbbbbb
+FB bbbb bbbb
+FB babaaababbbaaabaaabb babaabbabbbaaabaaabb
+FB bbbb bbbb
+FB babaaababaaaba babaabbabaaaba
+FB ba ba
+FB bbbababaaabaaabb bbbababaabbaaabb
+FB baaabbbaaabbbaaa baabbbbaaabbbaaa
+FB bbbbbabaaababbbabababbbaaa bbbbbabaabbabbbabababbbaaa
+FB baaabaaaba baabbaaaba
+FB bbbbbb bbbbbb
+FB bbbbbaaabbbaaabbbabbbaaababaaaba bbbbbaabbbbaaabbbabbbaaababaaaba
+FB babbbaaababbbaaababbbababaaa babbbaabbabbbaaababbbababaaa
+FB babbbabaaababaaa babbbabaabbabaaa
+FB babaaababbbbbaaabbbaaababbba babaabbabbbbbaaabbbaaababbba
+FB baaabaaabaaa baabbaaabaaa
+FB babaaa babaab
+FB baaabbbabbbbbaaa baabbbbabbbbbaaa
+FB baaabbbaaa baabbbbaaa
+FB baaabbbaaa baabbbbaaa
+FB bbbaaabaaabababaaabb bbbaabbaaabababaaabb
+FB ba ba
+FB bbbaaabbbbbaaabbbabaaababb bbbaabbbbbbaaabbbabaaababb
+FB baaababbbbbaaa baabbabbbbbaaa
+FB babbbabaaabbbbba babbbabaabbbbbba
+FB bbbaaabbbaaabbbaaabababaaababaaa bbbaabbbbaaabbbaaabababaaababaaa
+FB bababaaababaaabbba bababaabbabaaabbba
+FB ba ba
+FB babaaabaaabaaabbbabbbbbb babaabbaaabaaabbbabbbbbb
+FB baba baba
+FB babbbbbbbb babbbbbbbb
+FB baaabaaaba baabbaaaba
+FB baaababaaabb baabbabaaabb
+FB baaabbbabaaabbbbbbbababaaa baabbbbabaaabbbbbbbababaaa
+FB baaabaaabaaabaaaba baabbaaabaaabaaaba
+FB baaabaaabbbbbbbaaabbbb baabbaaabbbbbbbaaabbbb
+FB baaababbbbbabbbaaababbbabaaaba baabbabbbbbabbbaaababbbabaaaba
+FB baaabb baabbb
+FB baaabbbbbaaababbbbbbbbbbbaaa baabbbbbbaaababbbbbbbbbbbaaa
+FB babaaababbbaaabaaabababbbb babaabbabbbaaabaaabababbbb
+FB bbbabbbaaababbbbbb bbbabbbaabbabbbbbb
+FB bbbabbbaaa bbbabbbaab
+FB bbbaaabaaababbbbbaaababbbabaaa bbbaabbaaababbbbbaaababbbabaaa
+FB babaaabbbabb babaabbbbabb
+FB bb bb
+FB babaaababababaaabbbaba babaabbabababaaabbbaba
+FB bbbbbabbbbbaaabb bbbbbabbbbbaabbb
+FB baaabbbabaaabaaababaaabaaabb baabbbbabaaabaaababaaabaaabb
+FB bbbaaabaaababbbbbbbabb bbbaabbaaababbbbbbbabb

@@ -1,0 +1,7 @@
+mode crux class C3 (196 passes, maxrl 3) depth <= 5  battery 6 texts  full-battery 876  active 1 deepmatch 1 threads 32
+  in baabbba          tgt babbabbba
+  in babbbaa          tgt babbbabba
+  in babaababaa       tgt bababbababaa
+  in babb             tgt babb
+  in baa              tgt babba
+  in baabaaba         tgt babbabaaba

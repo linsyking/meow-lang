@@ -3906,3 +3906,146 @@ c_E #S(E) + c'_E on D(k;3) — hence (coding invariance) rev is not
 L-reachable over any finite alphabet of at least two letters. Open
 remains: the once-primitive's reachability, and the union's exact
 criterion r in L. Ready for the user's external commit.
+
+## 2026-09-22 — Paper cleanup (user-directed, all four tasks)
+
+Scope: main.tex final-paper pass per user directives. No mathematical
+content was added; content was removed and rewired.
+
+1. SECTION 5 SURGERY. Deleted: 5.4 unsafe (def:rescan through the
+   incomparability remark), 5.5 Markov (def:markov through the
+   single-restart remark), the L_k family (prop:kth), and the corrupted
+   remnant line that produced the empty 5.6. Rewired: variants intro
+   (design-choices framing), the direction-section closing, the lim
+   section (intro, stop-set paragraph, prop:limtotal now self-contained —
+   the |A|=|B| case by the digit potential V = sum d(w[j]) 2^{-j} with
+   d(A[i])=0, d(B[i])=1 at the first differing position, hand-checked),
+   rem:limstrategies deleted, prop:limgrowth (v defined inline),
+   rem:fiborbit, the lim landscape paragraph, the census-splitting
+   paragraph (kept the aaab/baa non-admitter fact and counting
+   potentials as mathematics, dropped the 144/114/30 taxonomy), the
+   section-5 landscape table (5 rows), discussion, open list
+   (3 surviving items), rem:price (kept, stripped machine notes),
+   Methodology remark deleted. lem:pass-transfer and rem:native lost
+   their k-th clauses. Abstract, intro roadmap, related work (the
+   "String rewriting" paragraph now anchors on the sweep normalizer;
+   geser01 etc. citations kept), conclusion rewritten.
+
+2. SECTION 7 SURGERY. Kept eager + lazy passes only. Deleted thm:lazyargs,
+   ex:separation, the transition, 7.3 Streams, the two Methodology
+   remarks, cor:barriers(3) rewritten onto prop:limgrowth(ii)'s tower
+   nodes (K-recurrence 4,6,14,254,2^128-2 re-derived by hand).
+   def:dynamics/rem:dynamics now two runtimes. Landscape table 2 rows.
+
+3. EXPERIMENT-LANGUAGE SWEEP. Removed ~50 "(Verified: ...)"/
+   "(Machine: ...)" parentheticals (balanced-paren tool), the
+   thm:lim2cm and driver verification paragraphs, the machine-backdrop
+   remark, the research-record pointers, the "research campaign"
+   sentence the user flagged, "survivor of an honest history",
+   "currently unowned", search statistics, census numbers, measured
+   offsets, "all searches fail" phrasings. prop:no-2block's proof
+   restated as a closure computation. The union "evidence is fourfold"
+   paragraph now "the case is threefold" without search stats.
+
+4. PDF METADATA + BOOKMARKS. llncs.cls forces tocdepth=0 which
+   suppresses all hyperref bookmarks of level >= 1. Fixed by
+   \setcounter{tocdepth}{2} after the preamble plus hypersetup
+   pdftitle/pdfauthor. Verified in the binary: Info dict Title/Author
+   present (UTF-16), 24 outline bookmarks decoding to the full
+   section/subsection tree.
+
+RESULT: 86 pages (was 104), 0 errors, 0 undefined references, 0 overfull
+boxes, bookmarks + metadata correct. No dangling labels (cross-checked
+label vs ref sets). Backup of the pre-cleanup file:
+main_pre_cleanup.tex in the session tmp dir; final snapshot
+main_final_cleanup.tex alongside it.
+
+Not done here: the ONCE agent (charset-2 W pipeline, computed needles)
+still running in research/scratch/once/ — its results must be verified
+before anything enters the paper.
+
+## 2026-09-22 (later) — ONCE: the marking reduction verified and integrated
+
+The once agent (research/scratch/once/) delivered the marking
+reduction. I verified it before integration:
+
+1. RE-RUN OF THE AGENT'S BATTERY. verify_marking.py re-run from a
+   clean shell: ALL GREEN reproduced — binary string-level 4019 ok /
+   0 fail, AST-level with V-nodes + oracle node 1519 ok, ternary
+   (x=c, M=ab, A0=aac) 4019 + 1519 ok, once-clause pass transfer on
+   D5={aabab,aabbb} 3000/3000.
+
+2. INDEPENDENT FROM-SCRATCH CHECK. indep_once_check.py (session tmp,
+   written from the paper's enc2/dec2 definition only, no agent code):
+   X_COMMA='b', CELLS=('ba','bb'), M/A0='baa'/'babba'; the four stages
+   with invariants asserted at each stage (T0/T4 cell products, T1/T2/T3
+   products of {ba,bb,baa,babba}, leftmost M at 2i*). 15,446 cases:
+   0 value failures, 0 invariant failures.
+
+3. HAND PROOFS. Lemma 1 (alignment): odd-position occurrences of
+   N=enc2(Y) force Y=x^m and an x-run at the halved position (data
+   chars of N land on commas and vice versa), hence an aligned
+   occurrence one earlier; strengthened to ALL greedy windows aligned
+   (scan head always at the start of the still-untouched cells — note
+   the grid parity flips per insertion since |M|=3, so the invariant
+   is the token-product property, not a global grid). Lemma 2
+   (freshness): 'aa' signature proof for M; partition enumeration for
+   A0 (suffix b/ba/bab/babb + boundary-start cases all dead). Theorem
+   A's stage algebra (mark, oracle, unmark, splice) and the
+   definedness edge cases (Y=eps, no occurrence, X=eps) checked by
+   hand. Theorem C's route (once-clause transfer + Direction-1
+   induction + Direction-2 pullback) checked against the paper's
+   actual lem:pass-transfer/thm:transfer statements.
+
+4. CRUX SEARCH RE-RUN. crux_search.c recompiled and re-run: 1,500,624
+   nodes, 0 matches at depth <= 5, 2.6 s; validation run finds exactly
+   the paper's W on 10,064 random texts (sanity_w.log).
+
+5. INTEGRATION. main.tex sec 5.1: lem:align, lem:fresh, thm:marking
+   (eq:marking), cor:once-crux inserted after prop:del-leftmost, all
+   hand proofs, no machine language. Hinge remark rewritten around the
+   crux ("[babba/baa]_1 on marked texts: replace the leftmost aa by
+   abba"); landscape item 1, conclusion para 2, intro variants
+   paragraph, and abstract updated to the collapsed statement. A fresh
+   experiment-language sweep found and removed the parentheticals the
+   earlier sweep missed (rep_n proof, prop:last, the rev-conjugation
+   proofs, prop:unary-edge (iii) now stated as conjecture with its
+   residue-leakage mechanism, base-2 paragraph, cor:uniform, the
+   reversal-palindrome draft note). Round 5 written into the once
+   REPORT.md (the agent's write of it had been blocked).
+
+RESULT: 88 pages, 0 errors, 0 undefined references, 0 overfull.
+The once question now stands as one node: [babba/baa]_1 over {a,b}.
+
+## 2026-09-22 (evening) — the hinge narrows: marked texts + the cell prefix
+
+New verified reduction (mine, machine-checked 48,010 cases, 0 failures —
+script: session tmp pad_reduction.py): if the CELL-PREFIX function
+tau(T) = longest (ba|bb)*-prefix of a marked text T ∈ (ba|bb|baa)* is
+L-reachable, then the crux oracle is: pad with P = enc2(T) (|P| = 2|T|),
+run [eps/P][P·tau·babba / P·tau·baa](P·T). Uniqueness by length (2|B| >
+|P·T| always; 2|P| > edited length), firing at 0; inert when no mark.
+INTEGRATED into main.tex: prop:cellprefix after cor:once-crux; the
+corollary's hypothesis WEAKENED to the marked-texts restriction (the
+oracle's scrutinee T1 is always a product of blocks and M's by lem:align,
+so a subdomain witness suffices — the searches' actual target); hinge
+remark, landscape item 1, conclusion updated. 88 pages, 0/0/0.
+
+Attack fleet launched (four background agents, all with the standing
+rules — C/C++ only for CPU work, 60s cap per run, no brute force,
+artifacts + REPORT.md, nothing enters the paper unverified):
+- scratch/trunc/ — constructive attack on tau (pad-reduction verified
+  first; leads: [bb/aaab] token-aligned b-run pairing onto (aa|aaab|baa)*;
+  ba->a, bb->aab with marks protected as bb (fresh in (a|aab)*));
+  the wall: binary cannot give 3 run-homogeneous codes (additive length
+  codes collide p+q = q+p; internal b's displace the residue to the
+  first b ≠ first mark; b-run parities collide on mark|bb adjacencies).
+- scratch/oncecrux/ — scaled witness search: all fresh (M, A0) pairs to
+  length 6 (each pair a separate oracle target), longer pattern classes
+  on W0, MITM depth 6 if it fits 60s, and the truncation target.
+- scratch/leftwall/ — obstruction: prove tau (or the crux) not in L;
+  must explain W; residues of mixed runs are front-anchored (the
+  lem:orientation style argument is the mechanism to formalize).
+- scratch/oncezoo/ — which constant once-ops are L-reachable given W:
+  composition searches passes∘[a/b]_1∘passes; any fresh-pair oracle
+  falling closes the problem.

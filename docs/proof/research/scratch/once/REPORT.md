@@ -639,3 +639,101 @@ over |Sigma| >= 3 extraction-freshness works but the cascade dies on
 heterogeneous gaps.  This is the sharpest statement of why the |Sigma| >= 3
 lift resists: it needs a selection mechanism that is simultaneously
 heterogeneity-tolerant AND fresh-pattern-free.
+
+---
+
+# ROUND 5 (2026-09-22): THE MARKING REDUCTION -- THE HINGE IS ONE NODE
+
+## 24. The result
+
+THEOREM A (marking reduction).  Over Sigma = {a,b} with comma x = b
+(cells ba, bb), with M = "baa" and A0 = "babba" (structurally fresh
+constants, see 25): for all X, Y, Z with Y != eps,
+
+    [X/Y]_1 Z  =  dec2( [X'/A0] [N/M] [A0/M]_1 [M/N] enc2(Z) )
+
+where N = enc2(Y), X' = enc2(X), pipelines read right-to-left.  The
+single once-node on the right is the constant node [A0/M]_1 =
+["babba"/"baa"]_1; every other node is a plain L pass (computed
+patterns/replacements legal).  Both sides undefined together at
+Y = eps; the identity holds at Y occurring and not occurring in Z.
+
+THEOREM C / COROLLARY (the hinge is one node).  If the constant node
+["babba"/"baa"]_1 is L-reachable over {a,b}, then ONCE sqsubset L over
+EVERY |Sigma| >= 2 -- computed needles no less than constant ones.
+Route: the once node as a 3-argument function is coding-equivariant
+(cor:uniform, via lem:pass-transfer's once clause), so an ONCE-witness
+over any Sigma conjugates along a good coding c : Sigma -> {a,b}* to an
+ONCE-expression over {a,b}; Theorem A converts it (Lemma beta at each
+node, the hypothesis's witness in the oracle slot); thm:transfer
+Direction 2 pulls the L-witness back to Sigma.
+
+## 25. The construction (why it works)
+
+Four stages on T0 = enc2(Z), a product of cells ba, bb:
+
+* MARKING   T1 = [M/N] T0.  Every greedy window is cell-aligned
+  (Lemma 1: an occurrence of N at an odd position 2i+1 forces
+  Y = x^|Y| and an x-run at the halved position, hence an occurrence
+  at 2i, one earlier; so odd occurrences are never leftmost, and the
+  scan head always sits at the start of the still-untouched cells).
+  T1 is a product of cells and M's; the leftmost M sits at 2i* for the
+  leftmost Y-occurrence i* of Z.
+* ORACLE    T2 = [A0/M]_1 T1.  By freshness (Lemma 2) every occurrence
+  of M in a token product {ba,bb,baa,babba} starts at an M-token, so
+  the leftmost occurrence is the leftmost token: the first mark.
+* UNMARKING T3 = [N/M] T2.  At every scan state the text is a product
+  of the four tokens, so each window is an M-token, restored verbatim
+  to the N-window it replaced.  T3 = T0 with the leftmost window
+  replaced by A0.
+* SPLICING  T4 = [X'/A0] T3.  A0 occurs exactly at the (unique) A0
+  token; X' is a cell product; the window was cell-aligned, so T4 is a
+  cell product = enc2(W), W = Z with leftmost Y-occurrence replaced by
+  X.  dec2(T4) = W.
+
+Lemma 2 (freshness) over {a,b}, x = b: in a product of the tokens
+ba, bb, baa, babba, every occurrence of baa starts at a baa-token and
+every occurrence of babba at a babba-token.  Proof for baa: only baa
+contains "aa", and "aa" cannot straddle a boundary (nothing begins
+with a); the occurrence's tail aa lies inside one token = baa, whose
+head is the occurrence's start.  Proof for babba: partition enumeration
+(suffix/whole-tokens/prefix); suffix b -> bb and an a-start (dead);
+suffix ba -> remainder "bba" (no token begins bba; bb leaves an
+a-start); suffix bab/babb -> no token so ends; boundary start ->
+first token must spell "bab": the cell ba leaves "bba" (dead), baa
+spells "baa" (mismatch), babba is the whole occurrence.  M also has
+the 2-line signature proof: an M-occurrence carries its "aa", which
+pins the baa-token.
+
+The constants are found structurally (find_constants in
+verify_marking.py): tokens = cells xd (INCLUDING the xx cell the
+doubling pass emits) + M + A0; (M, A0) valid iff in every product of
+<= 4 tokens every occurrence of M (resp. A0) starts at an equal token.
+Length 3 + 5 is the minimum; (baa, babba) is the first pair.  (Earlier
+bug, fixed: the cell set must include xx = "bb", else A0 = "cb"-style
+cell-colliding markers pass.)  Ternary (x = c): M = "ab", A0 = "aac".
+
+## 26. Verification (verify_marking.py -- ALL GREEN; re-run by
+coordinator, reproduced)
+
+* [bin]  string-level reduction, 4000+19 random+adversarial cases:
+  4019 ok, 0 FAIL (M='baa', A0='babba', x='b', sigma=ab).
+* [bin]  AST-level with V-nodes and oracle node (oden): 1519 ok.
+* [tern] string + AST over Sigma = {a,b,c} with M='ab', A0='aac',
+  x='c': 4019 + 1519 ok.
+* [transfer] once-primitive pass transfer on the good coding
+  D5 = {aabab, aabbb}: 3000/3000.
+
+## 27. The remaining crux
+
+The oracle node ["babba"/"baa"]_1 on marked texts (products of cells
+and baa): "replace the leftmost aa by abba".  Exhaustive depth-<= 5
+search over the W-class (patterns {a,b}^{1..2}, replacements {a,b}^{<=2},
+5 passes, 1,500,624 nodes): 0 matches, 2.6 s (crux_search.c; sanity
+check finds exactly the paper's W on 10,064 random texts).
+
+## 28. Round log
+
+* R5: marking reduction found (rounds 1-4's negative results reframed
+  as constant-picking constraints); verify_marking.py battery green;
+  crux_search.c negative at depth 5; report delivered to coordinator.
